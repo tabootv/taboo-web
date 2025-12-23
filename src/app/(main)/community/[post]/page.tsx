@@ -1,0 +1,319 @@
+'use client';
+
+import { useEffect, useState, use } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft, Heart, MessageCircle, MoreHorizontal, Trash2, Flag, Send } from 'lucide-react';
+import { posts as postsApi } from '@/lib/api';
+import type { Post, PostComment } from '@/types';
+import { useAuthStore } from '@/lib/stores';
+import { LoadingScreen, Spinner, Avatar, Button } from '@/components/ui';
+import { toast } from 'sonner';
+
+export default function SinglePostPage({ params }: { params: Promise<{ post: string }> }) {
+  const { post: postId } = use(params);
+  const router = useRouter();
+  const { user, isAuthenticated } = useAuthStore();
+  const [post, setPost] = useState<Post | null>(null);
+  const [comments, setComments] = useState<PostComment[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingComments, setIsLoadingComments] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(0);
+  const [showMenu, setShowMenu] = useState(false);
+  const [newComment, setNewComment] = useState('');
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+
+  useEffect(() => {
+    async function fetchPost() {
+      const id = Number(postId);
+      if (!postId || isNaN(id)) {
+        toast.error('Invalid post');
+        router.push('/community');
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        const postData = await postsApi.get(id);
+        setPost(postData);
+        setIsLiked(postData.has_liked ?? false);
+        setLikesCount(postData.likes_count ?? 0);
+      } catch (error) {
+        console.error('Failed to fetch post:', error);
+        toast.error('Failed to load post');
+        router.push('/community');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchPost();
+  }, [postId, router]);
+
+  useEffect(() => {
+    async function fetchComments() {
+      if (!post) return;
+
+      try {
+        setIsLoadingComments(true);
+        const commentsData = await postsApi.getComments(post.id);
+        setComments(commentsData.data || []);
+      } catch (error) {
+        console.error('Failed to fetch comments:', error);
+      } finally {
+        setIsLoadingComments(false);
+      }
+    }
+
+    fetchComments();
+  }, [post]);
+
+  const handleLike = async () => {
+    if (!post) return;
+
+    try {
+      const result = await postsApi.like(post.id);
+      // Toggle local state since API returns updated counts
+      setIsLiked(!isLiked);
+      setLikesCount(result.likes_count);
+    } catch {
+      toast.error('Failed to like post');
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!post) return;
+
+    try {
+      await postsApi.delete(post.id);
+      toast.success('Post deleted');
+      router.push('/community');
+    } catch {
+      toast.error('Failed to delete post');
+    }
+  };
+
+  const handleSubmitComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!post || !newComment.trim()) return;
+
+    setIsSubmittingComment(true);
+    try {
+      const comment = await postsApi.postComment(post.id, newComment);
+      setComments((prev) => [comment, ...prev]);
+      setNewComment('');
+      toast.success('Comment posted');
+    } catch {
+      toast.error('Failed to post comment');
+    } finally {
+      setIsSubmittingComment(false);
+    }
+  };
+
+  if (isLoading) {
+    return <LoadingScreen message="Loading post..." />;
+  }
+
+  if (!post) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-12 text-center">
+        <p className="text-text-secondary">Post not found</p>
+      </div>
+    );
+  }
+
+  const channel = post.channel;
+  const isOwner = user?.id === post.user_id;
+
+  return (
+    <div className="max-w-2xl mx-auto px-4 py-6">
+      {/* Back Button */}
+      <button
+        onClick={() => router.back()}
+        className="flex items-center gap-2 text-text-secondary hover:text-text-primary mb-6 transition-colors"
+      >
+        <ArrowLeft className="w-5 h-5" />
+        Back to Community
+      </button>
+
+      {/* Post */}
+      <div className="bg-surface rounded-xl border border-border p-6">
+        {/* Header */}
+        <div className="flex items-start justify-between mb-4">
+          <Link
+            href={`/creators/creator-profile/${channel?.id || post.user?.id}`}
+            className="flex items-center gap-3 group"
+          >
+            <Avatar
+              src={channel?.dp || post.user?.dp}
+              alt={channel?.name || post.user?.display_name}
+              fallback={channel?.name || post.user?.display_name}
+              size="lg"
+              className="group-hover:ring-2 ring-red-primary transition-all"
+            />
+            <div>
+              <h3 className="font-semibold text-text-primary group-hover:text-red-primary transition-colors">
+                {channel?.name || post.user?.display_name}
+              </h3>
+              <p className="text-sm text-text-secondary">
+                {post.created_at}
+              </p>
+            </div>
+          </Link>
+
+          {/* Menu */}
+          <div className="relative">
+            <button
+              onClick={() => setShowMenu(!showMenu)}
+              className="p-2 rounded-lg text-text-secondary hover:bg-hover hover:text-text-primary transition-colors"
+            >
+              <MoreHorizontal className="w-5 h-5" />
+            </button>
+            {showMenu && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
+                <div className="absolute right-0 mt-1 w-40 bg-surface rounded-lg border border-border shadow-lg z-20 overflow-hidden">
+                  {isOwner && (
+                    <button
+                      onClick={handleDelete}
+                      className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-500 hover:bg-hover transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      Delete
+                    </button>
+                  )}
+                  <button className="flex items-center gap-2 w-full px-4 py-2 text-sm text-text-secondary hover:bg-hover hover:text-text-primary transition-colors">
+                    <Flag className="w-4 h-4" />
+                    Report
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Content */}
+        <p
+          className="text-text-primary whitespace-pre-wrap text-lg mb-6"
+          dangerouslySetInnerHTML={{ __html: post.caption }}
+        />
+
+        {/* Media */}
+        {post.media && post.media.length > 0 && (
+          <div className="mb-6 rounded-lg overflow-hidden">
+            {post.media.length === 1 ? (
+              <div className="relative aspect-video">
+                <Image
+                  src={post.media[0].original_url || ''}
+                  alt=""
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-1">
+                {post.media.slice(0, 4).map((media, index) => (
+                  <div key={media.id} className="relative aspect-square">
+                    <Image
+                      src={media.original_url || ''}
+                      alt=""
+                      fill
+                      className="object-cover"
+                    />
+                    {index === 3 && post.media && post.media.length > 4 && (
+                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                        <span className="text-white text-xl font-bold">
+                          +{post.media.length - 4}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Actions */}
+        <div className="flex items-center gap-6 pt-4 border-t border-border">
+          <button
+            onClick={handleLike}
+            className={`flex items-center gap-2 transition-colors ${
+              isLiked ? 'text-red-primary' : 'text-text-secondary hover:text-red-primary'
+            }`}
+          >
+            <Heart className={`w-6 h-6 ${isLiked ? 'fill-current' : ''}`} />
+            <span className="font-medium">{likesCount}</span>
+          </button>
+          <div className="flex items-center gap-2 text-text-secondary">
+            <MessageCircle className="w-6 h-6" />
+            <span className="font-medium">{post.comments_count}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Comments Section */}
+      <div className="mt-6">
+        <h2 className="text-lg font-semibold text-text-primary mb-4">Comments</h2>
+
+        {/* Add Comment */}
+        {isAuthenticated && (
+          <form onSubmit={handleSubmitComment} className="flex gap-3 mb-6">
+            <Avatar src={user?.dp} alt={user?.display_name} fallback={user?.display_name} size="md" />
+            <div className="flex-1 flex gap-2">
+              <input
+                type="text"
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Add a comment..."
+                className="flex-1 bg-surface border border-border rounded-lg px-4 py-2 text-text-primary placeholder:text-text-secondary focus:outline-none focus:border-red-primary"
+              />
+              <Button
+                type="submit"
+                disabled={isSubmittingComment || !newComment.trim()}
+                className="btn-premium"
+              >
+                <Send className="w-4 h-4" />
+              </Button>
+            </div>
+          </form>
+        )}
+
+        {/* Comments List */}
+        {isLoadingComments ? (
+          <div className="flex justify-center py-8">
+            <Spinner size="lg" />
+          </div>
+        ) : comments.length > 0 ? (
+          <div className="space-y-4">
+            {comments.map((comment) => (
+              <div key={comment.id} className="flex gap-3">
+                <Avatar
+                  src={comment.user?.dp}
+                  alt={comment.user?.display_name}
+                  fallback={comment.user?.display_name}
+                  size="sm"
+                />
+                <div className="flex-1">
+                  <div className="bg-surface border border-border rounded-lg p-3">
+                    <p className="font-medium text-text-primary text-sm">
+                      {comment.user?.display_name}
+                    </p>
+                    <p className="text-text-primary mt-1">{comment.content}</p>
+                  </div>
+                  <p className="text-xs text-text-secondary mt-1">
+                    {comment.created_at}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-text-secondary text-center py-8">No comments yet</p>
+        )}
+      </div>
+    </div>
+  );
+}

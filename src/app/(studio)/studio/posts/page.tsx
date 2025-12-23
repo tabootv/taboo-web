@@ -1,0 +1,265 @@
+'use client';
+
+import { useState, useRef, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import {
+  Image as ImageIcon,
+  Mic,
+  X,
+  Loader2,
+  Send,
+} from 'lucide-react';
+import { useAuthStore } from '@/lib/stores';
+import { studio } from '@/lib/api';
+import { Button } from '@/components/ui';
+import { toast } from 'sonner';
+
+export default function CreatePostPage() {
+  const router = useRouter();
+  const { user } = useAuthStore();
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const audioInputRef = useRef<HTMLInputElement>(null);
+
+  const [caption, setCaption] = useState('');
+  const [images, setImages] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [audio, setAudio] = useState<File | null>(null);
+  const [audioPreview, setAudioPreview] = useState<string | null>(null);
+  const [isPosting, setIsPosting] = useState(false);
+
+  const channel = user?.channel;
+
+  const handleImageSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    const newImages = files.slice(0, 4 - images.length);
+
+    for (const file of newImages) {
+      if (!file.type.startsWith('image/')) {
+        toast.error('Please select valid image files');
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error('Each image must be less than 10MB');
+        return;
+      }
+    }
+
+    setImages((prev) => [...prev, ...newImages].slice(0, 4));
+    setImagePreviews((prev) => [
+      ...prev,
+      ...newImages.map((file) => URL.createObjectURL(file)),
+    ].slice(0, 4));
+  }, [images.length]);
+
+  const handleAudioSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('audio/')) {
+        toast.error('Please select a valid audio file');
+        return;
+      }
+      if (file.size > 50 * 1024 * 1024) {
+        toast.error('Audio file must be less than 50MB');
+        return;
+      }
+      setAudio(file);
+      setAudioPreview(URL.createObjectURL(file));
+    }
+  }, []);
+
+  const removeImage = (index: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
+    setImagePreviews((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const removeAudio = () => {
+    setAudio(null);
+    setAudioPreview(null);
+    if (audioInputRef.current) audioInputRef.current.value = '';
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!caption.trim() && images.length === 0 && !audio) {
+      toast.error('Please add some content to your post');
+      return;
+    }
+
+    setIsPosting(true);
+
+    try {
+      const response = await studio.createPost({
+        body: caption,
+        image: images[0] || undefined,
+      });
+
+      if (response.success) {
+        toast.success('Post created successfully!');
+        setTimeout(() => router.push('/community'), 1000);
+      } else {
+        const errorMessages = response.errors
+          ? Object.values(response.errors).flat().join(', ')
+          : 'Failed to create post';
+        toast.error(errorMessages);
+      }
+    } catch (error) {
+      console.error('Failed to create post:', error);
+      toast.error('Failed to create post. Please try again.');
+    } finally {
+      setIsPosting(false);
+    }
+  };
+
+  return (
+    <div className="p-6 lg:p-8 max-w-2xl">
+      <div className="mb-8">
+        <h1 className="text-2xl font-semibold text-white">Create Post</h1>
+        <p className="text-text-secondary">Share an update with your community</p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="bg-surface border border-border rounded-xl p-6">
+          {/* Author Info */}
+          <div className="flex items-center gap-3 mb-4">
+            <div className="relative w-12 h-12 rounded-full overflow-hidden ring-2 ring-white/10">
+              {channel?.dp ? (
+                <Image src={channel.dp} alt={channel.name} fill className="object-cover" />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-red-primary to-red-dark flex items-center justify-center">
+                  <span className="text-lg font-bold text-white">
+                    {channel?.name?.charAt(0).toUpperCase() || 'U'}
+                  </span>
+                </div>
+              )}
+            </div>
+            <div>
+              <p className="font-medium text-white">{channel?.name}</p>
+              <p className="text-sm text-text-secondary">Posting as creator</p>
+            </div>
+          </div>
+
+          {/* Caption Input */}
+          <textarea
+            value={caption}
+            onChange={(e) => setCaption(e.target.value)}
+            placeholder="What's on your mind?"
+            rows={5}
+            className="w-full bg-transparent text-white placeholder:text-text-secondary resize-none focus:outline-none text-lg"
+            maxLength={2000}
+            autoFocus
+          />
+
+          <div className="flex justify-end mt-2">
+            <span className={`text-xs ${caption.length > 1800 ? 'text-yellow-500' : 'text-text-secondary'}`}>
+              {caption.length}/2000
+            </span>
+          </div>
+
+          {/* Image Previews */}
+          {imagePreviews.length > 0 && (
+            <div className={`mt-4 grid gap-2 ${
+              imagePreviews.length === 1 ? 'grid-cols-1' :
+              imagePreviews.length === 2 ? 'grid-cols-2' :
+              'grid-cols-2'
+            }`}>
+              {imagePreviews.map((preview, index) => (
+                <div
+                  key={index}
+                  className={`relative rounded-xl overflow-hidden ${
+                    imagePreviews.length === 1 ? 'aspect-video' :
+                    imagePreviews.length === 3 && index === 0 ? 'row-span-2 aspect-[9/16]' :
+                    'aspect-square'
+                  }`}
+                >
+                  <Image src={preview} alt={`Image ${index + 1}`} fill className="object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => removeImage(index)}
+                    className="absolute top-2 right-2 p-1.5 rounded-full bg-black/60 hover:bg-black/80 transition-colors"
+                  >
+                    <X className="w-4 h-4 text-white" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Audio Preview */}
+          {audioPreview && (
+            <div className="mt-4 p-4 rounded-xl bg-white/5 border border-white/10">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <Mic className="w-5 h-5 text-red-primary" />
+                  <span className="text-sm text-white">{audio?.name}</span>
+                </div>
+                <button type="button" onClick={removeAudio} className="p-1 rounded-full hover:bg-white/10 transition-colors">
+                  <X className="w-4 h-4 text-text-secondary" />
+                </button>
+              </div>
+              <audio src={audioPreview} controls className="w-full" />
+            </div>
+          )}
+
+          {/* Media Actions */}
+          <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
+            <div className="flex gap-2">
+              <label className={`p-3 rounded-xl hover:bg-white/10 transition-colors cursor-pointer ${
+                images.length >= 4 ? 'opacity-50 cursor-not-allowed' : ''
+              }`}>
+                <ImageIcon className="w-5 h-5 text-text-secondary" />
+                <input
+                  ref={imageInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageSelect}
+                  disabled={images.length >= 4}
+                  multiple
+                  className="hidden"
+                />
+              </label>
+              <label className={`p-3 rounded-xl hover:bg-white/10 transition-colors cursor-pointer ${
+                audio ? 'opacity-50 cursor-not-allowed' : ''
+              }`}>
+                <Mic className="w-5 h-5 text-text-secondary" />
+                <input
+                  ref={audioInputRef}
+                  type="file"
+                  accept="audio/*"
+                  onChange={handleAudioSelect}
+                  disabled={!!audio}
+                  className="hidden"
+                />
+              </label>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-text-secondary">
+              {images.length > 0 && <span>{images.length}/4 images</span>}
+              {audio && <span>1 audio</span>}
+            </div>
+          </div>
+        </div>
+
+        {/* Submit */}
+        <div className="flex justify-end gap-4">
+          <Button variant="ghost" type="button" onClick={() => router.push('/studio')}>
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            disabled={(!caption.trim() && images.length === 0 && !audio) || isPosting}
+            className="min-w-[120px]"
+          >
+            {isPosting ? (
+              <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Posting...</>
+            ) : (
+              <><Send className="w-4 h-4 mr-2" /> Post</>
+            )}
+          </Button>
+        </div>
+      </form>
+    </div>
+  );
+}
