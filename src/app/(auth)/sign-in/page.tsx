@@ -91,11 +91,11 @@ function SignInContent() {
               className="w-full h-11 pl-10 pr-4 rounded-lg text-sm text-white placeholder:text-white/30 transition-all outline-none"
               style={{
                 background: 'rgba(255,255,255,0.05)',
-                border: errors.email ? '1px solid #ab0013' : '1px solid rgba(255,255,255,0.1)',
+                border: errors.email ? '1px solid var(--red-primary)' : '1px solid rgba(255,255,255,0.1)',
               }}
             />
           </div>
-          {errors.email && <p className="mt-1 text-xs text-[#ab0013]">{errors.email}</p>}
+          {errors.email && <p className="mt-1 text-xs text-red-primary">{errors.email}</p>}
         </div>
 
         <div>
@@ -113,11 +113,11 @@ function SignInContent() {
               className="w-full h-11 pl-10 pr-4 rounded-lg text-sm text-white placeholder:text-white/30 transition-all outline-none"
               style={{
                 background: 'rgba(255,255,255,0.05)',
-                border: errors.password ? '1px solid #ab0013' : '1px solid rgba(255,255,255,0.1)',
+                border: errors.password ? '1px solid var(--red-primary)' : '1px solid rgba(255,255,255,0.1)',
               }}
             />
           </div>
-          {errors.password && <p className="mt-1 text-xs text-[#ab0013]">{errors.password}</p>}
+          {errors.password && <p className="mt-1 text-xs text-red-primary">{errors.password}</p>}
         </div>
 
         {/* Remember me & Forgot password */}
@@ -127,13 +127,13 @@ function SignInContent() {
               type="checkbox"
               checked={rememberMe}
               onChange={(e) => setRememberMe(e.target.checked)}
-              className="w-4 h-4 rounded bg-white/5 border-white/10 text-[#ab0013] focus:ring-[#ab0013]/30 focus:ring-offset-0"
+              className="w-4 h-4 rounded bg-white/5 border-white/10 text-red-primary focus:ring-red-primary/30 focus:ring-offset-0"
             />
             <span className="text-sm text-white/50">Remember me</span>
           </label>
           <Link
             href="/forgot-password"
-            className="text-sm text-[#ab0013] hover:text-[#d10018] transition-colors font-medium"
+            className="text-sm text-red-primary hover:text-red-hover transition-colors font-medium"
           >
             Forgot password?
           </Link>
@@ -145,7 +145,7 @@ function SignInContent() {
           disabled={isLoading}
           className="w-full h-11 rounded-lg text-sm font-semibold text-white transition-all flex items-center justify-center gap-2"
           style={{
-            background: '#ab0013',
+            background: 'var(--red-primary)',
             opacity: isLoading ? 0.7 : 1,
           }}
         >
@@ -209,7 +209,7 @@ function SignInContent() {
       {/* Sign Up Link */}
       <p className="mt-6 text-center text-sm text-white/50">
         Don&apos;t have an account?{' '}
-        <Link href="/register" className="text-[#ab0013] font-semibold hover:text-[#d10018] transition-colors">
+        <Link href="/register" className="text-red-primary font-semibold hover:text-red-hover transition-colors">
           Sign up for free
         </Link>
       </p>

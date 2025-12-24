@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getRequiredEnv } from '@/shared/lib/config/env';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://app.taboo.tv/api';
-const SERVICE_TOKEN = process.env.SERVICE_API_TOKEN || '';
+const API_URL = getRequiredEnv('NEXT_PUBLIC_API_URL');
+const SERVICE_TOKEN = getRequiredEnv('SERVICE_API_TOKEN');
 
 export async function GET(
   request: NextRequest,
@@ -17,7 +18,7 @@ export async function GET(
       {
         headers: {
           'Accept': 'application/json',
-          'Authorization': SERVICE_TOKEN ? `Bearer ${SERVICE_TOKEN}` : '',
+          Authorization: `Bearer ${SERVICE_TOKEN}`,
         },
         next: { revalidate: 300 },
       }

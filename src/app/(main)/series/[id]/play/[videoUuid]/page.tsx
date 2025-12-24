@@ -1,23 +1,33 @@
 'use client';
 
-import { useEffect, useState, use, useCallback, useRef } from 'react';
+import dynamic from 'next/dynamic';
+import { VideoComments } from '@/features/video';
+import { PlayerPageSkeleton } from '@/components/series';
+import { VideoPlayerSkeleton } from '@/components/video';
+import { auth, series as seriesApi, videos as videosApi } from '@/lib/api';
+import { cn, formatDuration, formatRelativeTime } from '@/lib/utils';
+import type { Series, Video } from '@/types';
+import {
+  CheckCircle,
+  ChevronRight,
+  Clock,
+  Play,
+  SkipForward,
+  ThumbsDown,
+  ThumbsUp,
+} from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import {
-  Play,
-  CheckCircle,
-  ThumbsUp,
-  ThumbsDown,
-  ChevronRight,
-  SkipForward,
-  Clock,
-} from 'lucide-react';
-import { series as seriesApi, videos as videosApi, auth } from '@/lib/api';
-import type { Series, Video } from '@/types';
-import { VideoPlayer } from '@/components/video/video-player';
-import { VideoComments } from '@/components/video';
-import { cn, formatDuration, formatRelativeTime } from '@/lib/utils';
+import { use, useCallback, useEffect, useRef, useState } from 'react';
+
+const VideoPlayer = dynamic(
+  () => import('@/features/video').then((mod) => ({ default: mod.VideoPlayer })),
+  {
+    loading: () => <VideoPlayerSkeleton />,
+    ssr: false,
+  }
+);
 
 export default function SeriesPlayerPage({
   params,
@@ -37,9 +47,10 @@ export default function SeriesPlayerPage({
 
   // Find current episode index
   const currentEpisodeIndex = episodes.findIndex((v) => v.uuid === currentVideo?.uuid);
-  const nextEpisode = currentEpisodeIndex >= 0 && currentEpisodeIndex < episodes.length - 1
-    ? episodes[currentEpisodeIndex + 1]
-    : null;
+  const nextEpisode =
+    currentEpisodeIndex >= 0 && currentEpisodeIndex < episodes.length - 1
+      ? episodes[currentEpisodeIndex + 1]
+      : null;
 
   useEffect(() => {
     async function fetchData() {
@@ -113,7 +124,7 @@ export default function SeriesPlayerPage({
         ...currentVideo,
         has_liked: response.has_liked,
         likes_count: response.likes_count,
-        has_disliked: response.has_liked ? false : currentVideo.has_disliked,
+        has_disliked: response.has_liked ? false : currentVideo.has_disliked ?? false,
       });
     } catch {
       console.error('Failed to like video');
@@ -154,7 +165,8 @@ export default function SeriesPlayerPage({
     );
   }
 
-  const shouldTruncateDescription = currentVideo.description && currentVideo.description.length > 200;
+  const shouldTruncateDescription =
+    currentVideo.description && currentVideo.description.length > 200;
 
   return (
     <div className="min-h-screen bg-background">
@@ -183,12 +195,12 @@ export default function SeriesPlayerPage({
             {/* Video Player */}
             <div className="w-full rounded-xl overflow-hidden bg-black">
               <VideoPlayer
-                thumbnail={currentVideo.thumbnail}
-                hls_url={currentVideo.hls_url || currentVideo.url_hls}
-                url_1440={currentVideo.url_1440}
-                url_1080={currentVideo.url_1080}
-                url_720={currentVideo.url_720}
-                url_480={currentVideo.url_480}
+                {...(currentVideo.thumbnail && { thumbnail: currentVideo.thumbnail })}
+                hls_url={currentVideo.hls_url || currentVideo.url_hls || null}
+                url_1440={currentVideo.url_1440 || null}
+                url_1080={currentVideo.url_1080 || null}
+                url_720={currentVideo.url_720 || null}
+                url_480={currentVideo.url_480 || null}
                 autoplay={autoplayEnabled}
                 onEnded={handleVideoEnded}
               />
@@ -217,8 +229,10 @@ export default function SeriesPlayerPage({
               {/* Channel Info */}
               <div className="flex items-center gap-3">
                 <Link
-                  href={`/creators/creator-profile/${currentVideo.channel?.uuid || currentVideo.channel?.id}`}
-                  className="flex-shrink-0"
+                  href={`/creators/creator-profile/${
+                    currentVideo.channel?.uuid || currentVideo.channel?.id
+                  }`}
+                  className="shrink-0"
                 >
                   <div className="relative w-10 h-10 rounded-full overflow-hidden">
                     {currentVideo.channel?.dp ? (
@@ -237,16 +251,19 @@ export default function SeriesPlayerPage({
                 </Link>
                 <div className="min-w-0">
                   <Link
-                    href={`/creators/creator-profile/${currentVideo.channel?.uuid || currentVideo.channel?.id}`}
+                    href={`/creators/creator-profile/${
+                      currentVideo.channel?.uuid || currentVideo.channel?.id
+                    }`}
                     className="flex items-center gap-1.5 group"
                   >
                     <span className="font-medium text-white group-hover:text-red-primary transition-colors truncate">
                       {currentVideo.channel?.name}
                     </span>
-                    <CheckCircle className="w-3.5 h-3.5 text-red-primary flex-shrink-0" />
+                    <CheckCircle className="w-3.5 h-3.5 text-red-primary shrink-0" />
                   </Link>
                   <p className="text-xs text-white/50">
-                    {currentVideo.humans_publish_at || formatRelativeTime(currentVideo.published_at)}
+                    {currentVideo.humans_publish_at ||
+                      formatRelativeTime(currentVideo.published_at)}
                   </p>
                 </div>
               </div>
@@ -264,9 +281,7 @@ export default function SeriesPlayerPage({
                         : 'text-white hover:bg-white/10'
                     )}
                   >
-                    <ThumbsUp
-                      className={cn('w-5 h-5', currentVideo.has_liked && 'fill-current')}
-                    />
+                    <ThumbsUp className={cn('w-5 h-5', currentVideo.has_liked && 'fill-current')} />
                     <span className="text-sm font-medium">{currentVideo.likes_count || 0}</span>
                   </button>
                   <div className="w-px h-6 bg-white/10" />
@@ -314,8 +329,9 @@ export default function SeriesPlayerPage({
 
             {/* Description Box */}
             {currentVideo.description && (
-              <div
-                className="mt-4 bg-surface/50 hover:bg-surface/70 rounded-xl p-4 cursor-pointer transition-colors"
+              <button
+                type="button"
+                className="mt-4 w-full text-left bg-surface/50 hover:bg-surface/70 rounded-xl p-4 transition-colors"
                 onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
               >
                 <p
@@ -327,11 +343,11 @@ export default function SeriesPlayerPage({
                   {currentVideo.description}
                 </p>
                 {shouldTruncateDescription && (
-                  <button className="text-sm font-medium text-white/60 hover:text-white mt-2">
+                  <span className="block text-sm font-medium text-white/60 hover:text-white mt-2">
                     {isDescriptionExpanded ? 'Show less' : 'Show more'}
-                  </button>
+                  </span>
                 )}
-              </div>
+              </button>
             )}
 
             {/* Comments Section */}
@@ -341,13 +357,13 @@ export default function SeriesPlayerPage({
           </div>
 
           {/* Sidebar - Episodes */}
-          <div className="w-full lg:w-[400px] flex-shrink-0">
+          <div className="w-full lg:w-[400px] shrink-0">
             {/* Series Info Header */}
             <Link
               href={`/series/${seriesId}`}
               className="flex items-center gap-3 p-3 bg-surface/50 rounded-xl mb-4 group hover:bg-surface/70 transition-colors"
             >
-              <div className="relative w-16 h-9 rounded-lg overflow-hidden flex-shrink-0">
+              <div className="relative w-16 h-9 rounded-lg overflow-hidden shrink-0">
                 {seriesData.thumbnail && (
                   <Image
                     src={seriesData.thumbnail}
@@ -358,9 +374,7 @@ export default function SeriesPlayerPage({
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs text-white/50 mb-0.5">
-                  {isCourse ? 'Course' : 'Series'}
-                </p>
+                <p className="text-xs text-white/50 mb-0.5">{isCourse ? 'Course' : 'Series'}</p>
                 <h3 className="text-sm font-medium text-white truncate group-hover:text-red-primary transition-colors">
                   {seriesData.title}
                 </h3>
@@ -379,7 +393,10 @@ export default function SeriesPlayerPage({
             </div>
 
             {/* Episode List */}
-            <div ref={episodesRef} className="flex flex-col gap-2 max-h-[600px] overflow-y-auto pr-1 custom-scrollbar">
+            <div
+              ref={episodesRef}
+              className="flex flex-col gap-2 max-h-[600px] overflow-y-auto pr-1 custom-scrollbar"
+            >
               {episodes.map((video, index) => (
                 <EpisodeCard
                   key={video.uuid}
@@ -393,9 +410,7 @@ export default function SeriesPlayerPage({
             </div>
 
             {episodes.length === 0 && (
-              <div className="text-center py-12 text-white/40">
-                No episodes available
-              </div>
+              <div className="text-center py-12 text-white/40">No episodes available</div>
             )}
           </div>
         </div>
@@ -427,13 +442,11 @@ function EpisodeCard({
       <div
         className={cn(
           'group flex gap-3 p-2 rounded-xl transition-all',
-          isCurrent
-            ? 'bg-red-primary/10 ring-1 ring-red-primary/30'
-            : 'hover:bg-surface/50'
+          isCurrent ? 'bg-red-primary/10 ring-1 ring-red-primary/30' : 'hover:bg-surface/50'
         )}
       >
         {/* Thumbnail */}
-        <div className="relative w-[140px] h-[79px] flex-shrink-0 rounded-lg overflow-hidden bg-surface">
+        <div className="relative w-[140px] h-[79px] shrink-0 rounded-lg overflow-hidden bg-surface">
           {video.thumbnail ? (
             <Image
               src={video.thumbnail_webp || video.thumbnail}
@@ -442,7 +455,7 @@ function EpisodeCard({
               className="object-cover transition-transform duration-300 group-hover:scale-105"
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-surface to-background" />
+            <div className="w-full h-full bg-linear-to-br from-surface to-background" />
           )}
 
           {/* Play Overlay */}
@@ -498,45 +511,3 @@ function EpisodeCard({
   );
 }
 
-// Skeleton Loader
-function PlayerPageSkeleton() {
-  return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-6">
-        <div className="h-5 w-64 bg-surface/50 rounded animate-pulse mb-4" />
-        <div className="flex flex-col lg:flex-row gap-6">
-          <div className="flex-1">
-            <div className="aspect-video bg-surface rounded-xl animate-pulse" />
-            <div className="mt-4 space-y-3">
-              <div className="h-7 w-3/4 bg-surface/50 rounded animate-pulse" />
-              <div className="h-5 w-32 bg-surface/50 rounded animate-pulse" />
-              <div className="flex gap-3 mt-4">
-                <div className="w-10 h-10 rounded-full bg-surface/50 animate-pulse" />
-                <div className="space-y-2">
-                  <div className="h-4 w-32 bg-surface/50 rounded animate-pulse" />
-                  <div className="h-3 w-24 bg-surface/50 rounded animate-pulse" />
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="w-full lg:w-[400px]">
-            <div className="h-16 bg-surface/50 rounded-xl animate-pulse mb-4" />
-            <div className="h-6 w-32 bg-surface/50 rounded animate-pulse mb-3" />
-            <div className="space-y-2">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="flex gap-3 p-2">
-                  <div className="w-[140px] h-[79px] bg-surface/50 rounded-lg animate-pulse" />
-                  <div className="flex-1 space-y-2">
-                    <div className="h-4 w-12 bg-surface/50 rounded animate-pulse" />
-                    <div className="h-4 w-full bg-surface/50 rounded animate-pulse" />
-                    <div className="h-3 w-20 bg-surface/50 rounded animate-pulse" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}

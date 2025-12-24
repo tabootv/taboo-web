@@ -1,13 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Public API endpoint for creator profiles (no auth required)
-// Framer landing pages can call this
+import { getRequiredEnv } from '@/shared/lib/config/env';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://app.taboo.tv/api';
+const API_URL = getRequiredEnv('NEXT_PUBLIC_API_URL');
 
-// Use a service token for server-to-server calls
-// This token should have read-only access to public creator data
-const SERVICE_TOKEN = process.env.SERVICE_API_TOKEN || '';
+const SERVICE_TOKEN = getRequiredEnv('SERVICE_API_TOKEN');
 
 export async function GET(
   request: NextRequest,
@@ -20,7 +17,7 @@ export async function GET(
     const response = await fetch(`${API_URL}/creators/${id}`, {
       headers: {
         'Accept': 'application/json',
-        'Authorization': SERVICE_TOKEN ? `Bearer ${SERVICE_TOKEN}` : '',
+        Authorization: `Bearer ${SERVICE_TOKEN}`,
       },
       next: { revalidate: 300 }, // Cache for 5 minutes
     });

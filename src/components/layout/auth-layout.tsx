@@ -11,7 +11,7 @@ interface AuthLayoutProps {
 
 export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
   return (
-    <div className="min-h-screen flex flex-col bg-[#030303] relative overflow-hidden">
+    <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
       {/* Frosted background effects */}
       <div className="absolute inset-0 pointer-events-none">
         {/* Subtle red glow at top */}

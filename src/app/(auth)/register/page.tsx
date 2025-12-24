@@ -84,7 +84,7 @@ export default function RegisterPage() {
 
   const inputErrorStyle = {
     background: 'rgba(255,255,255,0.05)',
-    border: '1px solid #ab0013',
+    border: '1px solid var(--red-primary)',
   };
 
   return (
@@ -115,7 +115,7 @@ export default function RegisterPage() {
                 style={errors.first_name ? inputErrorStyle : inputStyle}
               />
             </div>
-            {errors.first_name && <p className="mt-1 text-xs text-[#ab0013]">{errors.first_name}</p>}
+            {errors.first_name && <p className="mt-1 text-xs text-red-primary">{errors.first_name}</p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-white/70 mb-1.5">Last name</label>
@@ -130,7 +130,7 @@ export default function RegisterPage() {
               className="w-full h-11 px-4 rounded-lg text-sm text-white placeholder:text-white/30 transition-all outline-none"
               style={errors.last_name ? inputErrorStyle : inputStyle}
             />
-            {errors.last_name && <p className="mt-1 text-xs text-[#ab0013]">{errors.last_name}</p>}
+            {errors.last_name && <p className="mt-1 text-xs text-red-primary">{errors.last_name}</p>}
           </div>
         </div>
 
@@ -150,7 +150,7 @@ export default function RegisterPage() {
               style={errors.email ? inputErrorStyle : inputStyle}
             />
           </div>
-          {errors.email && <p className="mt-1 text-xs text-[#ab0013]">{errors.email}</p>}
+          {errors.email && <p className="mt-1 text-xs text-red-primary">{errors.email}</p>}
         </div>
 
         <div>
@@ -169,7 +169,7 @@ export default function RegisterPage() {
               style={errors.password ? inputErrorStyle : inputStyle}
             />
           </div>
-          {errors.password && <p className="mt-1 text-xs text-[#ab0013]">{errors.password}</p>}
+          {errors.password && <p className="mt-1 text-xs text-red-primary">{errors.password}</p>}
         </div>
 
         <div>
@@ -189,7 +189,7 @@ export default function RegisterPage() {
             />
           </div>
           {errors.password_confirmation && (
-            <p className="mt-1 text-xs text-[#ab0013]">{errors.password_confirmation}</p>
+            <p className="mt-1 text-xs text-red-primary">{errors.password_confirmation}</p>
           )}
         </div>
 
@@ -199,15 +199,15 @@ export default function RegisterPage() {
             type="checkbox"
             checked={acceptTerms}
             onChange={(e) => setAcceptTerms(e.target.checked)}
-            className="w-4 h-4 mt-0.5 rounded bg-white/5 border-white/10 text-[#ab0013] focus:ring-[#ab0013]/30 focus:ring-offset-0"
+            className="w-4 h-4 mt-0.5 rounded bg-white/5 border-white/10 text-red-primary focus:ring-red-primary/30 focus:ring-offset-0"
           />
           <span className="text-sm text-white/50 leading-relaxed">
             I agree to the{' '}
-            <Link href="/terms" className="text-[#ab0013] hover:text-[#d10018] transition-colors">
+            <Link href="/terms" className="text-red-primary hover:text-red-hover transition-colors">
               Terms of Service
             </Link>{' '}
             and{' '}
-            <Link href="/privacy" className="text-[#ab0013] hover:text-[#d10018] transition-colors">
+            <Link href="/privacy" className="text-red-primary hover:text-red-hover transition-colors">
               Privacy Policy
             </Link>
           </span>
@@ -219,7 +219,7 @@ export default function RegisterPage() {
           disabled={isLoading}
           className="w-full h-11 rounded-lg text-sm font-semibold text-white transition-all flex items-center justify-center gap-2"
           style={{
-            background: '#ab0013',
+            background: 'var(--red-primary)',
             opacity: isLoading ? 0.7 : 1,
           }}
         >
@@ -283,7 +283,7 @@ export default function RegisterPage() {
       {/* Sign In Link */}
       <p className="mt-6 text-center text-sm text-white/50">
         Already have an account?{' '}
-        <Link href="/sign-in" className="text-[#ab0013] font-semibold hover:text-[#d10018] transition-colors">
+        <Link href="/sign-in" className="text-red-primary font-semibold hover:text-red-hover transition-colors">
           Sign in
         </Link>
       </p>

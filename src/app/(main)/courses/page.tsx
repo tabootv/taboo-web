@@ -131,7 +131,7 @@ function CourseCard({ course }: { course: Course }) {
   const courseId = course.id;
   return (
     <Link href={`/courses/${courseId}`} className="group">
-      <div className="relative aspect-video rounded-[var(--radius-lg)] overflow-hidden bg-surface">
+      <div className="relative aspect-video rounded-lg overflow-hidden bg-surface">
         {course.thumbnail && (
           <Image
             src={course.thumbnail}
@@ -171,7 +171,7 @@ function CourseCard({ course }: { course: Course }) {
         </div>
 
         {/* Hover border */}
-        <div className="absolute inset-0 rounded-[var(--radius-lg)] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border-2 border-red-primary/50" />
+        <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border-2 border-red-primary/50" />
       </div>
 
       {/* Description */}

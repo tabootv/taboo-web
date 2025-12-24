@@ -18,21 +18,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useSidebarStore, useAuthStore } from '@/lib/stores';
-
-const mainNavigation = [
-  { name: 'Home', href: '/home', icon: Home },
-  { name: 'Shorts', href: '/shorts', icon: PlayCircle },
-  { name: 'Videos', href: '/videos', icon: Film },
-  { name: 'Series', href: '/series', icon: Layers },
-  { name: 'Edu', href: '/courses', icon: GraduationCap },
-  { name: 'Community', href: '/community', icon: Users },
-  { name: 'Globe', href: '/globe', icon: Globe2 },
-];
-
-const userNavigation = [
-  { name: 'History', href: '/profile?tab=history', icon: History },
-  { name: 'Watchlist', href: '/watchlist', icon: Bookmark },
-];
+import { mainNavigation, userNavigation } from './constants/navigation-constants';
 
 export function Sidebar() {
   const pathname = usePathname();

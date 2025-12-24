@@ -1,8 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { getRequiredEnv } from '@/shared/lib/config/env';
 import { cookies } from 'next/headers';
+import { NextRequest, NextResponse } from 'next/server';
 
-const FIRSTPROMOTER_API_KEY = process.env.FIRSTPROMOTER_API_KEY || 'hPq6CerLNVYlScmHTeplSbnze5IzlZ1x6aHUZ2WmvmY';
-const FIRSTPROMOTER_ACCOUNT_ID = process.env.FIRSTPROMOTER_ACCOUNT_ID || 'acc_N47LO28e';
+const FIRSTPROMOTER_API_KEY = getRequiredEnv('FIRSTPROMOTER_API_KEY');
+const FIRSTPROMOTER_V2_ACCOUNT_ID = getRequiredEnv('FIRSTPROMOTER_V2_ACCOUNT_ID');
 
 // Temporary mapping of user emails to FirstPromoter promoter IDs
 const PROMOTER_ID_MAP: Record<string, number> = {
@@ -52,8 +53,10 @@ export async function GET(request: NextRequest) {
     const startDate = searchParams.get('start_date') || getDefaultStartDate();
     const endDate = searchParams.get('end_date') || new Date().toISOString();
 
-    // Get user info from Laravel backend
-    const userResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://app.taboo.tv/api'}/me`, {
+    const { getRequiredEnv } = await import('@/shared/lib/config/env');
+    const apiUrl = getRequiredEnv('NEXT_PUBLIC_API_URL');
+
+    const userResponse = await fetch(`${apiUrl}/me`, {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: 'application/json',
@@ -74,10 +77,13 @@ export async function GET(request: NextRequest) {
     const promoterId = PROMOTER_ID_MAP[userEmail];
 
     if (!promoterId) {
-      return NextResponse.json({
-        error: 'No FirstPromoter account linked to this email',
-        email: userEmail
-      }, { status: 404 });
+      return NextResponse.json(
+        {
+          error: 'No FirstPromoter account linked to this email',
+          email: userEmail,
+        },
+        { status: 404 }
+      );
     }
 
     // Build the query params for FirstPromoter API
@@ -90,17 +96,9 @@ export async function GET(request: NextRequest) {
       'promoter_earnings_amount',
     ];
 
-    const queryParams = new URLSearchParams({
-      'columns[]': columns.join(','),
-      group_by: groupBy,
-      start_date: startDate,
-      end_date: endDate,
-      q: `id:${promoterId}`,
-    });
-
     // For array params, we need to add them individually
     const url = new URL('https://firstpromoter.com/api/v2/company/reports/promoters');
-    columns.forEach(col => url.searchParams.append('columns[]', col));
+    columns.forEach((col) => url.searchParams.append('columns[]', col));
     url.searchParams.append('group_by', groupBy);
     url.searchParams.append('start_date', startDate);
     url.searchParams.append('end_date', endDate);
@@ -109,9 +107,9 @@ export async function GET(request: NextRequest) {
     const fpResponse = await fetch(url.toString(), {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${FIRSTPROMOTER_API_KEY}`,
-        'Account-ID': FIRSTPROMOTER_ACCOUNT_ID,
-        'Accept': 'application/json',
+        Authorization: `Bearer ${FIRSTPROMOTER_API_KEY}`,
+        'Account-ID': FIRSTPROMOTER_V2_ACCOUNT_ID,
+        Accept: 'application/json',
       },
     });
 
@@ -184,7 +182,12 @@ function getDefaultStartDate(): string {
   return date.toISOString();
 }
 
-function getMockReportData(promoterId: number, startDate: string, endDate: string, groupBy: string): PromoterReportResponse {
+function getMockReportData(
+  promoterId: number,
+  startDate: string,
+  endDate: string,
+  groupBy: string
+): PromoterReportResponse {
   const data: ReportDataPoint[] = [];
   const start = new Date(startDate);
   const end = new Date(endDate);
@@ -192,7 +195,7 @@ function getMockReportData(promoterId: number, startDate: string, endDate: strin
   let current = new Date(start);
   while (current <= end) {
     data.push({
-      date: current.toISOString().split('T')[0],
+      date: current.toISOString().split('T')[0] ?? '',
       clicks_count: Math.floor(Math.random() * 50) + 10,
       referrals_count: Math.floor(Math.random() * 10),
       sales_count: Math.floor(Math.random() * 5),
@@ -210,21 +213,24 @@ function getMockReportData(promoterId: number, startDate: string, endDate: strin
     }
   }
 
-  const totals = data.reduce((acc, item) => ({
-    clicks_count: acc.clicks_count + item.clicks_count,
-    referrals_count: acc.referrals_count + item.referrals_count,
-    sales_count: acc.sales_count + item.sales_count,
-    customers_count: acc.customers_count + item.customers_count,
-    revenue_amount: acc.revenue_amount + item.revenue_amount,
-    promoter_earnings_amount: acc.promoter_earnings_amount + item.promoter_earnings_amount,
-  }), {
-    clicks_count: 0,
-    referrals_count: 0,
-    sales_count: 0,
-    customers_count: 0,
-    revenue_amount: 0,
-    promoter_earnings_amount: 0,
-  });
+  const totals = data.reduce(
+    (acc, item) => ({
+      clicks_count: acc.clicks_count + item.clicks_count,
+      referrals_count: acc.referrals_count + item.referrals_count,
+      sales_count: acc.sales_count + item.sales_count,
+      customers_count: acc.customers_count + item.customers_count,
+      revenue_amount: acc.revenue_amount + item.revenue_amount,
+      promoter_earnings_amount: acc.promoter_earnings_amount + item.promoter_earnings_amount,
+    }),
+    {
+      clicks_count: 0,
+      referrals_count: 0,
+      sales_count: 0,
+      customers_count: 0,
+      revenue_amount: 0,
+      promoter_earnings_amount: 0,
+    }
+  );
 
   return {
     promoter_id: promoterId,

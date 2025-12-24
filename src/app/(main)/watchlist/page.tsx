@@ -1,23 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
-import { Bookmark, Play, Trash2, Clock } from 'lucide-react';
+import { Bookmark } from 'lucide-react';
+import { WatchlistCard, WatchlistCardSkeleton } from '@/components/watchlist';
 import {
   useWatchlistStore,
-  formatAddedAt,
-  type WatchlistItem,
   type WatchlistItemType,
 } from '@/lib/stores/watchlist-store';
-
-// Filter categories for watchlist
-const filterCategories = [
-  { id: 'all', name: 'All' },
-  { id: 'video', name: 'Videos' },
-  { id: 'series', name: 'Series' },
-  { id: 'course', name: 'Courses' },
-];
+import { filterCategories } from './constants';
 
 export default function WatchlistPage() {
   const { items, removeItem, getItemsByType } = useWatchlistStore();
@@ -129,147 +120,6 @@ export default function WatchlistPage() {
             </Link>
           </div>
         )}
-      </div>
-    </div>
-  );
-}
-
-// Watchlist Card Component
-function WatchlistCard({
-  item,
-  onRemove,
-}: {
-  item: WatchlistItem;
-  onRemove: (id: number, type: WatchlistItemType) => void;
-}) {
-  const getHref = () => {
-    if (item.type === 'video') return `/videos/${item.uuid || item.id}`;
-    if (item.type === 'series') return `/series/${item.uuid || item.id}`;
-    // Courses use numeric ID for routing since the backend /courses/{id} endpoint expects numeric ID
-    if (item.type === 'course') return `/courses/${item.id}`;
-    return '#';
-  };
-
-  const getTypeBadge = () => {
-    if (item.type === 'video') return 'Video';
-    if (item.type === 'series') return 'Series';
-    if (item.type === 'course') return 'Course';
-    return '';
-  };
-
-  return (
-    <div className="series-card-clean group relative">
-      <Link href={getHref()}>
-        {/* Thumbnail */}
-        <div className="relative aspect-video w-full overflow-hidden rounded-t-xl">
-          {item.thumbnail ? (
-            <Image
-              src={item.thumbnail}
-              alt={item.title}
-              fill
-              className="object-cover"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-red-dark to-red-primary" />
-          )}
-
-          {/* Type Badge - Top Left */}
-          <div className="absolute top-3 left-3 series-type-badge">
-            <Play className="w-3 h-3 fill-white" />
-            {getTypeBadge()}
-          </div>
-
-          {/* Progress Bar */}
-          {item.progress !== undefined && item.progress > 0 && (
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
-              <div
-                className="h-full bg-red-primary"
-                style={{ width: `${item.progress}%` }}
-              />
-            </div>
-          )}
-
-          {/* Duration or Episode Count Badge */}
-          {(item.duration || item.videosCount) && (
-            <div className="absolute bottom-3 right-3 px-2 py-1 bg-black/70 rounded text-xs text-white font-medium">
-              {item.duration || `${item.videosCount} episodes`}
-            </div>
-          )}
-        </div>
-
-        {/* Content */}
-        <div className="p-4 flex flex-col">
-          {/* Title */}
-          <h3 className="text-base font-medium text-white line-clamp-2 min-h-[48px]">
-            {item.title}
-          </h3>
-
-          {/* Creator Info & Added Date */}
-          <div className="flex items-center justify-between mt-auto pt-3">
-            <div className="flex items-center gap-2">
-              {item.channel?.dp ? (
-                <Image
-                  src={item.channel.dp}
-                  alt={item.channel.name || 'Creator'}
-                  width={28}
-                  height={28}
-                  className="rounded-full object-cover"
-                />
-              ) : (
-                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-red-primary to-red-dark flex items-center justify-center">
-                  <span className="text-xs font-bold text-white">
-                    {(item.channel?.name || 'C').charAt(0).toUpperCase()}
-                  </span>
-                </div>
-              )}
-              <span className="text-sm text-text-secondary truncate max-w-[100px]">
-                {item.channel?.name || 'Creator'}
-              </span>
-            </div>
-
-            {/* Added Date */}
-            <div className="flex items-center gap-1 text-xs text-text-secondary">
-              <Clock className="w-3 h-3" />
-              {formatAddedAt(item.addedAt)}
-            </div>
-          </div>
-        </div>
-      </Link>
-
-      {/* Remove Button */}
-      <button
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          onRemove(item.id, item.type);
-        }}
-        className="absolute top-3 right-3 p-2 bg-black/70 hover:bg-red-primary rounded-full opacity-0 group-hover:opacity-100 transition-all"
-        title="Remove from watchlist"
-      >
-        <Trash2 className="w-4 h-4 text-white" />
-      </button>
-    </div>
-  );
-}
-
-// Skeleton Loader for Cards
-function WatchlistCardSkeleton() {
-  return (
-    <div className="series-card-clean">
-      {/* Thumbnail Skeleton */}
-      <div className="aspect-video w-full bg-[#1e1f23] rounded-t-xl animate-pulse" />
-      {/* Content Skeleton */}
-      <div className="p-4">
-        <div className="h-5 w-3/4 bg-[#1e1f23] rounded animate-pulse mb-3" />
-        <div className="h-5 w-1/2 bg-[#1e1f23] rounded animate-pulse mb-3" />
-        <div className="flex items-center justify-between pt-3">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-full bg-[#1e1f23] animate-pulse" />
-            <div className="h-4 w-20 bg-[#1e1f23] rounded animate-pulse" />
-          </div>
-          <div className="h-4 w-16 bg-[#1e1f23] rounded animate-pulse" />
-        </div>
       </div>
     </div>
   );

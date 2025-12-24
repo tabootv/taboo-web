@@ -118,7 +118,7 @@ export default function ProfilePage() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-6 min-h-screen">
       {/* Profile Header */}
-      <div className="bg-surface rounded-[var(--radius-lg)] elevation-low border border-border overflow-hidden">
+      <div className="bg-surface rounded-lg elevation-low border border-border overflow-hidden">
         {/* Cover */}
         <div className="h-32 md:h-48 bg-gradient-to-r from-red-primary to-red-dark" />
 
@@ -168,9 +168,9 @@ export default function ProfilePage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
         <Link
           href="/profile/settings"
-          className="flex items-center gap-3 p-4 bg-surface rounded-[var(--radius-md)] border border-border hover:bg-hover transition-colors"
+          className="flex items-center gap-3 p-4 bg-surface rounded-md border border-border hover:bg-hover transition-colors"
         >
-          <div className="p-2 bg-hover rounded-[var(--radius-sm)]">
+          <div className="p-2 bg-hover rounded-sm">
             <Settings className="w-5 h-5 text-text-secondary" />
           </div>
           <div>
@@ -181,9 +181,9 @@ export default function ProfilePage() {
 
         <Link
           href="/profile/subscription"
-          className="flex items-center gap-3 p-4 bg-surface rounded-[var(--radius-md)] border border-border hover:bg-hover transition-colors"
+          className="flex items-center gap-3 p-4 bg-surface rounded-md border border-border hover:bg-hover transition-colors"
         >
-          <div className="p-2 bg-red-primary/10 rounded-[var(--radius-sm)]">
+          <div className="p-2 bg-red-primary/10 rounded-sm">
             <CreditCard className="w-5 h-5 text-red-primary" />
           </div>
           <div>
@@ -194,9 +194,9 @@ export default function ProfilePage() {
 
         <Link
           href="/profile/edit"
-          className="flex items-center gap-3 p-4 bg-surface rounded-[var(--radius-md)] border border-border hover:bg-hover transition-colors"
+          className="flex items-center gap-3 p-4 bg-surface rounded-md border border-border hover:bg-hover transition-colors"
         >
-          <div className="p-2 bg-red-primary/10 rounded-[var(--radius-sm)]">
+          <div className="p-2 bg-red-primary/10 rounded-sm">
             <Edit2 className="w-5 h-5 text-red-primary" />
           </div>
           <div>
@@ -252,7 +252,7 @@ export default function ProfilePage() {
 function VideoCard({ video }: { video: Video }) {
   return (
     <Link href={`/videos/${video.id}`} className="group">
-      <div className="relative aspect-video rounded-[var(--radius-md)] overflow-hidden bg-surface">
+      <div className="relative aspect-video rounded-md overflow-hidden bg-surface">
         {video.thumbnail && (
           <Image
             src={video.thumbnail_webp || video.thumbnail}

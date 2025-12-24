@@ -114,7 +114,7 @@ export function FilterChips({
           ${base}
           rounded-full
           ${isSelected
-            ? 'bg-red-primary text-white shadow-[0_0_20px_rgba(171,0,19,0.4)]'
+            ? 'bg-red-primary text-white shadow-glow-medium'
             : 'bg-white/5 text-text-secondary hover:bg-white/10 hover:text-white'
           }
         `;
@@ -132,7 +132,7 @@ export function FilterChips({
           ${base}
           rounded-xl
           ${isSelected
-            ? 'bg-red-primary text-white shadow-[0_0_20px_rgba(171,0,19,0.4),inset_0_1px_0_rgba(255,255,255,0.1)]'
+            ? 'bg-red-primary text-white shadow-glow-medium'
             : 'bg-transparent text-text-secondary hover:bg-white/5 hover:text-white'
           }
         `;
@@ -141,7 +141,7 @@ export function FilterChips({
 
   // Container classes based on variant
   const containerClasses = {
-    default: 'p-2 bg-[rgba(15,15,16,0.7)] backdrop-blur-xl border border-[rgba(171,0,19,0.2)] rounded-2xl',
+    default: 'p-2 bg-surface/70 backdrop-blur-xl border border-red-primary/20 rounded-2xl',
     pills: 'gap-2',
     underline: 'border-b border-white/10',
   };

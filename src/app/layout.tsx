@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from 'next';
 import { Figtree } from 'next/font/google';
 import './globals.css';
+import { QueryProvider } from '@/shared/components/providers';
+import { ErrorBoundary } from '@/shared/components/error-boundary';
 
 const figtree = Figtree({
   variable: '--font-figtree',
@@ -51,7 +53,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${figtree.variable} antialiased`}>{children}</body>
+      <body className={`${figtree.variable} antialiased`}>
+        <ErrorBoundary>
+          <QueryProvider>{children}</QueryProvider>
+        </ErrorBoundary>
+      </body>
     </html>
   );
 }

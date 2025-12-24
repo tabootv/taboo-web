@@ -10,7 +10,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'primary', size = 'md', isLoading, disabled, children, ...props }, ref) => {
     const baseStyles =
-      'inline-flex items-center justify-center font-semibold rounded-[var(--radius-sm)] transition-bouncy focus:outline-none focus-visible:ring-2 focus-visible:ring-red-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none';
+      'inline-flex items-center justify-center font-semibold rounded-sm transition-bouncy focus:outline-none focus-visible:ring-2 focus-visible:ring-red-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none';
 
     const variants = {
       primary:
@@ -18,11 +18,11 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       secondary:
         'bg-surface text-text-primary border border-border hover:bg-hover hover:border-red-primary/30 active:scale-[0.98]',
       outline:
-        'border border-border bg-transparent text-text-primary hover:bg-hover hover:border-red-primary/50 hover:shadow-[0_0_20px_rgba(171,0,19,0.2)] active:scale-[0.98]',
+        'border border-border bg-transparent text-text-primary hover:bg-hover hover:border-red-primary/50 hover:shadow-glow-soft active:scale-[0.98]',
       ghost:
         'bg-transparent text-text-secondary hover:bg-hover hover:text-text-primary active:scale-[0.98]',
       danger:
-        'bg-red-deep text-white hover:bg-red-dark hover:shadow-[0_0_20px_rgba(171,0,19,0.3)] active:scale-[0.98]',
+        'bg-red-deep text-white hover:bg-red-dark hover:shadow-glow-soft active:scale-[0.98]',
       premium:
         'btn-premium text-white font-bold tracking-wide',
     };

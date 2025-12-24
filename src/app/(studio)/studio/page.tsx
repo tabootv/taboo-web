@@ -9,13 +9,13 @@ import {
   Eye,
   Users,
   Heart,
-  ChevronRight,
-  Upload,
   Sparkles,
   BarChart3,
   DollarSign,
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/stores';
+import { formatNumber } from '@/lib/utils';
+import { StatCard, ActionCard, QuickLinkCard, ComingSoonItem } from '@/components/studio';
 
 export default function StudioDashboard() {
   const { user } = useAuthStore();
@@ -129,108 +129,4 @@ export default function StudioDashboard() {
       </div>
     </div>
   );
-}
-
-function StatCard({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="bg-surface border border-border rounded-xl p-4">
-      <div className="flex items-center gap-3">
-        <div className="p-2 rounded-xl bg-white/5">
-          <Icon className="w-5 h-5 text-red-primary" />
-        </div>
-        <div>
-          <p className="text-2xl font-semibold text-white">{value}</p>
-          <p className="text-sm text-text-secondary">{label}</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ActionCard({
-  href,
-  icon: Icon,
-  title,
-  description,
-  gradient,
-}: {
-  href: string;
-  icon: React.ComponentType<{ className?: string }>;
-  title: string;
-  description: string;
-  gradient: string;
-}) {
-  return (
-    <Link href={href} className="group">
-      <div className="relative bg-surface border border-border rounded-xl overflow-hidden transition-all hover:border-white/20">
-        <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-10 group-hover:opacity-20 transition-opacity`} />
-        <div className="relative p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 rounded-xl bg-white/10">
-              <Icon className="w-6 h-6 text-white" />
-            </div>
-            <Upload className="w-5 h-5 text-text-secondary group-hover:text-white transition-colors" />
-          </div>
-          <h3 className="font-semibold text-white mb-1">{title}</h3>
-          <p className="text-sm text-text-secondary">{description}</p>
-        </div>
-      </div>
-    </Link>
-  );
-}
-
-function QuickLinkCard({
-  href,
-  icon: Icon,
-  title,
-  description,
-}: {
-  href: string;
-  icon: React.ComponentType<{ className?: string }>;
-  title: string;
-  description: string;
-}) {
-  return (
-    <Link href={href} className="group">
-      <div className="bg-surface border border-border rounded-xl p-5 flex items-center justify-between transition-all hover:border-white/20">
-        <div className="flex items-center gap-4">
-          <div className="p-3 rounded-xl bg-white/5 group-hover:bg-red-primary/10 transition-colors">
-            <Icon className="w-5 h-5 text-text-secondary group-hover:text-red-primary transition-colors" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-white">{title}</h3>
-            <p className="text-sm text-text-secondary">{description}</p>
-          </div>
-        </div>
-        <ChevronRight className="w-5 h-5 text-text-secondary group-hover:text-white transition-colors" />
-      </div>
-    </Link>
-  );
-}
-
-function ComingSoonItem({ title, description }: { title: string; description: string }) {
-  return (
-    <div className="p-4 rounded-xl bg-white/5 border border-dashed border-white/10">
-      <h4 className="font-medium text-white/60 mb-1">{title}</h4>
-      <p className="text-sm text-text-secondary">{description}</p>
-    </div>
-  );
-}
-
-function formatNumber(num: number): string {
-  if (num >= 1000000) {
-    return (num / 1000000).toFixed(1) + 'M';
-  }
-  if (num >= 1000) {
-    return (num / 1000).toFixed(1) + 'K';
-  }
-  return num.toString();
 }

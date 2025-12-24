@@ -1,5 +1,6 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useEffect, useState, useRef, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -17,8 +18,18 @@ import {
 import { courses as coursesApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import type { Series, Video, Channel, Course } from '@/types';
-import { VideoPlayer } from '@/components/video/video-player';
+import { VideoPlayerSkeleton } from '@/components/video';
+import { LessonCard, CoursePageSkeleton } from '@/components/courses';
+import { VerifiedBadge } from '@/components/ui';
 import { cn, formatDuration } from '@/lib/utils';
+
+const VideoPlayer = dynamic(
+  () => import('@/features/video').then((mod) => ({ default: mod.VideoPlayer })),
+  {
+    loading: () => <VideoPlayerSkeleton />,
+    ssr: false,
+  }
+);
 
 export default function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -336,174 +347,5 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
         </div>
       </div>
     </div>
-  );
-}
-
-// Lesson Card Component - Educational Style
-function LessonCard({
-  video,
-  lessonNumber,
-  courseId,
-  channel,
-  isFirst,
-}: {
-  video: Video;
-  lessonNumber: number;
-  courseId: string;
-  channel?: Channel;
-  isFirst: boolean;
-}) {
-  const href = `/courses/${courseId}/play/${video.uuid}`;
-
-  return (
-    <Link href={href} className="group block">
-      <div className="relative bg-surface/40 rounded-xl overflow-hidden transition-all duration-300 hover:bg-surface/70 hover:ring-1 hover:ring-red-primary/30 hover:shadow-xl hover:shadow-red-primary/5">
-        <div className="flex flex-col sm:flex-row">
-          {/* Lesson Number */}
-          <div className="hidden sm:flex items-center justify-center w-16 bg-surface/50 border-r border-white/5">
-            <span className="text-2xl font-bold text-white/30 group-hover:text-red-primary transition-colors">
-              {String(lessonNumber).padStart(2, '0')}
-            </span>
-          </div>
-
-          {/* Thumbnail */}
-          <div className="relative w-full sm:w-48 aspect-video sm:aspect-auto sm:h-28 flex-shrink-0 overflow-hidden">
-            {video.thumbnail ? (
-              <Image
-                src={video.thumbnail_webp || video.thumbnail}
-                alt={video.title}
-                fill
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-surface to-background flex items-center justify-center">
-                <GraduationCap className="w-8 h-8 text-white/20" />
-              </div>
-            )}
-
-            {/* Play Overlay */}
-            <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/40 transition-all duration-300">
-              <div className="w-10 h-10 rounded-full bg-red-primary/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transform scale-50 group-hover:scale-100 transition-all duration-300 shadow-lg">
-                <Play className="w-4 h-4 text-white fill-white ml-0.5" />
-              </div>
-            </div>
-
-            {/* Duration Badge */}
-            {video.duration && (
-              <div className="absolute bottom-2 right-2 px-2 py-0.5 bg-black/80 backdrop-blur-sm rounded text-xs font-medium text-white">
-                {formatDuration(video.duration)}
-              </div>
-            )}
-
-            {/* Lesson Badge - Mobile */}
-            <div className="sm:hidden absolute top-2 left-2 px-2 py-1 bg-red-primary/90 backdrop-blur-sm rounded text-xs font-bold text-white">
-              LESSON {lessonNumber}
-            </div>
-          </div>
-
-          {/* Content */}
-          <div className="flex-1 p-4 sm:p-5 flex flex-col justify-center">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="hidden sm:inline-block px-2 py-0.5 bg-red-primary/10 text-red-primary text-xs font-semibold rounded">
-                    LESSON {lessonNumber}
-                  </span>
-                  {isFirst && (
-                    <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 text-xs font-semibold rounded">
-                      START HERE
-                    </span>
-                  )}
-                </div>
-                <h3 className="text-white font-semibold line-clamp-1 mb-1 group-hover:text-red-primary transition-colors text-base sm:text-lg">
-                  {video.title}
-                </h3>
-                {video.description && (
-                  <p className="text-white/50 text-sm line-clamp-2">{video.description}</p>
-                )}
-              </div>
-
-              {/* Play Indicator */}
-              <div className="hidden sm:flex items-center gap-2 text-white/40 group-hover:text-red-primary transition-colors">
-                <span className="text-sm font-medium">Watch</span>
-                <Play className="w-4 h-4 fill-current" />
-              </div>
-            </div>
-
-            {/* Bottom Meta */}
-            <div className="flex items-center gap-3 mt-3 text-white/40 text-xs">
-              <span className="flex items-center gap-1">
-                <Clock className="w-3 h-3" />
-                {formatDuration(video.duration || 0)}
-              </span>
-              {(video.channel?.name || channel?.name) && (
-                <>
-                  <span>•</span>
-                  <span className="flex items-center gap-1 truncate">
-                    {video.channel?.name || channel?.name}
-                    <CheckCircle className="w-3 h-3 text-red-primary flex-shrink-0" />
-                  </span>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    </Link>
-  );
-}
-
-// Skeleton Loader
-function CoursePageSkeleton() {
-  return (
-    <div className="min-h-screen bg-background">
-      {/* Hero Skeleton */}
-      <div className="relative h-[80vh] min-h-[550px]">
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-surface/20 to-surface/10" />
-        <div className="absolute bottom-0 left-0 right-0 p-8 max-w-[1800px] mx-auto">
-          <div className="max-w-2xl space-y-4">
-            <div className="h-8 w-28 bg-red-primary/20 rounded-lg animate-pulse" />
-            <div className="h-12 sm:h-16 w-3/4 bg-surface/50 rounded animate-pulse" />
-            <div className="h-5 w-1/2 bg-surface/50 rounded animate-pulse" />
-            <div className="h-20 w-full bg-surface/50 rounded animate-pulse" />
-            <div className="flex gap-4">
-              <div className="h-12 w-36 bg-red-primary/20 rounded-lg animate-pulse" />
-              <div className="h-12 w-28 bg-surface/50 rounded animate-pulse" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Lessons Skeleton */}
-      <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="h-8 w-56 bg-surface/50 rounded animate-pulse mb-6" />
-        <div className="space-y-3">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="bg-surface/40 rounded-xl overflow-hidden flex">
-              <div className="hidden sm:block w-16 bg-surface/50" />
-              <div className="w-full sm:w-48 aspect-video sm:aspect-auto sm:h-28 bg-surface/50 animate-pulse" />
-              <div className="flex-1 p-5 space-y-2">
-                <div className="h-4 w-20 bg-red-primary/20 rounded animate-pulse" />
-                <div className="h-5 w-3/4 bg-surface/50 rounded animate-pulse" />
-                <div className="h-4 w-1/2 bg-surface/50 rounded animate-pulse" />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Verified Badge Component
-function VerifiedBadge({ size = 18 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M8 0L9.79611 1.52786L12.1244 1.52786L12.7023 3.76393L14.7023 5.04508L14.0489 7.29814L14.7023 9.55119L12.7023 10.8323L12.1244 13.0684L9.79611 13.0684L8 14.5963L6.20389 13.0684L3.87564 13.0684L3.29772 10.8323L1.29772 9.55119L1.95106 7.29814L1.29772 5.04508L3.29772 3.76393L3.87564 1.52786L6.20389 1.52786L8 0Z"
-        fill="#AB0013"
-      />
-      <path d="M5.5 7.5L7 9L10.5 5.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
   );
 }

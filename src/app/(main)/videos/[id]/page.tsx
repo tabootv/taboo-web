@@ -1,88 +1,27 @@
 'use client';
 
-import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import Image from 'next/image';
-import Link from 'next/link';
-import { CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Button, LoadingScreen } from '@/components/ui';
+import { VideoPlayerSkeleton } from '@/components/video';
+import { LikeButton, SaveButton, VideoComments } from '@/features/video';
 import { videos as videosApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/stores/auth-store';
-import type { Video, Tag } from '@/types';
-import {
-  VideoPlayer,
-  LikeButton,
-  VideoComments,
-  SaveButton,
-} from '@/components/video';
-import { Button, LoadingScreen } from '@/components/ui';
 import { formatRelativeTime } from '@/lib/utils';
+import { getTagKey, normalizeTags } from '@/lib/utils/tags';
+import type { Tag, Video } from '@/types';
+import { CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useParams, useRouter } from 'next/navigation';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-type RawTagInput = Tag | string | null | undefined;
-type RawTagsInput = RawTagInput[] | string | null | undefined;
-
-const hashStringToNumber = (value: string): number => {
-  let hash = 0;
-  for (let i = 0; i < value.length; i += 1) {
-    hash = (hash << 5) - hash + value.charCodeAt(i);
-    hash |= 0;
+const VideoPlayer = dynamic(
+  () => import('@/features/video').then((mod) => ({ default: mod.VideoPlayer })),
+  {
+    loading: () => <VideoPlayerSkeleton />,
+    ssr: false,
   }
-  return Math.abs(hash);
-};
-
-const getTagKey = (tag: Tag): string =>
-  tag.slug || tag.name || (tag.id !== undefined ? String(tag.id) : '');
-
-const normalizeTags = (tagsInput: RawTagsInput): Tag[] => {
-  if (!tagsInput) return [];
-
-  const rawTags: RawTagInput[] =
-    typeof tagsInput === 'string'
-      ? tagsInput
-          .split(',')
-          .map((tag) => tag.trim())
-          .filter(Boolean)
-      : tagsInput;
-
-  const normalized = rawTags.reduce<Tag[]>((acc, tag, index) => {
-    if (!tag) return acc;
-
-    if (typeof tag === 'string') {
-      const name = tag.trim();
-      if (!name) return acc;
-      const slug = name.toLowerCase().replace(/\s+/g, '-');
-      acc.push({
-        id: hashStringToNumber(`${slug}-${index}`),
-        name,
-        slug,
-        should_show: true,
-      });
-      return acc;
-    }
-
-    const name = tag.name || tag.slug || '';
-    if (!name) return acc;
-
-    const slug = tag.slug || name.toLowerCase().replace(/\s+/g, '-');
-    acc.push({
-      ...tag,
-      id: tag.id ?? hashStringToNumber(`${slug}-${index}`),
-      name,
-      slug,
-      should_show: tag.should_show !== false,
-    });
-    return acc;
-  }, []);
-
-  const deduped = new Map<string, Tag>();
-  normalized.forEach((tag) => {
-    const key = getTagKey(tag);
-    if (key && !deduped.has(key) && tag.should_show !== false) {
-      deduped.set(key, tag);
-    }
-  });
-
-  return Array.from(deduped.values());
-};
+);
 
 export default function VideoPage() {
   const params = useParams();
@@ -94,7 +33,7 @@ export default function VideoPage() {
   const [relatedVideos, setRelatedVideos] = useState<Video[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [autoplayEnabled, setAutoplayEnabled] = useState(user?.video_autoplay ?? true);
+  const [autoplayEnabled] = useState(user?.video_autoplay ?? true);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
 
@@ -105,7 +44,7 @@ export default function VideoPage() {
   const [showTagsRightArrow, setShowTagsRightArrow] = useState(false);
 
   const hydrateVideoTags = useCallback((videoData: Video): Video => {
-    const normalizedTags = normalizeTags(videoData.tags as RawTagsInput);
+    const normalizedTags = normalizeTags(videoData.tags);
     return { ...videoData, tags: normalizedTags };
   }, []);
 
@@ -128,11 +67,9 @@ export default function VideoPage() {
 
         if (allVideos.length < MIN_VIDEOS) {
           try {
-            const relatedResponse = await videosApi.getRelatedLongForm(
-              videoData.uuid || videoData.id,
-              1,
-              MIN_VIDEOS
-            );
+            const videoId = videoData.uuid || videoData.id;
+            if (!videoId) return;
+            const relatedResponse = await videosApi.getRelatedLongForm(videoId, 1, MIN_VIDEOS);
             const related = relatedResponse.data || [];
             const videoIds = new Set(allVideos.map((v) => v.uuid || v.id));
             related.forEach((v) => {
@@ -248,6 +185,7 @@ export default function VideoPage() {
       handleTagsScroll();
       return () => el.removeEventListener('scroll', handleTagsScroll);
     }
+    return undefined;
   }, [handleTagsScroll, availableTags]);
 
   const scrollTags = (direction: 'left' | 'right') => {
@@ -274,9 +212,20 @@ export default function VideoPage() {
     const currentIndex = videos.findIndex((v) => (v.uuid || v.id) === currentKey);
     if (currentIndex >= 0 && currentIndex < videos.length - 1) {
       const nextVideo = videos[currentIndex + 1];
-      router.push(`/videos/${nextVideo.uuid || nextVideo.id}`);
+      if (nextVideo) {
+        const nextId = nextVideo.uuid || nextVideo.id;
+        if (nextId) {
+          router.push(`/videos/${nextId}`);
+        }
+      }
     } else if (videos.length > 0) {
-      router.push(`/videos/${videos[0].uuid || videos[0].id}`);
+      const firstVideo = videos[0];
+      if (firstVideo) {
+        const firstId = firstVideo.uuid || firstVideo.id;
+        if (firstId) {
+          router.push(`/videos/${firstId}`);
+        }
+      }
     }
   }, [router]);
 
@@ -293,7 +242,7 @@ export default function VideoPage() {
         </p>
         <div className="flex gap-4 mt-4">
           <button
-            onClick={() => window.location.reload()}
+            onClick={() => globalThis.window.location.reload()}
             className="text-red-primary hover:underline"
           >
             Try again
@@ -320,8 +269,7 @@ export default function VideoPage() {
     );
   }
 
-  const shouldTruncateDescription =
-    video.description && video.description.length > 200;
+  const shouldTruncateDescription = video.description && video.description.length > 200;
 
   return (
     <div className="min-h-screen bg-background">
@@ -330,12 +278,12 @@ export default function VideoPage() {
           <div className="flex-1 min-w-0">
             <div className="w-full rounded-lg overflow-hidden bg-black">
               <VideoPlayer
-                thumbnail={video.thumbnail}
-                hls_url={video.hls_url || video.url_hls}
-                url_1440={video.url_1440}
-                url_1080={video.url_1080}
-                url_720={video.url_720}
-                url_480={video.url_480}
+                {...(video.thumbnail && { thumbnail: video.thumbnail })}
+                hls_url={video.hls_url || video.url_hls || null}
+                url_1440={video.url_1440 || null}
+                url_1080={video.url_1080 || null}
+                url_720={video.url_720 || null}
+                url_480={video.url_480 || null}
                 autoplay={autoplayEnabled}
                 onEnded={handleVideoEnded}
               />
@@ -349,7 +297,7 @@ export default function VideoPage() {
               <div className="flex items-center gap-3">
                 <Link
                   href={`/creators/creator-profile/${video.channel?.uuid || video.channel?.id}`}
-                  className="flex-shrink-0"
+                  className="shrink-0"
                 >
                   <div className="relative size-10 rounded-full overflow-hidden">
                     {video.channel?.dp ? (
@@ -374,7 +322,7 @@ export default function VideoPage() {
                     <span className="font-medium text-white group-hover:text-text-secondary transition-colors truncate">
                       {video.channel?.name}
                     </span>
-                    <CheckCircle className="w-3.5 h-3.5 text-text-secondary flex-shrink-0" />
+                    <CheckCircle className="w-3.5 h-3.5 text-text-secondary shrink-0" />
                   </Link>
                   <p className="text-xs text-text-secondary">
                     {video.humans_publish_at || formatRelativeTime(video.published_at)}
@@ -405,25 +353,24 @@ export default function VideoPage() {
             </div>
 
             {video.description && (
-              <div
-                className="mt-3 bg-surface hover:bg-hover rounded-lg p-3 cursor-pointer transition-colors"
+              <button
+                type="button"
+                className="mt-3 w-full text-left bg-surface hover:bg-hover rounded-lg p-3 transition-colors"
                 onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
               >
                 <p
                   className={`text-sm text-text-secondary whitespace-pre-wrap ${
-                    !isDescriptionExpanded && shouldTruncateDescription
-                      ? 'line-clamp-2'
-                      : ''
+                    !isDescriptionExpanded && shouldTruncateDescription ? 'line-clamp-2' : ''
                   }`}
                 >
                   {video.description}
                 </p>
                 {shouldTruncateDescription && (
-                  <button className="text-sm font-medium text-white mt-2">
+                  <span className="block text-sm font-medium text-white mt-2">
                     {isDescriptionExpanded ? 'Show less' : 'Show more'}
-                  </button>
+                  </span>
                 )}
-              </div>
+              </button>
             )}
 
             <div className="mt-6">
@@ -431,7 +378,7 @@ export default function VideoPage() {
             </div>
           </div>
 
-          <div className="w-full lg:w-[402px] flex-shrink-0">
+          <div className="w-full lg:w-[402px] shrink-0">
             {availableTags.length > 0 && (
               <div className="relative mb-3 group/tags">
                 {showTagsLeftArrow && (
@@ -459,7 +406,7 @@ export default function VideoPage() {
                 >
                   <button
                     onClick={() => setSelectedTag(null)}
-                    className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    className={`shrink-0 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                       selectedTag === null
                         ? 'bg-white text-black'
                         : 'bg-surface text-white hover:bg-hover'
@@ -472,7 +419,7 @@ export default function VideoPage() {
                     <button
                       key={getTagKey(tag)}
                       onClick={() => setSelectedTag(tag.name)}
-                      className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                      className={`shrink-0 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                         selectedTag === tag.name
                           ? 'bg-white text-black'
                           : 'bg-surface text-white hover:bg-hover'
@@ -487,19 +434,18 @@ export default function VideoPage() {
 
             <div className="flex flex-col gap-2">
               {filteredVideos.length === 0 ? (
-                <p className="text-text-secondary text-sm py-4">
-                  No videos found for this tag.
-                </p>
+                <p className="text-text-secondary text-sm py-4">No videos found for this tag.</p>
               ) : (
                 filteredVideos.map((item) => (
                   <Link
                     key={item.id}
                     href={`/videos/${item.uuid || item.id}`}
+                    prefetch={false}
                     className={`group flex gap-2 rounded-lg p-2 -mx-2 transition-colors hover:bg-surface ${
                       (item.uuid || item.id) === (video.uuid || video.id) ? 'bg-surface' : ''
                     }`}
                   >
-                    <div className="relative w-[168px] h-[94px] flex-shrink-0 rounded-md overflow-hidden bg-surface">
+                    <div className="relative w-[168px] h-[94px] shrink-0 rounded-md overflow-hidden bg-surface">
                       {item.thumbnail && (
                         <Image
                           src={item.thumbnail_webp || item.thumbnail}

@@ -159,7 +159,7 @@ export default function ChoosePlanPage() {
       <div className="min-h-[80vh] flex items-center justify-center">
         <div className="text-center">
           <div
-            className="w-10 h-10 mx-auto mb-4 rounded-full border-3 border-[#1a1a1a] border-t-[#ab0013] animate-spin"
+            className="w-10 h-10 mx-auto mb-4 rounded-full border-3 border-elevated border-t-red-primary animate-spin"
             style={{ borderWidth: 3 }}
           />
           <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 'clamp(14px, 3.5vw, 16px)' }}>
@@ -471,7 +471,7 @@ export default function ChoosePlanPage() {
                   <div className="flex items-center justify-center h-[400px]">
                     <div className="text-center">
                       <div
-                        className="w-8 h-8 mx-auto mb-3 rounded-full border-2 border-[#1a1a1a] border-t-[#ab0013] animate-spin"
+                        className="w-8 h-8 mx-auto mb-3 rounded-full border-2 border-elevated border-t-red-primary animate-spin"
                       />
                       <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>Loading checkout...</p>
                     </div>

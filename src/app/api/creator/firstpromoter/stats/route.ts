@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { getRequiredEnv } from '@/shared/lib/config/env';
 
-const FIRSTPROMOTER_API_KEY = process.env.FIRSTPROMOTER_API_KEY || 'hPq6CerLNVYlScmHTeplSbnze5IzlZ1x6aHUZ2WmvmY';
-const FIRSTPROMOTER_ACCOUNT_ID = process.env.FIRSTPROMOTER_ACCOUNT_ID || 'acc_N47LO28e';
+const FIRSTPROMOTER_API_KEY = getRequiredEnv('FIRSTPROMOTER_API_KEY');
+const FIRSTPROMOTER_V2_ACCOUNT_ID = getRequiredEnv('FIRSTPROMOTER_V2_ACCOUNT_ID');
 
 // Temporary mapping of user emails to FirstPromoter promoter IDs
 // TODO: Replace with database lookup once Laravel backend is ready
@@ -45,8 +46,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get user info from Laravel backend
-    const userResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://app.taboo.tv/api'}/me`, {
+    const { getRequiredEnv } = await import('@/shared/lib/config/env');
+    const apiUrl = getRequiredEnv('NEXT_PUBLIC_API_URL');
+
+    const userResponse = await fetch(`${apiUrl}/me`, {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: 'application/json',
@@ -78,7 +81,7 @@ export async function GET(request: NextRequest) {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${FIRSTPROMOTER_API_KEY}`,
-        'Account-ID': FIRSTPROMOTER_ACCOUNT_ID,
+        'Account-ID': FIRSTPROMOTER_V2_ACCOUNT_ID,
         'Accept': 'application/json',
       },
     });

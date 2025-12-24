@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { X, Play, Loader2 } from 'lucide-react';
 import { series as seriesApi, courses as coursesApi } from '@/lib/api';
-import { VideoPlayer } from '@/components/video/video-player';
+import { VideoPlayer } from '@/features/video';
 import { Button, LoadingScreen } from '@/components/ui';
 
 function TrailerContent() {

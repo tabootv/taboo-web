@@ -6,7 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, Play, Edit, Eye, ThumbsUp, MessageCircle, Clock, ExternalLink } from 'lucide-react';
 import { Button, LoadingScreen } from '@/components/ui';
-import { VideoPlayer } from '@/components/video/video-player';
+import { VideoPlayer } from '@/features/video';
 import { useAuthStore } from '@/lib/stores';
 import { formatCompactNumber, formatDuration, formatRelativeTime } from '@/lib/utils';
 import { toast } from 'sonner';

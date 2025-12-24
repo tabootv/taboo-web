@@ -5,3 +5,5 @@ export { useDebounce } from './use-debounce';
 export { usePrefersReducedMotion } from './use-prefers-reduced-motion';
 export { useAbortableFetch, createAbortableFetch } from './useAbortableFetch';
 export { useSubscription, usePlans, useRequireSubscription } from './use-subscription';
+export { useNormalizedTags } from './use-tags';
+export { useInfiniteScrollPagination } from './use-infinite-scroll-pagination';

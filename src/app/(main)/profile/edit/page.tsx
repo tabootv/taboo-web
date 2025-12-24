@@ -65,7 +65,7 @@ export default function SettingsPage() {
       <div className="flex items-center gap-4 mb-6">
         <Link
           href="/profile"
-          className="p-2 rounded-[var(--radius-sm)] hover:bg-hover transition-colors"
+          className="p-2 rounded-sm hover:bg-hover transition-colors"
         >
           <ArrowLeft className="w-5 h-5 text-text-secondary" />
         </Link>
@@ -78,12 +78,12 @@ export default function SettingsPage() {
       <div className="flex flex-col md:flex-row gap-6">
         {/* Sidebar */}
         <div className="w-full md:w-64 flex-shrink-0">
-          <nav className="bg-surface rounded-[var(--radius-lg)] border border-border p-2">
+          <nav className="bg-surface rounded-lg border border-border p-2">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-[var(--radius-md)] text-left transition-colors ${
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-md text-left transition-colors ${
                   activeTab === tab.id
                     ? 'bg-red-primary/10 text-red-primary'
                     : 'text-text-secondary hover:bg-hover hover:text-text-primary'
@@ -98,7 +98,7 @@ export default function SettingsPage() {
 
         {/* Content */}
         <div className="flex-1">
-          <div className="bg-surface rounded-[var(--radius-lg)] border border-border p-6">
+          <div className="bg-surface rounded-lg border border-border p-6">
             {activeTab === 'profile' && <ProfileSettings user={user} onUpdate={fetchUser} />}
             {activeTab === 'email' && <EmailSettings user={user} onUpdate={fetchUser} />}
             {activeTab === 'password' && <PasswordSettings />}
@@ -160,7 +160,7 @@ function ProfileSettings({
             type="text"
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
-            className="w-full px-4 py-3 bg-background border border-border rounded-[var(--radius-md)] text-text-primary focus:outline-none focus:border-red-primary transition-colors"
+            className="w-full px-4 py-3 bg-background border border-border rounded-md text-text-primary focus:outline-none focus:border-red-primary transition-colors"
           />
         </div>
         <div>
@@ -171,7 +171,7 @@ function ProfileSettings({
             type="text"
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
-            className="w-full px-4 py-3 bg-background border border-border rounded-[var(--radius-md)] text-text-primary focus:outline-none focus:border-red-primary transition-colors"
+            className="w-full px-4 py-3 bg-background border border-border rounded-md text-text-primary focus:outline-none focus:border-red-primary transition-colors"
           />
         </div>
       </div>
@@ -184,7 +184,7 @@ function ProfileSettings({
           type="text"
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
-          className="w-full px-4 py-3 bg-background border border-border rounded-[var(--radius-md)] text-text-primary focus:outline-none focus:border-red-primary transition-colors"
+          className="w-full px-4 py-3 bg-background border border-border rounded-md text-text-primary focus:outline-none focus:border-red-primary transition-colors"
         />
       </div>
 
@@ -198,7 +198,7 @@ function ProfileSettings({
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           placeholder="+1 (555) 000-0000"
-          className="w-full px-4 py-3 bg-background border border-border rounded-[var(--radius-md)] text-text-primary focus:outline-none focus:border-red-primary transition-colors"
+          className="w-full px-4 py-3 bg-background border border-border rounded-md text-text-primary focus:outline-none focus:border-red-primary transition-colors"
         />
       </div>
 
@@ -255,7 +255,7 @@ function EmailSettings({
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full px-4 py-3 bg-background border border-border rounded-[var(--radius-md)] text-text-primary focus:outline-none focus:border-red-primary transition-colors"
+          className="w-full px-4 py-3 bg-background border border-border rounded-md text-text-primary focus:outline-none focus:border-red-primary transition-colors"
         />
       </div>
 
@@ -269,7 +269,7 @@ function EmailSettings({
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Enter your current password"
-            className="w-full px-4 py-3 pr-12 bg-background border border-border rounded-[var(--radius-md)] text-text-primary focus:outline-none focus:border-red-primary transition-colors"
+            className="w-full px-4 py-3 pr-12 bg-background border border-border rounded-md text-text-primary focus:outline-none focus:border-red-primary transition-colors"
           />
           <button
             type="button"
@@ -349,7 +349,7 @@ function PasswordSettings() {
           type={showPasswords ? 'text' : 'password'}
           value={currentPassword}
           onChange={(e) => setCurrentPassword(e.target.value)}
-          className="w-full px-4 py-3 bg-background border border-border rounded-[var(--radius-md)] text-text-primary focus:outline-none focus:border-red-primary transition-colors"
+          className="w-full px-4 py-3 bg-background border border-border rounded-md text-text-primary focus:outline-none focus:border-red-primary transition-colors"
         />
       </div>
 
@@ -361,7 +361,7 @@ function PasswordSettings() {
           type={showPasswords ? 'text' : 'password'}
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
-          className="w-full px-4 py-3 bg-background border border-border rounded-[var(--radius-md)] text-text-primary focus:outline-none focus:border-red-primary transition-colors"
+          className="w-full px-4 py-3 bg-background border border-border rounded-md text-text-primary focus:outline-none focus:border-red-primary transition-colors"
         />
       </div>
 
@@ -373,7 +373,7 @@ function PasswordSettings() {
           type={showPasswords ? 'text' : 'password'}
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
-          className="w-full px-4 py-3 bg-background border border-border rounded-[var(--radius-md)] text-text-primary focus:outline-none focus:border-red-primary transition-colors"
+          className="w-full px-4 py-3 bg-background border border-border rounded-md text-text-primary focus:outline-none focus:border-red-primary transition-colors"
         />
       </div>
 
@@ -409,7 +409,7 @@ function DangerZone() {
     <div className="space-y-6">
       <h2 className="text-lg font-semibold text-red-primary">Danger Zone</h2>
 
-      <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-[var(--radius-md)]">
+      <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-md">
         <h3 className="font-medium text-text-primary mb-2">Delete Account</h3>
         <p className="text-sm text-text-secondary mb-4">
           Once you delete your account, there is no going back. All your data will be

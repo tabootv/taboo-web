@@ -17,6 +17,7 @@ import {
 import { useAuthStore } from '@/lib/stores';
 import { useSubscription } from '@/lib/hooks';
 import { Button } from '@/components/ui';
+import { formatDate } from '@/lib/utils';
 
 /**
  * Subscription management page
@@ -47,10 +48,10 @@ export default function SubscriptionPage() {
     }
   }, [isAuthenticated, router]);
 
-  // Format date
-  const formatDate = (dateString?: string) => {
+  // Format date helper
+  const formatDateLocal = (dateString?: string) => {
     if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return formatDate(dateString, {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -190,7 +191,7 @@ export default function SubscriptionPage() {
                     {status === 'canceled' ? 'Access Until' : 'Next Billing Date'}
                   </span>
                   <span className="text-text-primary font-medium">
-                    {formatDate(currentPeriodEnd)}
+                    {formatDateLocal(currentPeriodEnd)}
                   </span>
                 </div>
               )}

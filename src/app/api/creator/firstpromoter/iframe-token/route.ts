@@ -1,7 +1,8 @@
-import { NextResponse } from 'next/server';
+import { getRequiredEnv } from '@/shared/lib/config/env';
 import { cookies } from 'next/headers';
+import { NextResponse } from 'next/server';
 
-const FIRSTPROMOTER_API_KEY = process.env.FIRSTPROMOTER_API_KEY || 'hPq6CerLNVYlScmHTeplSbnze5IzlZ1x6aHUZ2WmvmY';
+const FIRSTPROMOTER_API_KEY = getRequiredEnv('FIRSTPROMOTER_API_KEY');
 
 // Mapping of user emails to FirstPromoter promoter IDs
 // TODO: Replace with database lookup once Laravel backend is ready
@@ -18,8 +19,10 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get user info from Laravel backend
-    const userResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://app.taboo.tv/api'}/me`, {
+    const { getRequiredEnv } = await import('@/shared/lib/config/env');
+    const apiUrl = getRequiredEnv('NEXT_PUBLIC_API_URL');
+
+    const userResponse = await fetch(`${apiUrl}/me`, {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: 'application/json',
@@ -40,10 +43,13 @@ export async function GET() {
     const promoterId = PROMOTER_ID_MAP[userEmail];
 
     if (!promoterId) {
-      return NextResponse.json({
-        error: 'No FirstPromoter account linked to this email',
-        email: userEmail
-      }, { status: 404 });
+      return NextResponse.json(
+        {
+          error: 'No FirstPromoter account linked to this email',
+          email: userEmail,
+        },
+        { status: 404 }
+      );
     }
 
     // Call FirstPromoter V1 API to get iframe access token
@@ -52,8 +58,8 @@ export async function GET() {
       {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${FIRSTPROMOTER_API_KEY}`,
-          'Accept': 'application/json',
+          Authorization: `Bearer ${FIRSTPROMOTER_API_KEY}`,
+          Accept: 'application/json',
         },
       }
     );
@@ -61,10 +67,13 @@ export async function GET() {
     if (!fpResponse.ok) {
       const errorText = await fpResponse.text();
       console.error('FirstPromoter iframe_login error:', fpResponse.status, errorText);
-      return NextResponse.json({
-        error: 'Failed to get iframe token',
-        details: errorText
-      }, { status: 500 });
+      return NextResponse.json(
+        {
+          error: 'Failed to get iframe token',
+          details: errorText,
+        },
+        { status: 500 }
+      );
     }
 
     const fpData = await fpResponse.json();

@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { TopHeader } from './top-header';
 import { Sidebar } from './sidebar';
 import { Footer } from './footer';
+import { NavigationProgress } from '@/components/navigation/NavigationProgress';
 import { useAuthStore, useSidebarStore } from '@/lib/stores';
 import { Toaster } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -29,6 +30,7 @@ export function MainLayout({ children, showFooter = true }: MainLayoutProps) {
 
   return (
     <div className="bg-background min-h-screen">
+      <NavigationProgress />
       <TopHeader />
       <Sidebar />
 

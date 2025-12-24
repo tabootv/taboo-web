@@ -23,7 +23,7 @@ import {
   ArrowUpRight,
 } from 'lucide-react';
 import { Button } from '@/components/ui';
-import { FunnelAreaChart } from '@/components/studio/funnel-area-chart';
+import { FunnelAreaChart } from '@/features/creator-studio';
 
 type DateRange = '7d' | '30d' | '90d' | '365d' | 'all';
 type GroupBy = 'day' | 'week' | 'month';
@@ -409,7 +409,7 @@ export default function EarningsPage() {
               }}
             >
               {dateRangeOptions.map((option) => (
-                <option key={option.value} value={option.value} className="bg-[#1a1a1a] text-white">
+                <option key={option.value} value={option.value} className="bg-elevated text-white">
                   {option.label}
                 </option>
               ))}
@@ -428,7 +428,7 @@ export default function EarningsPage() {
               }}
             >
               {groupByOptions.map((option) => (
-                <option key={option.value} value={option.value} className="bg-[#1a1a1a] text-white">
+                <option key={option.value} value={option.value} className="bg-elevated text-white">
                   {option.label}
                 </option>
               ))}

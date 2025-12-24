@@ -1,5 +1,9 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+
+dayjs.extend(relativeTime);
 
 /**
  * Merge Tailwind CSS classes with clsx
@@ -55,51 +59,30 @@ export const formatCompactNumber = formatNumber;
 
 /**
  * Format a date to a relative time string (e.g., "2 hours ago", "3 days ago")
+ * Uses dayjs for better i18n support
  * @param date - Date string or Date object
  * @returns Relative time string
  */
 export function formatRelativeTime(date: string | Date): string {
-  const now = new Date();
-  const then = new Date(date);
-  const diffInSeconds = Math.floor((now.getTime() - then.getTime()) / 1000);
-
-  if (diffInSeconds < 0) return 'Just now';
-
-  const intervals = [
-    { label: 'year', seconds: 31536000 },
-    { label: 'month', seconds: 2592000 },
-    { label: 'week', seconds: 604800 },
-    { label: 'day', seconds: 86400 },
-    { label: 'hour', seconds: 3600 },
-    { label: 'minute', seconds: 60 },
-  ];
-
-  for (const interval of intervals) {
-    const count = Math.floor(diffInSeconds / interval.seconds);
-    if (count >= 1) {
-      return `${count} ${interval.label}${count !== 1 ? 's' : ''} ago`;
-    }
-  }
-
-  return 'Just now';
+  return dayjs(date).fromNow();
 }
 
 /**
  * Format a date to a localized string
+ * Supports both dayjs format string and Intl.DateTimeFormat options
  * @param date - Date string or Date object
- * @param options - Intl.DateTimeFormat options
+ * @param formatOrOptions - dayjs format string (default: 'MMM D, YYYY') or Intl.DateTimeFormat options
  * @returns Formatted date string
  */
 export function formatDate(
   date: string | Date,
-  options: Intl.DateTimeFormatOptions = {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  }
+  formatOrOptions: string | Intl.DateTimeFormatOptions = 'MMM D, YYYY'
 ): string {
+  if (typeof formatOrOptions === 'string') {
+    return dayjs(date).format(formatOrOptions);
+  }
   const d = new Date(date);
-  return d.toLocaleDateString('en-US', options);
+  return d.toLocaleDateString('en-US', formatOrOptions);
 }
 
 /**
@@ -110,7 +93,25 @@ export function formatDate(
  */
 export function truncateText(text: string, maxLength: number): string {
   if (!text || text.length <= maxLength) return text;
-  return text.slice(0, maxLength).trim() + '...';
+  return text.slice(0, maxLength - 3) + '...';
+}
+
+/**
+ * Format file size in bytes to human-readable format
+ * @param bytes - File size in bytes
+ * @returns Formatted string (e.g., "1.5 MB")
+ */
+export function formatFileSize(bytes: number): string {
+  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+  let size = bytes;
+  let unitIndex = 0;
+
+  while (size >= 1024 && unitIndex < units.length - 1) {
+    size /= 1024;
+    unitIndex++;
+  }
+
+  return `${size.toFixed(1)} ${units[unitIndex]}`;
 }
 
 /**

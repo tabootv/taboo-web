@@ -2,9 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { Play, Clock, Eye, Heart, Film, Lock } from 'lucide-react';
-import { formatDuration, formatNumber, formatRelativeTime } from '@/lib/utils';
+import { MediaCardThumbnail } from './components/MediaCardThumbnail';
+import { MediaCardContent } from './components/MediaCardContent';
 
 export interface MediaCardProps {
   /** Unique identifier */
@@ -128,30 +127,6 @@ export function MediaCard({
   // Aspect ratio based on type
   const aspectRatio = type === 'short' ? 'aspect-[9/16]' : 'aspect-video';
 
-  // Size-based styles
-  const sizeStyles = {
-    sm: {
-      title: 'text-sm line-clamp-1',
-      meta: 'text-xs',
-      avatar: 'w-6 h-6',
-      padding: 'p-2',
-    },
-    md: {
-      title: 'text-base line-clamp-2',
-      meta: 'text-xs',
-      avatar: 'w-8 h-8',
-      padding: 'p-3',
-    },
-    lg: {
-      title: 'text-lg line-clamp-2',
-      meta: 'text-sm',
-      avatar: 'w-10 h-10',
-      padding: 'p-4',
-    },
-  };
-
-  const styles = sizeStyles[size];
-
   const hoverClasses =
     hoverEffect === 'calm'
       ? 'hover:-translate-y-0.5 hover:shadow-[0_10px_30px_rgba(0,0,0,0.35)] hover:border-border-subtle'
@@ -169,160 +144,35 @@ export function MediaCard({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Thumbnail */}
-      <div className={`relative ${aspectRatio} overflow-hidden bg-surface`}>
-        {/* Image */}
-        <Image
-          src={imageError ? '/placeholder-video.jpg' : (thumbnailWebp || thumbnail)}
-          alt={title}
-          fill
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
-          onError={() => setImageError(true)}
-          sizes={
-            size === 'sm'
-              ? '(max-width: 640px) 50vw, 25vw'
-              : size === 'lg'
-              ? '(max-width: 640px) 100vw, 50vw'
-              : '(max-width: 640px) 100vw, 33vw'
-          }
-        />
+      <MediaCardThumbnail
+        thumbnail={thumbnail}
+        thumbnailWebp={thumbnailWebp}
+        title={title}
+        type={type}
+        aspectRatio={aspectRatio}
+        size={size}
+        isHovered={isHovered}
+        imageError={imageError}
+        showPreview={showPreview}
+        previewUrl={previewUrl}
+        hidePlayOverlay={hidePlayOverlay}
+        isNsfw={isNsfw}
+        isPremium={isPremium}
+        duration={duration}
+        episodeCount={episodeCount}
+        tags={tags}
+        hideTags={hideTags}
+        onImageError={() => setImageError(true)}
+      />
 
-        {/* Preview Video on Hover */}
-        {showPreview && previewUrl && isHovered && (
-          <video
-            src={previewUrl}
-            className="absolute inset-0 w-full h-full object-cover"
-            autoPlay
-            muted
-            loop
-            playsInline
-          />
-        )}
-
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-
-        {/* Play Button on Hover */}
-        {!hidePlayOverlay && (
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-            <div className="w-12 h-12 rounded-full bg-red-primary/90 flex items-center justify-center shadow-lg">
-              <Play className="w-5 h-5 text-white fill-white ml-0.5" />
-            </div>
-          </div>
-        )}
-
-        {/* Badges Container */}
-        <div className="absolute top-2 left-2 flex flex-wrap gap-1">
-          {/* NSFW Badge */}
-          {isNsfw && (
-            <span className="px-2 py-0.5 text-[10px] font-semibold uppercase bg-red-primary text-white rounded">
-              18+
-            </span>
-          )}
-
-          {/* Premium Badge */}
-          {isPremium && (
-            <span className="px-2 py-0.5 text-[10px] font-semibold uppercase bg-yellow-500 text-black rounded flex items-center gap-1">
-              <Lock className="w-2.5 h-2.5" />
-              Premium
-            </span>
-          )}
-
-          {/* Series Badge */}
-          {type === 'series' && (
-            <span className="px-2 py-0.5 text-[10px] font-semibold uppercase bg-white/20 backdrop-blur text-white rounded flex items-center gap-1">
-              <Film className="w-2.5 h-2.5" />
-              Series
-            </span>
-          )}
-        </div>
-
-        {/* Bottom Info */}
-        <div className="absolute bottom-2 left-2 right-2 flex justify-between items-end">
-          {/* Duration / Episode Count */}
-          {(duration || episodeCount) && (
-            <span className="px-2 py-0.5 text-[11px] font-medium bg-black/80 text-white rounded">
-              {duration ? formatDuration(duration) : `${episodeCount} episodes`}
-            </span>
-          )}
-
-          {/* Tags (first 2) */}
-          {!hideTags && tags && tags.length > 0 && (
-            <div className="flex gap-1">
-              {tags.slice(0, 2).map((tag) => (
-                <span
-                  key={tag}
-                  className="px-2 py-0.5 text-[10px] bg-red-primary/80 text-white rounded"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className={styles.padding}>
-        {/* Channel Info */}
-        {channel && (
-          <div className="flex items-start gap-2 mb-2">
-            <div className={`${styles.avatar} relative rounded-full overflow-hidden flex-shrink-0 bg-surface`}>
-              {channel.avatar ? (
-                <Image
-                  src={channel.avatar}
-                  alt={channel.name}
-                  fill
-                  className="object-cover"
-                />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-red-primary to-red-dark flex items-center justify-center">
-                  <span className="text-xs font-bold text-white">
-                    {channel.name.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            <div className="flex-1 min-w-0">
-              {/* Title */}
-              <h3 className={`title-card ${styles.title}`}>{title}</h3>
-
-              {/* Channel Name */}
-              <p className={`${styles.meta} text-text-secondary mt-0.5 truncate`}>
-                {channel.name}
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Title without channel */}
-        {!channel && (
-          <h3 className={`title-card ${styles.title} mb-2`}>{title}</h3>
-        )}
-
-        {/* Metadata Row */}
-        <div className={`flex items-center gap-3 ${styles.meta} text-text-secondary`}>
-          {views !== undefined && (
-            <span className="flex items-center gap-1">
-              <Eye className="w-3.5 h-3.5" />
-              {formatNumber(views)}
-            </span>
-          )}
-          {likes !== undefined && (
-            <span className="flex items-center gap-1">
-              <Heart className="w-3.5 h-3.5" />
-              {formatNumber(likes)}
-            </span>
-          )}
-          {date && (
-            <span className="flex items-center gap-1">
-              <Clock className="w-3.5 h-3.5" />
-              {formatRelativeTime(date)}
-            </span>
-          )}
-        </div>
-      </div>
+      <MediaCardContent
+        title={title}
+        channel={channel}
+        views={views}
+        likes={likes}
+        date={date}
+        size={size}
+      />
     </div>
   );
 

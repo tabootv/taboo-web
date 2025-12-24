@@ -1,18 +1,16 @@
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import Cookies from 'js-cookie';
+import { getRequiredEnv } from '@/shared/lib/config/env';
+import { redirect } from '@/shared/lib/utils/redirect';
+import { handleApiError } from '@/shared/lib/utils/error-handler';
 
-// Token storage key - API: app.taboo.tv
 const TOKEN_KEY = 'tabootv_token';
 
-// Create axios instance
-// Use /api proxy in browser to avoid CORS, direct URL on server
-const getBaseURL = () => {
+const getBaseURL = (): string => {
   if (typeof window !== 'undefined') {
-    // Browser: use local proxy to avoid CORS
     return '/api';
   }
-  // Server: use direct API URL
-  return process.env.NEXT_PUBLIC_API_URL || 'https://app.taboo.tv/api';
+  return getRequiredEnv('NEXT_PUBLIC_API_URL');
 };
 
 const apiClient: AxiosInstance = axios.create({
@@ -38,27 +36,27 @@ apiClient.interceptors.request.use(
   }
 );
 
-// Response interceptor - handle errors
 apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
-    // Handle 401 Unauthorized
-    if (error.response?.status === 401) {
-      removeToken();
-      // Redirect to login if in browser
-      if (typeof window !== 'undefined') {
-        window.location.href = '/sign-in';
-      }
-    }
-
-    // Handle 403 Forbidden (subscription required)
-    if (error.response?.status === 403) {
-      const data = error.response.data as { message?: string };
-      if (data?.message?.includes('subscription')) {
+    try {
+      if (error.response?.status === 401) {
+        removeToken();
         if (typeof window !== 'undefined') {
-          window.location.href = '/plans';
+          redirect('/sign-in');
         }
       }
+
+      if (error.response?.status === 403) {
+        const data = error.response.data as { message?: string };
+        if (data?.message?.includes('subscription')) {
+          if (typeof window !== 'undefined') {
+            redirect('/plans');
+          }
+        }
+      }
+    } catch (redirectError) {
+      console.error('Error in response interceptor:', redirectError);
     }
 
     return Promise.reject(error);

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { subscriptions } from '@/lib/api/endpoints';
 import { useAuthStore } from '@/lib/stores';
 import type { SubscriptionInfo, Plan } from '@/types';
@@ -166,12 +167,14 @@ export function useRequireSubscription(options?: { redirectTo?: string }) {
   const { isSubscribed, loading } = useSubscription();
   const { isAuthenticated } = useAuthStore();
 
+  const router = useRouter();
+
   useEffect(() => {
     if (!loading && isAuthenticated && !isSubscribed) {
       const redirectUrl = options?.redirectTo || '/choose-plan';
-      window.location.href = redirectUrl;
+      router.push(redirectUrl);
     }
-  }, [isSubscribed, loading, isAuthenticated, options?.redirectTo]);
+  }, [isSubscribed, loading, isAuthenticated, options?.redirectTo, router]);
 
   return {
     isSubscribed,

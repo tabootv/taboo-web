@@ -4,15 +4,16 @@
  * Uses V1 API for profile/rewards and V2 API for date-filtered reports
  */
 
-const FIRSTPROMOTER_API_KEY =
-  process.env.FIRSTPROMOTER_API_KEY || 'hPq6CerLNVYlScmHTeplSbnze5IzlZ1x6aHUZ2WmvmY';
-const FIRSTPROMOTER_ACCOUNT_ID = process.env.FIRSTPROMOTER_ACCOUNT_ID || '1fw6tytr';
-const V1_BASE_URL = 'https://firstpromoter.com/api/v1';
-const V2_BASE_URL = 'https://firstpromoter.com/api/v2/company';
+import { getRequiredEnv } from '@/shared/lib/config/env';
+
+const FIRSTPROMOTER_API_KEY = getRequiredEnv('FIRSTPROMOTER_API_KEY');
+const FIRSTPROMOTER_ACCOUNT_ID = getRequiredEnv('FIRSTPROMOTER_ACCOUNT_ID');
+const V1_BASE_URL = getRequiredEnv('FIRSTPROMOTER_V1_API_URL');
+const V2_BASE_URL = getRequiredEnv('FIRSTPROMOTER_V2_API_URL');
 
 // Ensure this module is only used on the server
-if (typeof window !== 'undefined') {
-  throw new Error('FirstPromoter client must only be used on the server');
+if (globalThis.window !== undefined) {
+  throw new TypeError('FirstPromoter client must only be used on the server');
 }
 
 function getV1Headers(): HeadersInit {
@@ -260,7 +261,11 @@ export async function getPromoterProfile(promoterId: number): Promise<PromoterPr
     });
 
     if (!response.ok) {
-      console.error('FirstPromoter getPromoterProfile error:', response.status, await response.text());
+      console.error(
+        'FirstPromoter getPromoterProfile error:',
+        response.status,
+        await response.text()
+      );
       return null;
     }
 
@@ -282,7 +287,7 @@ export async function getPromoterProfile(promoterId: number): Promise<PromoterPr
     const name =
       data.profile?.first_name && data.profile?.last_name
         ? `${data.profile.first_name} ${data.profile.last_name}`.trim()
-        : data.profile?.first_name || data.email.split('@')[0];
+        : data.profile?.first_name || data.email.split('@')[0] || 'Unknown';
 
     return {
       id: data.id,
@@ -330,7 +335,11 @@ export async function getPromoterReports(
     });
 
     if (!response.ok) {
-      console.error('FirstPromoter getPromoterReports error:', response.status, await response.text());
+      console.error(
+        'FirstPromoter getPromoterReports error:',
+        response.status,
+        await response.text()
+      );
       return null;
     }
 
@@ -363,7 +372,11 @@ export async function getRewardsList(promoterId: number): Promise<RewardV1Respon
       );
 
       if (!response.ok) {
-        console.error('FirstPromoter getRewardsList error:', response.status, await response.text());
+        console.error(
+          'FirstPromoter getRewardsList error:',
+          response.status,
+          await response.text()
+        );
         break;
       }
 
@@ -387,7 +400,7 @@ export async function getRewardsList(promoterId: number): Promise<RewardV1Respon
  * Get date string in YYYY-MM-DD format (ignoring time)
  */
 function toDateString(date: Date): string {
-  return date.toISOString().split('T')[0];
+  return date.toISOString().split('T')[0] ?? '';
 }
 
 /**
@@ -531,7 +544,11 @@ export async function getPromoterProfileV2(promoterId: number): Promise<V2Promot
     });
 
     if (!response.ok) {
-      console.error('FirstPromoter getPromoterProfileV2 error:', response.status, await response.text());
+      console.error(
+        'FirstPromoter getPromoterProfileV2 error:',
+        response.status,
+        await response.text()
+      );
       return null;
     }
 
@@ -568,14 +585,18 @@ export async function getCommissionsList(
     });
 
     if (!response.ok) {
-      console.error('FirstPromoter getCommissionsList error:', response.status, await response.text());
+      console.error(
+        'FirstPromoter getCommissionsList error:',
+        response.status,
+        await response.text()
+      );
       return { commissions: [], total: 0 };
     }
 
     const data = await response.json();
     return {
       commissions: Array.isArray(data) ? data : [],
-      total: Array.isArray(data) ? data.length : 0
+      total: Array.isArray(data) ? data.length : 0,
     };
   } catch (error) {
     console.error('FirstPromoter getCommissionsList exception:', error);
@@ -605,7 +626,11 @@ export async function getReferralsList(
     });
 
     if (!response.ok) {
-      console.error('FirstPromoter getReferralsList error:', response.status, await response.text());
+      console.error(
+        'FirstPromoter getReferralsList error:',
+        response.status,
+        await response.text()
+      );
       return [];
     }
 
@@ -659,7 +684,7 @@ export async function getComprehensiveEarningsData(params: ReportParams) {
     getCommissionsList(params.promoterId, {
       perPage: 10,
       startDate: params.startDate,
-      endDate: params.endDate
+      endDate: params.endDate,
     }),
     getPayoutsList(params.promoterId, { perPage: 10 }),
   ]);
@@ -678,30 +703,35 @@ export async function getComprehensiveEarningsData(params: ReportParams) {
   };
 
   // Build enhanced profile from V2 data
-  const profile = profileV2 ? {
-    id: profileV2.id,
-    email: profileV2.email,
-    name: profileV2.name?.trim() || profileV2.profile?.first_name || profileV2.email.split('@')[0],
-    status: 'active',
-    refId: profileV2.promoter_campaigns?.[0]?.ref_token || '',
-    referralLink: profileV2.promoter_campaigns?.[0]?.ref_link || '',
-    stats: {
-      clicks: profileV2.stats.clicks_count,
-      signups: profileV2.stats.referrals_count,
-      customers: profileV2.stats.customers_count,
-      sales: profileV2.stats.sales_count,
-      revenue: profileV2.stats.revenue_amount,
-      earnings: profileV2.balances.earnings_balance?.cash || 0,
-      activeCustomers: profileV2.stats.active_customers_count,
-    },
-    balance: {
-      current: profileV2.balances.current_balance?.cash || 0,
-      pending: profileV2.balances.pending_balance?.cash || 0,
-      paid: (profileV2.balances.earnings_balance?.cash || 0) - (profileV2.balances.current_balance?.cash || 0),
-    },
-    payoutMethod: profileV2.selected_payout_method?.method || null,
-    joinedAt: profileV2.joined_at,
-  } : null;
+  const profile = profileV2
+    ? {
+        id: profileV2.id,
+        email: profileV2.email,
+        name:
+          profileV2.name?.trim() || profileV2.profile?.first_name || profileV2.email.split('@')[0],
+        status: 'active',
+        refId: profileV2.promoter_campaigns?.[0]?.ref_token || '',
+        referralLink: profileV2.promoter_campaigns?.[0]?.ref_link || '',
+        stats: {
+          clicks: profileV2.stats.clicks_count,
+          signups: profileV2.stats.referrals_count,
+          customers: profileV2.stats.customers_count,
+          sales: profileV2.stats.sales_count,
+          revenue: profileV2.stats.revenue_amount,
+          earnings: profileV2.balances.earnings_balance?.cash || 0,
+          activeCustomers: profileV2.stats.active_customers_count,
+        },
+        balance: {
+          current: profileV2.balances.current_balance?.cash || 0,
+          pending: profileV2.balances.pending_balance?.cash || 0,
+          paid:
+            (profileV2.balances.earnings_balance?.cash || 0) -
+            (profileV2.balances.current_balance?.cash || 0),
+        },
+        payoutMethod: profileV2.selected_payout_method?.method || null,
+        joinedAt: profileV2.joined_at,
+      }
+    : null;
 
   return {
     profile,

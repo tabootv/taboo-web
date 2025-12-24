@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import { useEffect, useState } from 'react';
 
 interface SpinnerProps {
   size?: 'sm' | 'md' | 'lg';
@@ -68,12 +69,6 @@ const messages: Record<LoadingVariant, string[]> = {
   minimal: ['Loading…', 'Please wait.', 'Almost there.'],
 };
 
-function pickMessage(variant: LoadingVariant, fallback?: string) {
-  const pool = messages[variant] || messages.default;
-  if (fallback && !/loading/i.test(fallback)) return fallback;
-  return pool[Math.floor(Math.random() * pool.length)];
-}
-
 export function LoadingScreen({
   message,
   variant = 'default',
@@ -81,7 +76,24 @@ export function LoadingScreen({
   message?: string;
   variant?: LoadingVariant;
 }) {
-  const display = pickMessage(variant, message);
+  const [display, setDisplay] = useState<string>(() => {
+    if (message && !/loading/i.test(message)) {
+      return message;
+    }
+    const pool = messages[variant] || messages.default;
+    return pool[0] || 'Loading…';
+  });
+
+  useEffect(() => {
+    if (!message || /loading/i.test(message)) {
+      const pool = messages[variant] || messages.default;
+      const randomMessage = pool[Math.floor(Math.random() * pool.length)];
+      if (randomMessage) {
+        setDisplay(randomMessage);
+      }
+    }
+  }, [message, variant]);
+
   return (
     <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
       <Spinner size="lg" />

@@ -7,7 +7,7 @@ import { Virtual, Mousewheel, EffectCreative } from 'swiper/modules';
 import type { Swiper as SwiperType } from 'swiper';
 import { useShortsStore } from '@/lib/stores/shorts-store';
 import { useAuthStore } from '@/lib/stores/auth-store';
-import { ShortVideoCard } from '@/components/shorts/short-video-card';
+import { ShortVideoCard } from '@/features/shorts';
 import { videos as videosApi } from '@/lib/api';
 import { toast } from 'sonner';
 import { Loader2, ChevronUp, ChevronDown, LogIn, Video } from 'lucide-react';

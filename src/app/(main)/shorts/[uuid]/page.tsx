@@ -9,7 +9,7 @@ import { ChevronUp, ChevronDown, LogIn, Video, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useShortsStore } from '@/lib/stores/shorts-store';
 import { useAuthStore } from '@/lib/stores/auth-store';
-import { ShortVideoCard } from '@/components/shorts/short-video-card';
+import { ShortVideoCard } from '@/features/shorts';
 import { videos as videosApi } from '@/lib/api';
 import { toast } from 'sonner';
 

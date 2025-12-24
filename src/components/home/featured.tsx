@@ -3,9 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { home } from '@/lib/api';
 import type { Video } from '@/types';
-import { RailRow } from './rail-row';
-import { RailCard } from './rail-card';
-import { MediaPreviewModal } from './media-preview-modal';
+import { RailRow, RailCard, MediaPreviewModal } from '@/components/home';
 
 interface FeaturedSectionProps {
   initialVideos?: Video[];

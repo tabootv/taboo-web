@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore, useStudioSidebarStore } from '@/lib/stores';
-import { StudioSidebar, StudioHeader } from '@/components/studio';
+import { StudioSidebar, StudioHeader } from '@/features/creator-studio';
 import { cn } from '@/lib/utils';
 
 export default function StudioLayout({ children }: { children: React.ReactNode }) {

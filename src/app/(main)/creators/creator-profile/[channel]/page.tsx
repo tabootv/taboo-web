@@ -10,7 +10,7 @@ import type { Creator, Video, Series, Post } from '@/types';
 import { LoadingScreen } from '@/components/ui';
 import { formatDuration } from '@/lib/utils';
 import { toast } from 'sonner';
-import { CommunityPost } from '@/components/community';
+import { CommunityPost } from '@/features/community';
 import { useAuthStore } from '@/lib/stores';
 
 type TabIndex = 0 | 1 | 2 | 3 | 4;

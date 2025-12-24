@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { getComprehensiveEarningsData, type GroupBy, type V2Commission, type V2Payout } from '@/lib/firstpromoter/client';
+import { getRequiredEnv } from '@/shared/lib/config/env';
 
 // Hardcoded promoter ID mapping for now
 // TODO: Replace with database lookup once Laravel backend is ready
@@ -169,10 +170,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get user info to map to promoter ID
-    const userResponse = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || 'https://app.taboo.tv/api'}/me`,
-      {
+    const apiUrl = getRequiredEnv('NEXT_PUBLIC_API_URL');
+
+    const userResponse = await fetch(`${apiUrl}/me`, {
         headers: {
           Authorization: `Bearer ${token}`,
           Accept: 'application/json',
