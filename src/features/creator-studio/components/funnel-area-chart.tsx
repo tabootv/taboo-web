@@ -7,9 +7,12 @@ import {
   CartesianGrid,
   XAxis,
   YAxis,
-  Tooltip,
-  ResponsiveContainer,
 } from 'recharts';
+import {
+  ChartContainer,
+  ChartTooltip,
+  type ChartConfig,
+} from '@/components/ui/chart';
 
 interface SeriesDataPoint {
   period: string;
@@ -36,32 +39,33 @@ interface MetricConfig {
   yAxisId: 'left' | 'right';
 }
 
+// Red tones palette for monochromatic look
 const METRICS: MetricConfig[] = [
   {
     key: 'clicks',
     label: 'Clicks',
-    color: '#3b82f6',
+    color: '#fca5a5', // Light red (red-300)
     format: (v) => v.toLocaleString(),
     yAxisId: 'left',
   },
   {
     key: 'signups',
     label: 'Signups',
-    color: '#8b5cf6',
+    color: '#f87171', // Medium red (red-400)
     format: (v) => v.toLocaleString(),
     yAxisId: 'left',
   },
   {
     key: 'customers',
     label: 'Customers',
-    color: '#10b981',
+    color: '#dc2626', // Red (red-600)
     format: (v) => v.toLocaleString(),
     yAxisId: 'left',
   },
   {
     key: 'revenue',
     label: 'Revenue',
-    color: '#ef4444',
+    color: '#ab0013', // Taboo primary red
     format: (v) =>
       new Intl.NumberFormat('en-US', {
         style: 'currency',
@@ -72,6 +76,26 @@ const METRICS: MetricConfig[] = [
     yAxisId: 'right',
   },
 ];
+
+// Chart config for shadcn ChartContainer
+const chartConfig = {
+  clicks: {
+    label: 'Clicks',
+    color: '#fca5a5',
+  },
+  signups: {
+    label: 'Signups',
+    color: '#f87171',
+  },
+  customers: {
+    label: 'Customers',
+    color: '#dc2626',
+  },
+  revenue: {
+    label: 'Revenue',
+    color: '#ab0013',
+  },
+} satisfies ChartConfig;
 
 function formatLabel(period: string, groupBy?: string) {
   const date = new Date(period);
@@ -170,99 +194,117 @@ export function FunnelAreaChart({ data, groupBy }: FunnelAreaChartProps) {
       </div>
 
       {/* Chart */}
-      <div className="h-[300px] w-full">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart
-            data={chartData}
-            margin={{ top: 10, right: showRightAxis ? 60 : 10, left: showLeftAxis ? 10 : 0, bottom: 0 }}
-          >
-            <defs>
-              {METRICS.map((metric) => (
-                <linearGradient
-                  key={metric.key}
-                  id={`gradient-${metric.key}`}
-                  x1="0"
-                  y1="0"
-                  x2="0"
-                  y2="1"
-                >
-                  <stop offset="0%" stopColor={metric.color} stopOpacity={0.4} />
-                  <stop offset="100%" stopColor={metric.color} stopOpacity={0.05} />
-                </linearGradient>
-              ))}
-            </defs>
-            <CartesianGrid
-              strokeDasharray="3 3"
-              stroke="rgba(255,255,255,0.05)"
-              vertical={false}
-            />
-            <XAxis
-              dataKey="formattedPeriod"
-              tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 11 }}
-              tickLine={false}
-              axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
-              interval={Math.max(0, Math.floor(chartData.length / 8) - 1)}
-            />
-            <YAxis
-              yAxisId="left"
-              orientation="left"
-              tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 11 }}
-              tickLine={false}
-              axisLine={false}
-              tickFormatter={formatAxisNumber}
-              domain={[0, 'auto']}
-              hide={!showLeftAxis}
-            />
-            <YAxis
-              yAxisId="right"
-              orientation="right"
-              tick={{ fill: 'rgba(239,68,68,0.7)', fontSize: 11 }}
-              tickLine={false}
-              axisLine={false}
-              tickFormatter={formatAxisCurrency}
-              domain={[0, 'auto']}
-              hide={!showRightAxis}
-            />
-            <Tooltip
-              cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 1 }}
-              contentStyle={{
-                backgroundColor: 'rgba(0,0,0,0.95)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '8px',
-                padding: '12px',
-              }}
-              labelStyle={{ color: 'rgba(255,255,255,0.7)', marginBottom: '8px' }}
-              itemStyle={{ color: 'rgba(255,255,255,0.9)', fontSize: '12px' }}
-              formatter={(value, name) => {
-                const metric = METRICS.find((m) => m.label === name);
-                return metric ? metric.format(Number(value)) : String(value);
-              }}
-            />
-            {[...METRICS].reverse().map((metric) =>
-              visibleMetrics.has(metric.key) ? (
-                <Area
-                  key={metric.key}
-                  type="monotone"
-                  dataKey={metric.key}
-                  name={metric.label}
-                  stroke={metric.color}
-                  strokeWidth={2}
-                  fill={`url(#gradient-${metric.key})`}
-                  fillOpacity={1}
-                  dot={false}
-                  yAxisId={metric.yAxisId}
-                  activeDot={{
-                    r: 4,
-                    stroke: metric.color,
-                    strokeWidth: 2,
-                    fill: '#000',
-                  }}
-                />
-              ) : null
-            )}
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
+      <ChartContainer config={chartConfig} className="h-[300px] w-full">
+        <AreaChart
+          data={chartData}
+          margin={{ top: 10, right: showRightAxis ? 60 : 10, left: showLeftAxis ? 10 : 0, bottom: 0 }}
+        >
+          <defs>
+            {METRICS.map((metric) => (
+              <linearGradient
+                key={metric.key}
+                id={`gradient-${metric.key}`}
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="1"
+              >
+                <stop offset="0%" stopColor={metric.color} stopOpacity={0.4} />
+                <stop offset="100%" stopColor={metric.color} stopOpacity={0.05} />
+              </linearGradient>
+            ))}
+          </defs>
+          <CartesianGrid
+            strokeDasharray="3 3"
+            stroke="rgba(255,255,255,0.05)"
+            vertical={false}
+          />
+          <XAxis
+            dataKey="formattedPeriod"
+            tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 11 }}
+            tickLine={false}
+            axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
+            interval={Math.max(0, Math.floor(chartData.length / 8) - 1)}
+          />
+          <YAxis
+            yAxisId="left"
+            orientation="left"
+            tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 11 }}
+            tickLine={false}
+            axisLine={false}
+            tickFormatter={formatAxisNumber}
+            domain={[0, 'auto']}
+            hide={!showLeftAxis}
+          />
+          <YAxis
+            yAxisId="right"
+            orientation="right"
+            tick={{ fill: 'rgba(171,0,19,0.7)', fontSize: 11 }}
+            tickLine={false}
+            axisLine={false}
+            tickFormatter={formatAxisCurrency}
+            domain={[0, 'auto']}
+            hide={!showRightAxis}
+          />
+          <ChartTooltip
+            cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 1 }}
+            content={({ active, payload, label }) => {
+              if (!active || !payload?.length) return null;
+
+              return (
+                <div className="bg-black/95 backdrop-blur-xl border border-white/10 rounded-lg px-3 py-2.5 shadow-xl min-w-[140px]">
+                  <div className="text-white/60 text-[11px] font-medium mb-2 pb-1.5 border-b border-white/10">
+                    {formatLabel(label, groupBy)}
+                  </div>
+                  <div className="space-y-1.5">
+                    {payload.map((entry) => {
+                      const metric = METRICS.find((m) => m.key === entry.dataKey);
+                      if (!metric || !visibleMetrics.has(metric.key)) return null;
+
+                      return (
+                        <div key={entry.dataKey} className="flex items-center justify-between gap-4">
+                          <div className="flex items-center gap-2">
+                            <div
+                              className="w-2 h-2 rounded-full"
+                              style={{ backgroundColor: metric.color }}
+                            />
+                            <span className="text-white/50 text-xs">{metric.label}</span>
+                          </div>
+                          <span className="text-white text-xs font-medium tabular-nums">
+                            {metric.format(Number(entry.value))}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            }}
+          />
+          {[...METRICS].reverse().map((metric) =>
+            visibleMetrics.has(metric.key) ? (
+              <Area
+                key={metric.key}
+                type="monotone"
+                dataKey={metric.key}
+                name={metric.label}
+                stroke={metric.color}
+                strokeWidth={2}
+                fill={`url(#gradient-${metric.key})`}
+                fillOpacity={1}
+                dot={false}
+                yAxisId={metric.yAxisId}
+                activeDot={{
+                  r: 4,
+                  stroke: metric.color,
+                  strokeWidth: 2,
+                  fill: '#000',
+                }}
+              />
+            ) : null
+          )}
+        </AreaChart>
+      </ChartContainer>
 
       {/* Axis Legend */}
       <div className="flex flex-wrap items-center justify-center gap-6 text-xs text-white/40">
@@ -274,7 +316,7 @@ export function FunnelAreaChart({ data, groupBy }: FunnelAreaChartProps) {
         )}
         {showRightAxis && (
           <div className="flex items-center gap-1.5">
-            <div className="w-3 h-0.5 bg-red-500/70" />
+            <div className="w-3 h-0.5 bg-[#ab0013]/70" />
             <span>Right axis: Revenue ($)</span>
           </div>
         )}

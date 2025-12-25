@@ -27,7 +27,13 @@
       "Bash(NEXT_PUBLIC_API_URL=https://beta.taboo.tv/api npm run dev:*)",
       "Bash(API_KEY=\"hPq6CerLNVYlScmHTeplSbnze5IzlZ1x6aHUZ2WmvmY\")",
       "Bash(ACCOUNT_ID=\"1fw6tytr\":*)",
-      "Bash(npx eslint:*)"
+      "Bash(npx eslint:*)",
+      "Bash(npx shadcn@latest add card:*)",
+      "Bash(npx shadcn@latest add calendar:*)",
+      "Bash(npx shadcn@latest add popover:*)",
+      "Bash(npx shadcn@latest add chart:*)",
+      "Bash(npx shadcn@latest add select:*)",
+      "Bash(npx shadcn@latest init:*)"
     ],
     "deny": [],
     "ask": []
