@@ -80,9 +80,9 @@ export function SingleComment({
 
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between gap-1">
-        <div className="flex items-center gap-2 min-w-fit">
-          <div className="relative size-[30px] md:size-[48px] rounded-full overflow-hidden bg-surface">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-3 min-w-fit">
+          <div className="relative size-[34px] md:size-[40px] rounded-full overflow-hidden bg-surface border border-border">
             {comment.user?.dp ? (
               <Image
                 src={comment.user.dp}
@@ -97,7 +97,7 @@ export function SingleComment({
             )}
           </div>
           <div className="flex items-center gap-2">
-            <p className="text-[12px] md:text-[19px] font-bold leading-[18px]">
+            <p className="text-[13px] md:text-[15px] font-semibold leading-tight">
               {comment.user?.display_name}
             </p>
             {comment.user?.badge && (
@@ -110,38 +110,38 @@ export function SingleComment({
               />
             )}
           </div>
-          <span className="text-[16px] text-[#807E81]">
+          <span className="text-[12px] md:text-[13px] text-[#807E81]">
             {formatRelativeTime(comment.created_at)}
           </span>
         </div>
 
-        <div className="flex items-center justify-between w-full max-w-[147px] gap-3">
+        <div className="flex items-center gap-2">
           <button
             onClick={toggleLike}
-            className="cursor-pointer p-2 hover:bg-white/10 rounded-full transition-colors"
+            className="cursor-pointer p-1.5 hover:bg-white/10 rounded-full transition-colors"
           >
             <ThumbsUp
-              className={`w-5 h-5 ${liked ? 'text-red-primary fill-red-primary' : 'text-white'}`}
+              className={`w-4 h-4 ${liked ? 'text-red-primary fill-red-primary' : 'text-white'}`}
             />
           </button>
           <button
             onClick={toggleDislike}
-            className="cursor-pointer p-2 hover:bg-white/10 rounded-full transition-colors"
+            className="cursor-pointer p-1.5 hover:bg-white/10 rounded-full transition-colors"
           >
             <ThumbsDown
-              className={`w-5 h-5 ${disliked ? 'text-red-primary fill-red-primary' : 'text-white'}`}
+              className={`w-4 h-4 ${disliked ? 'text-red-primary fill-red-primary' : 'text-white'}`}
             />
           </button>
           <button
             onClick={() => setShowReplyInput(!showReplyInput)}
-            className="min-h-[46px] p-0 flex items-center hover:bg-white/10 rounded-full transition-colors"
+            className="min-h-[38px] p-1 flex items-center hover:bg-white/10 rounded-full transition-colors"
           >
-            <Reply className="w-5 h-5 text-white" style={{ transform: 'scaleX(-1)' }} />
+            <Reply className="w-4 h-4 text-white" style={{ transform: 'scaleX(-1)' }} />
           </button>
         </div>
       </div>
 
-      <p className="text-[16px] font-normal whitespace-pre-wrap break-words mt-0 md:mt-[14px] leading-[18px] md:leading-[24px]">
+      <p className="text-[14px] md:text-[15px] font-normal whitespace-pre-wrap break-words mt-2 leading-[20px] md:leading-[22px]">
         {comment.content}
       </p>
 

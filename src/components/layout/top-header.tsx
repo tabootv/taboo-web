@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { Menu, Bell, User, LogOut, Clapperboard, Edit2, Settings } from 'lucide-react';
+import { Menu, Bell, LogOut, Settings } from 'lucide-react';
 import { Avatar, Button } from '@/components/ui';
 import { Logo } from '@/components/ui/logo';
 import { SearchInput } from '@/components/search';
@@ -20,7 +20,7 @@ export function TopHeader() {
 
   // Close user menu when clicking outside
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
+    const handleClickOutside = () => {
       if (isUserMenuOpen) {
         setIsUserMenuOpen(false);
       }
@@ -36,10 +36,11 @@ export function TopHeader() {
         document.removeEventListener('click', handleClickOutside);
       };
     }
+    return undefined;
   }, [isUserMenuOpen]);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 h-14 bg-background border-b border-border">
+    <header className="fixed top-0 left-0 right-0 z-50 h-14 bg-black border-b border-black">
       <div className="flex items-center justify-between h-full px-4">
         {/* Left: Hamburger + Logo */}
         <div className="flex items-center gap-2">

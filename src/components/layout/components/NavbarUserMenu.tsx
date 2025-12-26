@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Bell, User, LogOut, Settings, Bookmark, Clapperboard } from 'lucide-react';
 import { Avatar, Button } from '@/components/ui';
+import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/lib/stores';
 import { useUserMenu } from '../hooks/use-user-menu';
 
@@ -16,7 +17,7 @@ interface NavbarUserMenuProps {
 export function NavbarUserMenu({ isSearchExpanded }: NavbarUserMenuProps) {
   const router = useRouter();
   const { user, isAuthenticated, logout } = useAuthStore();
-  const { isUserMenuOpen, toggleUserMenu, closeUserMenu } = useUserMenu();
+  const { isUserMenuOpen, toggleMenu: toggleUserMenu, closeMenu: closeUserMenu } = useUserMenu();
 
   const handleLogout = async () => {
     await logout();
@@ -58,7 +59,7 @@ export function NavbarUserMenu({ isSearchExpanded }: NavbarUserMenuProps) {
           onClick={toggleUserMenu}
           className="flex items-center gap-2 p-1 rounded-sm hover:bg-hover transition-colors"
         >
-          <Avatar src={user?.dp} alt={user?.display_name} size="sm" fallback={user?.display_name} />
+          <Avatar src={user?.dp ?? null} alt={user?.display_name} size="sm" fallback={user?.display_name} />
         </button>
 
         {/* Dropdown */}

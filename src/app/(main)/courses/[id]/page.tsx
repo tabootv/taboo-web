@@ -8,7 +8,6 @@ import Link from 'next/link';
 import {
   Play,
   Clock,
-  CheckCircle,
   ChevronDown,
   GraduationCap,
   BookOpen,
@@ -17,7 +16,7 @@ import {
 } from 'lucide-react';
 import { courses as coursesApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/stores/auth-store';
-import type { Series, Video, Channel, Course } from '@/types';
+import type { Series, Video, Course } from '@/types';
 import { VideoPlayerSkeleton } from '@/components/video';
 import { LessonCard, CoursePageSkeleton } from '@/components/courses';
 import { VerifiedBadge } from '@/components/ui';
@@ -70,13 +69,13 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
 
   const handleTrailerEnded = () => {
     setShowTrailer(false);
-    if (videos.length > 0) {
+    if (videos.length > 0 && videos[0]) {
       router.push(`/courses/${id}/play/${videos[0].uuid}`);
     }
   };
 
   const handleStartCourse = () => {
-    if (videos.length > 0) {
+    if (videos.length > 0 && videos[0]) {
       router.push(`/courses/${id}/play/${videos[0].uuid}`);
     }
   };
@@ -164,7 +163,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
             {showTrailer && courseData.trailer_url && (
               <div className="mb-8 max-w-4xl animate-fade-in">
                 <VideoPlayer
-                  thumbnail={heroImage}
+                  thumbnail={heroImage || ''}
                   url_1080={courseData.trailer_url}
                   autoplay={true}
                   onEnded={handleTrailerEnded}

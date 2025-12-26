@@ -45,6 +45,7 @@ export function SeriesSidePanel({ series }: SeriesSidePanelProps) {
 
       return () => clearTimeout(playTimer);
     }
+    return undefined;
   }, [series?.uuid, series?.trailer_url]);
 
   const handleSave = useCallback(() => {

@@ -30,7 +30,7 @@ export default function CreatorsPage() {
       } catch (error) {
         console.error('Error fetching creators:', error);
       } finally {
-        setTimeout(() => setIsLoading(false), 500);
+        setIsLoading(false);
       }
     };
 

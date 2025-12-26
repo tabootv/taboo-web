@@ -33,7 +33,7 @@ export function NavbarMobileMenu({
   if (!isOpen || isSearchExpanded) return null;
 
   return (
-    <div className="lg:hidden border-t border-border bg-black">
+    <div className="lg:hidden bg-black">
       <div className="px-4 py-2 space-y-1">
         {/* Mobile Search */}
         <form onSubmit={onSubmit} className="py-2">

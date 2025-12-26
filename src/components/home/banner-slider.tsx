@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { Play, ChevronLeft, ChevronRight } from 'lucide-react';
 import { home } from '@/lib/api';
@@ -81,11 +80,12 @@ export function BannerSlider({ initialBanners }: BannerSliderProps) {
     );
   }
 
-  if (banners.length === 0) {
+  const currentBanner = banners[currentIndex];
+
+  if (banners.length === 0 || !currentBanner) {
     return null;
   }
 
-  const currentBanner = banners[currentIndex];
   const thumbnail = currentBanner.type === 'video'
     ? currentBanner.thumbnail
     : currentBanner.trailer_thumbnail;

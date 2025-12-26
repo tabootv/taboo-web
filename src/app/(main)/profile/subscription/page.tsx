@@ -17,7 +17,6 @@ import {
 import { useAuthStore } from '@/lib/stores';
 import { useSubscription } from '@/lib/hooks';
 import { Button } from '@/components/ui';
-import { formatDate } from '@/lib/utils';
 
 /**
  * Subscription management page
@@ -30,7 +29,7 @@ export default function SubscriptionPage() {
   const { isAuthenticated, user } = useAuthStore();
   const {
     isSubscribed,
-    subscriptionInfo,
+    subscriptionInfo: _subscriptionInfo,
     loading,
     error,
     provider,
@@ -51,7 +50,7 @@ export default function SubscriptionPage() {
   // Format date helper
   const formatDateLocal = (dateString?: string) => {
     if (!dateString) return 'N/A';
-    return formatDate(dateString, {
+    return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',

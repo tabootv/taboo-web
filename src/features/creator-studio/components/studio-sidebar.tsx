@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Logo } from '@/components/ui/logo';
-import { useStudioSidebarStore } from '@/lib/stores';
+import { useSidebarStore } from '@/lib/stores';
 
 const navigation = [
   { name: 'Dashboard', href: '/studio', icon: LayoutDashboard },
@@ -31,7 +31,7 @@ const navigation = [
 
 export function StudioSidebar() {
   const pathname = usePathname();
-  const { isExpanded, isMobileOpen, setMobileOpen } = useStudioSidebarStore();
+  const { isExpanded, isMobileOpen, setMobileOpen } = useSidebarStore();
 
   const isActive = (href: string) => {
     if (href === '/studio') {
@@ -53,7 +53,7 @@ export function StudioSidebar() {
       {/* Desktop Sidebar */}
       <aside
         className={cn(
-          'fixed top-14 left-0 bottom-0 z-40 bg-surface border-r border-border flex flex-col transition-all duration-300',
+          'fixed top-14 left-0 bottom-0 z-40 bg-background border-r border-black flex flex-col transition-all duration-300',
           'hidden lg:flex',
           isExpanded ? 'w-60' : 'w-[72px]'
         )}
@@ -118,12 +118,12 @@ export function StudioSidebar() {
       {/* Mobile Sidebar */}
       <aside
         className={cn(
-          'fixed top-0 left-0 bottom-0 z-50 bg-surface border-r border-border flex flex-col w-60 transition-transform duration-300 lg:hidden',
+          'fixed top-0 left-0 bottom-0 z-50 bg-background border-r border-black flex flex-col w-60 transition-transform duration-300 lg:hidden',
           isMobileOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
         {/* Mobile Header */}
-        <div className="h-14 flex items-center justify-between px-4 border-b border-border">
+        <div className="h-14 flex items-center justify-between px-4 border-b border-black bg-black">
           <div className="flex items-center gap-2">
             <Logo size="sm" linkTo="/home" />
             <span className="text-xs font-medium text-red-primary px-2 py-0.5 bg-red-primary/10 rounded">

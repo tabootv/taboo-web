@@ -184,10 +184,14 @@ export default function CompleteProfilePage() {
               <div className="space-y-3">
                 <Button
                   onClick={handleSavePhoto}
-                  isLoading={isLoading}
+                  disabled={isLoading}
                   className="w-full btn-premium"
                 >
-                  {profileImageFile ? 'Continue' : 'Choose Photo'}
+                  {isLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    profileImageFile ? 'Continue' : 'Choose Photo'
+                  )}
                 </Button>
                 <Button variant="ghost" onClick={handleSkipPhoto} className="w-full">
                   Skip for now
@@ -280,8 +284,8 @@ export default function CompleteProfilePage() {
                   </select>
                 </div>
 
-                <Button type="submit" isLoading={isLoading} className="w-full btn-premium">
-                  Continue
+                <Button type="submit" disabled={isLoading} className="w-full btn-premium">
+                  {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Continue'}
                 </Button>
               </form>
             </div>

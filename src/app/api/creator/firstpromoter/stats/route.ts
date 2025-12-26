@@ -37,7 +37,7 @@ export interface PromoterStats {
   last_login_at: string | null;
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get('tabootv_token')?.value;
@@ -134,7 +134,7 @@ function getMockStats(promoterId: number, email: string): PromoterStats {
   return {
     id: promoterId,
     email: email,
-    name: email.split('@')[0],
+    name: email.split('@')[0] ?? email,
     state: 'approved',
     stats: {
       clicks_count: 1247,
@@ -149,7 +149,7 @@ function getMockStats(promoterId: number, email: string): PromoterStats {
       paid_balance: 157500, // $1,575.00 in cents
     },
     profile: {
-      first_name: email.split('@')[0],
+      first_name: email.split('@')[0] ?? email,
       last_name: '',
       avatar_url: null,
     },

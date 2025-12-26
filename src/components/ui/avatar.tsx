@@ -3,11 +3,11 @@ import { cn } from '@/lib/utils';
 import { User } from 'lucide-react';
 
 interface AvatarProps {
-  src?: string | null;
-  alt?: string;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
-  className?: string;
-  fallback?: string;
+  src?: string | null | undefined;
+  alt?: string | undefined;
+  size?: 'sm' | 'md' | 'lg' | 'xl' | undefined;
+  className?: string | undefined;
+  fallback?: string | undefined;
 }
 
 const sizes = {

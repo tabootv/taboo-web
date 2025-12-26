@@ -8,7 +8,6 @@ import { auth, series as seriesApi, videos as videosApi } from '@/lib/api';
 import { cn, formatDuration, formatRelativeTime } from '@/lib/utils';
 import type { Series, Video } from '@/types';
 import {
-  CheckCircle,
   ChevronRight,
   Clock,
   Play,
@@ -16,6 +15,7 @@ import {
   ThumbsDown,
   ThumbsUp,
 } from 'lucide-react';
+import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -259,7 +259,7 @@ export default function SeriesPlayerPage({
                     <span className="font-medium text-white group-hover:text-red-primary transition-colors truncate">
                       {currentVideo.channel?.name}
                     </span>
-                    <CheckCircle className="w-3.5 h-3.5 text-red-primary shrink-0" />
+                    <span className="shrink-0"><VerifiedBadge size={14} /></span>
                   </Link>
                   <p className="text-xs text-white/50">
                     {currentVideo.humans_publish_at ||
@@ -500,10 +500,9 @@ function EpisodeCard({
             {video.title}
           </p>
 
-          {/* Channel */}
-          <p className="text-xs text-white/40 mt-1 flex items-center gap-1">
+          {/* Channel - kept clean without verification badge */}
+          <p className="text-xs text-white/40 mt-1">
             {video.channel?.name}
-            <CheckCircle className="w-2.5 h-2.5 text-red-primary" />
           </p>
         </div>
       </div>

@@ -3,7 +3,7 @@
 import { usePrefetch } from '@/lib/hooks/use-prefetch';
 import { formatDuration } from '@/lib/utils';
 import type { Channel, Video } from '@/types';
-import { CheckCircle, Clock, GraduationCap, Play } from 'lucide-react';
+import { Clock, GraduationCap, Play } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -100,9 +100,8 @@ export function LessonCard({ video, lessonNumber, courseId, channel, isFirst }: 
               {(video.channel?.name || channel?.name) && (
                 <>
                   <span>•</span>
-                  <span className="flex items-center gap-1 truncate">
+                  <span className="truncate">
                     {video.channel?.name || channel?.name}
-                    <CheckCircle className="w-3 h-3 text-red-primary flex-shrink-0" />
                   </span>
                 </>
               )}

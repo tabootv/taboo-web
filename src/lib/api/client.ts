@@ -2,7 +2,6 @@ import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'ax
 import Cookies from 'js-cookie';
 import { getRequiredEnv } from '@/shared/lib/config/env';
 import { redirect } from '@/shared/lib/utils/redirect';
-import { handleApiError } from '@/shared/lib/utils/error-handler';
 
 const TOKEN_KEY = 'tabootv_token';
 

@@ -13,7 +13,7 @@
 
 import { home, playlists as playlistsApi } from './endpoints';
 import type { AxiosError } from 'axios';
-import type { Banner, Creator, Video, Series, Playlist, PaginatedResponse } from '@/types';
+import type { Banner, Creator, Video, Series, Playlist } from '@/types';
 
 // ============================================
 // Types

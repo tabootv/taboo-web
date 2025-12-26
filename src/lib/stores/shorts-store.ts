@@ -41,7 +41,7 @@ export const useShortsStore = create<ShortsState>((set, get) => ({
   currentIndex: 0,
   nextPageUrl: null,
   isLastPage: false,
-  isMuted: false, // Start unmuted
+  isMuted: false, // Start unmuted - autoplay handles temporary muting
   volume: 1,
   isLoading: false,
   isLoadingMore: false,

@@ -3,12 +3,13 @@
 import { Button, LoadingScreen } from '@/components/ui';
 import { VideoPlayerSkeleton } from '@/components/video';
 import { LikeButton, SaveButton, VideoComments } from '@/features/video';
-import { videos as videosApi } from '@/lib/api';
+import { videos as videosApi, creators as creatorsApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { formatRelativeTime } from '@/lib/utils';
 import { getTagKey, normalizeTags } from '@/lib/utils/tags';
 import type { Tag, Video } from '@/types';
-import { CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -48,6 +49,14 @@ export default function VideoPage() {
     return { ...videoData, tags: normalizedTags };
   }, []);
 
+  const shuffleList = useCallback(<T,>(items: T[]): T[] => {
+    const array = [...items];
+    for (let i = array.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }, []);
   useEffect(() => {
     videoRef.current = video;
     relatedVideosRef.current = relatedVideos;
@@ -64,10 +73,11 @@ export default function VideoPage() {
         const { video: videoData, videos } = await videosApi.play(id);
 
         let allVideos = videos || [];
+        const videoId = videoData.uuid || videoData.id;
+        const channelId = videoData.channel?.id || videoData.channel?.uuid;
 
         if (allVideos.length < MIN_VIDEOS) {
           try {
-            const videoId = videoData.uuid || videoData.id;
             if (!videoId) return;
             const relatedResponse = await videosApi.getRelatedLongForm(videoId, 1, MIN_VIDEOS);
             const related = relatedResponse.data || [];
@@ -82,6 +92,21 @@ export default function VideoPage() {
             });
           } catch (supplementError) {
             console.error('Failed to fetch related long-form videos:', supplementError);
+          }
+        }
+
+        // Diversify with the creator's catalog to keep recommendations fresh
+        if (channelId) {
+          try {
+            const creatorResp = await creatorsApi.getVideos(channelId, { sort_by: 'newest' });
+            const creatorVideos = (creatorResp.data || creatorResp.videos || []) as Video[];
+            const validCreatorVideos = (creatorVideos || []).filter((v) => {
+              const key = v.uuid || v.id;
+              return key && key !== videoId && v.short !== true && (v as any).is_short !== true && (v as any).type !== 'short';
+            });
+            allVideos = allVideos.concat(validCreatorVideos);
+          } catch (creatorError) {
+            console.error('Failed to fetch creator videos for recommendations:', creatorError);
           }
         }
 
@@ -100,8 +125,17 @@ export default function VideoPage() {
           }
         }
 
+        const dedupedMap = new Map<string, Video>();
+        allVideos.forEach((item) => {
+          const key = (item.uuid || item.id) as string | undefined;
+          if (!key || key === videoId) return;
+          if (!dedupedMap.has(key)) {
+            dedupedMap.set(key, item);
+          }
+        });
+
         const videoWithTags = hydrateVideoTags(videoData);
-        const relatedWithTags = allVideos.map(hydrateVideoTags);
+        const relatedWithTags = shuffleList(Array.from(dedupedMap.values()).map(hydrateVideoTags));
 
         if (!isSubscribed) return;
 
@@ -145,7 +179,7 @@ export default function VideoPage() {
     return () => {
       isSubscribed = false;
     };
-  }, [id, hydrateVideoTags]);
+  }, [id, hydrateVideoTags, shuffleList]);
 
   const availableTags = useMemo(() => {
     const tagMap = new Map<string, Tag>();
@@ -162,6 +196,8 @@ export default function VideoPage() {
     relatedVideos.forEach((v) => addTags(v.tags));
     return Array.from(tagMap.values());
   }, [video, relatedVideos]);
+
+  const displayedTags = useMemo(() => availableTags.slice(0, 5), [availableTags]);
 
   const filteredVideos = useMemo(() => {
     if (!selectedTag) {
@@ -186,7 +222,7 @@ export default function VideoPage() {
       return () => el.removeEventListener('scroll', handleTagsScroll);
     }
     return undefined;
-  }, [handleTagsScroll, availableTags]);
+  }, [handleTagsScroll, displayedTags.length]);
 
   const scrollTags = (direction: 'left' | 'right') => {
     if (tagsScrollRef.current) {
@@ -293,7 +329,7 @@ export default function VideoPage() {
               {video.title}
             </h1>
 
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-3 pb-4 border-b border-border">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-3 pb-4">
               <div className="flex items-center gap-3">
                 <Link
                   href={`/creators/creator-profile/${video.channel?.uuid || video.channel?.id}`}
@@ -322,7 +358,7 @@ export default function VideoPage() {
                     <span className="font-medium text-white group-hover:text-text-secondary transition-colors truncate">
                       {video.channel?.name}
                     </span>
-                    <CheckCircle className="w-3.5 h-3.5 text-text-secondary shrink-0" />
+                    <span className="shrink-0"><VerifiedBadge size={14} /></span>
                   </Link>
                   <p className="text-xs text-text-secondary">
                     {video.humans_publish_at || formatRelativeTime(video.published_at)}
@@ -336,7 +372,7 @@ export default function VideoPage() {
                     className="ml-2"
                   >
                     <Button
-                      variant="primary"
+                      variant="default"
                       size="sm"
                       className="rounded-full px-4 font-medium text-sm"
                     >
@@ -353,38 +389,43 @@ export default function VideoPage() {
             </div>
 
             {video.description && (
-              <button
-                type="button"
-                className="mt-3 w-full text-left bg-surface hover:bg-hover rounded-lg p-3 transition-colors"
-                onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
-              >
-                <p
-                  className={`text-sm text-text-secondary whitespace-pre-wrap ${
-                    !isDescriptionExpanded && shouldTruncateDescription ? 'line-clamp-2' : ''
-                  }`}
+              <div className="bg-surface/60 border border-border rounded-xl p-4">
+                <button
+                  type="button"
+                  className="w-full text-left"
+                  onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
                 >
-                  {video.description}
-                </p>
-                {shouldTruncateDescription && (
-                  <span className="block text-sm font-medium text-white mt-2">
-                    {isDescriptionExpanded ? 'Show less' : 'Show more'}
-                  </span>
-                )}
-              </button>
+                  <p
+                    className={`text-sm text-text-secondary whitespace-pre-wrap ${
+                      !isDescriptionExpanded && shouldTruncateDescription ? 'line-clamp-2' : ''
+                    }`}
+                  >
+                    {video.description}
+                  </p>
+                  {shouldTruncateDescription && (
+                    <span className="block text-sm font-medium text-white mt-2">
+                      {isDescriptionExpanded ? 'Show less' : 'Show more'}
+                    </span>
+                  )}
+                </button>
+              </div>
             )}
 
-            <div className="mt-6">
+            <div className="h-px bg-white/10 my-6" />
+
+            <div className="mt-4 bg-surface/60 border border-border rounded-xl p-4">
               <VideoComments video={video} initialComments={video.comments || []} />
             </div>
           </div>
 
           <div className="w-full lg:w-[402px] shrink-0">
-            {availableTags.length > 0 && (
+            {displayedTags.length > 0 && (
               <div className="relative mb-3 group/tags">
                 {showTagsLeftArrow && (
                   <button
                     onClick={() => scrollTags('left')}
-                    className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-1 bg-background/90 rounded-full shadow-md"
+                    className="absolute left-0 top-1/2 -translate-y-1/2 z-10 size-7 rounded-full bg-black/70 backdrop-blur hover:bg-black/80 transition-colors flex items-center justify-center"
+                    aria-label="Previous tags"
                   >
                     <ChevronLeft className="w-4 h-4 text-white" />
                   </button>
@@ -393,7 +434,8 @@ export default function VideoPage() {
                 {showTagsRightArrow && (
                   <button
                     onClick={() => scrollTags('right')}
-                    className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-1 bg-background/90 rounded-full shadow-md"
+                    className="absolute right-0 top-1/2 -translate-y-1/2 z-10 size-7 rounded-full bg-black/70 backdrop-blur hover:bg-black/80 transition-colors flex items-center justify-center"
+                    aria-label="Next tags"
                   >
                     <ChevronRight className="w-4 h-4 text-white" />
                   </button>
@@ -401,28 +443,28 @@ export default function VideoPage() {
 
                 <div
                   ref={tagsScrollRef}
-                  className="flex gap-2 overflow-x-auto hide-scrollbar scroll-smooth py-1 px-1"
+                  className="flex gap-1 overflow-x-auto hide-scrollbar scroll-smooth py-1 px-2"
                   style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                 >
                   <button
                     onClick={() => setSelectedTag(null)}
-                    className={`shrink-0 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    className={`shrink-0 px-2 py-[6px] rounded-full text-[13px] font-medium transition-colors border ${
                       selectedTag === null
-                        ? 'bg-white text-black'
-                        : 'bg-surface text-white hover:bg-hover'
+                        ? 'bg-black/50 text-white border-white/40'
+                        : 'bg-surface/60 text-white border-border hover:bg-hover'
                     }`}
                   >
                     All
                   </button>
 
-                  {availableTags.map((tag) => (
+                  {displayedTags.map((tag) => (
                     <button
                       key={getTagKey(tag)}
                       onClick={() => setSelectedTag(tag.name)}
-                      className={`shrink-0 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                      className={`shrink-0 px-2 py-[6px] rounded-full text-[13px] font-medium transition-colors border ${
                         selectedTag === tag.name
-                          ? 'bg-white text-black'
-                          : 'bg-surface text-white hover:bg-hover'
+                          ? 'bg-black/50 text-white border-white/40'
+                          : 'bg-surface/60 text-white border-border hover:bg-hover'
                       }`}
                     >
                       {tag.name}
@@ -462,7 +504,7 @@ export default function VideoPage() {
                       </p>
                       <p className="text-xs text-text-secondary mt-1 flex items-center gap-1">
                         {item.channel?.name}
-                        <CheckCircle className="w-3 h-3 text-text-secondary" />
+                        <span className="shrink-0"><VerifiedBadge size={12} /></span>
                       </p>
                       <p className="text-xs text-text-secondary">
                         {formatRelativeTime(item.published_at)}

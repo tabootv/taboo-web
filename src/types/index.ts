@@ -422,11 +422,11 @@ export interface Subscription {
 // Subscription info response (from /api/me or /api/subscription-info)
 export interface SubscriptionInfo {
   is_subscribed: boolean;
-  provider?: SubscriptionProvider;
-  plan?: string;
-  status?: SubscriptionStatus;
-  current_period_end?: string;
-  manage_url?: string;
+  provider?: SubscriptionProvider | undefined;
+  plan?: string | undefined;
+  status?: SubscriptionStatus | undefined;
+  current_period_end?: string | undefined;
+  manage_url?: string | undefined;
 }
 
 export interface SubscriptionStatusResponse {

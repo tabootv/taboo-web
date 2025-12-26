@@ -45,15 +45,15 @@ export interface SearchRail {
 export interface TopResult {
   type: 'title' | 'creator';
   id: string;
-  uuid?: string;
+  uuid?: string | undefined;
   title: string;
   thumb: string;
-  thumbLarge?: string;
-  creatorName?: string;
-  year?: number;
+  thumbLarge?: string | undefined;
+  creatorName?: string | undefined;
+  year?: number | undefined;
   description: string;
-  duration?: number;
-  contentType?: 'video' | 'short' | 'series';
+  duration?: number | undefined;
+  contentType?: 'video' | 'short' | 'series' | undefined;
 }
 
 export interface SearchResponse {
@@ -329,7 +329,7 @@ export function getTopResult(query: string): TopResult | null {
 
   // Return highest viewed title match
   if (titles.length > 0) {
-    const top = titles.sort((a, b) => (b.views || 0) - (a.views || 0))[0];
+    const top = titles.sort((a, b) => (b.views || 0) - (a.views || 0))[0]!;
     return {
       type: 'title',
       id: top.id,
@@ -347,7 +347,7 @@ export function getTopResult(query: string): TopResult | null {
 
   // Return creator match
   if (creators.length > 0) {
-    const top = creators.sort((a, b) => b.subscriberCount - a.subscriberCount)[0];
+    const top = creators.sort((a, b) => b.subscriberCount - a.subscriberCount)[0]!;
     return {
       type: 'creator',
       id: top.id,

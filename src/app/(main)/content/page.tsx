@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Plus, Video, Film, BarChart3, Eye, Heart, MessageCircle, MoreVertical, Edit, Trash2 } from 'lucide-react';
+import { Plus, Video, Film, Eye, Heart, MessageCircle, MoreVertical, Edit, Trash2 } from 'lucide-react';
 import { useAuthStore } from '@/lib/stores';
-import { Button, LoadingScreen, Spinner } from '@/components/ui';
+import { Button, LoadingScreen } from '@/components/ui';
 import { formatDuration, formatRelativeTime } from '@/lib/utils';
 import type { Video as VideoType } from '@/types';
 

@@ -21,12 +21,15 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 interface ShakaPlayerProps {
   src: string;
-  thumbnail?: string;
-  title?: string;
-  autoplay?: boolean;
-  onProgress?: (progress: number) => void;
-  onEnded?: () => void;
-  className?: string;
+  thumbnail?: string | undefined;
+  title?: string | undefined;
+  autoplay?: boolean | undefined;
+  onProgress?: ((progress: number) => void) | undefined;
+  onPlay?: (() => void) | undefined;
+  onPause?: (() => void) | undefined;
+  onSeek?: ((time: number) => void) | undefined;
+  onEnded?: (() => void) | undefined;
+  className?: string | undefined;
 }
 
 interface QualityTrack {
@@ -60,6 +63,9 @@ export function ShakaPlayer({
   title,
   autoplay = false,
   onProgress,
+  onPlay,
+  onPause,
+  onSeek,
   onEnded,
   className = '',
 }: ShakaPlayerProps) {
@@ -410,21 +416,24 @@ export function ShakaPlayer({
       if (!videoRef.current) return;
       const newTime = Math.max(0, Math.min(duration, videoRef.current.currentTime + seconds));
       videoRef.current.currentTime = newTime;
+      onSeek?.(newTime);
       setSeekFeedback({
         direction: seconds > 0 ? 'forward' : 'backward',
         seconds: Math.abs(seconds),
       });
       setTimeout(() => setSeekFeedback(null), 800);
     },
-    [duration]
+    [duration, onSeek]
   );
 
   const seekToPercent = useCallback(
     (percent: number) => {
       if (!videoRef.current || !duration) return;
-      videoRef.current.currentTime = (percent / 100) * duration;
+      const newTime = (percent / 100) * duration;
+      videoRef.current.currentTime = newTime;
+      onSeek?.(newTime);
     },
-    [duration]
+    [duration, onSeek]
   );
 
   const toggleFullscreen = useCallback(async () => {
@@ -537,8 +546,14 @@ export function ShakaPlayer({
     const video = videoRef.current;
     if (!video) return;
 
-    const handlePlay = () => setIsPlaying(true);
-    const handlePause = () => setIsPlaying(false);
+    const handlePlay = () => {
+      setIsPlaying(true);
+      onPlay?.();
+    };
+    const handlePause = () => {
+      setIsPlaying(false);
+      onPause?.();
+    };
     const handleTimeUpdate = () => {
       setCurrentTime(video.currentTime);
       if (video.duration) {

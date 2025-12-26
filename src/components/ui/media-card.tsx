@@ -89,7 +89,7 @@ export interface MediaCardProps {
  * />
  */
 export function MediaCard({
-  id,
+  id: _id,
   uuid,
   type,
   title,

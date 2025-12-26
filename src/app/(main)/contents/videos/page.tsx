@@ -76,7 +76,7 @@ export default function ContentVideosPage() {
 
     observerRef.current = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasMore && !isLoadingMore) {
+        if (entries[0]?.isIntersecting && hasMore && !isLoadingMore) {
           fetchVideos(page + 1);
         }
       },

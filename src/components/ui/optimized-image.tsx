@@ -96,8 +96,8 @@ export function OptimizedImage({
           isLoading ? 'opacity-0' : 'opacity-100',
           fill ? className : ''
         )}
-        fill={fill}
-        placeholder={blurDataURL || src ? 'blur' : undefined}
+        {...(fill !== undefined ? { fill } : {})}
+        {...(blurDataURL || src ? { placeholder: 'blur' as const } : {})}
         blurDataURL={blurDataURL || defaultBlurDataURL}
         onLoad={() => setIsLoading(false)}
         onError={() => {

@@ -5,7 +5,8 @@ import { VideoPlayerSkeleton } from '@/components/video';
 import { auth, courses as coursesApi, videos as videosApi } from '@/lib/api';
 import { cn, formatDuration, formatRelativeTime } from '@/lib/utils';
 import type { Course, Video } from '@/types';
-import { CheckCircle, ChevronRight, Clock, Play, SkipForward } from 'lucide-react';
+import { ChevronRight, Clock, Play, SkipForward } from 'lucide-react';
+import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -208,7 +209,7 @@ export default function CoursePlayerPage({
                     <span className="font-medium text-white group-hover:text-red-primary transition-colors truncate">
                       {currentVideo.channel?.name}
                     </span>
-                    <CheckCircle className="w-3.5 h-3.5 text-red-primary shrink-0" />
+                    <span className="shrink-0"><VerifiedBadge size={14} /></span>
                   </Link>
                   <p className="text-xs text-white/50">
                     {currentVideo.humans_publish_at ||

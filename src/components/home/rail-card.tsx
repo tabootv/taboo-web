@@ -25,7 +25,6 @@ export const RailCard = memo(function RailCard({
   const [isVideoReady, setIsVideoReady] = useState(false);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [mounted, setMounted] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -34,7 +33,6 @@ export const RailCard = memo(function RailCard({
 
   // Check saved state on mount
   useEffect(() => {
-    setMounted(true);
     if (video.id) {
       setSaved(isSaved(video.id));
     }

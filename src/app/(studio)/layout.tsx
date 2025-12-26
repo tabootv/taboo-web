@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuthStore, useStudioSidebarStore } from '@/lib/stores';
+import { useAuthStore, useSidebarStore } from '@/lib/stores';
 import { StudioSidebar, StudioHeader } from '@/features/creator-studio';
 import { cn } from '@/lib/utils';
 
 export default function StudioLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { user, isAuthenticated, isLoading } = useAuthStore();
-  const { isExpanded } = useStudioSidebarStore();
+  const { isExpanded } = useSidebarStore();
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {

@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Menu, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Logo } from '@/components/ui/logo';
@@ -17,8 +17,8 @@ export function Navbar() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [isScrolled, setIsScrolled] = useState(false);
-  const { isSearchExpanded, searchInputRef, handleSearchToggle, handleSearchClose } = useSearchExpansion();
-  const { isMobileMenuOpen, toggleMobileMenu, closeMobileMenu } = useMobileMenu();
+  const { isExpanded: isSearchExpanded, inputRef: searchInputRef, toggle: handleSearchToggle, collapse: handleSearchClose } = useSearchExpansion();
+  const { isMobileMenuOpen, toggleMenu: toggleMobileMenu, closeMenu: closeMobileMenu } = useMobileMenu();
 
   // Check if we're on the home page for transparent header
   const isHomePage = pathname === '/home' || pathname === '/';
@@ -52,10 +52,10 @@ export function Navbar() {
   return (
     <nav
       className={cn(
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
+        'fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b border-black',
         isHomePage && !isScrolled && !isMobileMenuOpen
-          ? 'bg-gradient-to-b from-black/80 via-black/40 to-transparent border-transparent'
-          : 'bg-black border-b border-border'
+          ? 'bg-gradient-to-b from-black/80 via-black/40 to-transparent'
+          : 'bg-black'
       )}
     >
       <div className="max-w-[1920px] mx-auto px-4 md:px-8 lg:px-12">

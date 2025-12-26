@@ -4,7 +4,7 @@ import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowLeft, Play, Edit, Eye, ThumbsUp, MessageCircle, Clock, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Edit, Eye, ThumbsUp, MessageCircle, Clock, ExternalLink } from 'lucide-react';
 import { Button, LoadingScreen } from '@/components/ui';
 import { VideoPlayer } from '@/features/video';
 import { useAuthStore } from '@/lib/stores';
@@ -97,9 +97,9 @@ export default function ShowShortPage({ params }: { params: Promise<{ id: string
           <div className="w-full max-w-[300px] aspect-[9/16] rounded-xl overflow-hidden bg-black">
             {hasVideoUrl ? (
               <VideoPlayer
-                thumbnail={short.thumbnail}
-                url_720={short.url_720}
-                url_480={short.url_480}
+                thumbnail={short.thumbnail || ''}
+                url_720={short.url_720 ?? null}
+                url_480={short.url_480 ?? null}
                 className="w-full h-full"
               />
             ) : (

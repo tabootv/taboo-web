@@ -129,7 +129,8 @@ function safeParseDateToString(dateStr: string): string | null {
       return null;
     }
 
-    return parsedDate.toISOString().split('T')[0];
+    const isoDate = parsedDate.toISOString().split('T')[0];
+    return isoDate ?? null;
   } catch (error) {
     console.warn('Error parsing date:', dateStr, error);
     return null;
@@ -255,13 +256,13 @@ export async function GET(request: NextRequest) {
     const response: EarningsResponse = {
       promoter: {
         id: profile.id,
-        name: profile.name,
-        email: profile.email,
-        refId: profile.refId,
-        referralLink: profile.referralLink,
-        status: profile.status,
-        payoutMethod: profile.payoutMethod,
-        joinedAt: profile.joinedAt,
+        name: profile.name ?? '',
+        email: profile.email ?? '',
+        refId: profile.refId ?? '',
+        referralLink: profile.referralLink ?? '',
+        status: profile.status ?? 'active',
+        payoutMethod: profile.payoutMethod ?? null,
+        joinedAt: profile.joinedAt ?? new Date().toISOString(),
       },
       // Filtered stats based on date range (from V2 Reports API + rewards for earnings)
       summary: {

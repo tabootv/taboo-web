@@ -1,18 +1,24 @@
 export function CreatorCardSkeleton() {
   return (
-    <div className="creator-card-bg h-full">
-      <div className="h-[100px] w-full bg-gray-700 rounded-t-lg animate-pulse" />
+    <div className="creator-card-bg h-full opacity-60">
+      {/* Banner skeleton */}
+      <div className="h-[100px] w-full rounded-t-lg skeleton" />
+
       <div className="card-content px-2!">
-        <div className="size-[88px] rounded-full bg-gray-700 -mt-[60px] animate-pulse" />
+        {/* Avatar skeleton */}
+        <div className="size-[88px] rounded-full -mt-[60px] skeleton" />
+
         <div className="w-full">
           <div className="flex items-center justify-between">
-            <div className="w-[120px] h-[22px] bg-gray-700 rounded animate-pulse" />
-            <div className="w-[86px] h-[36px] bg-gray-700 rounded-[18px] animate-pulse hidden md:block" />
+            {/* Name skeleton */}
+            <div className="w-[120px] h-[20px] rounded skeleton" />
+            {/* Follow button skeleton */}
+            <div className="w-[80px] h-[32px] rounded-full skeleton hidden md:block" />
           </div>
-          <div className="w-[230px] h-[22px] bg-gray-700 rounded animate-pulse mt-2 md:mt-6" />
+          {/* Description skeleton */}
+          <div className="w-[180px] h-[16px] rounded skeleton mt-3" />
         </div>
       </div>
     </div>
   );
 }
-

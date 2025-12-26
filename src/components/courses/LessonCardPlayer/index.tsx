@@ -1,6 +1,6 @@
 import { cn, formatDuration } from '@/lib/utils';
 import type { Video } from '@/types';
-import { CheckCircle, Lock, Play } from 'lucide-react';
+import { Lock, Play } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -104,9 +104,8 @@ export function LessonCardPlayer({
           </p>
 
           {video.channel?.name && (
-            <p className="text-xs text-white/40 mt-1 flex items-center gap-1">
+            <p className="text-xs text-white/40 mt-1">
               {video.channel.name}
-              <CheckCircle className="w-2.5 h-2.5 text-red-primary" />
             </p>
           )}
         </div>

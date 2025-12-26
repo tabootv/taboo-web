@@ -14,7 +14,7 @@ interface HoverCardVideoPreviewProps {
   isHovered: boolean;
   isNew: boolean;
   duration: number | null;
-  videoRef: React.RefObject<HTMLVideoElement>;
+  videoRef: React.RefObject<HTMLVideoElement | null>;
   onVideoLoaded: () => void;
   onToggleMute: (e: React.MouseEvent) => void;
 }

@@ -4,10 +4,10 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Plus, Play, Edit, Trash2, Eye, ThumbsUp, Clock, MoreVertical } from 'lucide-react';
+import { Plus, Play, Edit, Trash2, Eye, ThumbsUp, MoreVertical } from 'lucide-react';
 import type { Video } from '@/types';
 import { Button, LoadingScreen, Spinner } from '@/components/ui';
-import { formatCompactNumber, formatDuration, formatRelativeTime } from '@/lib/utils';
+import { formatCompactNumber } from '@/lib/utils';
 import { useAuthStore } from '@/lib/stores';
 import { toast } from 'sonner';
 import apiClient from '@/lib/api/client';
@@ -73,7 +73,7 @@ export default function ContentShortsPage() {
 
     observerRef.current = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasMore && !isLoadingMore) {
+        if (entries[0]?.isIntersecting && hasMore && !isLoadingMore) {
           fetchShorts(page + 1);
         }
       },

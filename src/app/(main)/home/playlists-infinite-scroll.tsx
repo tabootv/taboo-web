@@ -183,7 +183,7 @@ export function PlaylistsInfiniteScroll({
 
     observerRef.current = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && !isLoadingRef.current) {
+        if (entries[0]?.isIntersecting && !isLoadingRef.current) {
           loadMorePlaylists();
         }
       },
@@ -334,6 +334,7 @@ function PlaylistRail({ playlist, onOpenPreview, onLoadMore }: PlaylistRailProps
       el.addEventListener('scroll', handleScroll, { passive: true });
       return () => el.removeEventListener('scroll', handleScroll);
     }
+    return undefined;
   }, [handleScroll]);
 
   // Skeleton while videos are loading

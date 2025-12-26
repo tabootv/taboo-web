@@ -11,6 +11,7 @@ import {
   Home,
   Layers,
   PlayCircle,
+  Rss,
   Users,
 } from 'lucide-react';
 
@@ -26,7 +27,8 @@ export const mainNavigation: NavigationItem[] = [
   { name: 'Videos', href: '/videos', icon: Film },
   { name: 'Series', href: '/series', icon: Layers },
   { name: 'Edu', href: '/courses', icon: GraduationCap },
-  { name: 'Community', href: '/community', icon: Users },
+  { name: 'Feed', href: '/community', icon: Rss },
+  { name: 'Creators', href: '/creator', icon: Users },
   { name: 'Globe', href: '/globe', icon: Globe2 },
 ];
 

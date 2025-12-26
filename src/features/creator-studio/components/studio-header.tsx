@@ -16,7 +16,7 @@ import {
   Settings,
   HelpCircle,
 } from 'lucide-react';
-import { useAuthStore, useStudioSidebarStore } from '@/lib/stores';
+import { useAuthStore, useSidebarStore } from '@/lib/stores';
 import { Logo } from '@/components/ui/logo';
 import {
   DropdownMenu,
@@ -28,14 +28,14 @@ import {
 
 export function StudioHeader() {
   const { user, logout } = useAuthStore();
-  const { toggleExpanded, toggleMobileOpen } = useStudioSidebarStore();
+  const { toggleExpanded, toggleMobileOpen } = useSidebarStore();
 
   const handleLogout = async () => {
     await logout();
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 h-14 bg-background border-b border-border">
+    <header className="fixed top-0 left-0 right-0 z-50 h-14 bg-black border-b border-black">
       <div className="flex items-center justify-between h-full px-4">
         {/* Left: Hamburger + Logo + Studio Badge */}
         <div className="flex items-center gap-2">

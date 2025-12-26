@@ -8,7 +8,6 @@ import { useSavedVideosStore, type SavedVideo } from '@/lib/stores/saved-videos-
 import { videos as videosApi } from '@/lib/api';
 import type { Video } from '@/types';
 import { Play } from 'lucide-react';
-import { formatRelativeTime } from '@/lib/utils';
 import { HoverCardVideoPreview } from './components/HoverCardVideoPreview';
 import { HoverCardInfo } from './components/HoverCardInfo';
 import { HoverCardActions } from './components/HoverCardActions';
@@ -20,14 +19,13 @@ interface NetflixHoverCardProps {
   fixedHeight?: boolean;
 }
 
-export function NetflixHoverCard({ video, showDate, index = 0, fixedHeight = true }: NetflixHoverCardProps) {
+export function NetflixHoverCard({ video, showDate, index = 0, fixedHeight: _fixedHeight = true }: NetflixHoverCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isVideoReady, setIsVideoReady] = useState(false);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [saved, setSaved] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [fetchedPreviewUrl, setFetchedPreviewUrl] = useState<string | null>(null);
@@ -40,14 +38,13 @@ export function NetflixHoverCard({ video, showDate, index = 0, fixedHeight = tru
 
   // Check saved state on mount
   useEffect(() => {
-    setMounted(true);
     if (video.id) {
       setSaved(isSaved(video.id));
     }
   }, [isSaved, video.id]);
 
   const thumbnail = video.thumbnail_webp || video.thumbnail || video.card_thumbnail;
-  const isNew = video.published_at && new Date(video.published_at).getTime() > Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const isNew = !!(video.published_at && new Date(video.published_at).getTime() > Date.now() - 7 * 24 * 60 * 60 * 1000);
   const description = video.description || video.title;
 
   // Get video URL for preview (prefer lower quality for preview, fallback to HLS or fetched URL)

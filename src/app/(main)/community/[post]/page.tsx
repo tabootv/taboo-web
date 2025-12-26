@@ -147,9 +147,9 @@ export default function SinglePostPage({ params }: { params: Promise<{ post: str
             className="flex items-center gap-3 group"
           >
             <Avatar
-              src={channel?.dp || post.user?.dp}
-              alt={channel?.name || post.user?.display_name}
-              fallback={channel?.name || post.user?.display_name}
+              src={channel?.dp || post.user?.dp || null}
+              alt={channel?.name || post.user?.display_name || ''}
+              fallback={channel?.name || post.user?.display_name || ''}
               size="lg"
               className="group-hover:ring-2 ring-red-primary transition-all"
             />
@@ -201,12 +201,12 @@ export default function SinglePostPage({ params }: { params: Promise<{ post: str
         />
 
         {/* Media */}
-        {post.media && post.media.length > 0 && (
+        {post.media && post.media.length > 0 && post.media[0] && (
           <div className="mb-6 rounded-lg overflow-hidden">
             {post.media.length === 1 ? (
               <div className="relative aspect-video">
                 <Image
-                  src={post.media[0].original_url || ''}
+                  src={post.media[0]?.original_url || ''}
                   alt=""
                   fill
                   className="object-cover"
@@ -261,7 +261,7 @@ export default function SinglePostPage({ params }: { params: Promise<{ post: str
         {/* Add Comment */}
         {isAuthenticated && (
           <form onSubmit={handleSubmitComment} className="flex gap-3 mb-6">
-            <Avatar src={user?.dp} alt={user?.display_name} fallback={user?.display_name} size="md" />
+            <Avatar src={user?.dp || null} alt={user?.display_name || ''} fallback={user?.display_name || ''} size="md" />
             <div className="flex-1 flex gap-2">
               <input
                 type="text"
@@ -291,9 +291,9 @@ export default function SinglePostPage({ params }: { params: Promise<{ post: str
             {comments.map((comment) => (
               <div key={comment.id} className="flex gap-3">
                 <Avatar
-                  src={comment.user?.dp}
-                  alt={comment.user?.display_name}
-                  fallback={comment.user?.display_name}
+                  src={comment.user?.dp || null}
+                  alt={comment.user?.display_name || ''}
+                  fallback={comment.user?.display_name || ''}
                   size="sm"
                 />
                 <div className="flex-1">

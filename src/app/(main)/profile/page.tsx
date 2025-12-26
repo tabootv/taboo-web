@@ -9,7 +9,6 @@ import {
   Bookmark,
   Clock,
   Heart,
-  PlayCircle,
   Edit2,
   Camera,
   LogOut,
@@ -128,9 +127,9 @@ export default function ProfilePage() {
             {/* Avatar */}
             <div className="relative">
               <Avatar
-                src={user?.dp}
-                alt={user?.display_name}
-                fallback={user?.display_name}
+                src={user?.dp || null}
+                alt={user?.display_name || 'User'}
+                fallback={user?.display_name || 'U'}
                 className="w-32 h-32 border-4 border-surface text-4xl"
               />
               <label className="absolute bottom-2 right-2 p-2 bg-surface/80 rounded-full text-text-primary hover:bg-hover transition-colors cursor-pointer">

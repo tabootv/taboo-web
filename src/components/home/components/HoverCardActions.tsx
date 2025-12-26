@@ -8,7 +8,7 @@ import type { Video } from '@/types';
 
 interface HoverCardActionsProps {
   video: Video;
-  showDate?: boolean;
+  showDate?: boolean | undefined;
 }
 
 export function HoverCardActions({ video, showDate }: HoverCardActionsProps) {

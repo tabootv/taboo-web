@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 interface NavbarSearchBarProps {
   isSearchExpanded: boolean;
   searchQuery: string;
-  searchInputRef: React.RefObject<HTMLInputElement>;
+  searchInputRef: React.RefObject<HTMLInputElement | null>;
   onQueryChange: (value: string) => void;
   onSubmit: (e: React.FormEvent) => void;
   onToggle: () => void;

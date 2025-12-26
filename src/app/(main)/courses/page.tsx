@@ -62,7 +62,7 @@ export default function CoursesPage() {
 
     observerRef.current = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasMore && !isLoadingMore) {
+        if (entries[0]?.isIntersecting && hasMore && !isLoadingMore) {
           fetchCourses(page + 1);
         }
       },
@@ -96,9 +96,6 @@ export default function CoursesPage() {
       {/* Load More */}
       <div ref={loadMoreRef} className="mt-8 flex justify-center">
         {isLoadingMore && <Spinner size="lg" />}
-        {!hasMore && coursesList.length > 0 && (
-          <p className="text-text-secondary">No more courses to load</p>
-        )}
       </div>
 
         {/* Empty State */}

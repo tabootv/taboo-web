@@ -16,8 +16,8 @@
   --surface-hover: #161616;
   --hover: #161616;
   --elevated: #1a1a1a;
-  --card: oklch(1 0 0);
-  --border: oklch(0.922 0 0);
+  --card: #0d0d0d;
+  --border: rgba(255, 255, 255, 0.06);
 
   /* Text Colors */
   --text-primary: #e6e7ea;
@@ -2222,7 +2222,7 @@ section:has(.vertical-series-card:hover) {
 }
 
 .community-post-card:hover {
-  background: var(--card);
+  background: rgba(255, 255, 255, 0.03);
   border-color: rgba(255, 255, 255, 0.12);
 }
 
