@@ -16,6 +16,7 @@ interface PlaylistWithVideos extends Omit<Playlist, 'videos'> {
 
 interface UsePlaylistsPaginationReturn {
   playlistsList: PlaylistWithVideos[];
+  setPlaylistsList: React.Dispatch<React.SetStateAction<PlaylistWithVideos[]>>;
   currentPage: number;
   lastPage: number | null;
   loadingPlaylists: boolean;

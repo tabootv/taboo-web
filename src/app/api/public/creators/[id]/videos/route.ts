@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getRequiredEnv } from '@/shared/lib/config/env';
 
-const API_URL = getRequiredEnv('NEXT_PUBLIC_API_URL');
-const SERVICE_TOKEN = getRequiredEnv('SERVICE_API_TOKEN');
+// Force dynamic to avoid build-time env var requirement
+export const dynamic = 'force-dynamic';
 
 export async function GET(
   request: NextRequest,
@@ -11,6 +11,8 @@ export async function GET(
   const { id } = await params;
   const searchParams = request.nextUrl.searchParams;
   const sortBy = searchParams.get('sort_by') || 'newest';
+  const API_URL = getRequiredEnv('NEXT_PUBLIC_API_URL');
+  const SERVICE_TOKEN = getRequiredEnv('SERVICE_API_TOKEN');
 
   try {
     const response = await fetch(

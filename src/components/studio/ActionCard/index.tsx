@@ -1,32 +1,31 @@
 import Link from 'next/link';
 import type { LucideIcon } from 'lucide-react';
-import { Upload } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface ActionCardProps {
   href: string;
   icon: LucideIcon;
   title: string;
   description: string;
-  gradient: string;
+  gradient?: string;
 }
 
-export function ActionCard({ href, icon: Icon, title, description, gradient }: ActionCardProps) {
+export function ActionCard({ href, icon: Icon, title, description }: ActionCardProps) {
   return (
     <Link href={href} className="group">
-      <div className="relative bg-surface border border-border rounded-xl overflow-hidden transition-all hover:border-white/20">
-        <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-10 group-hover:opacity-20 transition-opacity`} />
-        <div className="relative p-6">
+      <Card className="transition-all hover:scale-[1.02] hover:border-white/20">
+        <CardContent className="p-5">
           <div className="flex items-center justify-between mb-4">
-            <div className="p-3 rounded-xl bg-white/10">
-              <Icon className="w-6 h-6 text-white" />
+            <div className="w-12 h-12 rounded-xl bg-[#ab0013]/20 flex items-center justify-center group-hover:bg-[#ab0013]/30 transition-colors">
+              <Icon className="w-6 h-6 text-[#ab0013]" />
             </div>
-            <Upload className="w-5 h-5 text-text-secondary group-hover:text-white transition-colors" />
+            <ArrowUpRight className="w-5 h-5 text-white/30 group-hover:text-white/60 transition-colors" />
           </div>
           <h3 className="font-semibold text-white mb-1">{title}</h3>
-          <p className="text-sm text-text-secondary">{description}</p>
-        </div>
-      </div>
+          <p className="text-sm text-white/40">{description}</p>
+        </CardContent>
+      </Card>
     </Link>
   );
 }
-

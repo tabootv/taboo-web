@@ -4,8 +4,8 @@ import dynamic from 'next/dynamic';
 import { useSeriesDetail } from '@/api/queries';
 import { VideoPlayerSkeleton } from '@/components/video';
 import { cn, formatDuration } from '@/lib/utils';
-import type { Channel, Series, Video } from '@/types';
-import { CheckCircle, ChevronDown, Clock, Info, Play } from 'lucide-react';
+import type { Series, Video } from '@/types';
+import { ChevronDown, Clock, Info, Play } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
@@ -207,7 +207,7 @@ export default function SeriesDetailPage() {
                       </div>
                     )}
                     <div className="absolute -bottom-0.5 -right-0.5">
-                      <VerifiedBadge size={16} />
+                      <VerifiedBadge size={14} />
                     </div>
                   </div>
                   <div>

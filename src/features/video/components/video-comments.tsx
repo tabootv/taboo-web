@@ -18,7 +18,7 @@ export function VideoComments({ video, initialComments = [] }: VideoCommentsProp
   const [commentList, setCommentList] = useState<Comment[]>(initialComments);
   const [showAllComments, setShowAllComments] = useState(true);
   const [content, setContent] = useState('');
-  const [isFocused, setIsFocused] = useState(false);
+  const [_isFocused, _setIsFocused] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // On mobile, collapse comments by default
@@ -87,8 +87,8 @@ export function VideoComments({ video, initialComments = [] }: VideoCommentsProp
       </p>
 
       {/* Comment Input */}
-      <div className="flex items-end md:items-start gap-3 mt-3 mb-3 md:my-5">
-        <div className="relative size-[32px] md:size-[40px] rounded-full overflow-hidden bg-surface flex-shrink-0">
+      <div className="flex items-center gap-3 mt-3 mb-3 md:my-5">
+        <div className="relative size-[36px] md:size-[40px] rounded-full overflow-hidden bg-surface flex-shrink-0 border border-border">
           {user?.dp ? (
             <Image src={user.dp} alt={user.display_name || 'You'} fill className="object-cover" />
           ) : (
@@ -98,7 +98,7 @@ export function VideoComments({ video, initialComments = [] }: VideoCommentsProp
           )}
         </div>
 
-        <div className="flex items-end w-full">
+        <div className="flex items-center w-full">
           <div className="flex-1 relative">
             <textarea
               value={content}
@@ -106,7 +106,7 @@ export function VideoComments({ video, initialComments = [] }: VideoCommentsProp
               onKeyDown={handleKeyDown}
               placeholder="Add Comment"
               rows={1}
-              className="w-full bg-surface/30 border border-transparent focus:border-transparent focus:outline-none rounded-lg resize-none py-2 px-3 text-white placeholder:text-white/50 transition-colors"
+              className="w-full bg-surface/60 border border-border focus:border-white/20 focus:outline-none rounded-full resize-none py-2.5 px-4 text-sm text-white placeholder:text-white/60 transition-colors"
             />
           </div>
           <button

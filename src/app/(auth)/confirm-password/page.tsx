@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Lock, AlertCircle } from 'lucide-react';
+import { Lock, AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui';
 import { Logo } from '@/components/ui/logo';
 import apiClient from '@/lib/api/client';
@@ -85,8 +85,8 @@ export default function ConfirmPasswordPage() {
               </div>
             </div>
 
-            <Button type="submit" isLoading={isLoading} className="w-full btn-premium">
-              Confirm
+            <Button type="submit" disabled={isLoading} className="w-full btn-premium">
+              {isLoading ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Confirming...</> : 'Confirm'}
             </Button>
           </form>
         </div>

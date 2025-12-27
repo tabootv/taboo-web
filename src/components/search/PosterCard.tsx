@@ -4,24 +4,25 @@ import { useState, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Play, Plus, MoreHorizontal, Check } from 'lucide-react';
+import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
 import { cn } from '@/lib/utils';
 import { formatDuration, formatCompactNumber } from '@/lib/utils';
 
 interface PosterCardProps {
   id: string;
-  uuid?: string;
+  uuid?: string | undefined;
   title: string;
   thumb: string;
-  thumbWebp?: string;
-  creatorName?: string;
-  year?: number;
-  duration?: number;
-  views?: number;
-  contentType?: 'video' | 'short' | 'series';
-  variant?: 'poster' | 'landscape' | 'short';
-  showActions?: boolean;
-  className?: string;
-  onClick?: () => void;
+  thumbWebp?: string | undefined;
+  creatorName?: string | undefined;
+  year?: number | undefined;
+  duration?: number | undefined;
+  views?: number | undefined;
+  contentType?: 'video' | 'short' | 'series' | undefined;
+  variant?: 'poster' | 'landscape' | 'short' | undefined;
+  showActions?: boolean | undefined;
+  className?: string | undefined;
+  onClick?: (() => void) | undefined;
 }
 
 export function PosterCard({
@@ -73,7 +74,7 @@ export function PosterCard({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <Link href={href} onClick={onClick} className="block">
+      <Link href={href} {...(onClick ? { onClick } : {})} className="block">
         <div
           className={cn(
             'relative overflow-hidden rounded-md bg-surface transition-all duration-300',
@@ -183,11 +184,11 @@ interface CreatorAvatarCardProps {
   id: string;
   name: string;
   avatar: string;
-  subscriberCount?: number;
-  videoCount?: number;
-  verified?: boolean;
-  className?: string;
-  onClick?: () => void;
+  subscriberCount?: number | undefined;
+  videoCount?: number | undefined;
+  verified?: boolean | undefined;
+  className?: string | undefined;
+  onClick?: (() => void) | undefined;
 }
 
 export function CreatorAvatarCard({
@@ -195,7 +196,7 @@ export function CreatorAvatarCard({
   name,
   avatar,
   subscriberCount,
-  videoCount,
+  videoCount: _videoCount,
   verified,
   className,
   onClick,
@@ -203,7 +204,7 @@ export function CreatorAvatarCard({
   return (
     <Link
       href={`/creators/creator-profile/${id}`}
-      onClick={onClick}
+      {...(onClick ? { onClick } : {})}
       className={cn('flex flex-col items-center group flex-shrink-0', className)}
     >
       <div className="relative">
@@ -211,8 +212,8 @@ export function CreatorAvatarCard({
           <Image src={avatar} alt={name} fill className="object-cover" sizes="96px" />
         </div>
         {verified && (
-          <div className="absolute bottom-1 right-1 w-5 h-5 bg-red-primary rounded-full flex items-center justify-center">
-            <Check className="w-3 h-3 text-white" />
+          <div className="absolute bottom-0 right-0">
+            <VerifiedBadge size={16} />
           </div>
         )}
       </div>
@@ -232,16 +233,16 @@ export function CreatorAvatarCard({
 interface TagChipProps {
   id: string;
   name: string;
-  count?: number;
-  className?: string;
-  onClick?: () => void;
+  count?: number | undefined;
+  className?: string | undefined;
+  onClick?: (() => void) | undefined;
 }
 
 export function TagChip({ id, name, count, className, onClick }: TagChipProps) {
   return (
     <Link
       href={`/tag/${id}`}
-      onClick={onClick}
+      {...(onClick ? { onClick } : {})}
       className={cn(
         'inline-flex items-center gap-2 px-4 py-2.5 bg-surface hover:bg-hover border border-border hover:border-red-primary/50 rounded-full transition-all duration-200 group flex-shrink-0',
         className

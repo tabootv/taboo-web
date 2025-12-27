@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import {
@@ -20,13 +20,16 @@ import {
 import { useAuthStore } from '@/lib/stores';
 import { studio } from '@/lib/api';
 import { Button } from '@/components/ui';
+import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
 
 export default function UploadShortPage() {
   const router = useRouter();
-  const { user } = useAuthStore();
+  useAuthStore(); // Verify user is authenticated
   const videoInputRef = useRef<HTMLInputElement>(null);
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
+  const videoPreviewRef = useRef<string | null>(null);
+  const thumbnailPreviewRef = useRef<string | null>(null);
 
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoPreview, setVideoPreview] = useState<string | null>(null);
@@ -54,7 +57,13 @@ export default function UploadShortPage() {
         return;
       }
       setVideoFile(file);
-      setVideoPreview(URL.createObjectURL(file));
+      if (videoPreviewRef.current) {
+        try { URL.revokeObjectURL(videoPreviewRef.current); } catch {}
+        videoPreviewRef.current = null;
+      }
+      const url = URL.createObjectURL(file);
+      videoPreviewRef.current = url;
+      setVideoPreview(url);
       if (!title) {
         const nameWithoutExt = file.name.replace(/\.[^/.]+$/, '');
         setTitle(nameWithoutExt);
@@ -70,21 +79,48 @@ export default function UploadShortPage() {
         return;
       }
       setThumbnail(file);
-      setThumbnailPreview(URL.createObjectURL(file));
+      if (thumbnailPreviewRef.current) {
+        try { URL.revokeObjectURL(thumbnailPreviewRef.current); } catch {}
+        thumbnailPreviewRef.current = null;
+      }
+      const url = URL.createObjectURL(file);
+      thumbnailPreviewRef.current = url;
+      setThumbnailPreview(url);
     }
   }, []);
 
   const handleRemoveVideo = () => {
     setVideoFile(null);
     setVideoPreview(null);
+    if (videoPreviewRef.current) {
+      try { URL.revokeObjectURL(videoPreviewRef.current); } catch {}
+      videoPreviewRef.current = null;
+    }
     if (videoInputRef.current) videoInputRef.current.value = '';
   };
 
   const handleRemoveThumbnail = () => {
     setThumbnail(null);
     setThumbnailPreview(null);
+    if (thumbnailPreviewRef.current) {
+      try { URL.revokeObjectURL(thumbnailPreviewRef.current); } catch {}
+      thumbnailPreviewRef.current = null;
+    }
     if (thumbnailInputRef.current) thumbnailInputRef.current.value = '';
   };
+
+  useEffect(() => {
+    return () => {
+      if (videoPreviewRef.current) {
+        try { URL.revokeObjectURL(videoPreviewRef.current); } catch {}
+        videoPreviewRef.current = null;
+      }
+      if (thumbnailPreviewRef.current) {
+        try { URL.revokeObjectURL(thumbnailPreviewRef.current); } catch {}
+        thumbnailPreviewRef.current = null;
+      }
+    };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -118,10 +154,10 @@ export default function UploadShortPage() {
 
       const response = await studio.uploadShort({
         file: videoFile,
-        thumbnail: thumbnail || undefined,
+        thumbnail: thumbnail || null,
         title,
-        description: description || undefined,
-        tags: tagArray.length > 0 ? tagArray : undefined,
+        ...(description && { description }),
+        ...(tagArray.length > 0 && { tags: tagArray }),
         is_nsfw: isNsfw,
       });
 
@@ -150,200 +186,213 @@ export default function UploadShortPage() {
   return (
     <div className="p-6 lg:p-8 max-w-4xl">
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-white">Upload Short</h1>
-        <p className="text-text-secondary">Create quick, engaging vertical videos</p>
+        <p className="text-xs uppercase tracking-[0.2em] text-white/50">Creator studio</p>
+        <h1 className="text-3xl font-bold text-white">Upload a Short</h1>
+        <p className="text-white/50">Quick, vertical drops with the same Taboo polish.</p>
       </div>
 
       {/* Tips Banner */}
-      <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-4 mb-6">
-        <div className="flex gap-4">
-          <div className="p-2 rounded-xl bg-purple-500/10 h-fit">
-            <Smartphone className="w-5 h-5 text-purple-400" />
+      <Card className="mb-6 border border-white/10 bg-gradient-to-r from-black via-[#120508] to-[#1a0b0c] shadow-[0_18px_50px_rgba(0,0,0,0.45)]">
+        <CardContent className="p-4">
+          <div className="flex gap-4 items-center">
+            <div className="p-3 rounded-xl bg-red-primary/15 border border-red-primary/30 h-fit">
+              <Smartphone className="w-5 h-5 text-red-primary" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-white mb-1">Shorts that pop</h3>
+              <ul className="text-sm text-white/60 space-y-1">
+                <li className="flex items-center gap-2"><Clock className="w-3 h-3" /> Aim for 15-45 seconds</li>
+                <li className="flex items-center gap-2"><Smartphone className="w-3 h-3" /> 9:16 vertical, crisp thumbnail</li>
+              </ul>
+            </div>
           </div>
-          <div>
-            <h3 className="font-medium text-white mb-1">Tips for great Shorts</h3>
-            <ul className="text-sm text-text-secondary space-y-1">
-              <li className="flex items-center gap-2"><Clock className="w-3 h-3" /> Keep it under 60 seconds</li>
-              <li className="flex items-center gap-2"><Smartphone className="w-3 h-3" /> Use vertical format (9:16)</li>
-            </ul>
-          </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Video Upload */}
-        <div className="bg-surface border border-border rounded-xl p-6">
-          <h2 className="font-semibold text-white mb-4 flex items-center gap-2">
-            <Film className="w-5 h-5 text-purple-400" />
-            Short Video
-          </h2>
+        <Card className="border border-white/10 bg-surface">
+          <CardContent className="p-6">
+            <h2 className="font-semibold text-white mb-4 flex items-center gap-2">
+              <Film className="w-5 h-5 text-red-primary" />
+              Short Video
+            </h2>
 
-          {!videoFile ? (
-            <label className="block cursor-pointer">
-              <div className="border-2 border-dashed border-white/20 rounded-xl p-12 text-center hover:border-purple-500/50 hover:bg-purple-500/5 transition-all">
-                <Upload className="w-12 h-12 text-text-secondary mx-auto mb-4" />
-                <p className="text-white font-medium mb-2">Drag and drop your short video here</p>
-                <p className="text-text-secondary text-sm mb-4">or click to browse</p>
-                <p className="text-xs text-text-secondary">Vertical video (9:16) recommended • Up to 60 seconds • Max 500MB</p>
+            {!videoFile ? (
+              <label className="block cursor-pointer">
+                <div className="border-2 border-dashed border-white/15 rounded-xl p-12 text-center hover:border-red-primary/40 hover:bg-red-primary/5 transition-all">
+                  <Upload className="w-12 h-12 text-white/40 mx-auto mb-4" />
+                  <p className="text-white font-medium mb-2">Drag and drop your short video here</p>
+                  <p className="text-white/40 text-sm mb-4">or click to browse</p>
+                  <p className="text-xs text-white/40">Vertical video (9:16) recommended • Up to 60 seconds • Max 500MB</p>
+                </div>
+                <input
+                  ref={videoInputRef}
+                  type="file"
+                  accept="video/*"
+                  onChange={handleVideoSelect}
+                  data-testid="studio-short-input"
+                  className="hidden"
+                />
+              </label>
+            ) : (
+              <div className="flex gap-6">
+                <div className="relative w-[200px] flex-shrink-0">
+                    <div className="aspect-[9/16] rounded-xl overflow-hidden bg-black">
+                    <video data-testid="studio-short-preview" src={videoPreview || undefined} className="w-full h-full object-cover" controls />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleRemoveVideo}
+                    data-testid="remove-short-btn"
+                    className="absolute top-2 right-2 p-1.5 rounded-full bg-black/60 hover:bg-black/80 transition-colors"
+                  >
+                    <X className="w-4 h-4 text-white" />
+                  </button>
+                </div>
+                <div className="flex-1">
+                  <p className="text-white font-medium mb-2">{videoFile.name}</p>
+                  <p className="text-sm text-white/40 mb-4">{(videoFile.size / 1024 / 1024).toFixed(1)} MB</p>
+                  <div className="mt-4">
+                    <label className="block text-sm font-medium text-white mb-2">Custom Thumbnail</label>
+                    {thumbnailPreview ? (
+                      <div className="relative w-24 aspect-[9/16] rounded-lg overflow-hidden">
+                        <Image src={thumbnailPreview} alt="Thumbnail" fill className="object-cover" />
+                        <button
+                          type="button"
+                          onClick={handleRemoveThumbnail}
+                          className="absolute top-1 right-1 p-1 rounded-full bg-black/60"
+                        >
+                          <X className="w-3 h-3 text-white" />
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="w-24 aspect-[9/16] border-2 border-dashed border-white/20 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-red-primary/40 transition-all">
+                        <ImageIcon className="w-5 h-5 text-red-primary/80 mb-1" />
+                        <span className="text-xs text-white/40">Add</span>
+                        <input
+                          ref={thumbnailInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={handleThumbnailSelect}
+                          className="hidden"
+                        />
+                      </label>
+                    )}
+                  </div>
+                </div>
               </div>
-              <input
-                ref={videoInputRef}
-                type="file"
-                accept="video/*"
-                onChange={handleVideoSelect}
-                className="hidden"
-              />
-            </label>
-          ) : (
-            <div className="flex gap-6">
-              <div className="relative w-[200px] flex-shrink-0">
-                <div className="aspect-[9/16] rounded-xl overflow-hidden bg-black">
-                  <video src={videoPreview || undefined} className="w-full h-full object-cover" controls />
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Details */}
+        <Card>
+          <CardContent className="p-6">
+            <h2 className="font-semibold text-white mb-4">Details</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">
+                  Title <span className="text-[#ab0013]">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Enter short title"
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/40 focus:outline-none focus:border-purple-500 transition-colors"
+                  maxLength={100}
+                />
+                <p className="mt-1 text-xs text-white/40 text-right">{title.length}/100</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">Description</label>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Add a description"
+                  rows={3}
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/40 focus:outline-none focus:border-purple-500 transition-colors resize-none"
+                  maxLength={500}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-white mb-2 flex items-center gap-2">
+                  <Tag className="w-4 h-4" /> Tags
+                </label>
+                <input
+                  type="text"
+                  value={tags}
+                  onChange={(e) => setTags(e.target.value)}
+                  placeholder="Add tags (comma separated)"
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/40 focus:outline-none focus:border-purple-500 transition-colors"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Visibility */}
+        <Card>
+          <CardContent className="p-6">
+            <h2 className="font-semibold text-white mb-4">Visibility</h2>
+            <div className="flex gap-4">
+              <label className="flex-1 flex items-center gap-3 p-4 rounded-xl bg-white/5 cursor-pointer hover:bg-white/10 transition-colors">
+                <input
+                  type="radio"
+                  name="visibility"
+                  checked={visibility === 'public'}
+                  onChange={() => setVisibility('public')}
+                  className="w-4 h-4 accent-purple-500"
+                />
+                <Globe className="w-5 h-5 text-white/40" />
+                <span className="text-white font-medium">Public</span>
+              </label>
+              <label className="flex-1 flex items-center gap-3 p-4 rounded-xl bg-white/5 cursor-pointer hover:bg-white/10 transition-colors">
+                <input
+                  type="radio"
+                  name="visibility"
+                  checked={visibility === 'private'}
+                  onChange={() => setVisibility('private')}
+                  className="w-4 h-4 accent-purple-500"
+                />
+                <Lock className="w-5 h-5 text-white/40" />
+                <span className="text-white font-medium">Private</span>
+              </label>
+            </div>
+
+            <div className="mt-6 pt-6 border-t border-white/10">
+              <label className="flex items-center justify-between cursor-pointer">
+                <div>
+                  <p className="text-white font-medium">Age-restricted (18+)</p>
+                  <p className="text-sm text-white/40">Not suitable for younger audiences</p>
                 </div>
                 <button
                   type="button"
-                  onClick={handleRemoveVideo}
-                  className="absolute top-2 right-2 p-1.5 rounded-full bg-black/60 hover:bg-black/80 transition-colors"
+                  onClick={() => setIsNsfw(!isNsfw)}
+                  className={`relative w-12 h-6 rounded-full transition-colors ${isNsfw ? 'bg-purple-500' : 'bg-white/20'}`}
                 >
-                  <X className="w-4 h-4 text-white" />
+                  <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${isNsfw ? 'left-7' : 'left-1'}`} />
                 </button>
-              </div>
-              <div className="flex-1">
-                <p className="text-white font-medium mb-2">{videoFile.name}</p>
-                <p className="text-sm text-text-secondary mb-4">{(videoFile.size / 1024 / 1024).toFixed(1)} MB</p>
-                <div className="mt-4">
-                  <label className="block text-sm font-medium text-white mb-2">Custom Thumbnail</label>
-                  {thumbnailPreview ? (
-                    <div className="relative w-24 aspect-[9/16] rounded-lg overflow-hidden">
-                      <Image src={thumbnailPreview} alt="Thumbnail" fill className="object-cover" />
-                      <button
-                        type="button"
-                        onClick={handleRemoveThumbnail}
-                        className="absolute top-1 right-1 p-1 rounded-full bg-black/60"
-                      >
-                        <X className="w-3 h-3 text-white" />
-                      </button>
-                    </div>
-                  ) : (
-                    <label className="w-24 aspect-[9/16] border-2 border-dashed border-white/20 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-purple-500/50 transition-all">
-                      <ImageIcon className="w-5 h-5 text-text-secondary mb-1" />
-                      <span className="text-xs text-text-secondary">Add</span>
-                      <input
-                        ref={thumbnailInputRef}
-                        type="file"
-                        accept="image/*"
-                        onChange={handleThumbnailSelect}
-                        className="hidden"
-                      />
-                    </label>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Details */}
-        <div className="bg-surface border border-border rounded-xl p-6">
-          <h2 className="font-semibold text-white mb-4">Details</h2>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-white mb-2">
-                Title <span className="text-red-primary">*</span>
               </label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Enter short title"
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-text-secondary focus:outline-none focus:border-purple-500 transition-colors"
-                maxLength={100}
-              />
-              <p className="mt-1 text-xs text-text-secondary text-right">{title.length}/100</p>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-white mb-2">Description</label>
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Add a description"
-                rows={3}
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-text-secondary focus:outline-none focus:border-purple-500 transition-colors resize-none"
-                maxLength={500}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-white mb-2 flex items-center gap-2">
-                <Tag className="w-4 h-4" /> Tags
-              </label>
-              <input
-                type="text"
-                value={tags}
-                onChange={(e) => setTags(e.target.value)}
-                placeholder="Add tags (comma separated)"
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-text-secondary focus:outline-none focus:border-purple-500 transition-colors"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Visibility */}
-        <div className="bg-surface border border-border rounded-xl p-6">
-          <h2 className="font-semibold text-white mb-4">Visibility</h2>
-          <div className="flex gap-4">
-            <label className="flex-1 flex items-center gap-3 p-4 rounded-xl bg-white/5 cursor-pointer hover:bg-white/10 transition-colors">
-              <input
-                type="radio"
-                name="visibility"
-                checked={visibility === 'public'}
-                onChange={() => setVisibility('public')}
-                className="w-4 h-4 accent-purple-500"
-              />
-              <Globe className="w-5 h-5 text-text-secondary" />
-              <span className="text-white font-medium">Public</span>
-            </label>
-            <label className="flex-1 flex items-center gap-3 p-4 rounded-xl bg-white/5 cursor-pointer hover:bg-white/10 transition-colors">
-              <input
-                type="radio"
-                name="visibility"
-                checked={visibility === 'private'}
-                onChange={() => setVisibility('private')}
-                className="w-4 h-4 accent-purple-500"
-              />
-              <Lock className="w-5 h-5 text-text-secondary" />
-              <span className="text-white font-medium">Private</span>
-            </label>
-          </div>
-
-          <div className="mt-6 pt-6 border-t border-white/10">
-            <label className="flex items-center justify-between cursor-pointer">
-              <div>
-                <p className="text-white font-medium">Age-restricted (18+)</p>
-                <p className="text-sm text-text-secondary">Not suitable for younger audiences</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsNsfw(!isNsfw)}
-                className={`relative w-12 h-6 rounded-full transition-colors ${isNsfw ? 'bg-purple-500' : 'bg-white/20'}`}
-              >
-                <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${isNsfw ? 'left-7' : 'left-1'}`} />
-              </button>
-            </label>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Upload Progress */}
         {isUploading && (
-          <div className="bg-surface border border-border rounded-xl p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <Loader2 className="w-5 h-5 text-purple-400 animate-spin" />
-              <span className="text-white font-medium">Uploading short...</span>
-            </div>
-            <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-              <div className="h-full bg-purple-500 transition-all duration-300" style={{ width: `${uploadProgress}%` }} />
-            </div>
-            <p className="mt-2 text-sm text-text-secondary">{uploadProgress}% complete</p>
-          </div>
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <Loader2 className="w-5 h-5 text-purple-400 animate-spin" />
+                <span className="text-white font-medium">Uploading short...</span>
+              </div>
+              <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                <div className="h-full bg-purple-500 transition-all duration-300" style={{ width: `${uploadProgress}%` }} />
+              </div>
+              <p className="mt-2 text-sm text-white/40">{uploadProgress}% complete</p>
+            </CardContent>
+          </Card>
         )}
 
         {uploadError && (

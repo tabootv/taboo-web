@@ -9,11 +9,16 @@ TabooTV is a video streaming platform frontend built with Next.js 16 and React 1
 ## Commands
 
 ```bash
-npm run dev      # Start development server (port 3000)
-npm run build    # Production build
-npm run start    # Start production server
-npm run lint     # Run ESLint
-npx tsc --noEmit # Type check without emitting
+npm run dev          # Start development server (port 3000)
+npm run build        # Production build
+npm run start        # Start production server
+npm run lint         # Run ESLint (--max-warnings=0)
+npm run lint:fix     # Run ESLint with auto-fix
+npm run format       # Format code with Prettier
+npm run format:check # Check formatting
+npm run type-check   # Type check without emitting (tsc --noEmit)
+npm run test         # Run unit tests (Vitest)
+npm run test:ui      # Run tests with Vitest UI
 ```
 
 ## Architecture
@@ -33,7 +38,13 @@ src/
 ├── app/
 │   ├── (main)/      # Main app pages with navbar (videos, series, profile, studio)
 │   ├── (auth)/      # Auth pages without main layout (login, register, plans)
-│   └── layout.tsx   # Root layout with providers
+│   └── layout.tsx   # Root layout with QueryProvider and ErrorBoundary
+├── api/             # NEW: TanStack Query API layer
+│   ├── client/      # Domain-specific API clients (video, auth, home, series, posts)
+│   ├── queries/     # TanStack Query hooks (useVideo, useVideoList, etc.)
+│   ├── mutations/   # TanStack mutation hooks (useLogin, useToggleLike, etc.)
+│   ├── query-keys.ts  # Centralized query key factories
+│   └── types/       # API-specific types
 ├── components/
 │   ├── ui/          # Design system components (PageHeader, MediaCard, etc.)
 │   ├── layout/      # Navbar, Footer, MainLayout
@@ -41,11 +52,14 @@ src/
 │   ├── video/       # Video player components, ShakaPlayer
 │   └── shorts/      # Shorts feed components
 ├── lib/
-│   ├── api/         # API client and endpoints
+│   ├── api/         # Legacy API endpoints (being migrated to src/api/)
 │   ├── stores/      # Zustand stores
 │   ├── hooks/       # Custom React hooks
 │   ├── utils.ts     # Utility functions (cn, formatDuration, formatNumber)
 │   └── design-tokens.ts  # Design system tokens
+├── shared/          # Shared infrastructure
+│   ├── components/  # Providers (QueryProvider), ErrorBoundary
+│   └── lib/         # Query client config, utilities, env helpers
 └── types/           # TypeScript interfaces for API responses
 ```
 

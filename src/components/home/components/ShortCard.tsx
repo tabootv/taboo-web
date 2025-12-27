@@ -1,11 +1,10 @@
 /**
- * Individual short card component with video preview
+ * Individual short card component - simplified without video preview
  */
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { Volume2, VolumeX, Play } from 'lucide-react';
-import { useShortVideoPreview } from '../hooks/use-short-video-preview';
+import { Play } from 'lucide-react';
 import type { Video } from '@/types';
 
 interface ShortCardProps {
@@ -14,26 +13,12 @@ interface ShortCardProps {
 }
 
 export function ShortCard({ video, index }: ShortCardProps) {
-  const {
-    thumbnail,
-    previewUrl,
-    isHovered,
-    isFetchingUrl,
-    showVideo,
-    isMuted,
-    videoRef,
-    handleMouseEnter,
-    handleMouseLeave,
-    handleVideoLoaded,
-    toggleMute,
-  } = useShortVideoPreview(video);
+  const thumbnail = video.thumbnail || video.thumbnail_webp || video.card_thumbnail;
 
   return (
     <Link
       href={`/shorts/${video.uuid}`}
-      className="flex-shrink-0 w-[169px] md:w-[190px] group relative rounded-lg overflow-hidden cursor-pointer"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      className="flex-shrink-0 w-[130px] sm:w-[160px] md:w-[190px] group relative rounded-lg overflow-hidden cursor-pointer short-hover active:scale-[0.97] transition-transform"
     >
       <div className="relative aspect-[9/16]">
         {/* Thumbnail */}
@@ -42,67 +27,34 @@ export function ShortCard({ video, index }: ShortCardProps) {
             src={thumbnail}
             alt={video.title || 'Short video'}
             fill
-            className={`object-cover transition-opacity duration-300 ${
-              showVideo ? 'opacity-0' : 'opacity-100'
-            }`}
+            className="object-cover"
             priority={index < 6}
+            sizes="(max-width: 640px) 130px, (max-width: 768px) 160px, 190px"
           />
         )}
 
-        {/* Video preview on hover */}
-        {previewUrl && (
-          <video
-            ref={videoRef}
-            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
-              showVideo ? 'opacity-100' : 'opacity-0'
-            }`}
-            muted={isMuted}
-            loop
-            playsInline
-            preload="metadata"
-            onLoadedData={handleVideoLoaded}
-          >
-            <source src={previewUrl} type="video/mp4" />
-          </video>
-        )}
-
-        {/* Loading indicator while fetching video URL */}
-        {isHovered && isFetchingUrl && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-            <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+        {/* Play icon overlay on hover/active */}
+        <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity">
+          <div className="p-2.5 sm:p-3 bg-red-primary rounded-full transform scale-90 group-hover:scale-100 transition-transform">
+            <Play className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="white" />
           </div>
-        )}
-
-        {/* Play icon overlay when hovered but video not playing yet */}
-        {isHovered && !showVideo && !isFetchingUrl && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-            <div className="p-3 bg-white/90 rounded-full">
-              <Play className="w-5 h-5 text-black" fill="black" />
-            </div>
-          </div>
-        )}
-
-        {/* Volume control when video is playing */}
-        {showVideo && (
-          <button
-            onClick={toggleMute}
-            className="absolute bottom-3 right-3 p-2 rounded-full bg-black/60 border border-white/30 hover:border-white transition-colors z-10"
-          >
-            {isMuted ? (
-              <VolumeX className="w-4 h-4 text-white" />
-            ) : (
-              <Volume2 className="w-4 h-4 text-white" />
-            )}
-          </button>
-        )}
+        </div>
 
         {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none" />
 
         {/* Border on hover */}
         <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none ring-2 ring-red-primary/60" />
+
+        {/* Title at bottom */}
+        {video.title && (
+          <div className="absolute bottom-0 left-0 right-0 p-2 sm:p-3">
+            <p className="text-white text-xs sm:text-sm font-medium line-clamp-2 drop-shadow-lg">
+              {video.title}
+            </p>
+          </div>
+        )}
       </div>
     </Link>
   );
 }
-

@@ -8,7 +8,6 @@ import Link from 'next/link';
 import {
   Play,
   Clock,
-  CheckCircle,
   ChevronDown,
   GraduationCap,
   BookOpen,
@@ -17,7 +16,7 @@ import {
 } from 'lucide-react';
 import { useCourseDetail } from '@/api/queries';
 import { useAuthStore } from '@/lib/stores/auth-store';
-import type { Series, Video, Channel, Course } from '@/types';
+import type { Series, Video, Course } from '@/types';
 import { VideoPlayerSkeleton } from '@/components/video';
 import { LessonCard, CoursePageSkeleton } from '@/components/courses';
 import { VerifiedBadge } from '@/components/ui';
@@ -45,13 +44,13 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
 
   const handleTrailerEnded = () => {
     setShowTrailer(false);
-    if (videos.length > 0) {
+    if (videos.length > 0 && videos[0]) {
       router.push(`/courses/${id}/play/${videos[0].uuid}`);
     }
   };
 
   const handleStartCourse = () => {
-    if (videos.length > 0) {
+    if (videos.length > 0 && videos[0]) {
       router.push(`/courses/${id}/play/${videos[0].uuid}`);
     }
   };
@@ -107,7 +106,8 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
     );
   }
 
-  const heroImage = courseData.desktop_banner || courseData.trailer_thumbnail || courseData.thumbnail || courseData.card_thumbnail;
+  // Try multiple thumbnail sources - API might return in different fields
+  const heroImage = courseData.course_thumbnail || courseData.card_thumbnail || courseData.thumbnail || courseData.trailer_thumbnail || courseData.desktop_banner;
 
   return (
     <div className="min-h-screen bg-background">
@@ -139,7 +139,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
             {showTrailer && courseData.trailer_url && (
               <div className="mb-8 max-w-4xl animate-fade-in">
                 <VideoPlayer
-                  thumbnail={heroImage}
+                  thumbnail={heroImage || ''}
                   url_1080={courseData.trailer_url}
                   autoplay={true}
                   onEnded={handleTrailerEnded}
@@ -219,27 +219,6 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
                   </div>
                 )}
 
-                {/* Action Buttons */}
-                <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-2">
-                  <button
-                    onClick={handleStartCourse}
-                    disabled={videos.length === 0}
-                    className="flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 bg-red-primary hover:bg-red-primary/90 text-white font-semibold rounded-lg transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-lg shadow-red-primary/30"
-                  >
-                    <Play className="w-5 sm:w-6 h-5 sm:h-6 fill-white" />
-                    <span>Start Learning</span>
-                  </button>
-                  {courseData.trailer_url && !showTrailer && (
-                    <button
-                      onClick={handleWatchTrailer}
-                      className="flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-lg backdrop-blur-sm transition-all border border-white/10"
-                    >
-                      <Play className="w-5 h-5" />
-                      <span>Preview</span>
-                    </button>
-                  )}
-                </div>
-
                 {/* Instructor Info */}
                 {courseData.channel && (
                   <Link
@@ -271,6 +250,27 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
                     </p>
                   </Link>
                 )}
+
+                {/* Action Buttons */}
+                <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-2">
+                  <button
+                    onClick={handleStartCourse}
+                    disabled={videos.length === 0}
+                    className="flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 bg-red-primary hover:bg-red-primary/90 text-white font-semibold rounded-lg transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-lg shadow-red-primary/30"
+                  >
+                    <Play className="w-5 sm:w-6 h-5 sm:h-6 fill-white" />
+                    <span>Start Learning</span>
+                  </button>
+                  {courseData.trailer_url && !showTrailer && (
+                    <button
+                      onClick={handleWatchTrailer}
+                      className="flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-lg backdrop-blur-sm transition-all border border-white/10"
+                    >
+                      <Play className="w-5 h-5" />
+                      <span>Preview</span>
+                    </button>
+                  )}
+                </div>
               </div>
             )}
           </div>
@@ -307,7 +307,6 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
                 lessonNumber={index + 1}
                 courseId={id}
                 channel={courseData.channel}
-                isFirst={index === 0}
               />
             ))}
           </div>

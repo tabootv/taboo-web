@@ -62,7 +62,7 @@ export function VideoCard({ video }: VideoCardProps) {
         )}
       </div>
       <div className="mt-2">
-        <h3 className="font-medium text-white text-[12px] md:text-sm leading-snug line-clamp-2 group-hover:text-red-primary transition-colors">
+        <h3 className="font-medium text-white text-[13px] md:text-[14px] leading-snug line-clamp-3 group-hover:text-red-primary transition-colors">
           {video.title}
         </h3>
         <div className="text-sm text-white/60 mt-0.5 truncate flex items-center gap-2">

@@ -2,8 +2,6 @@
  * Skeleton loading state for series section
  */
 
-import { Film } from 'lucide-react';
-
 export function SeriesSkeleton() {
   return (
     <section className="mt-10 md:mt-12">

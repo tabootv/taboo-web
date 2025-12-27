@@ -33,8 +33,8 @@ export function NavbarMobileMenu({
   if (!isOpen || isSearchExpanded) return null;
 
   return (
-    <div className="lg:hidden border-t border-border bg-black">
-      <div className="px-4 py-2 space-y-1">
+    <div className="lg:hidden bg-black safe-bottom">
+      <div className="px-4 py-3 space-y-1">
         {/* Mobile Search */}
         <form onSubmit={onSubmit} className="py-2">
           <div className="relative">
@@ -44,7 +44,7 @@ export function NavbarMobileMenu({
               value={searchQuery}
               onChange={(e) => onQueryChange(e.target.value)}
               placeholder="Search..."
-              className="w-full pl-10 pr-4 py-2 bg-background border border-border rounded-md text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:border-red-primary transition-colors"
+              className="w-full pl-10 pr-4 py-3 bg-surface border border-border rounded-xl text-base text-text-primary placeholder:text-text-secondary focus:outline-none focus:border-red-primary transition-colors"
             />
           </div>
         </form>
@@ -57,10 +57,10 @@ export function NavbarMobileMenu({
               href={item.href}
               onClick={onClose}
               className={cn(
-                'flex items-center gap-3 px-3 py-2 rounded-sm text-base font-medium transition-colors',
+                'flex items-center gap-3 px-4 py-3.5 rounded-xl text-base font-medium transition-colors active:scale-[0.98]',
                 isActive
                   ? 'bg-red-primary/10 text-red-primary'
-                  : 'text-text-secondary hover:bg-hover hover:text-text-primary'
+                  : 'text-text-secondary hover:bg-hover hover:text-text-primary active:bg-hover'
               )}
             >
               <item.icon className="w-5 h-5" />
@@ -70,14 +70,14 @@ export function NavbarMobileMenu({
         })}
 
         {!isAuthenticated && (
-          <div className="pt-4 pb-2 space-y-2">
+          <div className="pt-4 pb-2 space-y-3">
             <Link href="/sign-in" onClick={onClose}>
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" className="w-full h-12 text-base">
                 Sign In
               </Button>
             </Link>
             <Link href="/register" onClick={onClose}>
-              <Button className="w-full">Sign Up</Button>
+              <Button className="w-full h-12 text-base">Sign Up</Button>
             </Link>
           </div>
         )}

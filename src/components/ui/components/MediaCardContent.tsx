@@ -10,10 +10,10 @@ import type { MediaCardProps } from '../media-card';
 
 interface MediaCardContentProps {
   title: string;
-  channel?: MediaCardProps['channel'];
-  views?: number;
-  likes?: number;
-  date?: string;
+  channel?: MediaCardProps['channel'] | undefined;
+  views?: number | undefined;
+  likes?: number | undefined;
+  date?: string | undefined;
   size: MediaCardProps['size'];
 }
 

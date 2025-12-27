@@ -110,6 +110,34 @@ interface RewardDataPoint {
 }
 
 /**
+ * Safely parse a date string into YYYY-MM-DD format
+ * Handles various formats like "Dec 23, 2025", "2025-12-23", "Week 52, 2025", etc.
+ */
+function safeParseDateToString(dateStr: string): string | null {
+  try {
+    // If it's already in YYYY-MM-DD format, return as is
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      return dateStr;
+    }
+
+    // Try to parse the date
+    const parsedDate = new Date(dateStr);
+
+    // Check if the date is valid
+    if (isNaN(parsedDate.getTime())) {
+      console.warn('Could not parse date:', dateStr);
+      return null;
+    }
+
+    const isoDate = parsedDate.toISOString().split('T')[0];
+    return isoDate ?? null;
+  } catch (error) {
+    console.warn('Error parsing date:', dateStr, error);
+    return null;
+  }
+}
+
+/**
  * Merge earnings data from rewards with funnel metrics from V2 Reports API
  */
 function mergeFunnelData(
@@ -121,16 +149,17 @@ function mergeFunnelData(
 
   if (v2Reports?.sub_data) {
     for (const item of v2Reports.sub_data) {
-      // V2 API returns dates like "Dec 23, 2025" - parse and normalize to YYYY-MM-DD
-      const parsedDate = new Date(item.period);
-      const normalizedDate = parsedDate.toISOString().split('T')[0] || item.period;
+      // V2 API returns dates in various formats - safely parse them
+      const normalizedDate = safeParseDateToString(item.period);
 
-      funnelMap.set(normalizedDate, {
-        clicks: item.data.clicks_count || 0,
-        signups: item.data.referrals_count || 0,
-        customers: item.data.customers_count || 0,
-        revenue: item.data.revenue_amount || 0,
-      });
+      if (normalizedDate) {
+        funnelMap.set(normalizedDate, {
+          clicks: item.data.clicks_count || 0,
+          signups: item.data.referrals_count || 0,
+          customers: item.data.customers_count || 0,
+          revenue: item.data.revenue_amount || 0,
+        });
+      }
     }
   }
 
@@ -227,13 +256,13 @@ export async function GET(request: NextRequest) {
     const response: EarningsResponse = {
       promoter: {
         id: profile.id,
-        name: profile.name || 'Unknown',
-        email: profile.email,
-        refId: profile.refId,
-        referralLink: profile.referralLink,
-        status: profile.status,
-        payoutMethod: profile.payoutMethod,
-        joinedAt: profile.joinedAt,
+        name: profile.name ?? '',
+        email: profile.email ?? '',
+        refId: profile.refId ?? '',
+        referralLink: profile.referralLink ?? '',
+        status: profile.status ?? 'active',
+        payoutMethod: profile.payoutMethod ?? null,
+        joinedAt: profile.joinedAt ?? new Date().toISOString(),
       },
       // Filtered stats based on date range (from V2 Reports API + rewards for earnings)
       summary: {

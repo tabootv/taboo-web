@@ -2,6 +2,7 @@
 
 import { useCreatorsList } from '@/api/queries';
 import { CreatorCard, CreatorCardSkeleton } from '@/components/creator';
+import { PageHeader } from '@/components/ui';
 import { Rss, Star, Users } from 'lucide-react';
 import Link from 'next/link';
 import { useMemo } from 'react';
@@ -25,9 +26,9 @@ export default function CreatorsPage() {
       <div className="creators-atmosphere-bg" />
 
       <div className="relative z-10 max-w-[1280px] mx-auto px-4 md:px-6 lg:px-8 pt-6">
-        <div className="relative flex items-center min-h-[44px] pb-3">
-          <h1 className="text-2xl md:text-3xl font-bold text-white absolute left-0">Creators</h1>
-          <div className="w-full flex justify-center">
+        <PageHeader
+          title="Creators"
+          actions={
             <div className="flex gap-2">
               <Link
                 href="/community"
@@ -44,8 +45,8 @@ export default function CreatorsPage() {
                 Creators
               </Link>
             </div>
-          </div>
-        </div>
+          }
+        />
 
         <div className="mt-4">
           {isLoading ? (

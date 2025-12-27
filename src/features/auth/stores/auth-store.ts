@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import type { User } from '@/types';
-import { removeToken, isAuthenticated } from '@/lib/api/client';
+import { isAuthenticated } from '@/lib/api/client';
 
 /**
  * Auth store for client-side UI state only.

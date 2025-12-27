@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { CheckCircle } from 'lucide-react';
+import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
 import type { Video } from '@/types';
 
 interface VideoRightSidebarCardProps {
@@ -15,7 +15,7 @@ interface VideoRightSidebarCardProps {
 export function VideoRightSidebarCard({
   video,
   currentVideoId,
-  actionButtons = false,
+  actionButtons: _actionButtons = false,
 }: VideoRightSidebarCardProps) {
   const [isLoading, setIsLoading] = useState(true);
   const isCurrentVideo = video.id === currentVideoId;
@@ -98,7 +98,7 @@ export function VideoRightSidebarCard({
           <p className="text-sm font-normal text-text-secondary">
             {video.channel?.name}
           </p>
-          <CheckCircle className="w-3 h-3 text-red-primary" fill="currentColor" />
+          <VerifiedBadge size={12} />
         </div>
       </div>
     </Link>

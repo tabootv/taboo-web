@@ -1,71 +1,80 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
-import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { home } from '@/lib/api';
 import type { Video } from '@/types';
 import { SectionCard } from '@/components/home';
 import { ShortCard } from './components/ShortCard';
 import { useHorizontalScroll } from './hooks/use-horizontal-scroll';
-import { shuffleArray } from './utils/shorts-utils';
 
 interface HomeShortsSectionProps {
   initialShorts?: Video[];
 }
 
+// Fisher-Yates shuffle - keeps first 3 recent, shuffles rest
+function shuffleShorts(shorts: Video[]): Video[] {
+  if (!shorts || shorts.length === 0) return [];
+
+  const recent = shorts.slice(0, 3);
+  const rest = [...shorts.slice(3)];
+
+  for (let i = rest.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const temp = rest[i]!;
+    rest[i] = rest[j]!;
+    rest[j] = temp;
+  }
+
+  return [...recent, ...rest];
+}
+
 export function HomeShortsSection({ initialShorts }: HomeShortsSectionProps) {
-  const pathname = usePathname();
-  const hasInitialData = initialShorts && initialShorts.length > 0;
-  const [videos, setVideos] = useState<Video[]>(
-    initialShorts ? shuffleArray(initialShorts) : []
-  );
-  const [isLoading, setIsLoading] = useState(!hasInitialData);
-  const didInitialFetch = useRef(false);
+  const [videos, setVideos] = useState<Video[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const { scrollRef, showLeftGradient, showRightGradient, scroll } = useHorizontalScroll();
 
   useEffect(() => {
-    // Skip fetch if initial data was provided and has content
-    if (hasInitialData && !didInitialFetch.current) {
-      didInitialFetch.current = true;
-      return;
-    }
-    didInitialFetch.current = true;
-
     let cancelled = false;
-    setIsLoading(true);
 
-    async function fetchVideos() {
+    async function loadShorts() {
+      // Try initialShorts first
+      if (initialShorts && initialShorts.length > 0) {
+        setVideos(shuffleShorts(initialShorts));
+        setIsLoading(false);
+        return;
+      }
+
+      // Fallback: fetch from API
       try {
         const data = await home.getShortVideosV2();
-        if (!cancelled) {
-          // Shuffle the shorts to show random order each time
-          setVideos(shuffleArray(data || []));
+        if (!cancelled && data && data.length > 0) {
+          setVideos(shuffleShorts(data));
         }
       } catch (error) {
-        console.error('Error fetching short videos:', error);
+        console.error('Error fetching shorts:', error);
       } finally {
         if (!cancelled) {
           setIsLoading(false);
         }
       }
     }
-    fetchVideos();
+
+    loadShorts();
 
     return () => {
       cancelled = true;
     };
-  }, [pathname, hasInitialData]);
-
+  }, [initialShorts]);
 
   if (isLoading) {
     return (
       <SectionCard title="Shorts" href="/shorts">
         <div className="flex gap-3 md:gap-6 overflow-hidden">
-          {Array.from({ length: 12 }).map((_, i) => (
+          {Array.from({ length: 8 }).map((_, i) => (
             <div
               key={i}
-              className="flex-shrink-0 w-[169px] md:w-[190px] aspect-[9/16] rounded-lg bg-surface animate-pulse"
+              className="flex-shrink-0 w-[169px] md:w-[190px] aspect-[9/16] rounded-lg skeleton"
             />
           ))}
         </div>
@@ -91,7 +100,7 @@ export function HomeShortsSection({ initialShorts }: HomeShortsSectionProps) {
           }`}
         />
 
-        {/* Navigation Arrows - centered on vertical shorts */}
+        {/* Navigation Arrows */}
         <button
           onClick={() => scroll('left')}
           className={`absolute left-2 top-1/2 -translate-y-1/2 z-20 p-2 md:p-2.5 bg-black/80 rounded-full border border-white/20 opacity-0 group-hover/section:opacity-100 transition-all hover:bg-black hover:border-white/40 ${
@@ -123,4 +132,3 @@ export function HomeShortsSection({ initialShorts }: HomeShortsSectionProps) {
     </SectionCard>
   );
 }
-

@@ -8,8 +8,19 @@ export function NavigationProgress() {
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const prevPathnameRef = useRef(pathname);
+  const isShortsPage = pathname?.startsWith('/shorts');
+  const isVideoPage = pathname?.startsWith('/videos/');
+  const isStudioUploadPage = pathname?.startsWith('/studio/upload');
+  const isImmersiveRoute = isShortsPage || isVideoPage || isStudioUploadPage;
 
   useEffect(() => {
+    if (isImmersiveRoute) {
+      prevPathnameRef.current = pathname;
+      setIsLoading(false);
+      setProgress(0);
+      return;
+    }
+
     if (prevPathnameRef.current === pathname) {
       return;
     }
@@ -36,9 +47,9 @@ export function NavigationProgress() {
       clearTimeout(timer3);
       clearTimeout(completeTimer);
     };
-  }, [pathname]);
+  }, [pathname, isImmersiveRoute]);
 
-  if (!isLoading && progress === 0) {
+  if (isImmersiveRoute || (!isLoading && progress === 0)) {
     return null;
   }
 
@@ -54,4 +65,3 @@ export function NavigationProgress() {
     </div>
   );
 }
-

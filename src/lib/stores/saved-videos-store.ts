@@ -41,7 +41,7 @@ export const useSavedVideosStore = create<SavedVideosState>()(
       },
 
       toggleSave: (video: SavedVideo) => {
-        const { videos, isSaved, saveVideo, removeVideo } = get();
+        const { isSaved, saveVideo, removeVideo } = get();
         if (isSaved(video.id)) {
           removeVideo(video.id);
           return false;

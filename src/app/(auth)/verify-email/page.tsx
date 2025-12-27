@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { Mail, CheckCircle, XCircle, Loader2, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui';
 import { Logo } from '@/components/ui/logo';
-import { auth } from '@/lib/api';
 import { toast } from 'sonner';
 import apiClient from '@/lib/api/client';
 
@@ -124,11 +123,11 @@ function VerifyEmailContent() {
             <div className="space-y-3">
               <Button
                 onClick={handleResendVerification}
-                isLoading={isResending}
+                disabled={isResending}
                 className="w-full"
               >
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Resend Verification Email
+                {isResending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
+                {isResending ? 'Sending...' : 'Resend Verification Email'}
               </Button>
               <Link href="/sign-in" className="block">
                 <Button variant="outline" className="w-full">
@@ -148,12 +147,12 @@ function VerifyEmailContent() {
               </div>
               <Button
                 onClick={handleResendVerification}
-                isLoading={isResending}
+                disabled={isResending}
                 variant="outline"
                 className="w-full"
               >
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Resend Verification Email
+                {isResending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
+                {isResending ? 'Sending...' : 'Resend Verification Email'}
               </Button>
               <p className="text-sm text-text-secondary">
                 Already verified?{' '}

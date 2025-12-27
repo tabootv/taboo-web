@@ -56,6 +56,7 @@ export default function ShortPage() {
       }, 100);
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [videos.length, isReady]);
 
   // URL sync - only update after initialization

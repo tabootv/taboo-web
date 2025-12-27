@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, useEffect, useCallback } from 'react';
+import { useRef, useState, useEffect, useCallback, memo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -20,20 +20,26 @@ interface ShortVideoCardProps {
   video: Video;
   index: number;
   isActive: boolean;
+  isNearActive?: boolean; // True for slides adjacent to active (for preloading)
 }
 
-export function ShortVideoCard({ video, index, isActive }: ShortVideoCardProps) {
+// Detect if we're on a desktop/high-bandwidth device
+const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 768;
+
+function ShortVideoCardComponent({ video, index: _index, isActive, isNearActive = false }: ShortVideoCardProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
   const lastTapRef = useRef<number>(0);
-  const heartAnimationRef = useRef<HTMLDivElement>(null);
+  const shouldPlayRef = useRef(false); // Track if video should be playing
+  const isMutedRef = useRef(false); // Track mute state without causing re-renders
+  const hasStartedPlaybackRef = useRef(false); // Avoid unmuting before autoplay is allowed
 
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isBuffering, setIsBuffering] = useState(true);
+  const [_isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [showPlayIcon, setShowPlayIcon] = useState(false);
   const [showHeartAnimation, setShowHeartAnimation] = useState(false);
   const [heartPosition, setHeartPosition] = useState({ x: 0, y: 0 });
+  const lastProgressUpdate = useRef<number>(0);
 
   const {
     isMuted,
@@ -43,8 +49,57 @@ export function ShortVideoCard({ video, index, isActive }: ShortVideoCardProps) 
   } = useShortsStore();
   const prefersReducedMotion = usePrefersReducedMotion();
 
-  const videoSrc = video.url_480 || video.url_720 || video.url_1080 || video.hls_url || '';
+  // Keep ref in sync with store value
+  useEffect(() => {
+    isMutedRef.current = isMuted;
+  }, [isMuted]);
+
+  // Better video source selection: prefer higher quality on desktop
+  const videoSrc = isDesktop
+    ? (video.url_720 || video.url_1080 || video.url_480 || video.hls_url || '')
+    : (video.url_480 || video.url_720 || video.hls_url || '');
   const likesCount = video.likes_count ?? 0;
+
+  // Determine preload strategy based on active/near-active state
+  const preloadStrategy = isActive && !prefersReducedMotion
+    ? 'auto'
+    : isNearActive
+      ? 'metadata'
+      : 'none';
+
+  // Helper to attempt playback
+  const attemptPlay = useCallback(async () => {
+    const videoEl = videoRef.current;
+    if (!videoEl) return;
+
+    // Start muted to satisfy autoplay, then unmute immediately if the user prefers sound
+    videoEl.muted = true;
+    videoEl.volume = 0;
+    try {
+      await videoEl.play();
+      hasStartedPlaybackRef.current = true;
+      setIsPlaying(true);
+      if (!isMutedRef.current) {
+        videoEl.muted = false;
+        videoEl.volume = 1;
+      }
+    } catch {
+      // Autoplay blocked - user will need to tap
+    }
+  }, []);
+
+  // Video event handlers as callbacks for React props
+  const handleCanPlay = useCallback(() => {
+    if (isActive && !prefersReducedMotion) {
+      void attemptPlay();
+    }
+  }, [isActive, prefersReducedMotion, attemptPlay]);
+
+  const handleLoadedData = useCallback(() => {
+    if (isActive && !prefersReducedMotion) {
+      void attemptPlay();
+    }
+  }, [isActive, prefersReducedMotion, attemptPlay]);
 
   // Play/pause based on active state
   useEffect(() => {
@@ -52,25 +107,27 @@ export function ShortVideoCard({ video, index, isActive }: ShortVideoCardProps) 
     if (!videoEl) return;
 
     if (isActive && !prefersReducedMotion) {
+      shouldPlayRef.current = true;
+      hasStartedPlaybackRef.current = false;
       videoEl.currentTime = 0;
-      videoEl.muted = isMuted;
-      const playPromise = videoEl.play();
-      if (playPromise) {
-        playPromise.then(() => setIsPlaying(true)).catch(() => {});
-      }
+      // Try to play immediately
+      void attemptPlay();
     } else {
+      shouldPlayRef.current = false;
+      hasStartedPlaybackRef.current = false;
       videoEl.pause();
       setIsPlaying(false);
       if (!isActive) {
         videoEl.currentTime = 0;
       }
     }
-  }, [isActive, isMuted, prefersReducedMotion]);
+  }, [isActive, prefersReducedMotion, attemptPlay]);
 
   // Update mute state
   useEffect(() => {
     if (videoRef.current) {
-      videoRef.current.muted = isMuted;
+      videoRef.current.muted = isMuted || !hasStartedPlaybackRef.current;
+      videoRef.current.volume = videoRef.current.muted ? 0 : 1;
     }
   }, [isMuted]);
 
@@ -79,32 +136,28 @@ export function ShortVideoCard({ video, index, isActive }: ShortVideoCardProps) 
     const videoEl = videoRef.current;
     if (!videoEl) return;
 
+    // Throttled progress update - only update every 250ms to reduce re-renders
     const handleTimeUpdate = () => {
+      const now = Date.now();
+      if (now - lastProgressUpdate.current < 250) return;
+      lastProgressUpdate.current = now;
+
       if (videoEl.duration) {
         setProgress((videoEl.currentTime / videoEl.duration) * 100);
       }
     };
 
-    const handleWaiting = () => setIsBuffering(true);
-    const handlePlaying = () => {
-      setIsBuffering(false);
-      setIsPlaying(true);
-    };
+    const handlePlaying = () => setIsPlaying(true);
     const handlePause = () => setIsPlaying(false);
-    const handleCanPlay = () => setIsBuffering(false);
 
     videoEl.addEventListener('timeupdate', handleTimeUpdate);
-    videoEl.addEventListener('waiting', handleWaiting);
     videoEl.addEventListener('playing', handlePlaying);
     videoEl.addEventListener('pause', handlePause);
-    videoEl.addEventListener('canplay', handleCanPlay);
 
     return () => {
       videoEl.removeEventListener('timeupdate', handleTimeUpdate);
-      videoEl.removeEventListener('waiting', handleWaiting);
       videoEl.removeEventListener('playing', handlePlaying);
       videoEl.removeEventListener('pause', handlePause);
-      videoEl.removeEventListener('canplay', handleCanPlay);
     };
   }, []);
 
@@ -181,21 +234,17 @@ export function ShortVideoCard({ video, index, isActive }: ShortVideoCardProps) 
           <video
             ref={videoRef}
             className="h-full w-full object-cover"
-            preload={isActive && !prefersReducedMotion ? 'auto' : 'none'}
+            preload={preloadStrategy}
             loop
+            autoPlay={isActive && !prefersReducedMotion}
             playsInline
-            muted={isMuted}
+            muted
             poster={video.thumbnail}
+            onCanPlay={handleCanPlay}
+            onLoadedData={handleLoadedData}
           >
             <source src={videoSrc} type="video/mp4" />
           </video>
-
-          {/* Buffering spinner */}
-          {isBuffering && isActive && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin" />
-            </div>
-          )}
 
           {/* Play icon on pause */}
           {showPlayIcon && (
@@ -359,3 +408,14 @@ function ActionButton({
     </button>
   );
 }
+
+// Memoize the component to prevent unnecessary re-renders when parent updates
+export const ShortVideoCard = memo(ShortVideoCardComponent, (prevProps, nextProps) => {
+  // Only re-render if these props change
+  return (
+    prevProps.isActive === nextProps.isActive &&
+    prevProps.isNearActive === nextProps.isNearActive &&
+    prevProps.video.uuid === nextProps.video.uuid &&
+    prevProps.video.likes_count === nextProps.video.likes_count
+  );
+});

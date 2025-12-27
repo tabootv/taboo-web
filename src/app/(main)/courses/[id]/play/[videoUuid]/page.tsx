@@ -6,7 +6,8 @@ import { useCourseDetail, useCoursePlay, useVideo, useMe } from '@/api/queries';
 import { useToggleAutoplay } from '@/api/mutations';
 import { cn, formatDuration, formatRelativeTime } from '@/lib/utils';
 import type { Course, Video } from '@/types';
-import { CheckCircle, ChevronRight, Clock, Play, SkipForward } from 'lucide-react';
+import { ChevronRight, Clock, Play, SkipForward } from 'lucide-react';
+import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -176,7 +177,7 @@ export default function CoursePlayerPage({
                     <span className="font-medium text-white group-hover:text-red-primary transition-colors truncate">
                       {currentVideo.channel?.name}
                     </span>
-                    <CheckCircle className="w-3.5 h-3.5 text-red-primary shrink-0" />
+                    <span className="shrink-0"><VerifiedBadge size={14} /></span>
                   </Link>
                   <p className="text-xs text-white/50">
                     {currentVideo.humans_publish_at ||
@@ -240,9 +241,9 @@ export default function CoursePlayerPage({
               className="flex items-center gap-3 p-3 bg-surface/50 rounded-xl mb-4 group hover:bg-surface/70 transition-colors"
             >
               <div className="relative w-16 h-9 rounded-lg overflow-hidden shrink-0">
-                {courseData.thumbnail && (
+                {(courseData.course_thumbnail || courseData.card_thumbnail || courseData.thumbnail || courseData.trailer_thumbnail || courseData.desktop_banner) && (
                   <Image
-                    src={courseData.thumbnail}
+                    src={courseData.course_thumbnail || courseData.card_thumbnail || courseData.thumbnail || courseData.trailer_thumbnail || courseData.desktop_banner || ''}
                     alt={courseData.title}
                     fill
                     className="object-cover"
@@ -250,7 +251,7 @@ export default function CoursePlayerPage({
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs text-white/50 mb-0.5">Course</p>
+                <p className="text-xs text-white/50 mb-0.5">Education</p>
                 <h3 className="text-sm font-medium text-white truncate group-hover:text-red-primary transition-colors">
                   {courseData.title}
                 </h3>

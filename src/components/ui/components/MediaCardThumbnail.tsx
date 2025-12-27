@@ -9,22 +9,22 @@ import type { MediaCardProps } from '../media-card';
 
 interface MediaCardThumbnailProps {
   thumbnail: string;
-  thumbnailWebp?: string;
+  thumbnailWebp?: string | undefined;
   title: string;
   type: MediaCardProps['type'];
   aspectRatio: string;
   size: MediaCardProps['size'];
   isHovered: boolean;
   imageError: boolean;
-  showPreview?: boolean;
-  previewUrl?: string;
-  hidePlayOverlay?: boolean;
-  isNsfw?: boolean;
-  isPremium?: boolean;
-  duration?: number;
-  episodeCount?: number;
-  tags?: string[];
-  hideTags?: boolean;
+  showPreview?: boolean | undefined;
+  previewUrl?: string | undefined;
+  hidePlayOverlay?: boolean | undefined;
+  isNsfw?: boolean | undefined;
+  isPremium?: boolean | undefined;
+  duration?: number | undefined;
+  episodeCount?: number | undefined;
+  tags?: string[] | undefined;
+  hideTags?: boolean | undefined;
   onImageError: () => void;
 }
 

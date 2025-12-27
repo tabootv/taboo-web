@@ -28,11 +28,11 @@ export function VideoPlayerWrapper({
   return (
     <ShakaPlayer
       src={hlsUrl}
-      poster={thumbnail}
+      thumbnail={thumbnail}
       autoplay={autoplay}
       onPlay={() => trackPlay()}
       onPause={() => trackPause()}
-      onSeek={(time) => trackSeek(time)}
+      onSeek={(time: number) => trackSeek(time)}
       onEnded={onEnded}
     />
   );

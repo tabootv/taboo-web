@@ -5,18 +5,18 @@ export type WatchlistItemType = 'video' | 'series' | 'course';
 
 export interface WatchlistItem {
   id: number;
-  uuid?: string;
+  uuid?: string | undefined;
   type: WatchlistItemType;
   title: string;
   thumbnail: string | null;
   channel?: {
     id: number;
     name: string;
-    dp?: string | null;
-  };
-  duration?: string;
-  progress?: number; // 0-100 percentage
-  videosCount?: number; // For series/courses
+    dp?: string | null | undefined;
+  } | undefined;
+  duration?: string | undefined;
+  progress?: number | undefined; // 0-100 percentage
+  videosCount?: number | undefined; // For series/courses
   addedAt: number;
 }
 

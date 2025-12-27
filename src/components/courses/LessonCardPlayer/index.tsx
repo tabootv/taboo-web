@@ -1,6 +1,6 @@
 import { cn, formatDuration } from '@/lib/utils';
 import type { Video } from '@/types';
-import { CheckCircle, Lock, Play } from 'lucide-react';
+import { Lock, Play } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -35,11 +35,7 @@ export function LessonCardPlayer({
       <div
         className={cn(
           'group flex gap-3 p-2 rounded-xl transition-all',
-          (() => {
-            if (isCurrent) return 'bg-red-primary/10 ring-1 ring-red-primary/30';
-            if (isLocked) return 'opacity-50';
-            return 'hover:bg-surface/50';
-          })()
+          isLocked ? 'opacity-50' : 'hover:ring-1 hover:ring-red-primary/50 hover:shadow-[0_0_15px_rgba(171,0,19,0.3)]'
         )}
       >
         <div className="relative w-[140px] h-[79px] shrink-0 rounded-lg overflow-hidden bg-surface">
@@ -96,7 +92,7 @@ export function LessonCardPlayer({
 
           <p
             className={cn(
-              'text-sm font-medium line-clamp-2 leading-tight',
+              'text-sm font-medium leading-tight',
               isCurrent ? 'text-white' : 'text-white/80 group-hover:text-white'
             )}
           >
@@ -104,9 +100,8 @@ export function LessonCardPlayer({
           </p>
 
           {video.channel?.name && (
-            <p className="text-xs text-white/40 mt-1 flex items-center gap-1">
+            <p className="text-xs text-white/40 mt-1">
               {video.channel.name}
-              <CheckCircle className="w-2.5 h-2.5 text-red-primary" />
             </p>
           )}
         </div>

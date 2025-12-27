@@ -2,13 +2,14 @@
 
 import { useRelatedVideos, useVideoPlay } from '@/api/queries';
 import { Button, LoadingScreen } from '@/components/ui';
+import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
 import { VideoPlayerSkeleton } from '@/components/video';
 import { LikeButton, SaveButton, VideoComments } from '@/features/video';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { formatRelativeTime } from '@/lib/utils';
 import { getTagKey, normalizeTags } from '@/lib/utils/tags';
 import type { Tag, Video } from '@/types';
-import { CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -66,19 +67,8 @@ export default function VideoPage() {
       });
     }
 
-    // Development checks
-    if (process.env.NODE_ENV === 'development') {
-      const leaked = allVideos.find(
-        (v: any) => v?.short === true || v?.is_short === true || v?.type === 'short'
-      );
-      if (leaked) {
-        console.error('SHORT CONTENT LEAKED INTO /videos/[id] related list', leaked);
-      }
-      const missingUuid = allVideos.find((v: any) => !v?.uuid);
-      if (missingUuid) {
-        console.error('MISSING UUID IN RELATED VIDEO', missingUuid);
-      }
-    }
+    // Development checks - removed console.error for production readiness
+    // These checks can be re-enabled with proper logging service if needed
 
     return allVideos.map(hydrateVideoTags);
   }, [playData?.videos, relatedData?.data, video, hydrateVideoTags]);
@@ -131,11 +121,18 @@ export default function VideoPage() {
     return Array.from(tagMap.values());
   }, [video, relatedVideos]);
 
+  const displayedTags = useMemo(() => availableTags.slice(0, 5), [availableTags]);
+
   const filteredVideos = useMemo(() => {
+    const limit = 7;
     if (!selectedTag) {
-      return relatedVideos;
+      return relatedVideos.slice(0, limit);
     }
-    return relatedVideos.filter((v) => v.tags?.some((tag) => tag.name === selectedTag));
+    const tagged = relatedVideos.filter((v) => v.tags?.some((tag) => tag.name === selectedTag));
+    const fillers = relatedVideos.filter(
+      (v) => !tagged.includes(v)
+    );
+    return [...tagged, ...fillers].slice(0, limit);
   }, [relatedVideos, selectedTag]);
 
   const handleTagsScroll = useCallback(() => {
@@ -154,7 +151,7 @@ export default function VideoPage() {
       return () => el.removeEventListener('scroll', handleTagsScroll);
     }
     return undefined;
-  }, [handleTagsScroll, availableTags]);
+  }, [handleTagsScroll, displayedTags.length]);
 
   const scrollTags = (direction: 'left' | 'right') => {
     if (tagsScrollRef.current) {
@@ -261,7 +258,7 @@ export default function VideoPage() {
               {video.title}
             </h1>
 
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-3 pb-4 border-b border-border">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-3 pb-4">
               <div className="flex items-center gap-3">
                 <Link
                   href={`/creators/creator-profile/${video.channel?.uuid || video.channel?.id}`}
@@ -290,7 +287,7 @@ export default function VideoPage() {
                     <span className="font-medium text-white group-hover:text-text-secondary transition-colors truncate">
                       {video.channel?.name}
                     </span>
-                    <CheckCircle className="w-3.5 h-3.5 text-text-secondary shrink-0" />
+                    <span className="shrink-0"><VerifiedBadge size={14} /></span>
                   </Link>
                   <p className="text-xs text-text-secondary">
                     {video.humans_publish_at || formatRelativeTime(video.published_at)}
@@ -304,7 +301,7 @@ export default function VideoPage() {
                     className="ml-2"
                   >
                     <Button
-                      variant="primary"
+                      variant="default"
                       size="sm"
                       className="rounded-full px-4 font-medium text-sm"
                     >
@@ -324,38 +321,43 @@ export default function VideoPage() {
             </div>
 
             {video.description && (
-              <button
-                type="button"
-                className="mt-3 w-full text-left bg-surface hover:bg-hover rounded-lg p-3 transition-colors"
-                onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
-              >
-                <p
-                  className={`text-sm text-text-secondary whitespace-pre-wrap ${
-                    !isDescriptionExpanded && shouldTruncateDescription ? 'line-clamp-2' : ''
-                  }`}
+              <div className="bg-surface/60 border border-border rounded-xl p-4">
+                <button
+                  type="button"
+                  className="w-full text-left"
+                  onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
                 >
-                  {video.description}
-                </p>
-                {shouldTruncateDescription && (
-                  <span className="block text-sm font-medium text-white mt-2">
-                    {isDescriptionExpanded ? 'Show less' : 'Show more'}
-                  </span>
-                )}
-              </button>
+                  <p
+                    className={`text-sm text-text-secondary whitespace-pre-wrap ${
+                      !isDescriptionExpanded && shouldTruncateDescription ? 'line-clamp-2' : ''
+                    }`}
+                  >
+                    {video.description}
+                  </p>
+                  {shouldTruncateDescription && (
+                    <span className="block text-sm font-medium text-white mt-2">
+                      {isDescriptionExpanded ? 'Show less' : 'Show more'}
+                    </span>
+                  )}
+                </button>
+              </div>
             )}
 
-            <div className="mt-6">
+            <div className="h-px bg-white/10 my-6" />
+
+            <div className="mt-4 bg-surface/60 border border-border rounded-xl p-4">
               <VideoComments video={video} initialComments={video.comments || []} />
             </div>
           </div>
 
           <div className="w-full lg:w-[402px] shrink-0">
-            {availableTags.length > 0 && (
+            {displayedTags.length > 0 && (
               <div className="relative mb-3 group/tags">
                 {showTagsLeftArrow && (
                   <button
                     onClick={() => scrollTags('left')}
-                    className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-1 bg-background/90 rounded-full shadow-md"
+                    className="absolute left-0 top-1/2 -translate-y-1/2 z-10 size-7 rounded-full bg-black/70 backdrop-blur hover:bg-black/80 transition-colors flex items-center justify-center"
+                    aria-label="Previous tags"
                   >
                     <ChevronLeft className="w-4 h-4 text-white" />
                   </button>
@@ -364,7 +366,8 @@ export default function VideoPage() {
                 {showTagsRightArrow && (
                   <button
                     onClick={() => scrollTags('right')}
-                    className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-1 bg-background/90 rounded-full shadow-md"
+                    className="absolute right-0 top-1/2 -translate-y-1/2 z-10 size-7 rounded-full bg-black/70 backdrop-blur hover:bg-black/80 transition-colors flex items-center justify-center"
+                    aria-label="Next tags"
                   >
                     <ChevronRight className="w-4 h-4 text-white" />
                   </button>
@@ -372,28 +375,28 @@ export default function VideoPage() {
 
                 <div
                   ref={tagsScrollRef}
-                  className="flex gap-2 overflow-x-auto hide-scrollbar scroll-smooth py-1 px-1"
+                  className="flex gap-1 overflow-x-auto hide-scrollbar scroll-smooth py-1 px-2"
                   style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                 >
                   <button
                     onClick={() => setSelectedTag(null)}
-                    className={`shrink-0 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    className={`shrink-0 px-2 py-[6px] rounded-full text-[13px] font-medium transition-colors border ${
                       selectedTag === null
-                        ? 'bg-white text-black'
-                        : 'bg-surface text-white hover:bg-hover'
+                        ? 'bg-black/50 text-white border-white/40'
+                        : 'bg-surface/60 text-white border-border hover:bg-hover'
                     }`}
                   >
                     All
                   </button>
 
-                  {availableTags.map((tag) => (
+                  {displayedTags.map((tag) => (
                     <button
                       key={getTagKey(tag)}
                       onClick={() => setSelectedTag(tag.name)}
-                      className={`shrink-0 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                      className={`shrink-0 px-2 py-[6px] rounded-full text-[13px] font-medium transition-colors border ${
                         selectedTag === tag.name
-                          ? 'bg-white text-black'
-                          : 'bg-surface text-white hover:bg-hover'
+                          ? 'bg-black/50 text-white border-white/40'
+                          : 'bg-surface/60 text-white border-border hover:bg-hover'
                       }`}
                     >
                       {tag.name}
@@ -433,7 +436,7 @@ export default function VideoPage() {
                       </p>
                       <p className="text-xs text-text-secondary mt-1 flex items-center gap-1">
                         {item.channel?.name}
-                        <CheckCircle className="w-3 h-3 text-text-secondary" />
+                        <span className="shrink-0"><VerifiedBadge size={12} /></span>
                       </p>
                       <p className="text-xs text-text-secondary">
                         {formatRelativeTime(item.published_at)}

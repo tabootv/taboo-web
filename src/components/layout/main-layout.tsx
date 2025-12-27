@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { TopHeader } from './top-header';
 import { Sidebar } from './sidebar';
 import { Footer } from './footer';
@@ -19,6 +19,8 @@ export function MainLayout({ children, showFooter = true }: MainLayoutProps) {
   const { checkAuth } = useAuthStore();
   const { isExpanded } = useSidebarStore();
   const pathname = usePathname();
+  const router = useRouter();
+  const PIP_RETURN_URL_KEY = 'tabootv_pip_return_url';
 
   // Check if we're on the home page (banner goes behind header)
   const isHomePage = pathname === '/home' || pathname === '/';
@@ -27,6 +29,31 @@ export function MainLayout({ children, showFooter = true }: MainLayoutProps) {
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
+
+  // Global PiP return handler: if PiP closes while routed away, return to the stored URL
+  useEffect(() => {
+    const handleLeavePiP = () => {
+      const storedUrl = sessionStorage.getItem(PIP_RETURN_URL_KEY);
+      if (storedUrl) {
+        sessionStorage.removeItem(PIP_RETURN_URL_KEY);
+        if (storedUrl !== pathname) {
+          router.push(storedUrl);
+        }
+      }
+    };
+
+    // If PiP was closed and we remounted without the element, still honor stored URL
+    const storedUrl = sessionStorage.getItem(PIP_RETURN_URL_KEY);
+    if (storedUrl && !document.pictureInPictureElement && storedUrl !== pathname) {
+      sessionStorage.removeItem(PIP_RETURN_URL_KEY);
+      router.push(storedUrl);
+    }
+
+    document.addEventListener('leavepictureinpicture', handleLeavePiP as EventListener);
+    return () => {
+      document.removeEventListener('leavepictureinpicture', handleLeavePiP as EventListener);
+    };
+  }, [pathname, router, PIP_RETURN_URL_KEY]);
 
   return (
     <div className="bg-background min-h-screen">

@@ -4,7 +4,7 @@ import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowLeft, Play, Edit, Eye, ThumbsUp, MessageCircle, Clock, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Edit, Eye, ThumbsUp, MessageCircle, Clock, ExternalLink } from 'lucide-react';
 import { Button, LoadingScreen } from '@/components/ui';
 import { VideoPlayer } from '@/features/video';
 import { useAuthStore } from '@/lib/stores';
@@ -94,10 +94,10 @@ export default function ShowVideoPage({ params }: { params: Promise<{ id: string
       <div className="aspect-video rounded-xl overflow-hidden bg-black mb-6">
         {hasVideoUrl ? (
           <VideoPlayer
-            thumbnail={video.thumbnail}
-            url_1080={video.url_1080}
-            url_720={video.url_720}
-            url_480={video.url_480}
+            thumbnail={video.thumbnail || ''}
+            url_1080={video.url_1080 ?? null}
+            url_720={video.url_720 ?? null}
+            url_480={video.url_480 ?? null}
             className="w-full h-full"
           />
         ) : (

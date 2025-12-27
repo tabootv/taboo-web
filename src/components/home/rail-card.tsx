@@ -25,7 +25,6 @@ export const RailCard = memo(function RailCard({
   const [isVideoReady, setIsVideoReady] = useState(false);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [mounted, setMounted] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -34,7 +33,6 @@ export const RailCard = memo(function RailCard({
 
   // Check saved state on mount
   useEffect(() => {
-    setMounted(true);
     if (video.id) {
       setSaved(isSaved(video.id));
     }
@@ -220,22 +218,38 @@ export const RailCard = memo(function RailCard({
           {video.title}
         </h3>
         <div className="flex items-center gap-2 mt-1">
-          {video.channel?.dp ? (
-            <div className="relative w-4 h-4 rounded-full overflow-hidden flex-shrink-0">
-              <Image
-                src={video.channel.dp}
-                alt=""
-                fill
-                className="object-cover"
-              />
-            </div>
-          ) : video.channel?.name && (
-            <div className="w-4 h-4 rounded-full bg-gradient-to-br from-red-primary/80 to-red-dark flex items-center justify-center flex-shrink-0">
-              <span className="text-[8px] text-white font-bold">
-                {video.channel.name.charAt(0)}
-              </span>
-            </div>
-          )}
+          {(() => {
+            // Check multiple sources for profile picture (API returns dp in different locations)
+            const videoAny = video as Video & {
+              creator?: { dp?: string; channel?: { dp?: string } };
+              user?: { dp?: string; small_dp?: string };
+            };
+            const profilePic =
+              video.channel?.dp ||
+              video.channel?.small_dp ||
+              videoAny.creator?.dp ||
+              videoAny.creator?.channel?.dp ||
+              videoAny.user?.dp ||
+              videoAny.user?.small_dp;
+
+            if (profilePic) {
+              return (
+                <div className="relative w-4 h-4 rounded-full overflow-hidden flex-shrink-0">
+                  <Image src={profilePic} alt="" fill className="object-cover" />
+                </div>
+              );
+            }
+            if (video.channel?.name) {
+              return (
+                <div className="w-4 h-4 rounded-full bg-gradient-to-br from-red-primary/80 to-red-dark flex items-center justify-center flex-shrink-0">
+                  <span className="text-[8px] text-white font-bold">
+                    {video.channel.name.charAt(0)}
+                  </span>
+                </div>
+              );
+            }
+            return null;
+          })()}
           <p className="text-xs text-white/50 truncate">
             {video.channel?.name}
           </p>

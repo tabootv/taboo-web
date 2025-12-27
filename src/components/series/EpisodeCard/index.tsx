@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { CheckCircle, Play } from 'lucide-react';
+import { Play } from 'lucide-react';
 import { formatDuration } from '@/lib/utils';
 import { usePrefetch } from '@/lib/hooks/use-prefetch';
 import type { Channel, Video } from '@/types';
@@ -19,7 +19,6 @@ export function EpisodeCard({
   video,
   episodeNumber,
   seriesId,
-  channel,
   isCourse,
 }: EpisodeCardProps) {
   const { prefetchRoute } = usePrefetch();
@@ -73,10 +72,7 @@ export function EpisodeCard({
               {video.description}
             </p>
           )}
-          <div className="flex items-center gap-1.5 text-white/40 text-xs">
-            <span className="truncate">{video.channel?.name || channel?.name}</span>
-            <CheckCircle className="w-3 h-3 text-red-primary shrink-0" />
-          </div>
+          {/* Creator name removed - cards kept clean with just thumbnail, title, description */}
         </div>
       </div>
     </Link>

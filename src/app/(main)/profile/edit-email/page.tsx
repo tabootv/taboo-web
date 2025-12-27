@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Mail, Lock, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Mail, Lock, AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui';
 import { profile as profileApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/stores';
@@ -131,8 +131,8 @@ export default function EditEmailPage() {
           >
             Cancel
           </Button>
-          <Button type="submit" isLoading={isLoading} className="flex-1 btn-premium">
-            Update Email
+          <Button type="submit" disabled={isLoading} className="flex-1 btn-premium">
+            {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Update Email'}
           </Button>
         </div>
       </form>

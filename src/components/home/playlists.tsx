@@ -7,17 +7,6 @@ import { PlaylistRail } from './components/PlaylistRail';
 import { usePlaylistsPagination } from './hooks/use-playlists-pagination';
 import { usePlaylistVideos } from './hooks/use-playlist-videos';
 
-interface PlaylistWithVideos {
-  id: number;
-  name?: string;
-  description?: string;
-  videos: { data: Video[] };
-  _videosLoaded: boolean;
-  videos_current_page: number;
-  videos_last_page: number | null;
-  videos_loading: boolean;
-}
-
 interface PlaylistsSectionProps {
   instanceId: number | string;
   onAllLoaded: () => void;
@@ -30,28 +19,13 @@ export function PlaylistsSection({ instanceId, onAllLoaded }: PlaylistsSectionPr
 
   const {
     playlistsList,
-    currentPage,
-    lastPage,
+    setPlaylistsList,
     loadingPlaylists,
     fetchPlaylistsPage,
     checkIfAllLoaded,
   } = usePlaylistsPagination(onAllLoaded);
 
-  const { fetchPlaylistVideos } = usePlaylistVideos(
-    useCallback(
-      (updater) => {
-        // This is a workaround - we need to pass setPlaylistsList
-        // but hooks can't directly access state setters from other hooks
-        // So we'll use a different approach
-      },
-      []
-    )
-  );
-
-  // Re-export setPlaylistsList from the hook
-  const setPlaylistsList = useCallback((updater: any) => {
-    // This will be handled by the hook
-  }, []);
+  const { fetchPlaylistVideos } = usePlaylistVideos(setPlaylistsList);
 
   const handleOpenPreview = useCallback((video: Video) => {
     setPreviewVideo(video);
@@ -75,7 +49,8 @@ export function PlaylistsSection({ instanceId, onAllLoaded }: PlaylistsSectionPr
 
     sentinelObserverRef.current = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting) {
+        const entry = entries[0];
+        if (entry?.isIntersecting) {
           fetchPlaylistsPage();
         }
       },

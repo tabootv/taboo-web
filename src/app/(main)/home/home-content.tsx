@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import {
   BannerSlider,
   CreatorsSection,
@@ -24,25 +24,33 @@ interface HomeContentProps {
  * - Manages infinite scroll for playlists with real cursor pagination
  */
 export function HomeContent({ initialData }: HomeContentProps) {
+  // Generate unique key on mount to force shorts to reshuffle each visit
+  const [shortsKey, setShortsKey] = useState(() => Date.now());
+
+  // Update key on each mount (handles navigation back to home)
+  useEffect(() => {
+    setShortsKey(Date.now());
+  }, []);
+
   return (
     <>
       {/* Hero Banner Slider - full-width, no rounded corners, goes behind header */}
       <div className="relative w-full">
-        <BannerSlider initialBanners={initialData.static?.banners} />
+        <BannerSlider initialBanners={initialData.static?.banners || []} />
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col w-full gap-6 md:gap-8 lg:gap-10 mt-8 md:mt-12 relative z-10">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 flex flex-col w-full gap-5 sm:gap-6 md:gap-8 lg:gap-10 mt-4 sm:mt-8 md:mt-12 relative z-10">
         {/* Static Sections - loaded once */}
-        <CreatorsSection initialCreators={initialData.static?.creators} />
-        <FeaturedSection initialVideos={initialData.static?.featured} />
-        <HomeShortsSection initialShorts={initialData.static?.shorts} />
+        <CreatorsSection initialCreators={initialData.static?.creators || []} />
+        <FeaturedSection initialVideos={initialData.static?.featured || []} />
+        <HomeShortsSection key={shortsKey} initialShorts={initialData.static?.shorts || []} />
 
         {/* Recommended - shown once (not paginated) */}
-        <RecommendedSection initialVideos={initialData.static?.recommended} />
+        <RecommendedSection initialVideos={initialData.static?.recommended || []} />
 
         {/* Series - shown once (not paginated) */}
-        <HomeSeriesSection initialSeries={initialData.static?.series} />
+        <HomeSeriesSection initialSeries={initialData.static?.series || []} />
 
         {/* Playlists - infinite scroll with real pagination */}
         <PlaylistsInfiniteScroll

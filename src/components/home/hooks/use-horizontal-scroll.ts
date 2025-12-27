@@ -24,6 +24,7 @@ export function useHorizontalScroll() {
       handleScroll();
       return () => el.removeEventListener('scroll', handleScroll);
     }
+    return undefined;
   }, [handleScroll]);
 
   const scroll = useCallback((direction: 'left' | 'right') => {

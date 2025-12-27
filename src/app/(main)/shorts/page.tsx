@@ -46,14 +46,11 @@ export default function ShortsPage() {
     }
   }, [hasFetched, isLoading, fetchVideos]);
 
-  // Mark as ready once we have videos
+  // Mark as ready once we have videos - no artificial delay
   useEffect(() => {
     if (videos.length > 0 && !isReady) {
-      const timer = setTimeout(() => {
-        setIsReady(true);
-        isInitializedRef.current = true;
-      }, 50);
-      return () => clearTimeout(timer);
+      setIsReady(true);
+      isInitializedRef.current = true;
     }
   }, [videos.length, isReady]);
 
@@ -204,7 +201,10 @@ export default function ShortsPage() {
   }
 
   return (
-    <div className="fixed top-14 left-0 right-0 bottom-0 bg-black overflow-hidden z-30 lg:left-[72px]">
+    <div
+      className="fixed top-14 left-0 right-0 bottom-0 bg-black overflow-hidden z-30 lg:left-[72px]"
+      style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+    >
       {/* Full screen swiper */}
       <Swiper
         modules={[Virtual, Mousewheel, EffectCreative]}
@@ -220,8 +220,8 @@ export default function ShortsPage() {
         }}
         virtual={{
           enabled: true,
-          addSlidesAfter: 2,
-          addSlidesBefore: 1,
+          addSlidesAfter: 3, // Increased for better preloading
+          addSlidesBefore: 2, // Increased for better preloading
         }}
         effect="creative"
         creativeEffect={{
@@ -252,19 +252,26 @@ export default function ShortsPage() {
         onSlideChange={handleSlideChange}
         className="h-full w-full shorts-swiper"
       >
-        {videos.map((video, index) => (
-          <SwiperSlide
-            key={video.uuid}
-            virtualIndex={index}
-            className="!h-full !w-full"
-          >
-            <ShortVideoCard
-              video={video}
-              index={index}
-              isActive={currentIndex === index}
-            />
-          </SwiperSlide>
-        ))}
+        {videos.map((video, index) => {
+          const isActive = currentIndex === index;
+          // Mark adjacent slides for preloading (1 before, 2 after)
+          const isNearActive = !isActive && Math.abs(currentIndex - index) <= 2;
+
+          return (
+            <SwiperSlide
+              key={video.uuid}
+              virtualIndex={index}
+              className="!h-full !w-full"
+            >
+              <ShortVideoCard
+                video={video}
+                index={index}
+                isActive={isActive}
+                isNearActive={isNearActive}
+              />
+            </SwiperSlide>
+          );
+        })}
       </Swiper>
 
       {/* Navigation buttons - Desktop only */}

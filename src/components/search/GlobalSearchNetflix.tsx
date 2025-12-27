@@ -44,7 +44,6 @@ export const GlobalSearchNetflix = forwardRef<GlobalSearchHandle, GlobalSearchNe
     const router = useRouter();
     const inputRef = useRef<HTMLInputElement>(null);
     const overlayRef = useRef<HTMLDivElement>(null);
-    const abortControllerRef = useRef<AbortController | null>(null);
 
     const [isOpen, setIsOpen] = useState(false);
     const [query, setQuery] = useState('');
@@ -119,8 +118,6 @@ export const GlobalSearchNetflix = forwardRef<GlobalSearchHandle, GlobalSearchNe
       return items;
     }, [results]);
 
-    const allResults = getAllResults();
-
     // Keyboard handling
     useEffect(() => {
       const handleKeyDown = (e: KeyboardEvent) => {
@@ -164,15 +161,19 @@ export const GlobalSearchNetflix = forwardRef<GlobalSearchHandle, GlobalSearchNe
             if (!query.trim() && selectedIndex >= 0 && selectedIndex < recentItems.length) {
               // Recent search selected
               const selected = recentItems[selectedIndex];
-              setQuery(selected);
-              handleViewAll(selected);
+              if (selected) {
+                setQuery(selected);
+                handleViewAll(selected);
+              }
             } else if (query.trim()) {
               if (selectedIndex === allResults.length) {
                 // "View all" selected
                 handleViewAll();
               } else if (selectedIndex >= 0 && selectedIndex < allResults.length) {
                 const item = allResults[selectedIndex];
-                handleItemClick(item);
+                if (item) {
+                  handleItemClick(item);
+                }
               } else {
                 handleViewAll();
               }
@@ -251,13 +252,6 @@ export const GlobalSearchNetflix = forwardRef<GlobalSearchHandle, GlobalSearchNe
       setQuery('');
       setResults(null);
     };
-
-    const hasResults =
-      results &&
-      (results.videos.length > 0 ||
-        results.shorts.length > 0 ||
-        results.series.length > 0 ||
-        results.creators.length > 0);
 
     const topResult = results?.videos[0] || results?.series[0];
 

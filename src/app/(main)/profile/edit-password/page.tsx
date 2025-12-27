@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Lock, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Lock, Eye, EyeOff, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui';
 import { profile as profileApi } from '@/lib/api';
 import { toast } from 'sonner';
@@ -215,11 +215,10 @@ export default function EditPasswordPage() {
           </Button>
           <Button
             type="submit"
-            isLoading={isLoading}
-            disabled={!allRequirementsMet || !passwordsMatch}
+            disabled={isLoading || !allRequirementsMet || !passwordsMatch}
             className="flex-1 btn-premium"
           >
-            Update Password
+            {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Update Password'}
           </Button>
         </div>
       </form>

@@ -165,7 +165,7 @@ export default function SinglePostPage({ params }: { params: Promise<{ post: str
         />
 
         {/* Media */}
-        {post.media && post.media.length > 0 && (
+        {post.media && post.media.length > 0 && post.media[0] && (
           <div className="mb-6 rounded-lg overflow-hidden">
             {post.media.length === 1 ? (
               <div className="relative aspect-video">

@@ -172,14 +172,21 @@ export const videos = {
     };
   },
 
-  getAll: async (page = 1, perPage = 24): Promise<PaginatedResponse<Video>> => {
-    // Use public endpoint for listing all platform videos
-    // Matches Taboo BO behavior: short=false (only long-form videos), sorted by published_at DESC
+  /**
+   * CANONICAL LONG-FORM VIDEOS ENDPOINT
+   *
+   * This is THE source of truth for long-form videos.
+   * Backend guarantees: short=false, published=true, ordered by published_at DESC
+   *
+   * NEVER reuse home/recommendation APIs for /videos page.
+   * If shorts appear here, it's a BACKEND BUG.
+   */
+  getLongFormVideos: async (page = 1, perPage = 24): Promise<PaginatedResponse<Video>> => {
     const { data } = await apiClient.get('/public/videos', {
       params: {
         page,
-        limit: perPage,
-        short: false, // CRITICAL: Only long-form videos, never shorts
+        per_page: perPage,
+        short: false,
         is_short: false,
         type: 'video',
         published: true,
@@ -187,14 +194,28 @@ export const videos = {
         order: 'desc',
       },
     });
-    // API returns { videos: [...], pagination: {...} }
-    // Transform videos to match expected format (public API has creator.channel, we need channel at root)
-    const videos = (data.videos || []).map((video: Video & { creator?: { channel?: { id: number; name: string } } }) => ({
+
+    // Transform response
+    const videosList = (data.videos || []).map((video: Video & { creator?: { channel?: { id: number; name: string } } }) => ({
       ...video,
       channel: video.channel || video.creator?.channel,
     }));
+
+    // DEV ASSERTION: If ANY short leaks through, throw error
+    if (process.env.NODE_ENV === 'development') {
+      const leakedShort = videosList.find((v: Video) =>
+        v.short === true ||
+        (v as any).is_short === true ||
+        (v as any).type === 'short'
+      );
+      if (leakedShort) {
+        console.error('BACKEND BUG: Short content leaked into /public/videos', leakedShort);
+        throw new Error(`SHORT LEAKED INTO /videos: ${leakedShort.uuid || leakedShort.id}`);
+      }
+    }
+
     return {
-      data: videos,
+      data: videosList,
       current_page: data.pagination?.current_page || 1,
       last_page: data.pagination?.last_page || 1,
       per_page: data.pagination?.per_page || perPage,
@@ -210,19 +231,65 @@ export const videos = {
     };
   },
 
+  // Alias for backwards compatibility
+  getAll: async (page = 1, perPage = 24): Promise<PaginatedResponse<Video>> => {
+    return videos.getLongFormVideos(page, perPage);
+  },
+
+  // Deprecated - use getLongFormVideos directly
   getLongForm: async (page = 1, perPage = 24): Promise<PaginatedResponse<Video>> => {
-    const response = await videos.getAll(page, perPage);
-    // Defensive: drop any shorts if backend ignores flags
-    const filtered = (response.data || []).filter((v: any) => {
-      if (v?.short === true || v?.is_short === true || v?.type === 'short') {
-        return false;
-      }
-      return true;
+    return videos.getLongFormVideos(page, perPage);
+  },
+
+  /**
+   * Videos API - Main endpoint for /videos page
+   * Uses /public/videos with pagination
+   * Filters out shorts (videos under 60 seconds) client-side
+   */
+  getVideosV2: async (
+    page = 1,
+    perPage = 24
+  ): Promise<PaginatedResponse<Video>> => {
+    // Fetch more to account for filtered shorts
+    const { data } = await apiClient.get('/public/videos', {
+      params: {
+        page,
+        per_page: perPage * 2, // Fetch extra to compensate for filtered shorts
+      },
     });
-    if (process.env.NODE_ENV === 'development' && filtered.length !== (response.data || []).length) {
-      console.warn('Filtered out short content from /videos response');
-    }
-    return { ...response, data: filtered };
+
+    // Transform response - API returns { videos: [...], pagination: {...} }
+    const videosList = data.videos || [];
+    const pagination = data.pagination || {};
+
+    // Filter out shorts (under 60 seconds) and transform
+    const SHORTS_THRESHOLD = 60; // seconds
+    const transformedVideos = videosList
+      .filter((video: Video) => {
+        const duration = video.duration || 0;
+        return duration >= SHORTS_THRESHOLD;
+      })
+      .map((video: Video & { creator?: { channel?: { id: number; name: string } } }) => ({
+        ...video,
+        channel: video.channel || video.creator?.channel,
+      }))
+      .slice(0, perPage); // Limit to requested amount
+
+    return {
+      data: transformedVideos,
+      current_page: pagination.current_page || page,
+      last_page: pagination.last_page || 1,
+      per_page: pagination.per_page || perPage,
+      total: pagination.total || 0,
+      first_page_url: '',
+      from: null,
+      last_page_url: '',
+      links: [],
+      next_page_url: null,
+      path: '',
+      prev_page_url: null,
+      to: null,
+    };
   },
 
   getRelatedLongForm: async (
@@ -800,7 +867,10 @@ export const home = {
   },
 
   getShortVideosV2: async (): Promise<Video[]> => {
-    const { data } = await apiClient.get('/v2/home/short-videos');
+    // Add timestamp to prevent caching and get fresh shorts each time
+    const { data } = await apiClient.get('/v2/home/short-videos', {
+      params: { _t: Date.now() },
+    });
     // Handle various response formats (array, { videos: [] }, { data: [] }, { data: { data: [] } })
     const videos = data.videos || data.data || data;
     return Array.isArray(videos) ? videos : (videos?.data || []);
@@ -948,7 +1018,7 @@ export const creators = {
     return { data: creators, creators };
   },
 
-  get: async (id: number): Promise<Creator> => {
+  get: async (id: string | number): Promise<Creator> => {
     const { data } = await apiClient.get(`/creators/${id}`);
     return data.creator || data.data || data;
   },
@@ -959,53 +1029,78 @@ export const creators = {
   },
 
   getVideos: async (
-    id: number,
+    id: string | number,
     params?: { sort_by?: string; page_url?: string }
   ): Promise<PaginatedResponse<Video>> => {
     const url = params?.page_url || `/creators/creator-videos/${id}`;
     const queryParams = params?.sort_by ? { sort_by: params.sort_by } : undefined;
     const { data } = await apiClient.get(url, { params: queryParams });
-    return data.videos || data;
+    // Handle both { videos: [...] } and { videos: { data: [...] } } response structures
+    const videos = data.videos;
+    if (Array.isArray(videos)) {
+      return { ...data, data: videos };
+    }
+    return videos || data;
   },
 
   getShorts: async (
-    id: number,
+    id: string | number,
     params?: { sort_by?: string; page_url?: string }
   ): Promise<PaginatedResponse<ShortVideo>> => {
     const url = params?.page_url || `/creators/creator-shorts/${id}`;
     const queryParams = params?.sort_by ? { sort_by: params.sort_by } : undefined;
     const { data } = await apiClient.get(url, { params: queryParams });
-    return data.videos || data;
+    // Handle both { videos: [...] } and { videos: { data: [...] } } response structures
+    const videos = data.videos;
+    if (Array.isArray(videos)) {
+      return { ...data, data: videos };
+    }
+    return videos || data;
   },
 
   getSeries: async (
-    id: number,
+    id: string | number,
     params?: { sort_by?: string; page_url?: string }
   ): Promise<PaginatedResponse<Series>> => {
     const url = params?.page_url || `/creators/creator-series/${id}`;
     const queryParams = params?.sort_by ? { sort_by: params.sort_by } : undefined;
     const { data } = await apiClient.get(url, { params: queryParams });
-    return data.series || data;
+    // Handle both { series: [...] } and { series: { data: [...] } } response structures
+    const series = data.series;
+    if (Array.isArray(series)) {
+      return { ...data, data: series };
+    }
+    return series || data;
   },
 
   getPosts: async (
-    id: number,
+    id: string | number,
     params?: { sort_by?: string; page_url?: string }
   ): Promise<PaginatedResponse<Post>> => {
     const url = params?.page_url || `/creators/creator-posts/${id}`;
     const queryParams = params?.sort_by ? { sort_by: params.sort_by } : undefined;
     const { data } = await apiClient.get(url, { params: queryParams });
-    return data.posts || data;
+    // Handle both { posts: [...] } and { posts: { data: [...] } } response structures
+    const posts = data.posts;
+    if (Array.isArray(posts)) {
+      return { ...data, data: posts };
+    }
+    return posts || data;
   },
 
   getCourses: async (
-    id: number,
+    id: string | number,
     params?: { sort_by?: string; page_url?: string }
   ): Promise<PaginatedResponse<Course>> => {
     const url = params?.page_url || `/creators/creator-course/${id}`;
     const queryParams = params?.sort_by ? { sort_by: params.sort_by } : undefined;
     const { data } = await apiClient.get(url, { params: queryParams });
-    return data.courses || data;
+    // Handle both { courses: [...] } and { courses: { data: [...] } } response structures
+    const courses = data.courses;
+    if (Array.isArray(courses)) {
+      return { ...data, data: courses };
+    }
+    return courses || data;
   },
 };
 

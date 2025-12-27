@@ -3,15 +3,6 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  Home,
-  PlayCircle,
-  Film,
-  Layers,
-  GraduationCap,
-  Users,
-  Globe2,
-  History,
-  Bookmark,
   Clapperboard,
   ChevronRight,
   X,
@@ -40,7 +31,7 @@ export function Sidebar() {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed top-14 left-0 bottom-0 z-40 bg-background border-r border-border flex flex-col transition-all duration-300',
+          'fixed top-14 left-0 bottom-0 z-40 bg-background border-r border-black flex flex-col transition-all duration-300',
           // Desktop: always visible, width depends on expanded state
           'hidden lg:flex',
           isExpanded ? 'w-60' : 'w-[72px]',
@@ -139,7 +130,7 @@ export function Sidebar() {
                       )}
                     >
                       <Clapperboard className="w-5 h-5 flex-shrink-0" />
-                      <span className="text-sm truncate">Your videos</span>
+                      <span className="text-sm truncate">Creator Studio</span>
                     </Link>
                   )}
                 </nav>
@@ -161,12 +152,12 @@ export function Sidebar() {
       {/* Mobile Sidebar - Separate element for mobile overlay */}
       <aside
         className={cn(
-          'fixed top-0 left-0 bottom-0 z-50 bg-background border-r border-border flex flex-col w-60 transition-transform duration-300 lg:hidden',
+          'fixed top-0 left-0 bottom-0 z-50 bg-background border-r border-black flex flex-col w-60 transition-transform duration-300 lg:hidden',
           isMobileOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
         {/* Mobile Close Button */}
-        <div className="h-14 flex items-center justify-between px-4 border-b border-border">
+        <div className="h-14 flex items-center justify-between px-4 border-b border-black">
           <span className="text-lg font-bold text-red-primary">TabooTV</span>
           <button
             onClick={() => setMobileOpen(false)}

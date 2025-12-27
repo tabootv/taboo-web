@@ -8,7 +8,11 @@ export { MobileSearch } from './mobile-search';
 // New Design System Components
 export { PageHeader, type PageHeaderProps } from './page-header';
 export { FilterChips, type FilterChipsProps, type FilterOption } from './filter-chips';
+export { FilterSelect, type FilterSelectProps } from './filter-select';
 export { MediaCard, type MediaCardProps } from './media-card';
 export { ContentGrid, type ContentGridProps, type GridVariant } from './content-grid';
 export { OptimizedImage, ThumbnailImage } from './optimized-image';
 export { VerifiedBadge } from './VerifiedBadge';
+
+// Re-export types for convenience
+export type * from './types';

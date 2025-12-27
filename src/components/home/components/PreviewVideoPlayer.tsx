@@ -14,7 +14,7 @@ interface PreviewVideoPlayerProps {
   isVideoReady: boolean;
   isMuted: boolean;
   isNew: boolean;
-  videoRef: React.RefObject<HTMLVideoElement>;
+  videoRef: React.RefObject<HTMLVideoElement | null>;
   onVideoReady: () => void;
   onPlay: () => void;
   onToggleMute: () => void;

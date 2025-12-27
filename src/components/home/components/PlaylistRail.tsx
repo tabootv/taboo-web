@@ -42,6 +42,7 @@ export function PlaylistRail({ playlist, onOpenPreview, onLoadMore }: PlaylistRa
       el.addEventListener('scroll', handleScroll, { passive: true });
       return () => el.removeEventListener('scroll', handleScroll);
     }
+    return undefined;
   }, [handleScroll]);
 
   if (!playlist._videosLoaded) {
@@ -74,6 +75,7 @@ export function PlaylistRail({ playlist, onOpenPreview, onLoadMore }: PlaylistRa
           key={video.uuid || video.id}
           video={video}
           onOpenPreview={onOpenPreview}
+          showDate
           priority={index < 4}
         />
       ))}

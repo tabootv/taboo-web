@@ -14,7 +14,7 @@ interface RailProps {
   className?: string;
 }
 
-export function Rail({ label, items, type = 'titles', onItemClick, className }: RailProps) {
+export function Rail({ label, items, type: _type = 'titles', onItemClick, className }: RailProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
@@ -38,6 +38,7 @@ export function Rail({ label, items, type = 'titles', onItemClick, className }: 
         window.removeEventListener('resize', checkArrows);
       };
     }
+    return undefined;
   }, [checkArrows, items]);
 
   const scroll = (direction: 'left' | 'right') => {

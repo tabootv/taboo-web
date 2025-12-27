@@ -1,4 +1,7 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
 
 /* ============================================
    TabooTV Design System
@@ -13,8 +16,8 @@
   --surface-hover: #161616;
   --hover: #161616;
   --elevated: #1a1a1a;
-  --card: #131315;
-  --border: #1f1f1f;
+  --card: #0d0d0d;
+  --border: rgba(255, 255, 255, 0.06);
 
   /* Text Colors */
   --text-primary: #e6e7ea;
@@ -32,9 +35,7 @@
   --red-glow: rgba(171, 0, 19, 0.4);
 
   /* Alias for compatibility */
-  --background: var(--bg);
-  --foreground: var(--text-primary);
-  --primary: var(--red-primary);
+  --primary: oklch(0.205 0 0);
   --primary-light: var(--red-hover);
   --primary-dark: var(--red-dark);
 
@@ -125,6 +126,35 @@
   --font-semibold: 600;
   --font-bold: 700;
   --font-extrabold: 800;
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
 }
 
 @theme inline {
@@ -349,6 +379,34 @@
   --size-chip-sm: 28px;
   --size-chip-md: 36px;
   --size-chip-lg: 44px;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
 }
 
 /* ============================================
@@ -1078,19 +1136,19 @@ small {
   }
 }
 
+/* Creator Card - Studio Dashboard Style */
 .creator-card-bg {
-  background: var(--surface);
-  border-radius: 12px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+  border-radius: 16px;
   overflow: hidden;
-  border: 1px solid var(--border);
-  transition: all 0.2s ease, transform 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.2s ease;
   min-height: 260px;
 }
 
 .creator-card-bg:hover {
-  border-color: rgba(171, 0, 19, 0.3);
-  box-shadow: 0 0 20px rgba(171, 0, 19, 0.12);
-  transform: translateY(-2px);
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03));
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
 .card-content {
@@ -2154,32 +2212,32 @@ section:has(.vertical-series-card:hover) {
    Community Page - Social Feed
    ============================================ */
 
-/* Community Post Card */
+/* Community Post Card - Studio Dashboard Style */
 .community-post-card {
-  background: transparent;
-  border-radius: 12px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+  border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   padding: 16px;
   transition: all 0.2s ease;
 }
 
 .community-post-card:hover {
-  background: var(--card);
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03));
   border-color: rgba(255, 255, 255, 0.12);
 }
 
-/* Community Sidebar Card */
+/* Community Sidebar Card - Studio Dashboard Style */
 .community-sidebar-card {
-  background: transparent;
-  border-radius: 12px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+  border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   padding: 16px;
 }
 
-/* Create Post Card */
+/* Create Post Card - Studio Dashboard Style */
 .community-create-post {
-  background: transparent;
-  border-radius: 12px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+  border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   padding: 16px;
   transition: border-color 0.2s ease;
@@ -2969,4 +3027,324 @@ section:has(.vertical-series-card:hover) {
 .animate-dropdown-in {
   animation: dropdown-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   transform-origin: top right;
+}
+
+/* ============================================
+   Mobile Optimization Styles
+   ============================================ */
+
+/* Safe area insets for notched devices (iPhone X+, etc.) */
+:root {
+  --safe-area-inset-top: env(safe-area-inset-top, 0px);
+  --safe-area-inset-right: env(safe-area-inset-right, 0px);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-inset-left: env(safe-area-inset-left, 0px);
+}
+
+/* Mobile-specific touch optimizations */
+@media (max-width: 768px) {
+  /* Disable hover effects on touch devices for cleaner UX */
+  .hover-lift:hover,
+  .card-hover:hover,
+  .card-interactive:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* Optimize tap highlight */
+  * {
+    -webkit-tap-highlight-color: rgba(171, 0, 19, 0.1);
+  }
+
+  /* Prevent text selection on interactive elements */
+  button,
+  a,
+  .interactive {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* Smoother momentum scrolling */
+  .scroll-container,
+  .hide-scrollbar {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  /* Tighter spacing on mobile */
+  .mobile-compact {
+    gap: 8px !important;
+  }
+
+  /* Mobile-optimized card hover (active state instead) */
+  .card-interactive:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+}
+
+/* Mobile padding utilities with safe areas */
+.safe-top {
+  padding-top: max(16px, var(--safe-area-inset-top));
+}
+
+.safe-bottom {
+  padding-bottom: max(16px, var(--safe-area-inset-bottom));
+}
+
+.safe-left {
+  padding-left: max(16px, var(--safe-area-inset-left));
+}
+
+.safe-right {
+  padding-right: max(16px, var(--safe-area-inset-right));
+}
+
+.safe-x {
+  padding-left: max(16px, var(--safe-area-inset-left));
+  padding-right: max(16px, var(--safe-area-inset-right));
+}
+
+.safe-y {
+  padding-top: max(16px, var(--safe-area-inset-top));
+  padding-bottom: max(16px, var(--safe-area-inset-bottom));
+}
+
+.safe-all {
+  padding: max(16px, var(--safe-area-inset-top)) max(16px, var(--safe-area-inset-right)) max(16px, var(--safe-area-inset-bottom)) max(16px, var(--safe-area-inset-left));
+}
+
+/* Mobile-optimized scroll snap */
+@media (max-width: 768px) {
+  .snap-mobile {
+    scroll-snap-type: x mandatory;
+    scroll-padding: 16px;
+  }
+
+  .snap-mobile > * {
+    scroll-snap-align: start;
+  }
+}
+
+/* Mobile card sizes */
+@media (max-width: 768px) {
+  .mobile-card-sm {
+    width: 140px !important;
+    min-width: 140px !important;
+  }
+
+  .mobile-card-md {
+    width: 180px !important;
+    min-width: 180px !important;
+  }
+
+  .mobile-card-lg {
+    width: 220px !important;
+    min-width: 220px !important;
+  }
+}
+
+/* Mobile text sizes */
+@media (max-width: 768px) {
+  .mobile-text-sm {
+    font-size: 0.75rem !important;
+  }
+
+  .mobile-text-base {
+    font-size: 0.875rem !important;
+  }
+
+  .mobile-text-lg {
+    font-size: 1rem !important;
+  }
+}
+
+/* Mobile spacing */
+@media (max-width: 768px) {
+  .mobile-px-3 {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  .mobile-px-4 {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  .mobile-py-2 {
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+  }
+
+  .mobile-gap-2 {
+    gap: 8px !important;
+  }
+
+  .mobile-gap-3 {
+    gap: 12px !important;
+  }
+}
+
+/* Hide elements on mobile */
+@media (max-width: 768px) {
+  .mobile-hidden {
+    display: none !important;
+  }
+}
+
+/* Show only on mobile */
+@media (min-width: 769px) {
+  .mobile-only {
+    display: none !important;
+  }
+}
+
+/* Mobile full-width sections */
+@media (max-width: 768px) {
+  .mobile-full-bleed {
+    margin-left: -16px;
+    margin-right: -16px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+/* Touch-friendly button sizes */
+.touch-target {
+  position: relative;
+}
+
+.touch-target::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: max(100%, 44px);
+  height: max(100%, 44px);
+}
+
+/* Mobile navigation bar offset */
+.mobile-nav-offset {
+  padding-top: 56px; /* 14 * 4 = 56px navbar height */
+}
+
+@media (min-width: 1024px) {
+  .mobile-nav-offset {
+    padding-top: 64px; /* Slightly taller on desktop */
+  }
+}
+
+/* Prevent body scroll when modal is open */
+.body-scroll-lock {
+  overflow: hidden !important;
+  position: fixed !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Mobile video aspect ratios */
+@media (max-width: 768px) {
+  .mobile-aspect-video {
+    aspect-ratio: 16 / 9;
+  }
+
+  .mobile-aspect-short {
+    aspect-ratio: 9 / 16;
+  }
+
+  .mobile-aspect-square {
+    aspect-ratio: 1 / 1;
+  }
+}
+
+/* Swipe indicator for mobile carousels */
+.swipe-hint {
+  position: relative;
+}
+
+.swipe-hint::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 40px;
+  background: linear-gradient(to right, transparent, var(--bg));
+  pointer-events: none;
+}
+
+@media (min-width: 769px) {
+  .swipe-hint::after {
+    display: none;
+  }
+}
+
+/* Short video card optimizations */
+@media (max-width: 768px) {
+  .short-hover {
+    transition: transform 0.15s ease-out;
+  }
+
+  .short-hover:active {
+    transform: scale(0.97);
+  }
+}
+
+/* Mobile bottom bar safe area */
+.mobile-bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding-bottom: var(--safe-area-inset-bottom);
+  background: linear-gradient(to top, var(--bg), transparent);
+}
+
+/* Pull-to-refresh visual feedback */
+.pull-to-refresh {
+  overscroll-behavior-y: contain;
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }

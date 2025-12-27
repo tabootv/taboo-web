@@ -8,7 +8,7 @@ import { Spinner } from '../spinner';
 interface MobileSearchHeaderProps {
   query: string;
   isLoading: boolean;
-  inputRef: React.RefObject<HTMLInputElement>;
+  inputRef: React.RefObject<HTMLInputElement | null>;
   onQueryChange: (value: string) => void;
   onClear: () => void;
   onSubmit: (e: React.FormEvent) => void;

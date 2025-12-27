@@ -4,6 +4,7 @@ import { useRef, useState, useEffect, useCallback, ReactNode } from 'react';
 import { Volume2, VolumeX } from 'lucide-react';
 import { useShortsStore } from '@/lib/stores/shorts-store';
 import type { Video } from '@/types';
+import { usePrefersReducedMotion } from '@/lib/hooks';
 
 interface ShortVideoPlayerProps {
   video: Video;
@@ -19,25 +20,52 @@ export function ShortVideoPlayer({ video, index, children }: ShortVideoPlayerPro
   const { currentIndex, isMuted, volume, toggleMute, setVolume } = useShortsStore();
 
   const isActive = currentIndex === index;
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   // Get video URL (prefer lower quality for shorts)
   const videoSrc = video.url_480 || video.url_720 || video.url_1080 || video.hls_url || '';
+
+  const attemptPlay = useCallback(async () => {
+    const videoEl = videoRef.current;
+    if (!videoEl || prefersReducedMotion) {
+      setIsBuffering(false);
+      return;
+    }
+
+    const playWith = async (muted: boolean) => {
+      videoEl.muted = muted;
+      videoEl.volume = muted ? 0 : volume;
+      try {
+        await videoEl.play();
+        setIsBuffering(false);
+        return true;
+      } catch {
+        return false;
+      }
+    };
+
+    const preferredMuted = isMuted;
+    const playedPreferred = await playWith(preferredMuted);
+    if (playedPreferred) return;
+
+    const playedMuted = await playWith(true);
+    if (playedMuted && !preferredMuted) {
+      videoEl.muted = false;
+      videoEl.volume = volume;
+    }
+  }, [isMuted, prefersReducedMotion, volume]);
 
   // Handle play/pause based on active state
   useEffect(() => {
     const videoEl = videoRef.current;
     if (!videoEl) return;
 
-    if (isActive) {
-      videoEl.muted = isMuted;
-      videoEl.volume = isMuted ? 0 : volume;
-      videoEl.play().catch(() => {
-        // Autoplay blocked, stay paused
-      });
+    if (isActive && !prefersReducedMotion) {
+      void attemptPlay();
     } else {
       videoEl.pause();
     }
-  }, [isActive, isMuted, volume]);
+  }, [attemptPlay, isActive, prefersReducedMotion]);
 
   // Initialize mute state and volume
   useEffect(() => {
@@ -73,13 +101,11 @@ export function ShortVideoPlayer({ video, index, children }: ShortVideoPlayerPro
     if (!videoEl) return;
 
     if (videoEl.paused) {
-      videoEl.muted = false;
-      useShortsStore.getState().toggleMute();
-      videoEl.play();
+      void attemptPlay();
     } else {
       videoEl.pause();
     }
-  }, []);
+  }, [attemptPlay]);
 
   const handleToggleMute = useCallback(() => {
     toggleMute();

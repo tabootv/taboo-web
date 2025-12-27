@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import {
   Heart,
@@ -11,13 +11,13 @@ import {
   Volume2,
   VolumeX,
   Play,
-  Pause,
 } from 'lucide-react';
 import type { Video } from '@/types';
 import { Avatar } from '@/components/ui';
 import { formatCompactNumber } from '@/lib/utils';
 import { shorts as shortsApi } from '@/lib/api';
 import { toast } from 'sonner';
+import { usePrefersReducedMotion } from '@/lib/hooks';
 
 interface ShortPlayerProps {
   short: Video;
@@ -26,7 +26,7 @@ interface ShortPlayerProps {
   onPrevious?: () => void;
 }
 
-export function ShortPlayer({ short, isActive, onNext, onPrevious }: ShortPlayerProps) {
+export function ShortPlayer({ short, isActive, onNext: _onNext, onPrevious: _onPrevious }: ShortPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -34,21 +34,43 @@ export function ShortPlayer({ short, isActive, onNext, onPrevious }: ShortPlayer
   const [isLiked, setIsLiked] = useState(short.is_liked ?? false);
   const [likesCount, setLikesCount] = useState(short.likes_count ?? 0);
   const [isBookmarked, setIsBookmarked] = useState(short.is_bookmarked ?? false);
+  const prefersReducedMotion = usePrefersReducedMotion();
+
+  const attemptPlay = useCallback(async () => {
+    const videoEl = videoRef.current;
+    if (!videoEl || prefersReducedMotion) return;
+
+    const playWith = async (muted: boolean) => {
+      videoEl.muted = muted;
+      try {
+        await videoEl.play();
+        return true;
+      } catch {
+        return false;
+      }
+    };
+
+    const preferredMuted = isMuted;
+    const playedPreferred = await playWith(preferredMuted);
+    if (playedPreferred) return;
+
+    const playedMuted = await playWith(true);
+    if (playedMuted && !preferredMuted) {
+      videoEl.muted = false;
+    }
+  }, [isMuted, prefersReducedMotion]);
 
   // Auto-play when active
   useEffect(() => {
     if (!videoRef.current) return;
 
-    if (isActive) {
-      videoRef.current.play().catch(() => {
-        // Auto-play was prevented, show play button
-        setIsPlaying(false);
-      });
+    if (isActive && !prefersReducedMotion) {
+      void attemptPlay();
     } else {
       videoRef.current.pause();
       videoRef.current.currentTime = 0;
     }
-  }, [isActive]);
+  }, [attemptPlay, isActive, prefersReducedMotion]);
 
   // Handle play/pause events
   useEffect(() => {
@@ -79,14 +101,14 @@ export function ShortPlayer({ short, isActive, onNext, onPrevious }: ShortPlayer
     };
   }, []);
 
-  const togglePlay = () => {
+  const togglePlay = useCallback(() => {
     if (!videoRef.current) return;
     if (isPlaying) {
       videoRef.current.pause();
     } else {
-      videoRef.current.play();
+      void attemptPlay();
     }
-  };
+  }, [attemptPlay, isPlaying]);
 
   const toggleMute = () => {
     if (!videoRef.current) return;
