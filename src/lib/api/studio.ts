@@ -221,19 +221,20 @@ export const studio = {
 
   /**
    * Create a community post
+   * API expects: POST /posts with FormData { caption, post_image }
    */
   async createPost(payload: StudioCreatePostPayload): Promise<StudioCreatePostResponse> {
     const formData = new FormData();
-    formData.append('body', payload.body);
+    formData.append('caption', payload.body);
 
     if (payload.image) {
-      formData.append('image', payload.image);
+      formData.append('post_image', payload.image);
     }
     if (payload.video) {
       formData.append('video', payload.video);
     }
 
-    const { data } = await apiClient.post('/studio/posts', formData, {
+    const { data } = await apiClient.post('/posts', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

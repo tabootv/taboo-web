@@ -140,6 +140,20 @@ export function ShakaPlayer({
     );
   }, []);
 
+  // If user navigates away while in PiP, ensure we exit PiP when returning so the
+  // new video element takes over cleanly.
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const pipEl = document.pictureInPictureElement as HTMLVideoElement | null;
+    if (pipEl && pipEl !== videoRef.current) {
+      document.exitPictureInPicture().catch(() => {});
+      setIsPiP(false);
+      isPiPRef.current = false;
+      sessionStorage.removeItem(PIP_RETURN_URL_KEY);
+      pipReturnUrlRef.current = null;
+    }
+  }, [pathname]);
+
   const saveVolume = useCallback((vol: number) => {
     localStorage.setItem(VOLUME_STORAGE_KEY, vol.toString());
   }, []);

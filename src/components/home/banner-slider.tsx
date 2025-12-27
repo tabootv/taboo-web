@@ -109,51 +109,78 @@ export function BannerSlider({ initialBanners }: BannerSliderProps) {
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
         {/* Content - left aligned with padding */}
-        <div className="absolute inset-0 flex flex-col justify-center items-start p-6 md:p-12 lg:p-20 lg:pl-24">
-          <div className="text-left backdrop-blur-md md:backdrop-blur-none rounded-lg p-4 md:p-0 max-w-[600px]">
+        <div className="absolute inset-0 flex flex-col justify-end sm:justify-center items-start p-4 pb-8 sm:p-6 md:p-12 lg:p-20 lg:pl-24">
+          <div className="text-left backdrop-blur-md sm:backdrop-blur-none rounded-lg p-3 sm:p-4 md:p-0 max-w-[90%] sm:max-w-[600px]">
             {/* Channel name */}
-            <h3 className="text-sm md:text-base font-bold text-white/80 mb-2 drop-shadow-lg">
+            <h3 className="text-xs sm:text-sm md:text-base font-bold text-white/80 mb-1 sm:mb-2 drop-shadow-lg">
               {currentBanner.channel?.name}
             </h3>
 
             {/* Title */}
-            <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-3 drop-shadow-lg line-clamp-2">
+            <h2 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-2 sm:mb-3 drop-shadow-lg line-clamp-2">
               {currentBanner.title}
             </h2>
 
-            {/* Description - truncated */}
+            {/* Description - truncated, hidden on very small screens */}
             {currentBanner.description && (
-              <p className="text-xs md:text-sm text-white/80 mb-6 line-clamp-2 drop-shadow-lg">
-                {currentBanner.description}
-              </p>
+              <div className="hidden sm:block text-xs md:text-sm text-white/80 drop-shadow-lg mb-3 md:mb-5">
+                <p className="line-clamp-3">{currentBanner.description}</p>
+                {currentBanner.description.length > 180 && (
+                  <Link
+                    href={href}
+                    className="inline-flex items-center gap-1 text-white font-semibold mt-2 hover:text-red-primary transition-colors"
+                  >
+                    Read more
+                    <ChevronRight className="w-4 h-4" />
+                  </Link>
+                )}
+              </div>
             )}
 
             {/* CTA Button */}
             <Link href={href}>
-              <Button className="btn-premium px-6 py-3 text-base font-semibold">
-                <Play className="w-5 h-5 mr-2" fill="white" />
+              <Button className="btn-premium px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base font-semibold">
+                <Play className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" fill="white" />
                 Play Now
               </Button>
             </Link>
           </div>
         </div>
 
-        {/* Navigation Arrows - Smaller */}
+        {/* Navigation Arrows - Hidden on mobile, shown on hover for desktop */}
         {banners.length > 1 && (
           <>
             <button
               onClick={goToPrev}
-              className="absolute left-4 top-1/2 -translate-y-1/2 z-10 p-2 bg-black/50 hover:bg-black/70 rounded-full opacity-0 group-hover:opacity-100 transition-all"
+              className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-10 p-2 bg-black/50 hover:bg-black/70 rounded-full opacity-0 group-hover:opacity-100 transition-all hidden sm:flex items-center justify-center"
             >
               <ChevronLeft className="w-4 h-4 text-white" />
             </button>
             <button
               onClick={goToNext}
-              className="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-2 bg-black/50 hover:bg-black/70 rounded-full opacity-0 group-hover:opacity-100 transition-all"
+              className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-10 p-2 bg-black/50 hover:bg-black/70 rounded-full opacity-0 group-hover:opacity-100 transition-all hidden sm:flex items-center justify-center"
             >
               <ChevronRight className="w-4 h-4 text-white" />
             </button>
           </>
+        )}
+
+        {/* Slide Indicators - visible on mobile, bottom aligned */}
+        {banners.length > 1 && (
+          <div className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5 sm:gap-2">
+            {banners.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => goToSlide(idx)}
+                className={`h-1 sm:h-1.5 rounded-full transition-all duration-300 ${
+                  idx === currentIndex
+                    ? 'w-6 sm:w-8 bg-red-primary'
+                    : 'w-1.5 sm:w-2 bg-white/40 hover:bg-white/60'
+                }`}
+                aria-label={`Go to slide ${idx + 1}`}
+              />
+            ))}
+          </div>
         )}
       </div>
     </div>

@@ -40,7 +40,7 @@ export function HomeContent({ initialData }: HomeContentProps) {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col w-full gap-6 md:gap-8 lg:gap-10 mt-8 md:mt-12 relative z-10">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 flex flex-col w-full gap-5 sm:gap-6 md:gap-8 lg:gap-10 mt-4 sm:mt-8 md:mt-12 relative z-10">
         {/* Static Sections - loaded once */}
         <CreatorsSection initialCreators={initialData.static?.creators || []} />
         <FeaturedSection initialVideos={initialData.static?.featured || []} />

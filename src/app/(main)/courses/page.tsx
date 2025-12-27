@@ -126,12 +126,15 @@ export default function CoursesPage() {
 function CourseCard({ course }: { course: Course }) {
   // Use numeric ID for routing since the backend /courses/{id} endpoint expects numeric ID
   const courseId = course.id;
+  // Try multiple thumbnail sources - API might return in different fields
+  const thumbnail = course.course_thumbnail || course.card_thumbnail || course.thumbnail || course.trailer_thumbnail || course.desktop_banner;
+
   return (
     <Link href={`/courses/${courseId}`} className="group">
       <div className="relative aspect-video rounded-lg overflow-hidden bg-surface">
-        {course.thumbnail && (
+        {thumbnail && (
           <Image
-            src={course.thumbnail}
+            src={thumbnail}
             alt={course.title}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-300"

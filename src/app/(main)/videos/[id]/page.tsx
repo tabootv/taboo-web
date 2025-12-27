@@ -53,7 +53,9 @@ export default function VideoPage() {
     const array = [...items];
     for (let i = array.length - 1; i > 0; i -= 1) {
       const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
+      const temp = array[i];
+      array[i] = array[j] as T;
+      array[j] = temp as T;
     }
     return array;
   }, []);
@@ -71,6 +73,17 @@ export default function VideoPage() {
         setIsLoading(true);
         setError(null);
         const { video: videoData, videos } = await videosApi.play(id);
+
+        // Hard guard: if the backend returns a short here, redirect to the shorts experience
+        if (
+          videoData?.short === true ||
+          (videoData as any)?.is_short === true ||
+          (videoData as any)?.type === 'short'
+        ) {
+          const shortId = videoData.uuid || videoData.id || id;
+          router.replace(`/shorts/${shortId}`);
+          return;
+        }
 
         let allVideos = videos || [];
         const videoId = videoData.uuid || videoData.id;
@@ -99,7 +112,7 @@ export default function VideoPage() {
         if (channelId) {
           try {
             const creatorResp = await creatorsApi.getVideos(channelId, { sort_by: 'newest' });
-            const creatorVideos = (creatorResp.data || creatorResp.videos || []) as Video[];
+            const creatorVideos = (creatorResp.data || []) as Video[];
             const validCreatorVideos = (creatorVideos || []).filter((v) => {
               const key = v.uuid || v.id;
               return key && key !== videoId && v.short !== true && (v as any).is_short !== true && (v as any).type !== 'short';
@@ -179,7 +192,7 @@ export default function VideoPage() {
     return () => {
       isSubscribed = false;
     };
-  }, [id, hydrateVideoTags, shuffleList]);
+  }, [id, hydrateVideoTags, shuffleList, router]);
 
   const availableTags = useMemo(() => {
     const tagMap = new Map<string, Tag>();
@@ -200,10 +213,15 @@ export default function VideoPage() {
   const displayedTags = useMemo(() => availableTags.slice(0, 5), [availableTags]);
 
   const filteredVideos = useMemo(() => {
+    const limit = 7;
     if (!selectedTag) {
-      return relatedVideos;
+      return relatedVideos.slice(0, limit);
     }
-    return relatedVideos.filter((v) => v.tags?.some((tag) => tag.name === selectedTag));
+    const tagged = relatedVideos.filter((v) => v.tags?.some((tag) => tag.name === selectedTag));
+    const fillers = relatedVideos.filter(
+      (v) => !tagged.includes(v)
+    );
+    return [...tagged, ...fillers].slice(0, limit);
   }, [relatedVideos, selectedTag]);
 
   const handleTagsScroll = useCallback(() => {

@@ -185,7 +185,7 @@ export const videos = {
     const { data } = await apiClient.get('/public/videos', {
       params: {
         page,
-        limit: perPage,
+        per_page: perPage,
         short: false,
         is_short: false,
         type: 'video',
@@ -239,6 +239,57 @@ export const videos = {
   // Deprecated - use getLongFormVideos directly
   getLongForm: async (page = 1, perPage = 24): Promise<PaginatedResponse<Video>> => {
     return videos.getLongFormVideos(page, perPage);
+  },
+
+  /**
+   * Videos API - Main endpoint for /videos page
+   * Uses /public/videos with pagination
+   * Filters out shorts (videos under 60 seconds) client-side
+   */
+  getVideosV2: async (
+    page = 1,
+    perPage = 24
+  ): Promise<PaginatedResponse<Video>> => {
+    // Fetch more to account for filtered shorts
+    const { data } = await apiClient.get('/public/videos', {
+      params: {
+        page,
+        per_page: perPage * 2, // Fetch extra to compensate for filtered shorts
+      },
+    });
+
+    // Transform response - API returns { videos: [...], pagination: {...} }
+    const videosList = data.videos || [];
+    const pagination = data.pagination || {};
+
+    // Filter out shorts (under 60 seconds) and transform
+    const SHORTS_THRESHOLD = 60; // seconds
+    const transformedVideos = videosList
+      .filter((video: Video) => {
+        const duration = video.duration || 0;
+        return duration >= SHORTS_THRESHOLD;
+      })
+      .map((video: Video & { creator?: { channel?: { id: number; name: string } } }) => ({
+        ...video,
+        channel: video.channel || video.creator?.channel,
+      }))
+      .slice(0, perPage); // Limit to requested amount
+
+    return {
+      data: transformedVideos,
+      current_page: pagination.current_page || page,
+      last_page: pagination.last_page || 1,
+      per_page: pagination.per_page || perPage,
+      total: pagination.total || 0,
+      first_page_url: '',
+      from: null,
+      last_page_url: '',
+      links: [],
+      next_page_url: null,
+      path: '',
+      prev_page_url: null,
+      to: null,
+    };
   },
 
   getRelatedLongForm: async (

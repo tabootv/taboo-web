@@ -273,9 +273,9 @@ export default function CoursePlayerPage({
               className="flex items-center gap-3 p-3 bg-surface/50 rounded-xl mb-4 group hover:bg-surface/70 transition-colors"
             >
               <div className="relative w-16 h-9 rounded-lg overflow-hidden shrink-0">
-                {courseData.thumbnail && (
+                {(courseData.course_thumbnail || courseData.card_thumbnail || courseData.thumbnail || courseData.trailer_thumbnail || courseData.desktop_banner) && (
                   <Image
-                    src={courseData.thumbnail}
+                    src={courseData.course_thumbnail || courseData.card_thumbnail || courseData.thumbnail || courseData.trailer_thumbnail || courseData.desktop_banner || ''}
                     alt={courseData.title}
                     fill
                     className="object-cover"
@@ -283,7 +283,7 @@ export default function CoursePlayerPage({
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs text-white/50 mb-0.5">Course</p>
+                <p className="text-xs text-white/50 mb-0.5">Education</p>
                 <h3 className="text-sm font-medium text-white truncate group-hover:text-red-primary transition-colors">
                   {courseData.title}
                 </h3>

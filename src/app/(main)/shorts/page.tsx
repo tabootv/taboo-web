@@ -201,7 +201,10 @@ export default function ShortsPage() {
   }
 
   return (
-    <div className="fixed top-14 left-0 right-0 bottom-0 bg-black overflow-hidden z-30 lg:left-[72px]">
+    <div
+      className="fixed top-14 left-0 right-0 bottom-0 bg-black overflow-hidden z-30 lg:left-[72px]"
+      style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+    >
       {/* Full screen swiper */}
       <Swiper
         modules={[Virtual, Mousewheel, EffectCreative]}

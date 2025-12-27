@@ -1,59 +1,97 @@
 'use client';
 
-import { LoadingScreen } from '@/components/ui';
-import { VideoCardSkeleton, VideoEmptyState } from '@/components/video';
-import { videos as videosApi } from '@/lib/api';
-import { useInfiniteScrollPagination } from '@/lib/hooks/use-infinite-scroll-pagination';
-import type { Video } from '@/types';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { PAGE_SIZE } from './constants';
-import { Clock, Play, Plus, Check } from 'lucide-react';
-import Image from 'next/image';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
+import { Clock, Film, Play, Plus, Check } from 'lucide-react';
+import { videos as videosApi } from '@/lib/api';
+import type { Video } from '@/types';
 import { formatDuration, formatRelativeTime } from '@/lib/utils';
+import { LoadingScreen } from '@/components/ui';
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
 import { useSavedVideosStore, type SavedVideo } from '@/lib/stores/saved-videos-store';
+import { MediaPreviewModal } from '@/components/home/media-preview-modal';
 
-/**
- * Videos Page - LONG-FORM ONLY
- *
- * This page shows ONLY long-form videos.
- * Shorts are NEVER shown here.
- *
- * The backend guarantees short=false via /public/videos endpoint.
- * If shorts appear, it's a backend bug (caught by dev assertion in API layer).
- */
+const PAGE_SIZE = 24;
+const NEW_THRESHOLD_DAYS = 7;
+
+type SortOption = 'newest' | 'oldest' | 'longest' | 'shortest';
+
 export default function VideosPage() {
-  const skeletonKeyCounterRef = useRef(0);
-  const [sort, setSort] = useState<'newest' | 'oldest' | 'longest' | 'shortest'>('newest');
+  const [videosList, setVideosList] = useState<Video[]>([]);
+  const [nextPage, setNextPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [previewVideo, setPreviewVideo] = useState<Video | null>(null);
+
+  // Filters
+  const [sort, setSort] = useState<SortOption>('newest');
   const [creatorFilter, setCreatorFilter] = useState<string>('all');
   const [tagFilter, setTagFilter] = useState<string>('all');
 
-  const {
-    items: videosList,
-    isLoading,
-    isLoadingMore,
-    hasMore,
-    error,
-    loadMoreRef,
-  } = useInfiniteScrollPagination<Video>({
-    fetchPage: async (pageNum) => {
-      const page = typeof pageNum === 'number' ? pageNum : 1;
-      // Use ONLY the canonical long-form videos endpoint
-      // NO home APIs, NO recommendations, NO mixed feeds
-      const response = await videosApi.getLongFormVideos(page, PAGE_SIZE);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const lastCardRef = useRef<HTMLDivElement | null>(null);
 
-      return {
-        data: response.data || [],
-        currentPage: response.current_page ?? page,
-        lastPage: response.last_page ?? page,
-      };
-    },
-    initialPage: 1,
-    rootMargin: '600px',
-    threshold: 0,
-  });
+  const fetchPage = useCallback(async (pageNum: number, reset = false) => {
+    try {
+      setError(null);
+      if (pageNum === 1 || reset) {
+        setIsLoading(true);
+      } else {
+        setIsLoadingMore(true);
+      }
 
+      const response = await videosApi.getVideosV2(pageNum, PAGE_SIZE);
+      const items = response.data || [];
+
+      setVideosList((prev) => (pageNum === 1 || reset ? items : [...prev, ...items]));
+
+      const currentPage = response.current_page ?? pageNum;
+      const lastPage = response.last_page ?? pageNum;
+      setNextPage(currentPage + 1);
+      setHasMore(currentPage < lastPage);
+    } catch (err: unknown) {
+      console.error('Failed to fetch videos', err);
+      setError('Failed to load videos. Please try again.');
+    } finally {
+      setIsLoading(false);
+      setIsLoadingMore(false);
+    }
+  }, []);
+
+  // Initial fetch
+  useEffect(() => {
+    fetchPage(1, true);
+  }, [fetchPage]);
+
+  // Infinite scroll observer
+  useEffect(() => {
+    if (!hasMore || isLoading || isLoadingMore || videosList.length === 0) return;
+
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+    }
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (entry?.isIntersecting && hasMore && !isLoadingMore) {
+          fetchPage(nextPage);
+        }
+      },
+      { rootMargin: '600px', threshold: 0 }
+    );
+
+    if (lastCardRef.current) {
+      observerRef.current.observe(lastCardRef.current);
+    }
+
+    return () => observerRef.current?.disconnect();
+  }, [fetchPage, hasMore, isLoading, isLoadingMore, nextPage, videosList.length]);
+
+  // Extract unique creators from loaded videos
   const creatorOptions = useMemo(() => {
     const names = new Set<string>();
     videosList.forEach((v) => {
@@ -62,6 +100,7 @@ export default function VideosPage() {
     return Array.from(names).sort((a, b) => a.localeCompare(b));
   }, [videosList]);
 
+  // Extract unique tags from loaded videos
   const tagOptions = useMemo(() => {
     const tags = new Set<string>();
     videosList.forEach((v) => {
@@ -73,17 +112,23 @@ export default function VideosPage() {
     return Array.from(tags).sort((a, b) => a.localeCompare(b));
   }, [videosList]);
 
+  // Filter and sort videos client-side
   const filteredVideos = useMemo(() => {
     let list = [...videosList];
 
+    // Filter by creator
     if (creatorFilter !== 'all') {
       list = list.filter((v) => v.channel?.name === creatorFilter);
     }
 
+    // Filter by tag
     if (tagFilter !== 'all') {
-      list = list.filter((v) => v.tags?.some((t) => t?.name === tagFilter || t?.slug === tagFilter));
+      list = list.filter((v) =>
+        v.tags?.some((t) => t?.name === tagFilter || t?.slug === tagFilter)
+      );
     }
 
+    // Sort
     list.sort((a, b) => {
       if (sort === 'newest') {
         return new Date(b.published_at).getTime() - new Date(a.published_at).getTime();
@@ -101,13 +146,14 @@ export default function VideosPage() {
     return list;
   }, [videosList, creatorFilter, tagFilter, sort]);
 
-  if (isLoading) {
+  if (isLoading && videosList.length === 0) {
     return <LoadingScreen variant="feed" />;
   }
 
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12 py-8">
+        {/* Filters */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-5">
           <div className="flex flex-wrap items-center gap-2">
             <SelectFilter
@@ -131,9 +177,9 @@ export default function VideosPage() {
             />
 
             <SelectFilter
-              label="Videos"
+              label="Sort"
               value={sort}
-              onChange={(val) => setSort(val as typeof sort)}
+              onChange={(val) => setSort(val as SortOption)}
               options={[
                 { label: 'Newest', value: 'newest' },
                 { label: 'Oldest', value: 'oldest' },
@@ -151,34 +197,42 @@ export default function VideosPage() {
         )}
 
         {filteredVideos.length > 0 ? (
-          <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 md:gap-5">
-              {filteredVideos.map((video, idx) => (
-                <div key={video.uuid || video.id || idx}>
-                  <VideoCard video={video} priority={idx < 8} />
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-5">
+            {filteredVideos.map((video, idx) => {
+              const isLast = idx === filteredVideos.length - 1;
+              return (
+                <div
+                  key={video.uuid || video.id || idx}
+                  ref={isLast ? lastCardRef : null}
+                >
+                  <VideoCard video={video} priority={idx < 8} onOpenPreview={setPreviewVideo} />
                 </div>
+              );
+            })}
+            {isLoadingMore &&
+              Array.from({ length: 6 }).map((_, i) => (
+                <SkeletonCard key={`skeleton-${i}`} />
               ))}
-              {isLoadingMore &&
-                (() => {
-                  skeletonKeyCounterRef.current += 1;
-                  return Array.from({ length: 6 }).map((_, i) => (
-                    <VideoCardSkeleton
-                      key={`skeleton-${skeletonKeyCounterRef.current}-${i}`}
-                    />
-                  ));
-                })()}
-            </div>
-
-            <div ref={loadMoreRef} className="h-1" />
-          </>
+          </div>
         ) : (
-          <VideoEmptyState />
+          <div className="text-center py-20">
+            <Film className="w-16 h-16 text-white/20 mx-auto mb-4" />
+            <p className="text-white/50">No videos found</p>
+          </div>
         )}
 
         {!hasMore && filteredVideos.length > 0 && (
-          <div className="flex justify-center mt-8 text-white/40 text-sm">You've seen it all</div>
+          <div className="flex justify-center mt-8 text-white/40 text-sm">
+            You've seen it all
+          </div>
         )}
       </div>
+
+      {/* Preview Modal */}
+      <MediaPreviewModal
+        video={previewVideo}
+        onClose={() => setPreviewVideo(null)}
+      />
     </div>
   );
 }
@@ -213,7 +267,7 @@ function SelectFilter({
   );
 }
 
-function VideoCard({ video, priority = false }: { video: Video; priority?: boolean }) {
+function VideoCard({ video, priority = false, onOpenPreview }: { video: Video; priority?: boolean; onOpenPreview?: (video: Video) => void }) {
   const [isHovered, setIsHovered] = useState(false);
   const [isVideoReady, setIsVideoReady] = useState(false);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
@@ -246,7 +300,7 @@ function VideoCard({ video, priority = false }: { video: Video; priority?: boole
   const publishedLabel = formatRelativeTime(video.published_at);
   const isNew =
     video.published_at &&
-    new Date(video.published_at).getTime() > Date.now() - 7 * 24 * 60 * 60 * 1000;
+    new Date(video.published_at).getTime() > Date.now() - NEW_THRESHOLD_DAYS * 24 * 60 * 60 * 1000;
 
   const handleMouseEnter = () => {
     setIsHovered(true);
@@ -296,6 +350,12 @@ function VideoCard({ video, priority = false }: { video: Video; priority?: boole
     setSaved(newState);
   };
 
+  const handleOpenPreview = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onOpenPreview?.(video);
+  };
+
   return (
     <Link
       href={href}
@@ -313,7 +373,7 @@ function VideoCard({ video, priority = false }: { video: Video; priority?: boole
             className={`object-cover transition-all duration-300 ${
               isHovered ? 'scale-105' : 'scale-100'
             } ${isVideoPlaying && isVideoReady ? 'opacity-0' : 'opacity-100'}`}
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1400px) 33vw, 25vw"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1400px) 25vw, 20vw"
             priority={priority}
           />
         ) : (
@@ -387,41 +447,45 @@ function VideoCard({ video, priority = false }: { video: Video; priority?: boole
               <Plus className="w-3.5 h-3.5 text-white" />
             )}
           </button>
+
+          {/* More Info Button */}
+          {onOpenPreview && (
+            <button
+              onClick={handleOpenPreview}
+              className="px-2.5 py-1 bg-black/60 border border-white/40 hover:border-white rounded-full text-[10px] text-white font-medium transition-all hover:scale-105"
+            >
+              More Info
+            </button>
+          )}
         </div>
       </div>
 
       {/* Card Info */}
       <div className="mt-2">
-        <h3 className="font-medium text-white text-sm line-clamp-2 leading-snug group-hover:text-red-primary transition-colors">
+        <h3 className="font-medium text-white text-[12px] md:text-sm leading-snug line-clamp-2 group-hover:text-red-primary transition-colors">
           {video.title}
         </h3>
-        <div className="flex items-center gap-2 mt-1">
-          {video.channel?.dp ? (
-            <div className="relative w-4 h-4 rounded-full overflow-hidden flex-shrink-0">
-              <Image
-                src={video.channel.dp}
-                alt=""
-                fill
-                className="object-cover"
-              />
-            </div>
-          ) : video.channel?.name && (
-            <div className="w-4 h-4 rounded-full bg-gradient-to-br from-red-primary/80 to-red-dark flex items-center justify-center flex-shrink-0">
-              <span className="text-[8px] text-white font-bold">
-                {video.channel.name.charAt(0)}
-              </span>
-            </div>
+        <div className="text-sm text-white/60 mt-0.5 truncate flex items-center gap-2">
+          {video.channel?.name && (
+            <span className="truncate hover:text-white transition-colors">
+              {video.channel.name}
+            </span>
           )}
-          <p className="text-xs text-white/50 truncate">
-            {video.channel?.name}
-          </p>
+          {publishedLabel && (
+            <span className="text-white/40 text-xs flex-shrink-0">{publishedLabel}</span>
+          )}
         </div>
-        {publishedLabel && (
-          <p className="text-xs text-white/40 mt-0.5">
-            {publishedLabel}
-          </p>
-        )}
       </div>
     </Link>
+  );
+}
+
+function SkeletonCard() {
+  return (
+    <div className="animate-pulse">
+      <div className="relative aspect-video rounded-lg overflow-hidden bg-surface" />
+      <div className="h-4 bg-surface mt-2 rounded" />
+      <div className="h-3 bg-surface mt-1 rounded w-2/3" />
+    </div>
   );
 }

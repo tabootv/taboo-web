@@ -695,7 +695,7 @@ function VideoCard({ video }: { video: Video }) {
         </div>
       </div>
       <div className="mt-2">
-        <h3 className="text-sm font-medium text-white line-clamp-2 group-hover:text-red-primary transition-colors">
+        <h3 className="text-[13px] md:text-sm font-medium text-white leading-snug line-clamp-3 group-hover:text-red-primary transition-colors">
           {video.title}
         </h3>
         {publishedLabel && (

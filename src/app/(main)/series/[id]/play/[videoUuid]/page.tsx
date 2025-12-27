@@ -442,7 +442,7 @@ function EpisodeCard({
       <div
         className={cn(
           'group flex gap-3 p-2 rounded-xl transition-all',
-          isCurrent ? 'bg-red-primary/10 ring-1 ring-red-primary/30' : 'hover:bg-surface/50'
+          'hover:ring-1 hover:ring-red-primary/50 hover:shadow-[0_0_15px_rgba(171,0,19,0.3)]'
         )}
       >
         {/* Thumbnail */}
@@ -493,7 +493,7 @@ function EpisodeCard({
           {/* Title */}
           <p
             className={cn(
-              'text-sm font-medium line-clamp-2 leading-tight',
+              'text-sm font-medium leading-tight',
               isCurrent ? 'text-white' : 'text-white/80 group-hover:text-white'
             )}
           >

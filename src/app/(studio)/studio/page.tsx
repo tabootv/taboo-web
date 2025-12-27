@@ -20,27 +20,14 @@ import { Card, CardContent } from '@/components/ui/card';
 type MapVideo = {
   id?: string | number;
   uuid?: string;
-  latitude?: number;
-  longitude?: number;
   country?: string;
-  title?: string;
   tags?: string[];
-  short?: boolean;
-  channel?: { id?: string | number; name?: string; dp?: string } | undefined;
-};
-
-type MapTotals = {
-  totalVideos: number;
-  totalShorts: number;
-  countriesRecorded: number;
 };
 
 type AggregatedStats = {
-  totalVideos: number;
-  totalShorts: number;
   countriesRecorded: number;
   coveragePercent: number;
-  topCountries: { name: string; count: number }[];
+  topCountries: { name: string; count: number; flag: string }[];
   topTags: { name: string; count: number }[];
 };
 
@@ -139,9 +126,10 @@ export default function StudioDashboard() {
     const percent = mapStats.coveragePercent
       ? mapStats.coveragePercent
       : (recorded / 195) * 100;
-    return `${recorded}/195 (${percent.toFixed(1)}%)`;
+    return `${percent.toFixed(1)}%`;
   }, [mapStats]);
 
+  // Load content counts from creator API
   useEffect(() => {
     const channelId = channel?.id;
     if (!channelId) return;
@@ -169,6 +157,7 @@ export default function StudioDashboard() {
     };
   }, [channel?.id]);
 
+  // Load map stats
   useEffect(() => {
     const channelId = channel?.id;
     if (!channelId) return;
@@ -177,15 +166,15 @@ export default function StudioDashboard() {
       setIsLoadingMap(true);
       setMapError(null);
       try {
-        const { videos, totals: apiTotals } = await fetchAllMapVideos(channelId);
-        const stats = computeStats(videos, apiTotals);
+        const videos = await fetchMapVideos(channelId);
+        const stats = computeStats(videos);
         if (!cancelled) {
           setMapStats(stats);
         }
       } catch (err) {
         console.error('Failed to load map videos', err);
         if (!cancelled) {
-          setMapError('Could not load world stories right now.');
+          setMapError('Could not load world stats right now.');
         }
       } finally {
         if (!cancelled) {
@@ -197,7 +186,7 @@ export default function StudioDashboard() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [channel?.id]);
 
   return (
     <div className="p-6 lg:p-8 space-y-8">
@@ -224,7 +213,7 @@ export default function StudioDashboard() {
       </div>
 
       {/* Hero metrics + actions */}
-      <Card className="overflow-hidden bg-gradient-to-r from-black via-[#120508] to-[#1a0b0c] border border-white/10 shadow-[0_24px_70px_rgba(0,0,0,0.55)]">
+      <Card className="hover:translate-y-0 hover:scale-100">
         <CardContent className="p-6 lg:p-8 space-y-6">
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
             <StatCard icon={Video} label="Videos" value={formatNumber(totals.videos)} />
@@ -237,7 +226,7 @@ export default function StudioDashboard() {
       </Card>
 
       {/* Content pulse */}
-      <Card className="border border-white/10">
+      <Card className="hover:translate-y-0 hover:scale-100">
         <CardContent className="p-6 space-y-4">
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <div>
@@ -287,97 +276,108 @@ export default function StudioDashboard() {
         </CardContent>
       </Card>
 
-      {/* World stories */}
-      <div className="grid lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2 border border-white/10">
-          <CardContent className="p-6 space-y-5">
-            <div className="flex items-center justify-between gap-3 flex-wrap">
-              <div>
-                <h3 className="text-xl font-semibold text-white">World Takeover</h3>
-              </div>
+      {/* World Takeover - Full width */}
+      <Card className="hover:translate-y-0 hover:scale-100">
+        <CardContent className="p-6 lg:p-8 space-y-6">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div>
+              <h2 className="text-xl font-semibold text-white">World Takeover</h2>
+              <p className="text-white/50 text-sm">Your global content footprint.</p>
             </div>
+          </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              <StatCard
-                icon={Globe2}
-                label="Countries filmed"
-                value={`${formatNumber(mapStats?.countriesRecorded ?? 0)}/${195}`}
-              />
-              <StatCard
-                icon={MapPin}
-                label="Coverage"
-                value={coverageDisplay || '—'}
-              />
+          {/* Stats Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <StatCard
+              icon={Globe2}
+              label="Countries"
+              value={`${formatNumber(mapStats?.countriesRecorded ?? 0)}`}
+            />
+            <StatCard
+              icon={MapPin}
+              label="Coverage"
+              value={coverageDisplay || '—'}
+            />
+            <StatCard
+              icon={Globe2}
+              label="Global Reach"
+              value={`${formatNumber(mapStats?.countriesRecorded ?? 0)}/195`}
+            />
+          </div>
+
+          {mapError && (
+            <p className="text-sm text-red-300">{mapError}</p>
+          )}
+
+          {isLoadingMap && !mapStats && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="h-14 bg-white/5 rounded-xl animate-pulse" />
+              ))}
             </div>
+          )}
 
-            {mapError && (
-              <p className="text-sm text-red-300">{mapError}</p>
-            )}
-
-            {isLoadingMap && !mapStats && (
-              <p className="text-sm text-white/60">Loading world metrics...</p>
-            )}
-
-            {!isLoadingMap && mapStats && (
-              <>
-                <div className="grid gap-3">
-                  {(mapStats.topCountries || []).slice(0, 5).map((country) => (
-                    <div
-                      key={country.name}
-                      className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-xl px-3 py-2"
-                    >
-                      <div className="text-2xl" aria-hidden>
-                        {(() => {
-                          if (country.name === 'Unknown') return '🌐';
-                          const code = countryNameToCode(country.name);
-                          if (code) return getFlagEmoji(code);
-                          return '🌐';
-                        })()}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-white font-semibold leading-tight">{country.name}</p>
-                        <p className="text-white/50 text-sm">Videos: {country.count}</p>
-                      </div>
-                      <div className="w-32 h-2 bg-white/10 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-red-primary"
-                          style={{ width: `${Math.min(100, (country.count / (mapStats.topCountries[0]?.count || 1)) * 100)}%` }}
-                        />
-                      </div>
+          {!isLoadingMap && mapStats && mapStats.topCountries.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {mapStats.topCountries.slice(0, 6).map((country, idx) => (
+                <div
+                  key={country.name}
+                  className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-xl px-4 py-3 transition-all hover:bg-white/10"
+                >
+                  <div className="text-2xl" aria-hidden>
+                    {country.flag}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white font-semibold leading-tight">{country.name}</p>
+                    <p className="text-white/50 text-sm">{country.count} videos</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-20 h-2 bg-white/10 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-red-primary to-red-primary/70"
+                        style={{ width: `${Math.min(100, (country.count / (mapStats.topCountries[0]?.count || 1)) * 100)}%` }}
+                      />
                     </div>
-                  ))}
+                    <span className="text-xs text-white/40 w-8 text-right">#{idx + 1}</span>
+                  </div>
                 </div>
-              </>
-            )}
+              ))}
+            </div>
+          )}
 
-            {!mapError && !isLoadingMap && mapStats && mapStats.topCountries.length === 0 && (
-              <p className="text-sm text-white/50">No country data yet.</p>
-            )}
-          </CardContent>
-        </Card>
+          {!mapError && !isLoadingMap && mapStats && mapStats.topCountries.length === 0 && (
+            <p className="text-sm text-white/50">Start filming around the world to see your coverage!</p>
+          )}
+        </CardContent>
+      </Card>
 
-      </div>
-
-      {/* Top tags */}
-      <Card className="border border-white/10">
-        <CardContent className="p-6 space-y-3">
+      {/* Top tags - Full width */}
+      <Card className="hover:translate-y-0 hover:scale-100">
+        <CardContent className="p-6 lg:p-8 space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-white">Top tags</h3>
+            <div>
+              <h2 className="text-xl font-semibold text-white">Top Tags</h2>
+              <p className="text-white/50 text-sm">Your most used content tags.</p>
+            </div>
             {isLoadingMap && !mapStats && <span className="text-xs text-white/50">Loading…</span>}
           </div>
           {mapError && <p className="text-sm text-red-300">{mapError}</p>}
           {!isLoadingMap && mapStats && (
             <div className="flex flex-wrap gap-2">
-              {(mapStats.topTags || []).slice(0, 20).map((t) => (
+              {mapStats.topTags.map((t, idx) => (
                 <span
                   key={t.name}
-                  className="text-xs px-3 py-1 rounded-full bg-white/10 border border-white/10 text-white"
+                  className={`text-sm px-4 py-2 rounded-full border transition-all hover:scale-105 ${
+                    idx < 3
+                      ? 'bg-red-primary/20 border-red-primary/30 text-white font-medium'
+                      : 'bg-white/5 border-white/10 text-white/80'
+                  }`}
                 >
-                  {t.name} · {t.count}
+                  {t.name} <span className="text-white/50">· {t.count}</span>
                 </span>
               ))}
               {mapStats.topTags.length === 0 && (
-                <p className="text-sm text-white/50">No tags yet.</p>
+                <p className="text-sm text-white/50">No tags yet. Add tags to your videos!</p>
               )}
             </div>
           )}
@@ -387,86 +387,64 @@ export default function StudioDashboard() {
   );
 }
 
-async function fetchAllMapVideos(creatorId?: string | number): Promise<{ videos: MapVideo[]; totals: MapTotals }> {
+// Fetch map videos for a creator
+async function fetchMapVideos(creatorId: string | number): Promise<MapVideo[]> {
   const videos: MapVideo[] = [];
   let page = 1;
   let lastPage = 1;
-  let totals: MapTotals = { totalVideos: 0, totalShorts: 0, countriesRecorded: 0 };
 
-  while (page <= lastPage) {
+  while (page <= lastPage && page <= 5) { // Limit to 5 pages max
     const url = new URL('https://app.taboo.tv/api/public/map-videos');
     url.searchParams.set('page', String(page));
     url.searchParams.set('per_page', '50');
-    url.searchParams.set('short', 'false');
-    url.searchParams.set('sort_by', 'latest');
-    if (creatorId) {
-      url.searchParams.set('creators', String(creatorId));
-    }
+    url.searchParams.set('creators', String(creatorId));
 
     const res = await fetch(url.toString(), { cache: 'no-store' });
-
-    if (!res.ok) {
-      throw new Error(`Failed to fetch map videos (page ${page}): ${res.statusText}`);
-    }
+    if (!res.ok) throw new Error(`Failed to fetch map videos`);
 
     const data = await res.json();
-    const pageVideos: MapVideo[] = (data?.videos || []).map(normalizeMapVideo);
+    const pageVideos = (data?.videos || []).map((v: Record<string, unknown>) => ({
+      id: v.id,
+      uuid: v.uuid,
+      country: (v.country || v.country_name || 'Unknown') as string,
+      tags: Array.isArray(v.tags) ? v.tags : [],
+    }));
     videos.push(...pageVideos);
-
-    totals = {
-      totalVideos: data?.total_videos || totals.totalVideos,
-      totalShorts: data?.total_shorts || totals.totalShorts,
-      countriesRecorded: data?.countries_recorded || totals.countriesRecorded,
-    };
 
     lastPage = data?.pagination?.last_page || page;
     page += 1;
   }
 
-  return { videos, totals };
+  return videos;
 }
 
-function normalizeMapVideo(raw: any): MapVideo {
-  const country = raw?.country || raw?.country_name || raw?.countryCode || 'Unknown';
-  const tags = Array.isArray(raw?.tags) ? raw.tags : [];
-  return {
-    id: raw?.id,
-    uuid: raw?.uuid,
-    latitude: raw?.latitude,
-    longitude: raw?.longitude,
-    country,
-    title: raw?.title,
-    tags,
-    short: raw?.short,
-    channel: raw?.channel
-      ? {
-          id: raw.channel.id,
-          name: raw.channel.name,
-          dp: raw.channel.dp,
-        }
-      : undefined,
-  };
-}
-
-function computeStats(videos: MapVideo[], totals: MapTotals): AggregatedStats {
-  const byCountry: Record<string, { count: number; creators: Set<string> }> = {};
+// Compute stats from videos
+function computeStats(videos: MapVideo[]): AggregatedStats {
+  const byCountry: Record<string, number> = {};
   const byTag: Record<string, number> = {};
 
   videos.forEach((v) => {
     const country = v.country || 'Unknown';
-    const creator = v.channel?.name || 'Unknown';
-
-    byCountry[country] = byCountry[country] || { count: 0, creators: new Set() };
-    byCountry[country].count += 1;
-    byCountry[country].creators.add(creator);
+    byCountry[country] = (byCountry[country] || 0) + 1;
 
     (v.tags || []).forEach((t) => {
-      byTag[t] = (byTag[t] || 0) + 1;
+      const tagName = typeof t === 'string' ? t : (t as { name?: string }).name || '';
+      if (tagName) {
+        byTag[tagName] = (byTag[tagName] || 0) + 1;
+      }
     });
   });
 
   const topCountries = Object.entries(byCountry)
-    .map(([name, info]) => ({ name, count: info.count, creators: info.creators.size }))
+    .filter(([name]) => name !== 'Unknown')
+    .map(([name, count]) => {
+      const code = countryNameToCode(name);
+      return {
+        name,
+        count,
+        flag: code ? getFlagEmoji(code) : '🌐',
+      };
+    })
     .sort((a, b) => b.count - a.count);
 
   const topTags = Object.entries(byTag)
@@ -474,16 +452,14 @@ function computeStats(videos: MapVideo[], totals: MapTotals): AggregatedStats {
     .sort((a, b) => b.count - a.count)
     .slice(0, 20);
 
-  const countriesRecorded =
-    totals.countriesRecorded || topCountries.filter((c) => c.name !== 'Unknown').length;
+  const countriesRecorded = topCountries.length;
   const coveragePercent = (countriesRecorded / 195) * 100;
 
   return {
-    totalVideos: totals.totalVideos || videos.length,
-    totalShorts: totals.totalShorts,
     countriesRecorded,
     coveragePercent,
     topCountries,
     topTags,
   };
 }
+
