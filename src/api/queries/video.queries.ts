@@ -25,6 +25,19 @@ export function useVideo(id: string | number | null | undefined) {
 }
 
 /**
+ * Hook to play video (returns video + related videos)
+ */
+export function useVideoPlay(id: string | number | null | undefined) {
+  return useQuery({
+    queryKey: [...queryKeys.videos.detail(id!), 'play'],
+    queryFn: () => videoClient.play(id!),
+    enabled: !!id,
+    staleTime: 1000 * 60 * 30, // 30 minutes
+    gcTime: 1000 * 60 * 60, // 1 hour
+  });
+}
+
+/**
  * Hook to fetch list of videos with infinite scroll
  *
  * Stale time: 10 minutes
@@ -77,5 +90,38 @@ export function useVideoComments(id: string | number | null | undefined, page = 
     queryFn: () => videoClient.getComments(id!, page),
     enabled: !!id,
     staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+}
+
+/**
+ * Hook to fetch bookmarked videos
+ */
+export function useBookmarkedVideos(page = 1, perPage = 12) {
+  return useQuery({
+    queryKey: [...queryKeys.videos.bookmarked(), page, perPage],
+    queryFn: () => videoClient.getBookmarked(page, perPage),
+    staleTime: 1000 * 60 * 10, // 10 minutes
+  });
+}
+
+/**
+ * Hook to fetch watch history
+ */
+export function useHistoryVideos(page = 1, perPage = 12) {
+  return useQuery({
+    queryKey: [...queryKeys.videos.history(), page, perPage],
+    queryFn: () => videoClient.getHistory(page, perPage),
+    staleTime: 1000 * 60 * 10, // 10 minutes
+  });
+}
+
+/**
+ * Hook to fetch liked videos
+ */
+export function useLikedVideos(page = 1, perPage = 12) {
+  return useQuery({
+    queryKey: [...queryKeys.videos.liked(), page, perPage],
+    queryFn: () => videoClient.getLiked(page, perPage),
+    staleTime: 1000 * 60 * 10, // 10 minutes
   });
 }

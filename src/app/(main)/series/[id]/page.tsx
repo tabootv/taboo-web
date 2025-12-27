@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { series as seriesApi } from '@/lib/api';
+import { useSeriesDetail } from '@/api/queries';
 import { VideoPlayerSkeleton } from '@/components/video';
 import { cn, formatDuration } from '@/lib/utils';
 import type { Channel, Series, Video } from '@/types';
@@ -9,7 +9,7 @@ import { CheckCircle, ChevronDown, Clock, Info, Play } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { EpisodeCard, SeriesPageSkeleton } from '@/components/series';
 import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
 
@@ -25,32 +25,12 @@ export default function SeriesDetailPage() {
   const params = useParams();
   const router = useRouter();
   const seriesId = params.id as string;
-  const [seriesData, setSeriesData] = useState<Series | null>(null);
-  const [videos, setVideos] = useState<Video[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: seriesData, isLoading } = useSeriesDetail(seriesId);
   const [showTrailer, setShowTrailer] = useState(false);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    async function fetchSeries() {
-      try {
-        setIsLoading(true);
-        const series = await seriesApi.getSeriesDetail(seriesId);
-        setSeriesData(series);
-        const videosList = series?.videos || [];
-        setVideos(videosList);
-      } catch (error) {
-        console.error('Failed to fetch series:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    if (seriesId) {
-      fetchSeries();
-    }
-  }, [seriesId]);
+  const videos = seriesData?.videos || [];
 
   const handleTrailerEnded = () => {
     setShowTrailer(false);

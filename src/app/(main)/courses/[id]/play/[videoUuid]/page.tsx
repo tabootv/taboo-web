@@ -2,7 +2,8 @@
 
 import { CoursePlayerPageSkeleton, LessonCardPlayer } from '@/components/courses';
 import { VideoPlayerSkeleton } from '@/components/video';
-import { auth, courses as coursesApi, videos as videosApi } from '@/lib/api';
+import { useCourseDetail, useCoursePlay, useVideo, useMe } from '@/api/queries';
+import { useToggleAutoplay } from '@/api/mutations';
 import { cn, formatDuration, formatRelativeTime } from '@/lib/utils';
 import type { Course, Video } from '@/types';
 import { CheckCircle, ChevronRight, Clock, Play, SkipForward } from 'lucide-react';
@@ -29,49 +30,21 @@ export default function CoursePlayerPage({
   const router = useRouter();
   const lessonsRef = useRef<HTMLDivElement>(null);
 
-  const [courseData, setCourseData] = useState<Course | null>(null);
-  const [currentVideo, setCurrentVideo] = useState<Video | null>(null);
-  const [lessons, setLessons] = useState<Video[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [autoplayEnabled, setAutoplayEnabled] = useState(false);
+  const { data: courseData, isLoading: isLoadingCourse } = useCourseDetail(courseId);
+  const { data: currentVideo, isLoading: isLoadingPlay } = useCoursePlay(videoUuid);
+  const { data: meData } = useMe();
+  const toggleAutoplay = useToggleAutoplay();
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+
+  const isLoading = isLoadingCourse || isLoadingPlay;
+  const lessons = courseData?.videos || [];
+  const autoplayEnabled = meData?.user?.video_autoplay || false;
 
   const currentLessonIndex = lessons.findIndex((v) => v.uuid === currentVideo?.uuid);
   const nextLesson =
     currentLessonIndex >= 0 && currentLessonIndex < lessons.length - 1
       ? lessons[currentLessonIndex + 1]
       : null;
-
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        setIsLoading(true);
-
-        try {
-          const meResponse = await auth.me();
-          setAutoplayEnabled(meResponse.user.video_autoplay || false);
-        } catch {
-          // Not logged in
-        }
-
-        const [course, video] = await Promise.all([
-          coursesApi.getCourseDetail(Number(courseId)),
-          videosApi.getVideo(videoUuid),
-        ]);
-
-        setCourseData(course);
-        setCurrentVideo(video);
-        setLessons(course?.videos || []);
-      } catch (error) {
-        console.error('Failed to fetch data:', error);
-        router.push(`/courses/${courseId}`);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchData();
-  }, [videoUuid, courseId, router]);
 
   useEffect(() => {
     if (lessonsRef.current && currentLessonIndex >= 0) {
@@ -94,13 +67,8 @@ export default function CoursePlayerPage({
     }
   };
 
-  const handleToggleAutoplay = async () => {
-    try {
-      const response = await videosApi.toggleAutoplay();
-      setAutoplayEnabled(response.video_autoplay);
-    } catch {
-      setAutoplayEnabled(!autoplayEnabled);
-    }
+  const handleToggleAutoplay = () => {
+    toggleAutoplay.mutate();
   };
 
   if (isLoading) {

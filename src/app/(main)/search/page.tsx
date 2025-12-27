@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Search as SearchIcon } from 'lucide-react';
-import { search as searchApi } from '@/lib/api';
+import { useSearch } from '@/api/queries';
 import type { Video, Series, Creator } from '@/types';
 import { Spinner } from '@/components/ui';
 import { formatCompactNumber, formatDuration } from '@/lib/utils';
@@ -14,44 +14,13 @@ function SearchPageContent() {
   const searchParams = useSearchParams();
   const query = searchParams.get('q') || '';
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [results, setResults] = useState<{
-    videos: Video[];
-    series: Series[];
-    creators: Creator[];
-  }>({
-    videos: [],
-    series: [],
-    creators: [],
-  });
-  const [error, setError] = useState<string | null>(null);
+  const { data, isLoading, isError, error } = useSearch(query, 1);
 
-  useEffect(() => {
-    if (!query.trim()) {
-      setResults({ videos: [], series: [], creators: [] });
-      return;
-    }
-
-    const fetchResults = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const data = await searchApi.search(query);
-        setResults({
-          videos: data.videos || [],
-          series: data.series || [],
-          creators: data.creators || [],
-        });
-      } catch (err) {
-        console.error('Search failed:', err);
-        setError('Failed to load search results. Please try again.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchResults();
-  }, [query]);
+  const results = {
+    videos: data?.videos || [],
+    series: data?.series || [],
+    creators: data?.creators || [],
+  };
 
   const hasResults =
     results.videos.length > 0 ||
@@ -106,11 +75,11 @@ function SearchPageContent() {
   }
 
   // Error state
-  if (error) {
+  if (isError) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="text-center py-20">
-          <p className="text-red-400 mb-4">{error}</p>
+          <p className="text-red-400 mb-4">Failed to load search results. Please try again.</p>
           <button
             onClick={() => window.location.reload()}
             className="px-4 py-2 bg-red-primary hover:bg-red-600 text-white rounded-lg transition-colors"

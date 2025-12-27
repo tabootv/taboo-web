@@ -2,67 +2,59 @@
 
 import { LoadingScreen } from '@/components/ui';
 import { VideoCard, VideoCardSkeleton, VideoEmptyState } from '@/components/video';
-import { videos as videosApi } from '@/lib/api';
-import { useInfiniteScrollPagination } from '@/lib/hooks/use-infinite-scroll-pagination';
-import type { Video } from '@/types';
-import { useRef } from 'react';
+import { useVideoList } from '@/api/queries';
+import { useMemo, useEffect, useRef } from 'react';
 import { PAGE_SIZE } from './constants';
 
 export default function VideosPage() {
   const skeletonKeyCounterRef = useRef(0);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
   const {
-    items: videosList,
+    data,
     isLoading,
-    isLoadingMore,
-    hasMore,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    isError,
     error,
-    loadMoreRef,
-  } = useInfiniteScrollPagination<Video>({
-    fetchPage: async (pageNum) => {
-      const page = typeof pageNum === 'number' ? pageNum : 1;
-      const response = await videosApi.getLongForm(page, PAGE_SIZE);
-      let items = response.data || [];
-
-      if (process.env.NODE_ENV === 'development') {
-        console.log('VIDEOS REQUEST', {
-          url: `/public/videos?page=${page}&limit=${PAGE_SIZE}&short=false&type=video&published=true`,
-          sample: items.slice(0, 5).map((v: any) => ({
-            id: v?.id,
-            uuid: v?.uuid,
-            short: v?.short,
-            is_short: v?.is_short,
-            type: v?.type,
-            published_at: v?.published_at,
-          })),
-        });
-        const leaked = items.find(
-          (v: any) => v?.short === true || v?.is_short === true || v?.type === 'short'
-        );
-        if (leaked) {
-          console.error('SHORT CONTENT LEAKED INTO /videos', leaked);
-          throw new Error('SHORT CONTENT LEAKED INTO /videos');
-        }
-      }
-
-      items = items.filter(
-        (v: any) =>
-          v?.short === false ||
-          v?.is_short === false ||
-          v?.type === 'video' ||
-          v?.short === undefined
-      );
-
-      return {
-        data: items,
-        currentPage: response.current_page ?? page,
-        lastPage: response.last_page ?? page,
-      };
-    },
-    initialPage: 1,
-    rootMargin: '600px',
-    threshold: 0,
+  } = useVideoList({
+    short: false,
+    is_short: false,
+    type: 'video',
+    published: true,
+    sort_by: 'published_at',
+    order: 'desc',
+    per_page: PAGE_SIZE,
   });
+
+  // Flatten pages into single array
+  const videosList = useMemo(() => {
+    return data?.pages.flatMap((page) => page.data) || [];
+  }, [data]);
+
+  // Intersection observer for infinite scroll
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: '600px', threshold: 0 }
+    );
+
+    const currentRef = loadMoreRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   if (isLoading) {
     return <LoadingScreen variant="feed" />;
@@ -75,9 +67,9 @@ export default function VideosPage() {
           <p className="text-sm md:text-base font-semibold text-white/80 tracking-tight">Videos</p>
         </div>
 
-        {error && (
+        {isError && (
           <div className="mb-4 rounded-md border border-red-500/40 bg-red-500/10 text-red-100 px-4 py-3 text-sm">
-            {error}
+            {error?.message || 'Error loading videos'}
           </div>
         )}
 
@@ -99,7 +91,7 @@ export default function VideosPage() {
                   </div>
                 );
               })}
-              {isLoadingMore &&
+              {isFetchingNextPage &&
                 (() => {
                   skeletonKeyCounterRef.current += 1;
                   return Array.from({ length: 6 }).map((_, i) => (
@@ -116,7 +108,7 @@ export default function VideosPage() {
           <VideoEmptyState />
         )}
 
-        {!hasMore && videosList.length > 0 && (
+        {!hasNextPage && videosList.length > 0 && (
           <div className="flex justify-center mt-8 text-white/40 text-sm">You've seen it all</div>
         )}
       </div>

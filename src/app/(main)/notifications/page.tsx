@@ -1,7 +1,8 @@
 'use client';
 
 import { Button, LoadingScreen } from '@/components/ui';
-import { notifications as notificationsApi } from '@/lib/api';
+import { useNotifications } from '@/api/queries';
+import { useMarkAllNotificationsRead, useDeleteNotification, useDeleteAllNotifications } from '@/api/mutations';
 import { useAuthStore } from '@/lib/stores';
 import type { Notification } from '@/types';
 import { formatDistanceToNow } from 'date-fns';
@@ -15,63 +16,48 @@ import { toast } from 'sonner';
 export default function NotificationsPage() {
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
-  const [notificationsList, setNotificationsList] = useState<Notification[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const fetchNotifications = useCallback(async () => {
-    try {
-      const data = await notificationsApi.list();
-      const flatData = Array.isArray(data) ? data.flat() : [];
-      setNotificationsList(
-        flatData.filter((item) => item && typeof item === 'object' && 'id' in item)
-      );
-    } catch (error) {
-      console.error('Failed to fetch notifications:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const { data: notificationsList = [], isLoading } = useNotifications();
+  const markAllRead = useMarkAllNotificationsRead();
+  const deleteNotification = useDeleteNotification();
+  const deleteAll = useDeleteAllNotifications();
 
   useEffect(() => {
     if (!isAuthenticated) {
       router.push('/sign-in');
-      return;
     }
-    fetchNotifications();
+  }, [isAuthenticated, router]);
 
-    // Poll for new notifications every 30 seconds
-    const interval = setInterval(fetchNotifications, 30000);
-    return () => clearInterval(interval);
-  }, [isAuthenticated, router, fetchNotifications]);
-
-  const handleMarkAllRead = async () => {
-    try {
-      await notificationsApi.readAll();
-      fetchNotifications();
-      toast.success('All notifications marked as read');
-    } catch {
-      toast.error('Failed to mark notifications as read');
-    }
+  const handleMarkAllRead = () => {
+    markAllRead.mutate(undefined, {
+      onSuccess: () => {
+        toast.success('All notifications marked as read');
+      },
+      onError: () => {
+        toast.error('Failed to mark notifications as read');
+      },
+    });
   };
 
-  const handleDelete = async (id: string) => {
-    try {
-      await notificationsApi.delete(id);
-      setNotificationsList((prev) => prev.filter((n) => n.id !== id));
-      toast.success('Notification deleted');
-    } catch {
-      toast.error('Failed to delete notification');
-    }
+  const handleDelete = (id: string) => {
+    deleteNotification.mutate(id, {
+      onSuccess: () => {
+        toast.success('Notification deleted');
+      },
+      onError: () => {
+        toast.error('Failed to delete notification');
+      },
+    });
   };
 
-  const handleDeleteAll = async () => {
-    try {
-      await notificationsApi.deleteAll();
-      setNotificationsList([]);
-      toast.success('All notifications deleted');
-    } catch {
-      toast.error('Failed to delete notifications');
-    }
+  const handleDeleteAll = () => {
+    deleteAll.mutate(undefined, {
+      onSuccess: () => {
+        toast.success('All notifications deleted');
+      },
+      onError: () => {
+        toast.error('Failed to delete notifications');
+      },
+    });
   };
 
   if (!isAuthenticated) {

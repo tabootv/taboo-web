@@ -15,8 +15,8 @@ import {
   LogOut,
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/stores/auth-store';
-import { videos as videosApi } from '@/lib/api';
-import { profile as profileApi } from '@/lib/api';
+import { useBookmarkedVideos, useHistoryVideos, useLikedVideos } from '@/api/queries';
+import { useUpdateAvatar } from '@/api/mutations';
 import type { Video } from '@/types';
 import { Button, Avatar, LoadingScreen } from '@/components/ui';
 import { formatCompactNumber } from '@/lib/utils';
@@ -29,39 +29,23 @@ export default function ProfilePage() {
   const router = useRouter();
   const { user, isAuthenticated, logout, fetchUser } = useAuthStore();
   const [activeTab, setActiveTab] = useState<TabType>('bookmarks');
-  const [bookmarks, setBookmarks] = useState<Video[]>([]);
-  const [history, setHistory] = useState<Video[]>([]);
-  const [liked, setLiked] = useState<Video[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const updateAvatar = useUpdateAvatar();
   const [isUploadingDp, setIsUploadingDp] = useState(false);
+
+  const { data: bookmarksData, isLoading: isLoadingBookmarks } = useBookmarkedVideos(1, 12);
+  const { data: historyData, isLoading: isLoadingHistory } = useHistoryVideos(1, 12);
+  const { data: likedData, isLoading: isLoadingLiked } = useLikedVideos(1, 12);
+
+  const isLoading = isLoadingBookmarks || isLoadingHistory || isLoadingLiked;
+  const bookmarks = bookmarksData?.data || [];
+  const history = historyData?.data || [];
+  const liked = likedData?.data || [];
 
   useEffect(() => {
     if (!isAuthenticated) {
       router.push('/sign-in');
-      return;
     }
-
-    async function fetchProfileData() {
-      try {
-        setIsLoading(true);
-        await fetchUser();
-        const [bookmarksData, historyData, likedData] = await Promise.all([
-          videosApi.getBookmarked(1, 12).catch(() => ({ data: [] })),
-          videosApi.getHistory(1, 12).catch(() => ({ data: [] })),
-          videosApi.getLiked(1, 12).catch(() => ({ data: [] })),
-        ]);
-        setBookmarks(bookmarksData.data || []);
-        setHistory(historyData.data || []);
-        setLiked(likedData.data || []);
-      } catch (error) {
-        console.error('Failed to fetch profile data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchProfileData();
-  }, [isAuthenticated, router, fetchUser]);
+  }, [isAuthenticated, router]);
 
   const handleLogout = async () => {
     try {
@@ -77,13 +61,21 @@ export default function ProfilePage() {
     if (!file) return;
     try {
       setIsUploadingDp(true);
-      await profileApi.updateDisplayPicture(file);
-      await fetchUser();
-      toast.success('Profile picture updated');
+      updateAvatar.mutate(file, {
+        onSuccess: () => {
+          fetchUser();
+          toast.success('Profile picture updated');
+        },
+        onError: () => {
+          toast.error('Failed to update profile picture');
+        },
+        onSettled: () => {
+          setIsUploadingDp(false);
+        },
+      });
     } catch (error) {
       console.error(error);
       toast.error('Failed to update profile picture');
-    } finally {
       setIsUploadingDp(false);
     }
   };

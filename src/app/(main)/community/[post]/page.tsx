@@ -1,115 +1,75 @@
 'use client';
 
-import { useEffect, useState, use } from 'react';
+import { useAddPostComment, useDeletePost, useLikePost } from '@/api/mutations';
+import { usePost, usePostComments } from '@/api/queries';
+import { Avatar, Button, LoadingScreen, Spinner } from '@/components/ui';
+import { useAuthStore } from '@/lib/stores';
+import { ArrowLeft, Flag, Heart, MessageCircle, MoreHorizontal, Send, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Heart, MessageCircle, MoreHorizontal, Trash2, Flag, Send } from 'lucide-react';
-import { posts as postsApi } from '@/lib/api';
-import type { Post, PostComment } from '@/types';
-import { useAuthStore } from '@/lib/stores';
-import { LoadingScreen, Spinner, Avatar, Button } from '@/components/ui';
+import { use, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 export default function SinglePostPage({ params }: { params: Promise<{ post: string }> }) {
   const { post: postId } = use(params);
   const router = useRouter();
   const { user, isAuthenticated } = useAuthStore();
-  const [post, setPost] = useState<Post | null>(null);
-  const [comments, setComments] = useState<PostComment[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingComments, setIsLoadingComments] = useState(false);
-  const [isLiked, setIsLiked] = useState(false);
-  const [likesCount, setLikesCount] = useState(0);
+  const postIdNum = Number(postId);
+  const { data: post, isLoading } = usePost(Number.isNaN(postIdNum) ? null : postIdNum);
+  const { data: commentsData, isLoading: isLoadingComments } = usePostComments(Number.isNaN(postIdNum) ? null : postIdNum, 1);
+  const likePost = useLikePost();
+  const addComment = useAddPostComment();
+  const deletePost = useDeletePost();
   const [showMenu, setShowMenu] = useState(false);
   const [newComment, setNewComment] = useState('');
-  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+
+  const comments = commentsData?.data || [];
 
   useEffect(() => {
-    async function fetchPost() {
-      const id = Number(postId);
-      if (!postId || isNaN(id)) {
-        toast.error('Invalid post');
-        router.push('/community');
-        return;
-      }
-
-      try {
-        setIsLoading(true);
-        const postData = await postsApi.get(id);
-        setPost(postData);
-        setIsLiked(postData.has_liked ?? false);
-        setLikesCount(postData.likes_count ?? 0);
-      } catch (error) {
-        console.error('Failed to fetch post:', error);
-        toast.error('Failed to load post');
-        router.push('/community');
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchPost();
-  }, [postId, router]);
-
-  useEffect(() => {
-    async function fetchComments() {
-      if (!post) return;
-
-      try {
-        setIsLoadingComments(true);
-        const commentsData = await postsApi.getComments(post.id);
-        setComments(commentsData.data || []);
-      } catch (error) {
-        console.error('Failed to fetch comments:', error);
-      } finally {
-        setIsLoadingComments(false);
-      }
-    }
-
-    fetchComments();
-  }, [post]);
-
-  const handleLike = async () => {
-    if (!post) return;
-
-    try {
-      const result = await postsApi.like(post.id);
-      // Toggle local state since API returns updated counts
-      setIsLiked(!isLiked);
-      setLikesCount(result.likes_count);
-    } catch {
-      toast.error('Failed to like post');
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!post) return;
-
-    try {
-      await postsApi.delete(post.id);
-      toast.success('Post deleted');
+    if (!postId || Number.isNaN(postIdNum)) {
+      toast.error('Invalid post');
       router.push('/community');
-    } catch {
-      toast.error('Failed to delete post');
     }
+  }, [postId, postIdNum, router]);
+
+  const handleLike = () => {
+    if (!post) return;
+    likePost.mutate(post.id, {
+      onError: () => {
+        toast.error('Failed to like post');
+      },
+    });
   };
 
-  const handleSubmitComment = async (e: React.FormEvent) => {
+  const handleDelete = () => {
+    if (!post) return;
+    deletePost.mutate(post.id, {
+      onSuccess: () => {
+        toast.success('Post deleted');
+        router.push('/community');
+      },
+      onError: () => {
+        toast.error('Failed to delete post');
+      },
+    });
+  };
+
+  const handleSubmitComment = (e: React.FormEvent) => {
     e.preventDefault();
     if (!post || !newComment.trim()) return;
-
-    setIsSubmittingComment(true);
-    try {
-      const comment = await postsApi.postComment(post.id, newComment);
-      setComments((prev) => [comment, ...prev]);
-      setNewComment('');
-      toast.success('Comment posted');
-    } catch {
-      toast.error('Failed to post comment');
-    } finally {
-      setIsSubmittingComment(false);
-    }
+    addComment.mutate(
+      { postId: post.id, content: newComment },
+      {
+        onSuccess: () => {
+          setNewComment('');
+          toast.success('Comment posted');
+        },
+        onError: () => {
+          toast.error('Failed to post comment');
+        },
+      }
+    );
   };
 
   if (isLoading) {
@@ -147,9 +107,9 @@ export default function SinglePostPage({ params }: { params: Promise<{ post: str
             className="flex items-center gap-3 group"
           >
             <Avatar
-              src={channel?.dp || post.user?.dp}
-              alt={channel?.name || post.user?.display_name}
-              fallback={channel?.name || post.user?.display_name}
+              src={channel?.dp || post.user?.dp || null}
+              alt={channel?.name || post.user?.display_name || ''}
+              fallback={channel?.name || post.user?.display_name || ''}
               size="lg"
               className="group-hover:ring-2 ring-red-primary transition-all"
             />
@@ -173,7 +133,11 @@ export default function SinglePostPage({ params }: { params: Promise<{ post: str
             </button>
             {showMenu && (
               <>
-                <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
+                <div
+                  className="fixed inset-0 z-10"
+                  onClick={() => setShowMenu(false)}
+                  aria-hidden="true"
+                />
                 <div className="absolute right-0 mt-1 w-40 bg-surface rounded-lg border border-border shadow-lg z-20 overflow-hidden">
                   {isOwner && (
                     <button
@@ -206,7 +170,7 @@ export default function SinglePostPage({ params }: { params: Promise<{ post: str
             {post.media.length === 1 ? (
               <div className="relative aspect-video">
                 <Image
-                  src={post.media[0].original_url || ''}
+                  src={post.media[0]?.original_url || ''}
                   alt=""
                   fill
                   className="object-cover"
@@ -241,11 +205,11 @@ export default function SinglePostPage({ params }: { params: Promise<{ post: str
           <button
             onClick={handleLike}
             className={`flex items-center gap-2 transition-colors ${
-              isLiked ? 'text-red-primary' : 'text-text-secondary hover:text-red-primary'
+              post.has_liked ? 'text-red-primary' : 'text-text-secondary hover:text-red-primary'
             }`}
           >
-            <Heart className={`w-6 h-6 ${isLiked ? 'fill-current' : ''}`} />
-            <span className="font-medium">{likesCount}</span>
+            <Heart className={`w-6 h-6 ${post.has_liked ? 'fill-current' : ''}`} />
+            <span className="font-medium">{post.likes_count || 0}</span>
           </button>
           <div className="flex items-center gap-2 text-text-secondary">
             <MessageCircle className="w-6 h-6" />
@@ -261,7 +225,7 @@ export default function SinglePostPage({ params }: { params: Promise<{ post: str
         {/* Add Comment */}
         {isAuthenticated && (
           <form onSubmit={handleSubmitComment} className="flex gap-3 mb-6">
-            <Avatar src={user?.dp} alt={user?.display_name} fallback={user?.display_name} size="md" />
+            <Avatar src={user?.dp || null} alt={user?.display_name || ''} fallback={user?.display_name || ''} size="md" />
             <div className="flex-1 flex gap-2">
               <input
                 type="text"
@@ -272,7 +236,7 @@ export default function SinglePostPage({ params }: { params: Promise<{ post: str
               />
               <Button
                 type="submit"
-                disabled={isSubmittingComment || !newComment.trim()}
+                disabled={addComment.isPending || !newComment.trim()}
                 className="btn-premium"
               >
                 <Send className="w-4 h-4" />
@@ -282,37 +246,43 @@ export default function SinglePostPage({ params }: { params: Promise<{ post: str
         )}
 
         {/* Comments List */}
-        {isLoadingComments ? (
-          <div className="flex justify-center py-8">
-            <Spinner size="lg" />
-          </div>
-        ) : comments.length > 0 ? (
-          <div className="space-y-4">
-            {comments.map((comment) => (
-              <div key={comment.id} className="flex gap-3">
-                <Avatar
-                  src={comment.user?.dp}
-                  alt={comment.user?.display_name}
-                  fallback={comment.user?.display_name}
-                  size="sm"
-                />
-                <div className="flex-1">
-                  <div className="bg-surface border border-border rounded-lg p-3">
-                    <p className="font-medium text-text-primary text-sm">
-                      {comment.user?.display_name}
-                    </p>
-                    <p className="text-text-primary mt-1">{comment.content}</p>
-                  </div>
-                  <p className="text-xs text-text-secondary mt-1">
-                    {comment.created_at}
-                  </p>
-                </div>
+        {(() => {
+          if (isLoadingComments) {
+            return (
+              <div className="flex justify-center py-8">
+                <Spinner size="lg" />
               </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-text-secondary text-center py-8">No comments yet</p>
-        )}
+            );
+          }
+          if (comments.length > 0) {
+            return (
+              <div className="space-y-4">
+                {comments.map((comment) => (
+                  <div key={comment.id} className="flex gap-3">
+                    <Avatar
+                      src={comment.user?.dp || null}
+                      alt={comment.user?.display_name || ''}
+                      fallback={comment.user?.display_name || ''}
+                      size="sm"
+                    />
+                    <div className="flex-1">
+                      <div className="bg-surface border border-border rounded-lg p-3">
+                        <p className="font-medium text-text-primary text-sm">
+                          {comment.user?.display_name}
+                        </p>
+                        <p className="text-text-primary mt-1">{comment.content}</p>
+                      </div>
+                      <p className="text-xs text-text-secondary mt-1">
+                        {comment.created_at}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            );
+          }
+          return <p className="text-text-secondary text-center py-8">No comments yet</p>;
+        })()}
       </div>
     </div>
   );

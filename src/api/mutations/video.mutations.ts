@@ -58,10 +58,11 @@ export function useToggleDislike() {
       const previous = queryClient.getQueryData<Video>(queryKeys.videos.detail(videoId));
 
       if (previous) {
+        const currentDisliked = previous.has_disliked ?? false;
         queryClient.setQueryData<Video>(queryKeys.videos.detail(videoId), {
           ...previous,
-          has_disliked: !previous.has_disliked,
-          dislikes_count: previous.has_disliked
+          has_disliked: !currentDisliked,
+          dislikes_count: currentDisliked
             ? (previous.dislikes_count || 0) - 1
             : (previous.dislikes_count || 0) + 1,
         });
@@ -94,9 +95,10 @@ export function useToggleBookmark() {
       const previous = queryClient.getQueryData<Video>(queryKeys.videos.detail(videoId));
 
       if (previous) {
+        const currentBookmarked = previous.is_bookmarked ?? false;
         queryClient.setQueryData<Video>(queryKeys.videos.detail(videoId), {
           ...previous,
-          is_bookmarked: !previous.is_bookmarked,
+          is_bookmarked: !currentBookmarked,
         });
       }
 

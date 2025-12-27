@@ -1,15 +1,15 @@
 'use client';
 
-import { creators as creatorsApi } from '@/lib/api';
+import { useCreatorsList } from '@/api/queries';
 import { CreatorCard, CreatorCardSkeleton } from '@/components/creator';
-import type { Creator } from '@/types';
 import { Rss, Star, Users } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 
 export default function CreatorsPage() {
-  const [creatorsList, setCreatorsList] = useState<Creator[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data, isLoading } = useCreatorsList({ page: 1 });
+
+  const creatorsList = data?.data || [];
 
   const skeletonKeys = useMemo(
     () =>
@@ -19,23 +19,6 @@ export default function CreatorsPage() {
       ),
     []
   );
-
-  useEffect(() => {
-    const fetchCreators = async () => {
-      try {
-        setIsLoading(true);
-        const response = await creatorsApi.list({ page: 1 });
-        const creators = response.data || [];
-        setCreatorsList(creators);
-      } catch (error) {
-        console.error('Error fetching creators:', error);
-      } finally {
-        setTimeout(() => setIsLoading(false), 500);
-      }
-    };
-
-    fetchCreators();
-  }, []);
 
   return (
     <div className="creators-page-atmosphere min-h-screen">

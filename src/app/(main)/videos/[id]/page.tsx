@@ -1,9 +1,9 @@
 'use client';
 
+import { useRelatedVideos, useVideoPlay } from '@/api/queries';
 import { Button, LoadingScreen } from '@/components/ui';
 import { VideoPlayerSkeleton } from '@/components/video';
 import { LikeButton, SaveButton, VideoComments } from '@/features/video';
-import { videos as videosApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { formatRelativeTime } from '@/lib/utils';
 import { getTagKey, normalizeTags } from '@/lib/utils/tags';
@@ -29,13 +29,73 @@ export default function VideoPage() {
   const id = params.id as string;
   const { user } = useAuthStore();
 
-  const [video, setVideo] = useState<Video | null>(null);
-  const [relatedVideos, setRelatedVideos] = useState<Video[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [autoplayEnabled] = useState(user?.video_autoplay ?? true);
+  const { data: playData, isLoading: isLoadingPlay, isError: isErrorPlay, error: errorPlay } = useVideoPlay(id);
+  const videoId = playData?.video?.uuid || playData?.video?.id;
+  const { data: relatedData } = useRelatedVideos(videoId, 1, 10);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
+
+  const hydrateVideoTags = useCallback((videoData: Video): Video => {
+    const normalizedTags = normalizeTags(videoData.tags);
+    return { ...videoData, tags: normalizedTags };
+  }, []);
+
+  // Process video and related videos
+  const video = useMemo(() => {
+    if (!playData?.video) return null;
+    return hydrateVideoTags(playData.video);
+  }, [playData?.video, hydrateVideoTags]);
+
+  const relatedVideos = useMemo(() => {
+    const MIN_VIDEOS = 10;
+    let allVideos = playData?.videos || [];
+
+    // Supplement with related videos if needed
+    if (allVideos.length < MIN_VIDEOS && relatedData?.data) {
+      const related = relatedData.data || [];
+      const videoIds = new Set(allVideos.map((v) => v.uuid || v.id));
+      const currentVideoId = video?.uuid || video?.id;
+      
+      related.forEach((v) => {
+        const key = v.uuid || v.id;
+        if (!key || videoIds.has(key) || key === currentVideoId) return;
+        if (allVideos.length < MIN_VIDEOS) {
+          videoIds.add(key);
+          allVideos.push(v);
+        }
+      });
+    }
+
+    // Development checks
+    if (process.env.NODE_ENV === 'development') {
+      const leaked = allVideos.find(
+        (v: any) => v?.short === true || v?.is_short === true || v?.type === 'short'
+      );
+      if (leaked) {
+        console.error('SHORT CONTENT LEAKED INTO /videos/[id] related list', leaked);
+      }
+      const missingUuid = allVideos.find((v: any) => !v?.uuid);
+      if (missingUuid) {
+        console.error('MISSING UUID IN RELATED VIDEO', missingUuid);
+      }
+    }
+
+    return allVideos.map(hydrateVideoTags);
+  }, [playData?.videos, relatedData?.data, video, hydrateVideoTags]);
+
+  const isLoading = isLoadingPlay;
+  const error = useMemo(() => {
+    if (isErrorPlay) {
+      const axiosError = errorPlay as { response?: { status?: number; data?: { message?: string } } };
+      const status = axiosError?.response?.status;
+      if (status === 401) return 'auth';
+      if (status === 500) return 'server_error';
+      return 'not_found';
+    }
+    return null;
+  }, [isErrorPlay, errorPlay]);
+
+  const autoplayEnabled = user?.video_autoplay ?? true;
 
   const videoRef = useRef(video);
   const relatedVideosRef = useRef(relatedVideos);
@@ -43,109 +103,17 @@ export default function VideoPage() {
   const [showTagsLeftArrow, setShowTagsLeftArrow] = useState(false);
   const [showTagsRightArrow, setShowTagsRightArrow] = useState(false);
 
-  const hydrateVideoTags = useCallback((videoData: Video): Video => {
-    const normalizedTags = normalizeTags(videoData.tags);
-    return { ...videoData, tags: normalizedTags };
-  }, []);
-
   useEffect(() => {
     videoRef.current = video;
     relatedVideosRef.current = relatedVideos;
   }, [video, relatedVideos]);
 
+  // Reset selected tag when video changes
   useEffect(() => {
-    let isSubscribed = true;
-    const MIN_VIDEOS = 10;
-
-    async function fetchVideo() {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const { video: videoData, videos } = await videosApi.play(id);
-
-        let allVideos = videos || [];
-
-        if (allVideos.length < MIN_VIDEOS) {
-          try {
-            const videoId = videoData.uuid || videoData.id;
-            if (!videoId) return;
-            const relatedResponse = await videosApi.getRelatedLongForm(videoId, 1, MIN_VIDEOS);
-            const related = relatedResponse.data || [];
-            const videoIds = new Set(allVideos.map((v) => v.uuid || v.id));
-            related.forEach((v) => {
-              const key = v.uuid || v.id;
-              if (!key || videoIds.has(key) || key === (videoData.uuid || videoData.id)) return;
-              if (allVideos.length < MIN_VIDEOS) {
-                videoIds.add(key);
-                allVideos.push(v);
-              }
-            });
-          } catch (supplementError) {
-            console.error('Failed to fetch related long-form videos:', supplementError);
-          }
-        }
-
-        if (process.env.NODE_ENV === 'development') {
-          const leaked = allVideos.find(
-            (v: any) => v?.short === true || v?.is_short === true || v?.type === 'short'
-          );
-          if (leaked) {
-            console.error('SHORT CONTENT LEAKED INTO /videos/[id] related list', leaked);
-            throw new Error('SHORT CONTENT LEAKED INTO /videos/[id] related list');
-          }
-          const missingUuid = allVideos.find((v: any) => !v?.uuid);
-          if (missingUuid) {
-            console.error('MISSING UUID IN RELATED VIDEO', missingUuid);
-            throw new Error('MISSING UUID IN RELATED VIDEO');
-          }
-        }
-
-        const videoWithTags = hydrateVideoTags(videoData);
-        const relatedWithTags = allVideos.map(hydrateVideoTags);
-
-        if (!isSubscribed) return;
-
-        setVideo(videoWithTags);
-        setRelatedVideos(relatedWithTags);
-        setSelectedTag(null);
-      } catch (err: unknown) {
-        const axiosError = err as { response?: { status?: number; data?: { message?: string } } };
-        const status = axiosError?.response?.status;
-
-        if (status === 401) {
-          if (isSubscribed) {
-            setError('auth');
-          }
-          return;
-        }
-
-        if (status === 500) {
-          console.error('Server error fetching video:', err);
-          if (isSubscribed) {
-            setError('server_error');
-          }
-          return;
-        }
-
-        console.error('Failed to fetch video:', err);
-        if (isSubscribed) {
-          setError('not_found');
-        }
-      } finally {
-        if (isSubscribed) {
-          setIsLoading(false);
-        }
-      }
+    if (video) {
+      setSelectedTag(null);
     }
-
-    if (id) {
-      fetchVideo();
-    }
-
-    return () => {
-      isSubscribed = false;
-    };
-  }, [id, hydrateVideoTags]);
+  }, [video]);
 
   const availableTags = useMemo(() => {
     const tagMap = new Map<string, Tag>();
@@ -347,7 +315,10 @@ export default function VideoPage() {
               </div>
 
               <div className="flex items-center gap-2">
-                <LikeButton video={video} onUpdate={setVideo} />
+                <LikeButton video={video} onUpdate={() => {
+                  // Video state is managed by TanStack Query, mutations handle cache updates
+                  // This callback is for component compatibility only
+                }} />
                 <SaveButton video={video} />
               </div>
             </div>

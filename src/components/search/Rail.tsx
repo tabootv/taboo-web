@@ -1,10 +1,10 @@
 'use client';
 
-import { useRef, useState, useCallback, useEffect } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import type { SearchCreator, SearchItem, SearchTag, SearchTitle } from '@/api/types';
 import { cn } from '@/lib/utils';
-import { PosterCard, CreatorAvatarCard, TagChip } from './PosterCard';
-import type { SearchItem, SearchTitle, SearchCreator, SearchTag } from '@/mock/searchData';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { CreatorAvatarCard, PosterCard, TagChip } from './PosterCard';
 
 interface RailProps {
   label: string;
@@ -85,18 +85,18 @@ export function Rail({ label, items, type = 'titles', onItemClick, className }: 
                 <PosterCard
                   key={`${titleItem.id}-${index}`}
                   id={titleItem.id}
-                  uuid={titleItem.uuid}
+                  {...(titleItem.uuid && { uuid: titleItem.uuid })}
                   title={titleItem.title}
                   thumb={titleItem.thumb}
-                  thumbWebp={titleItem.thumbWebp}
-                  creatorName={titleItem.creatorName}
-                  year={titleItem.year}
-                  duration={titleItem.duration}
-                  views={titleItem.views}
-                  contentType={titleItem.contentType}
+                  {...(titleItem.thumbWebp && { thumbWebp: titleItem.thumbWebp })}
+                  {...(titleItem.creatorName && { creatorName: titleItem.creatorName })}
+                  {...(titleItem.year && { year: titleItem.year })}
+                  {...(titleItem.duration !== undefined && { duration: titleItem.duration })}
+                  {...(titleItem.views !== undefined && { views: titleItem.views })}
+                  {...(titleItem.contentType && { contentType: titleItem.contentType })}
                   variant={titleItem.contentType === 'short' ? 'short' : 'landscape'}
                   className={titleItem.contentType === 'short' ? 'w-32' : 'w-56 md:w-64'}
-                  onClick={onItemClick}
+                  {...(onItemClick && { onClick: onItemClick })}
                 />
               );
             }
@@ -111,8 +111,8 @@ export function Rail({ label, items, type = 'titles', onItemClick, className }: 
                   avatar={creatorItem.avatar}
                   subscriberCount={creatorItem.subscriberCount}
                   videoCount={creatorItem.videoCount}
-                  verified={creatorItem.verified}
-                  onClick={onItemClick}
+                  {...(creatorItem.verified !== undefined && { verified: creatorItem.verified })}
+                  {...(onItemClick && { onClick: onItemClick })}
                 />
               );
             }
@@ -125,7 +125,7 @@ export function Rail({ label, items, type = 'titles', onItemClick, className }: 
                   id={tagItem.id}
                   name={tagItem.name}
                   count={tagItem.count}
-                  onClick={onItemClick}
+                  {...(onItemClick && { onClick: onItemClick })}
                 />
               );
             }
@@ -138,7 +138,7 @@ export function Rail({ label, items, type = 'titles', onItemClick, className }: 
         {showRightArrow && (
           <button
             onClick={() => scroll('right')}
-            className="absolute right-0 top-0 bottom-0 z-20 w-12 bg-gradient-to-l from-background via-background/80 to-transparent flex items-center justify-end pr-2 opacity-0 group-hover/rail:opacity-100 transition-opacity"
+            className="absolute right-0 top-0 bottom-0 z-20 w-12 bg-linear-to-l from-background via-background/80 to-transparent flex items-center justify-end pr-2 opacity-0 group-hover/rail:opacity-100 transition-opacity"
             aria-label="Scroll right"
           >
             <div className="w-10 h-10 rounded-full bg-surface/90 backdrop-blur flex items-center justify-center hover:bg-hover transition-colors">
@@ -166,7 +166,7 @@ export function RailSkeleton({ variant = 'titles' }: { variant?: 'titles' | 'cre
           <div
             key={i}
             className={cn(
-              'flex-shrink-0 bg-surface rounded animate-pulse',
+              'shrink-0 bg-surface rounded animate-pulse',
               variant === 'creators' && 'w-24 h-36',
               variant === 'tags' && 'w-28 h-10 rounded-full',
               variant === 'titles' && 'w-56 md:w-64 aspect-video rounded-md'

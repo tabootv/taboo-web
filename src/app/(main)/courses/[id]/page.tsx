@@ -15,7 +15,7 @@ import {
   Users,
   LogIn,
 } from 'lucide-react';
-import { courses as coursesApi } from '@/lib/api';
+import { useCourseDetail } from '@/api/queries';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import type { Series, Video, Channel, Course } from '@/types';
 import { VideoPlayerSkeleton } from '@/components/video';
@@ -34,39 +34,14 @@ const VideoPlayer = dynamic(
 export default function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
-  const [courseData, setCourseData] = useState<(Series | Course) | null>(null);
-  const [videos, setVideos] = useState<Video[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: courseData, isLoading, isError } = useCourseDetail(id);
   const [showTrailer, setShowTrailer] = useState(false);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const { isAuthenticated } = useAuthStore();
 
-  useEffect(() => {
-    async function fetchCourse() {
-      setIsLoading(true);
-      setError(null);
-
-      // Use getCourseByUuid which handles both numeric IDs and UUIDs
-      // The API /courses/{id} returns { series: { ...course, videos: [...] } }
-      const course = await coursesApi.getCourseByUuid(id);
-      if (course) {
-        setCourseData(course);
-        setVideos(course.videos || []);
-        setIsLoading(false);
-        return;
-      }
-
-      // All attempts failed
-      setError('Unable to load course');
-      setIsLoading(false);
-    }
-
-    if (id) {
-      fetchCourse();
-    }
-  }, [id]);
+  const videos = courseData?.videos || [];
+  const error = isError ? 'Unable to load course' : null;
 
   const handleTrailerEnded = () => {
     setShowTrailer(false);

@@ -91,6 +91,19 @@ export const videoClient = {
   },
 
   /**
+   * Play video (returns video + related videos)
+   */
+  play: async (id: string | number): Promise<{ video: Video; videos: Video[] }> => {
+    const data = await apiClient.get<{ video?: Video; videos?: Video[]; data?: Video }>(
+      `/videos/${id}/play`
+    );
+    return {
+      video: data.video || data.data || (data as Video),
+      videos: data.videos || [],
+    };
+  },
+
+  /**
    * Get list of videos with filters
    */
   list: async (filters?: VideoListFilters): Promise<VideoListResponse> => {
@@ -255,5 +268,35 @@ export const videoClient = {
    */
   toggleAutoplay: async (): Promise<{ video_autoplay: boolean }> => {
     return apiClient.post<{ video_autoplay: boolean }>('/videos/toggle-autoplay');
+  },
+
+  /**
+   * Get bookmarked videos
+   */
+  getBookmarked: async (page = 1, perPage = 12): Promise<VideoListResponse> => {
+    const { data } = await apiClient.get('/profile/bookmarked-videos', {
+      params: { page, per_page: perPage },
+    });
+    return data.videos || data;
+  },
+
+  /**
+   * Get watch history
+   */
+  getHistory: async (page = 1, perPage = 12): Promise<VideoListResponse> => {
+    const { data } = await apiClient.get('/profile/watch-history', {
+      params: { page, per_page: perPage },
+    });
+    return data.videos || data;
+  },
+
+  /**
+   * Get liked videos
+   */
+  getLiked: async (page = 1, perPage = 12): Promise<VideoListResponse> => {
+    const { data } = await apiClient.get('/profile/liked-videos', {
+      params: { page, per_page: perPage },
+    });
+    return data.videos || data;
   },
 };

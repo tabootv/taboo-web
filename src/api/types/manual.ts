@@ -428,6 +428,86 @@ export interface SearchResults {
   creators: Creator[];
 }
 
+// Search UI Component Types (for Rail, PosterCard, etc.)
+export interface SearchTitle {
+  type: 'title';
+  id: string;
+  uuid: string;
+  title: string;
+  thumb: string;
+  thumbWebp?: string;
+  creatorName: string;
+  creatorId: string;
+  year: number;
+  description: string;
+  duration?: number;
+  views?: number;
+  contentType: 'video' | 'short' | 'series';
+}
+
+export interface SearchCreator {
+  type: 'creator';
+  id: string;
+  uuid: string;
+  name: string;
+  avatar: string;
+  subscriberCount: number;
+  videoCount: number;
+  verified?: boolean;
+}
+
+export interface SearchTag {
+  type: 'tag';
+  id: string;
+  name: string;
+  count: number;
+}
+
+export type SearchItem = SearchTitle | SearchCreator | SearchTag;
+
+export interface SearchRail {
+  label: string;
+  type: 'titles' | 'creators' | 'tags';
+  items: SearchItem[];
+}
+
+export interface TopResult {
+  type: 'title' | 'creator';
+  id: string;
+  uuid?: string;
+  title: string;
+  thumb: string;
+  thumbLarge?: string;
+  creatorName?: string;
+  year?: number;
+  description: string;
+  duration?: number;
+  contentType?: 'video' | 'short' | 'series';
+}
+
+export interface SearchResponse {
+  query: string;
+  top: TopResult | null;
+  rails: SearchRail[];
+  pagination: {
+    page: number;
+    nextPage: number | null;
+    hasMore: boolean;
+    total: number;
+  };
+}
+
+export interface SuggestResponse {
+  query: string;
+  suggestions: SearchItem[];
+  recentSearches?: string[];
+}
+
+export interface TrendingResponse {
+  trending: SearchItem[];
+  popular: string[];
+}
+
 // ============================================
 // Notifications Domain
 // ============================================
@@ -478,6 +558,281 @@ export interface Tag {
   name: string;
   slug: string;
   should_show?: boolean;
+}
+
+// ============================================
+// Studio Domain (Creator Studio)
+// ============================================
+
+export interface StudioCreator {
+  id: number;
+  name: string;
+  channel_slug: string;
+  avatar_url: string;
+}
+
+export interface StudioStats {
+  totalVideos: number;
+  totalShorts: number;
+  totalPosts: number;
+  totalViews?: number;
+  totalWatchTimeSeconds?: number;
+}
+
+export interface StudioContentItem {
+  id: number;
+  uuid: string;
+  title: string;
+  thumbnail_url: string;
+  created_at: string;
+  views_count?: number;
+  likes_count?: number;
+}
+
+export interface StudioDashboardResponse {
+  creator: StudioCreator;
+  stats: StudioStats;
+  latestVideos: StudioContentItem[];
+  latestShorts: StudioContentItem[];
+}
+
+export interface StudioUploadVideoPayload {
+  file: File;
+  thumbnail?: File | null;
+  title: string;
+  description?: string;
+  tags?: string[];
+  country_id?: number | null;
+  is_nsfw?: boolean;
+  series_id?: number | null;
+}
+
+export interface StudioUploadVideoResponse {
+  success: boolean;
+  video?: {
+    id: number;
+    uuid: string;
+    title: string;
+    thumbnail_url: string;
+  };
+  errors?: Record<string, string[]>;
+}
+
+export interface StudioUploadShortPayload {
+  file: File;
+  thumbnail?: File | null;
+  title: string;
+  description?: string;
+  tags?: string[];
+  country_id?: number | null;
+  is_nsfw?: boolean;
+}
+
+export interface StudioUploadShortResponse {
+  success: boolean;
+  video?: {
+    id: number;
+    uuid: string;
+    title: string;
+    thumbnail_url: string;
+  };
+  errors?: Record<string, string[]>;
+}
+
+export interface StudioCreatePostPayload {
+  body: string;
+  image?: File | null;
+  video?: File | null;
+}
+
+export interface StudioCreatePostResponse {
+  success: boolean;
+  post?: {
+    id: number;
+    body: string;
+    created_at: string;
+  };
+  errors?: Record<string, string[]>;
+}
+
+export interface StudioVideoListItem {
+  id: number;
+  uuid: string;
+  title: string;
+  description?: string;
+  thumbnail_url?: string;
+  views_count?: number;
+  likes_count?: number;
+  created_at: string;
+  published_at?: string;
+  status?: string;
+}
+
+export interface StudioVideoDetail {
+  id: number;
+  uuid: string;
+  title: string;
+  description?: string;
+  thumbnail_url?: string;
+  views_count?: number;
+  likes_count?: number;
+  created_at: string;
+  published_at?: string;
+  status?: string;
+}
+
+export interface StudioShortListItem {
+  id: number;
+  uuid: string;
+  title: string;
+  description?: string;
+  thumbnail_url?: string;
+  views_count?: number;
+  likes_count?: number;
+  created_at: string;
+  published_at?: string;
+  status?: string;
+}
+
+export interface StudioShortDetail {
+  id: number;
+  uuid: string;
+  title: string;
+  description?: string;
+  thumbnail_url?: string;
+  views_count?: number;
+  likes_count?: number;
+  created_at: string;
+  published_at?: string;
+  status?: string;
+}
+
+export interface StudioPostListItem {
+  id: number;
+  uuid: string;
+  body: string;
+  created_at: string;
+  published_at?: string;
+  likes_count?: number;
+  comments_count?: number;
+}
+
+export interface StudioPostDetail {
+  id: number;
+  uuid: string;
+  body: string;
+  created_at: string;
+  published_at?: string;
+  likes_count?: number;
+  comments_count?: number;
+}
+
+export interface StudioSeriesListItem {
+  id: number;
+  uuid: string;
+  title: string;
+  description?: string;
+  thumbnail_url?: string;
+  videos_count?: number;
+  created_at: string;
+  published_at?: string;
+}
+
+export interface StudioSeriesDetail {
+  id: number;
+  uuid: string;
+  title: string;
+  description?: string;
+  thumbnail_url?: string;
+  videos_count?: number;
+  created_at: string;
+  published_at?: string;
+}
+
+export interface StudioCourseListItem {
+  id: number;
+  uuid: string;
+  title: string;
+  description?: string;
+  thumbnail_url?: string;
+  videos_count?: number;
+  created_at: string;
+  published_at?: string;
+}
+
+export interface StudioCourseDetail {
+  id: number;
+  uuid: string;
+  title: string;
+  description?: string;
+  thumbnail_url?: string;
+  videos_count?: number;
+  created_at: string;
+  published_at?: string;
+}
+
+export interface StudioTag {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+export interface StudioCategory {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+export interface StudioCountry {
+  id: number;
+  name: string;
+  code: string;
+}
+
+export interface StudioSeriesCategory {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+export interface StudioVideoTag {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+export interface StudioShortTag {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+export interface StudioPostTag {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+export interface StudioCourseTag {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+export interface StudioSeriesTag {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+export interface StudioVideosListResponse {
+  videos: StudioVideoListItem[];
+  pagination: {
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+  };
 }
 
 // ============================================

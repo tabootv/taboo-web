@@ -1,14 +1,16 @@
 'use client';
 
-import { series as seriesApi } from '@/lib/api';
 import { SeriesPremiumCard, SeriesCardSkeleton } from '@/components/series';
-import type { Series } from '@/types';
+import { useSeriesList } from '@/api/queries';
 import { Play } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 
 export default function SeriesPage() {
-  const [seriesList, setSeriesList] = useState<Series[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data, isLoading, isError } = useSeriesList({
+    sort_by: 'newest',
+  });
+
+  const seriesList = data || [];
 
   const skeletonKeys = useMemo(
     () =>
@@ -18,26 +20,6 @@ export default function SeriesPage() {
       ),
     []
   );
-
-  const fetchSeries = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const response = await seriesApi.list({
-        sort_by: 'newest',
-      });
-      setSeriesList(response.series || []);
-      setTimeout(() => {
-        setIsLoading(false);
-      }, 500);
-    } catch (error) {
-      console.error('Error fetching series data:', error);
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchSeries();
-  }, [fetchSeries]);
 
   return (
     <div className="series-page-atmosphere min-h-screen">

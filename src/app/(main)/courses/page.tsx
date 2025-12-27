@@ -1,80 +1,21 @@
 'use client';
 
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Play, GraduationCap, LogIn } from 'lucide-react';
-import { courses as coursesApi } from '@/lib/api';
+import { useCoursesList } from '@/api/queries';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import type { Course } from '@/types';
 import { LoadingScreen, Spinner, Button } from '@/components/ui';
 
 export default function CoursesPage() {
-  const [coursesList, setCoursesList] = useState<Course[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const observerRef = useRef<IntersectionObserver | null>(null);
+  const { data, isLoading, isError } = useCoursesList({ page: 1 });
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const { isAuthenticated } = useAuthStore();
 
-  const fetchCourses = useCallback(async (pageNum: number, reset = false) => {
-    try {
-      if (pageNum === 1) {
-        setIsLoading(true);
-        setError(null);
-      } else {
-        setIsLoadingMore(true);
-      }
-
-      const response = await coursesApi.list({ page: pageNum });
-      const newCourses = response.data || [];
-
-      if (reset) {
-        setCoursesList(newCourses);
-      } else {
-        setCoursesList((prev) => [...prev, ...newCourses]);
-      }
-
-      setHasMore(response.current_page < response.last_page);
-      setPage(pageNum);
-    } catch (err) {
-      console.error('Failed to fetch courses:', err);
-      if (pageNum === 1) {
-        setError('Unable to load courses');
-      }
-    } finally {
-      setIsLoading(false);
-      setIsLoadingMore(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchCourses(1, true);
-  }, [fetchCourses]);
-
-  useEffect(() => {
-    if (observerRef.current) {
-      observerRef.current.disconnect();
-    }
-
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasMore && !isLoadingMore) {
-          fetchCourses(page + 1);
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    if (loadMoreRef.current) {
-      observerRef.current.observe(loadMoreRef.current);
-    }
-
-    return () => observerRef.current?.disconnect();
-  }, [hasMore, isLoadingMore, page, fetchCourses]);
+  const coursesList = data?.data || [];
+  const error = isError ? 'Unable to load courses' : null;
 
   if (isLoading) {
     return <LoadingScreen message="Loading courses..." />;
@@ -95,8 +36,7 @@ export default function CoursesPage() {
 
       {/* Load More */}
       <div ref={loadMoreRef} className="mt-8 flex justify-center">
-        {isLoadingMore && <Spinner size="lg" />}
-        {!hasMore && coursesList.length > 0 && (
+        {data && data.current_page >= data.last_page && coursesList.length > 0 && (
           <p className="text-text-secondary">No more courses to load</p>
         )}
       </div>

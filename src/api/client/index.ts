@@ -1,7 +1,16 @@
 export { authClient } from './auth.client';
 export { apiClient, getToken, isAuthenticated, removeToken, setToken } from './base-client';
+export { coursesClient } from './courses.client';
+export { creatorsClient } from './creators.client';
 export { homeClient } from './home.client';
+export { notificationsClient } from './notifications.client';
 export { postsClient } from './posts.client';
+export { profileClient } from './profile.client';
+export { searchClient } from './search.client';
 export { seriesClient } from './series.client';
+export { studioClient } from './studio.client';
+export { subscriptionsClient } from './subscriptions.client';
 export { videoClient } from './video.client';
+export type { CourseListFilters } from './courses.client';
+export type { CreatorListFilters } from './creators.client';
 export type { RelatedVideoFilters, VideoListFilters } from './video.client';

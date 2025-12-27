@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Play, ChevronDown, Clapperboard } from 'lucide-react';
-import { creators as creatorsApi } from '@/lib/api';
+import { useCreatorProfile, useCreatorVideos, useCreatorShorts, useCreatorSeries, useCreatorPosts, useCreatorCourses } from '@/api/queries';
 import type { Creator, Video, Series, Post } from '@/types';
 import { LoadingScreen } from '@/components/ui';
 import { formatDuration } from '@/lib/utils';

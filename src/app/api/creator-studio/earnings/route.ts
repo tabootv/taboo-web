@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { getComprehensiveEarningsData, type GroupBy, type V2Commission, type V2Payout } from '@/lib/firstpromoter/client';
 import { getRequiredEnv } from '@/shared/lib/config/env';
+import { cookies } from 'next/headers';
+import { NextRequest, NextResponse } from 'next/server';
 
 // Hardcoded promoter ID mapping for now
 // TODO: Replace with database lookup once Laravel backend is ready
@@ -123,7 +123,7 @@ function mergeFunnelData(
     for (const item of v2Reports.sub_data) {
       // V2 API returns dates like "Dec 23, 2025" - parse and normalize to YYYY-MM-DD
       const parsedDate = new Date(item.period);
-      const normalizedDate = parsedDate.toISOString().split('T')[0];
+      const normalizedDate = parsedDate.toISOString().split('T')[0] || item.period;
 
       funnelMap.set(normalizedDate, {
         clicks: item.data.clicks_count || 0,
@@ -227,7 +227,7 @@ export async function GET(request: NextRequest) {
     const response: EarningsResponse = {
       promoter: {
         id: profile.id,
-        name: profile.name,
+        name: profile.name || 'Unknown',
         email: profile.email,
         refId: profile.refId,
         referralLink: profile.referralLink,
