@@ -19,7 +19,7 @@ export function LessonCard({ video, lessonNumber, courseId, channel }: LessonCar
   const href = `/courses/${courseId}/play/${video.uuid}`;
 
   // Try multiple thumbnail sources - API might return in different fields
-  const thumbnail = video.thumbnail_webp || video.thumbnail || video.card_thumbnail || video.poster;
+  const thumbnail = video.thumbnail_webp || video.thumbnail || video.card_thumbnail || (video as Video & { poster?: string }).poster;
 
   return (
     <Link

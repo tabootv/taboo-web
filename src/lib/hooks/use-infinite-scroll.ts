@@ -6,33 +6,42 @@ interface UseInfiniteScrollOptions {
   onLoadMore: () => Promise<void> | void;
   hasMore: boolean;
   isLoading: boolean;
-  threshold?: number; // Distance from bottom in pixels to trigger load
+  threshold?: number; // Distance from bottom in pixels to trigger load (used for rootMargin)
   rootMargin?: string;
 }
 
 export function useInfiniteScroll(options: UseInfiniteScrollOptions) {
-  const { onLoadMore, hasMore, isLoading, threshold = 100, rootMargin = '0px' } = options;
+  const { onLoadMore, hasMore, isLoading, threshold = 100, rootMargin } = options;
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
+  const isLoadingRef = useRef(isLoading);
+
+  // Keep isLoading in sync with ref to avoid stale closures
+  useEffect(() => {
+    isLoadingRef.current = isLoading;
+  }, [isLoading]);
 
   const handleLoadMore = useCallback(async () => {
-    if (!hasMore || isLoading) return;
+    if (!hasMore || isLoadingRef.current) return;
     await onLoadMore();
-  }, [hasMore, isLoading, onLoadMore]);
+  }, [hasMore, onLoadMore]);
 
   useEffect(() => {
     const element = loadMoreRef.current;
     if (!element) return;
 
+    // Use threshold for rootMargin if custom rootMargin not provided
+    const margin = rootMargin ?? `${threshold}px`;
+
     observerRef.current = new IntersectionObserver(
       (entries) => {
         const entry = entries[0];
-        if (entry?.isIntersecting) {
+        if (entry?.isIntersecting && !isLoadingRef.current) {
           handleLoadMore();
         }
       },
       {
-        rootMargin,
+        rootMargin: margin,
         threshold: 0,
       }
     );
@@ -44,23 +53,7 @@ export function useInfiniteScroll(options: UseInfiniteScrollOptions) {
         observerRef.current.disconnect();
       }
     };
-  }, [handleLoadMore, rootMargin]);
-
-  // Also support scroll-based loading as fallback
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollTop = window.scrollY || document.documentElement.scrollTop;
-      const scrollHeight = document.documentElement.scrollHeight;
-      const clientHeight = document.documentElement.clientHeight;
-
-      if (scrollHeight - scrollTop - clientHeight < threshold) {
-        handleLoadMore();
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [handleLoadMore, threshold]);
+  }, [handleLoadMore, rootMargin, threshold]);
 
   return { loadMoreRef };
 }

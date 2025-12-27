@@ -206,7 +206,7 @@ export interface ShortVideo extends Video {
   short: true;
 }
 
-export interface VideoListResponse extends PaginatedResponse<Video> {}
+export type VideoListResponse = PaginatedResponse<Video>;
 
 export interface LikeResponse {
   has_liked: boolean;
@@ -294,7 +294,7 @@ export interface Post {
   updated_at: string;
 }
 
-export interface PostListResponse extends PaginatedResponse<Post> {}
+export type PostListResponse = PaginatedResponse<Post>;
 
 export interface PostComment {
   id: number;
@@ -313,7 +313,7 @@ export interface PostComment {
   updated_at: string;
 }
 
-export interface PostCommentListResponse extends PaginatedResponse<PostComment> {}
+export type PostCommentListResponse = PaginatedResponse<PostComment>;
 
 // ============================================
 // Comments Domain
@@ -336,7 +336,7 @@ export interface Comment {
   updated_at: string;
 }
 
-export interface CommentListResponse extends PaginatedResponse<Comment> {}
+export type CommentListResponse = PaginatedResponse<Comment>;
 
 // ============================================
 // Subscription Domain

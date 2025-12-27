@@ -43,8 +43,16 @@ export default function VideosPage() {
         setIsLoadingMore(true);
       }
 
-      const response = await videosApi.getVideosV2(pageNum, PAGE_SIZE);
-      const items = response.data || [];
+      const response = await videosApi.getLongFormVideos(pageNum, PAGE_SIZE);
+      const rawItems = response.data || [];
+
+      // Defensive client guard: drop anything that looks like a short
+      const items = rawItems.filter(
+        (video) =>
+          video?.short !== true &&
+          (video as any)?.is_short !== true &&
+          (video as any)?.type !== 'short'
+      );
 
       setVideosList((prev) => (pageNum === 1 || reset ? items : [...prev, ...items]));
 
@@ -223,7 +231,7 @@ export default function VideosPage() {
 
         {!hasMore && filteredVideos.length > 0 && (
           <div className="flex justify-center mt-8 text-white/40 text-sm">
-            You've seen it all
+            You&apos;ve seen it all
           </div>
         )}
       </div>
@@ -301,6 +309,19 @@ function VideoCard({ video, priority = false, onOpenPreview }: { video: Video; p
   const isNew =
     video.published_at &&
     new Date(video.published_at).getTime() > Date.now() - NEW_THRESHOLD_DAYS * 24 * 60 * 60 * 1000;
+
+  const videoAny = video as Video & {
+    channel?: { dp?: string; small_dp?: string };
+    creator?: { dp?: string; channel?: { dp?: string } };
+    user?: { dp?: string; small_dp?: string };
+  };
+  const profilePic =
+    videoAny.channel?.dp ||
+    videoAny.channel?.small_dp ||
+    videoAny.creator?.dp ||
+    videoAny.creator?.channel?.dp ||
+    videoAny.user?.dp ||
+    videoAny.user?.small_dp;
 
   const handleMouseEnter = () => {
     setIsHovered(true);
@@ -462,17 +483,28 @@ function VideoCard({ video, priority = false, onOpenPreview }: { video: Video; p
 
       {/* Card Info */}
       <div className="mt-2">
-        <h3 className="font-medium text-white text-[12px] md:text-sm leading-snug line-clamp-2 group-hover:text-red-primary transition-colors">
+        <h3 className="font-medium text-white text-sm leading-snug line-clamp-2 group-hover:text-red-primary transition-colors">
           {video.title}
         </h3>
-        <div className="text-sm text-white/60 mt-0.5 truncate flex items-center gap-2">
-          {video.channel?.name && (
-            <span className="truncate hover:text-white transition-colors">
-              {video.channel.name}
-            </span>
-          )}
+        <div className="flex items-center justify-between gap-2 mt-1">
+          <div className="flex items-center gap-2 min-w-0">
+            {profilePic ? (
+              <div className="relative w-4 h-4 rounded-full overflow-hidden flex-shrink-0">
+                <Image src={profilePic} alt="" fill className="object-cover" sizes="16px" />
+              </div>
+            ) : video.channel?.name ? (
+              <div className="w-4 h-4 rounded-full bg-gradient-to-br from-red-primary/80 to-red-dark flex items-center justify-center flex-shrink-0">
+                <span className="text-[8px] text-white font-bold">
+                  {video.channel.name.charAt(0)}
+                </span>
+              </div>
+            ) : null}
+            <p className="text-xs text-white/60 truncate hover:text-white transition-colors">
+              {video.channel?.name}
+            </p>
+          </div>
           {publishedLabel && (
-            <span className="text-white/40 text-xs flex-shrink-0">{publishedLabel}</span>
+            <span className="text-white/40 text-[11px] flex-shrink-0">{publishedLabel}</span>
           )}
         </div>
       </div>

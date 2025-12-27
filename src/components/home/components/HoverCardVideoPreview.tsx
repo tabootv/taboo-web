@@ -2,6 +2,7 @@
  * Video preview player component for hover card
  */
 
+import { memo } from 'react';
 import { Play, Volume2, VolumeX } from 'lucide-react';
 import { formatDuration } from '@/lib/utils';
 
@@ -19,7 +20,7 @@ interface HoverCardVideoPreviewProps {
   onToggleMute: (e: React.MouseEvent) => void;
 }
 
-export function HoverCardVideoPreview({
+export const HoverCardVideoPreview = memo(function HoverCardVideoPreview({
   previewUrl,
   isVideoPlaying,
   isVideoReady,
@@ -94,5 +95,5 @@ export function HoverCardVideoPreview({
       )}
     </>
   );
-}
+});
 

@@ -29,8 +29,8 @@ export function usePostsList() {
  */
 export function usePost(id: number | null | undefined) {
   return useQuery({
-    queryKey: queryKeys.community.postDetail(id!),
-    queryFn: () => postsClient.get(id!),
+    queryKey: queryKeys.community.postDetail(id as number),
+    queryFn: () => postsClient.get(id as number),
     enabled: !!id,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
@@ -42,8 +42,8 @@ export function usePost(id: number | null | undefined) {
  */
 export function usePostComments(postId: number | null | undefined, page = 1) {
   return useQuery({
-    queryKey: [...queryKeys.community.comments(postId!), page],
-    queryFn: () => postsClient.getComments(postId!, { page }),
+    queryKey: [...queryKeys.community.comments(postId as number), page],
+    queryFn: () => postsClient.getComments(postId as number, { page }),
     enabled: !!postId,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });

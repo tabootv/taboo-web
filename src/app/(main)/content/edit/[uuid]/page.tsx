@@ -28,7 +28,7 @@ export default function EditContentPage({ params }: { params: Promise<{ uuid: st
   const { user, isAuthenticated } = useAuthStore();
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [content, _setContent] = useState<Video | null>(null);
+  const [content] = useState<Video | null>(null);
 
   // Form state
   const [title, setTitle] = useState('');
@@ -36,7 +36,7 @@ export default function EditContentPage({ params }: { params: Promise<{ uuid: st
   const [visibility, setVisibility] = useState<Visibility>('public');
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
-  const [_thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [, setThumbnailFile] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
 
   const thumbnailInputRef = useRef<HTMLInputElement>(null);

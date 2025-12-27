@@ -140,20 +140,6 @@ export function ShakaPlayer({
     );
   }, []);
 
-  // If user navigates away while in PiP, ensure we exit PiP when returning so the
-  // new video element takes over cleanly.
-  useEffect(() => {
-    if (typeof document === 'undefined') return;
-    const pipEl = document.pictureInPictureElement as HTMLVideoElement | null;
-    if (pipEl && pipEl !== videoRef.current) {
-      document.exitPictureInPicture().catch(() => {});
-      setIsPiP(false);
-      isPiPRef.current = false;
-      sessionStorage.removeItem(PIP_RETURN_URL_KEY);
-      pipReturnUrlRef.current = null;
-    }
-  }, [pathname]);
-
   const saveVolume = useCallback((vol: number) => {
     localStorage.setItem(VOLUME_STORAGE_KEY, vol.toString());
   }, []);
@@ -186,7 +172,18 @@ export function ShakaPlayer({
   }, []);
 
   useEffect(() => {
-    if (!shakaModule || !videoRef.current || !src) return;
+    const videoEl = videoRef.current;
+    const isManifest = src && (src.includes('.m3u8') || src.includes('.mpd') || src.includes('manifest'));
+
+    // For MP4 / non-manifest sources, fall back to native video element
+    if (videoEl && src && !isManifest) {
+      videoEl.src = src;
+      videoEl.load();
+      setIsLoading(false);
+      return;
+    }
+
+    if (!shakaModule || !videoEl || !src || !isManifest) return;
 
     const initPlayer = async () => {
       try {
@@ -195,7 +192,7 @@ export function ShakaPlayer({
         }
 
         const player = new shakaModule.Player();
-        await player.attach(videoRef.current!);
+        await player.attach(videoEl);
         shakaRef.current = player;
 
         player.configure({
@@ -743,6 +740,16 @@ export function ShakaPlayer({
     return selectedQuality?.label || 'Auto';
   }, [isAutoQuality, selectedQuality]);
 
+  const handleBackdropToggle = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      const target = e.target as HTMLElement;
+      // Ignore clicks on controls marked as no-toggle (progress, buttons, etc.)
+      if (target.closest('[data-no-toggle]')) return;
+      togglePlay();
+    },
+    [togglePlay]
+  );
+
   return (
     <div
       ref={containerRef}
@@ -760,6 +767,7 @@ export function ShakaPlayer({
         setSeekPreview(null);
       }}
       onTouchStart={handleDoubleTap}
+      onClick={handleBackdropToggle}
     >
       {isLoading && (
         <div className="absolute inset-0 z-20 bg-black flex items-center justify-center">
@@ -773,8 +781,12 @@ export function ShakaPlayer({
         <button
           type="button"
           className="absolute inset-0 z-10 cursor-pointer group/thumb"
-          onClick={playVideoByThumbnail}
+          onClick={(e) => {
+            e.stopPropagation();
+            playVideoByThumbnail();
+          }}
           aria-label="Play video"
+          data-no-toggle
         >
           <Image
             src={thumbnail}
@@ -849,7 +861,10 @@ export function ShakaPlayer({
 
       {!isPlaying && !showThumbnail && !isBuffering && (
         <button
-          onClick={togglePlay}
+          onClick={(e) => {
+            e.stopPropagation();
+            togglePlay();
+          }}
           className={cn(
             'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10',
             'w-20 h-20 rounded-full bg-black/50 backdrop-blur-sm',
@@ -857,6 +872,7 @@ export function ShakaPlayer({
             'opacity-0 group-hover:opacity-100 transition-all duration-300',
             'hover:bg-black/70 hover:scale-110'
           )}
+          data-no-toggle
         >
           <Play className="w-10 h-10 text-white ml-1" fill="white" />
         </button>
@@ -879,8 +895,8 @@ export function ShakaPlayer({
             </div>
           )}
 
-          <div className="relative z-10 px-4 pb-2 space-y-2">
-            <div ref={progressRef} className="group/progress relative h-1">
+          <div className="relative z-10 px-4 pb-2 space-y-2" data-no-toggle>
+            <div ref={progressRef} className="group/progress relative h-1" data-no-toggle>
               <input
                 type="range"
                 min="0"
@@ -963,6 +979,7 @@ export function ShakaPlayer({
                 <button
                   onClick={togglePlay}
                   className="p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
+                  data-no-toggle
                 >
                   {isPlaying ? (
                     <Pause className="w-6 h-6" fill="white" />
@@ -971,10 +988,11 @@ export function ShakaPlayer({
                   )}
                 </button>
 
-                <div className="flex items-center group/vol">
+                <div className="flex items-center group/vol" data-no-toggle>
                   <button
                     onClick={toggleMute}
                     className="p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
+                    data-no-toggle
                   >
                     <VolumeIcon className="w-5 h-5" />
                   </button>

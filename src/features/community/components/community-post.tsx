@@ -122,7 +122,7 @@ export function CommunityPost({ post, currentUserId, onDelete }: CommunityPostPr
               {post.post_image.length === 1 ? (
                 <div className="relative aspect-video rounded-lg overflow-hidden">
                   <Image
-                    src={post.post_image[0]!}
+                    src={post.post_image[0] ?? ''}
                     alt="Post image"
                     fill
                     className="object-cover"

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import dynamic from 'next/dynamic';
 import {
   DollarSign,
   MousePointer,
@@ -28,7 +29,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { FunnelAreaChart } from '@/features/creator-studio';
+
+// Lazy load the chart component to reduce initial bundle size
+const FunnelAreaChart = dynamic(
+  () => import('@/features/creator-studio/components/funnel-area-chart').then(mod => ({ default: mod.FunnelAreaChart })),
+  {
+    loading: () => (
+      <div className="h-[300px] flex items-center justify-center">
+        <Loader2 className="w-6 h-6 text-white/30 animate-spin" />
+      </div>
+    ),
+    ssr: false,
+  }
+);
 
 type DateRange = '7d' | '30d' | '90d' | '365d' | 'all';
 type GroupBy = 'day' | 'week' | 'month';

@@ -18,7 +18,6 @@ export function VideoComments({ video, initialComments = [] }: VideoCommentsProp
   const [commentList, setCommentList] = useState<Comment[]>(initialComments);
   const [showAllComments, setShowAllComments] = useState(true);
   const [content, setContent] = useState('');
-  const [_isFocused, _setIsFocused] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // On mobile, collapse comments by default

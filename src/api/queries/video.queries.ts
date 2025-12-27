@@ -16,8 +16,8 @@ import { queryKeys } from '../query-keys';
  */
 export function useVideo(id: string | number | null | undefined) {
   return useQuery({
-    queryKey: queryKeys.videos.detail(id!),
-    queryFn: () => videoClient.get(id!),
+    queryKey: queryKeys.videos.detail(id as string | number),
+    queryFn: () => videoClient.get(id as string | number),
     enabled: !!id,
     staleTime: 1000 * 60 * 30, // 30 minutes
     gcTime: 1000 * 60 * 60, // 1 hour
@@ -61,8 +61,8 @@ export function useRelatedVideos(
   perPage = 12
 ) {
   return useQuery({
-    queryKey: queryKeys.videos.related(videoId!),
-    queryFn: () => videoClient.getRelated(videoId!, page, perPage),
+    queryKey: queryKeys.videos.related(videoId as string | number),
+    queryFn: () => videoClient.getRelated(videoId as string | number, page, perPage),
     enabled: !!videoId,
     staleTime: 1000 * 60 * 10, // 10 minutes
   });
@@ -73,8 +73,8 @@ export function useRelatedVideos(
  */
 export function useVideoComments(id: string | number | null | undefined, page = 1) {
   return useQuery({
-    queryKey: [...queryKeys.videos.comments(id!), page],
-    queryFn: () => videoClient.getComments(id!, page),
+    queryKey: [...queryKeys.videos.comments(id as string | number), page],
+    queryFn: () => videoClient.getComments(id as string | number, page),
     enabled: !!id,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });

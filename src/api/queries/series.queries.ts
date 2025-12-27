@@ -40,8 +40,8 @@ export function useSeriesListPaginated(page = 1, perPage = 12) {
  */
 export function useSeriesDetail(id: string | number | null | undefined) {
   return useQuery({
-    queryKey: queryKeys.series.detail(id!),
-    queryFn: () => seriesClient.getDetail(id!),
+    queryKey: queryKeys.series.detail(id as string | number),
+    queryFn: () => seriesClient.getDetail(id as string | number),
     enabled: !!id,
     staleTime: 1000 * 60 * 30, // 30 minutes
     gcTime: 1000 * 60 * 60, // 1 hour
@@ -53,8 +53,8 @@ export function useSeriesDetail(id: string | number | null | undefined) {
  */
 export function useSeriesTrailer(id: string | number | null | undefined) {
   return useQuery({
-    queryKey: queryKeys.series.trailer(id!),
-    queryFn: () => seriesClient.getTrailer(id!),
+    queryKey: queryKeys.series.trailer(id as string | number),
+    queryFn: () => seriesClient.getTrailer(id as string | number),
     enabled: !!id,
     staleTime: 1000 * 60 * 30, // 30 minutes
   });
@@ -65,8 +65,8 @@ export function useSeriesTrailer(id: string | number | null | undefined) {
  */
 export function useSeriesPlay(uuid: string | null | undefined) {
   return useQuery({
-    queryKey: [...queryKeys.series.detail(uuid!), 'play'],
-    queryFn: () => seriesClient.playVideo(uuid!),
+    queryKey: [...queryKeys.series.detail(uuid as string), 'play'],
+    queryFn: () => seriesClient.playVideo(uuid as string),
     enabled: !!uuid,
     staleTime: 1000 * 60 * 30, // 30 minutes
   });

@@ -67,7 +67,7 @@ export function CreatePostCard({ user, onPostCreated }: CreatePostCardProps) {
               onClick={() => setIsExpanded(true)}
               className="w-full text-left py-2.5 px-4 rounded-full bg-white/5 text-text-secondary hover:bg-white/10 transition-colors text-[15px]"
             >
-              What's on your mind?
+              What&apos;s on your mind?
             </button>
           )}
         </div>

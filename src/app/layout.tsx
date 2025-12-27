@@ -53,6 +53,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Preconnect to API and CDN for faster loading */}
+        <link rel="preconnect" href="https://app.taboo.tv" />
+        <link rel="preconnect" href="https://beta.taboo.tv" />
+        <link rel="dns-prefetch" href="https://app.taboo.tv" />
+        <link rel="dns-prefetch" href="https://beta.taboo.tv" />
+      </head>
       <body className={`${figtree.variable} antialiased`}>
         <ErrorBoundary>
           <QueryProvider>{children}</QueryProvider>

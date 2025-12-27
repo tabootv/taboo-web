@@ -96,7 +96,7 @@ export default function CommunityPage() {
 
                 {!hasNextPage && postsList.length > 0 && (
                   <p className="text-text-secondary text-sm text-center py-8">
-                    You've reached the end of the feed
+                    You&apos;ve reached the end of the feed
                   </p>
                 )}
               </>

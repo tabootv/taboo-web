@@ -38,7 +38,7 @@ export default function CreateContentPage() {
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
   const [videoFile, setVideoFile] = useState<File | null>(null);
-  const [_thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [, setThumbnailFile] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const [videoDuration, setVideoDuration] = useState<number>(0);
 

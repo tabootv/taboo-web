@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, memo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -19,7 +19,7 @@ interface NetflixHoverCardProps {
   fixedHeight?: boolean;
 }
 
-export function NetflixHoverCard({ video, showDate, index = 0, fixedHeight: _fixedHeight = true }: NetflixHoverCardProps) {
+export const NetflixHoverCard = memo(function NetflixHoverCard({ video, showDate, index = 0, fixedHeight: _fixedHeight = true }: NetflixHoverCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isVideoReady, setIsVideoReady] = useState(false);
@@ -33,7 +33,9 @@ export function NetflixHoverCard({ video, showDate, index = 0, fixedHeight: _fix
   const videoRef = useRef<HTMLVideoElement>(null);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
-  const { isSaved, toggleSave } = useSavedVideosStore();
+  // Use selectors to prevent re-renders when other parts of store change
+  const isSaved = useSavedVideosStore((state) => state.isSaved);
+  const toggleSave = useSavedVideosStore((state) => state.toggleSave);
   const router = useRouter();
 
   // Check saved state on mount
@@ -272,4 +274,4 @@ export function NetflixHoverCard({ video, showDate, index = 0, fixedHeight: _fix
       {!showExpanded && <HoverCardActions video={video} showDate={showDate} />}
     </div>
   );
-}
+});

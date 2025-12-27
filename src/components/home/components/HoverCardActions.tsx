@@ -2,6 +2,7 @@
  * Action buttons component for hover card
  */
 
+import { memo } from 'react';
 import Image from 'next/image';
 import { formatRelativeTime } from '@/lib/utils';
 import type { Video } from '@/types';
@@ -11,7 +12,7 @@ interface HoverCardActionsProps {
   showDate?: boolean | undefined;
 }
 
-export function HoverCardActions({ video, showDate }: HoverCardActionsProps) {
+export const HoverCardActions = memo(function HoverCardActions({ video, showDate }: HoverCardActionsProps) {
   return (
     <div className="mt-2">
       <h3 className="font-medium text-text-primary text-sm line-clamp-2 group-hover:text-red-primary transition-colors">
@@ -40,5 +41,5 @@ export function HoverCardActions({ video, showDate }: HoverCardActionsProps) {
       </div>
     </div>
   );
-}
+});
 

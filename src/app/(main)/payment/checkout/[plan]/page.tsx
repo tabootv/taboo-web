@@ -26,7 +26,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ plan: strin
   const { user, isAuthenticated, setSubscribed } = useAuthStore();
   const [plan, setPlan] = useState<Plan | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [checkoutMode, _setCheckoutMode] = useState<'redirect' | 'embed'>('redirect');
+  const [checkoutMode] = useState<'redirect' | 'embed'>('redirect');
   const [isVerifying, setIsVerifying] = useState(false);
 
   // Check if user just returned from Whop checkout

@@ -12,9 +12,9 @@ export const STORAGE_KEYS = {
 export const PLAYER_CONFIG = {
   CONTROLS_HIDE_DELAY: 3000,
   STREAMING: {
-    BUFFERING_GOAL: 15,
-    REBUFFERING_GOAL: 3,
-    BUFFER_BEHIND: 25,
+    BUFFERING_GOAL: 5, // Reduced from 15 for faster video start
+    REBUFFERING_GOAL: 2, // Reduced from 3 for faster recovery
+    BUFFER_BEHIND: 20, // Reduced from 25 to save memory
   },
   PREVIEW: {
     BUFFERING_GOAL: 4,

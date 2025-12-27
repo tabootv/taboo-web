@@ -21,7 +21,9 @@ function shuffleShorts(shorts: Video[]): Video[] {
 
   for (let i = rest.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const temp = rest[i]!;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     rest[i] = rest[j]!;
     rest[j] = temp;
   }

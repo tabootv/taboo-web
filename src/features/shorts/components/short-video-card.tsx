@@ -34,7 +34,7 @@ function ShortVideoCardComponent({ video, index: _index, isActive, isNearActive 
   const isMutedRef = useRef(false); // Track mute state without causing re-renders
   const hasStartedPlaybackRef = useRef(false); // Avoid unmuting before autoplay is allowed
 
-  const [_isPlaying, setIsPlaying] = useState(false);
+  const [, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [showPlayIcon, setShowPlayIcon] = useState(false);
   const [showHeartAnimation, setShowHeartAnimation] = useState(false);

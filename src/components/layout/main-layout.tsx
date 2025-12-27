@@ -30,29 +30,40 @@ export function MainLayout({ children, showFooter = true }: MainLayoutProps) {
     checkAuth();
   }, [checkAuth]);
 
-  // Global PiP return handler: if PiP closes while routed away, return to the stored URL
+  // Global PiP return handler: poll to detect when PiP closes
+  // Note: leavepictureinpicture event doesn't bubble to document, so we poll instead
   useEffect(() => {
-    const handleLeavePiP = () => {
-      const storedUrl = sessionStorage.getItem(PIP_RETURN_URL_KEY);
-      if (storedUrl) {
-        sessionStorage.removeItem(PIP_RETURN_URL_KEY);
-        if (storedUrl !== pathname) {
-          router.push(storedUrl);
-        }
-      }
-    };
-
-    // If PiP was closed and we remounted without the element, still honor stored URL
     const storedUrl = sessionStorage.getItem(PIP_RETURN_URL_KEY);
-    if (storedUrl && !document.pictureInPictureElement && storedUrl !== pathname) {
+
+    // If no stored URL, nothing to do
+    if (!storedUrl) return;
+
+    // If we're already on the stored URL, clean up
+    if (storedUrl === pathname) {
       sessionStorage.removeItem(PIP_RETURN_URL_KEY);
-      router.push(storedUrl);
+      return;
     }
 
-    document.addEventListener('leavepictureinpicture', handleLeavePiP as EventListener);
-    return () => {
-      document.removeEventListener('leavepictureinpicture', handleLeavePiP as EventListener);
-    };
+    // If PiP is not active but we have a stored URL, navigate back immediately
+    if (!document.pictureInPictureElement) {
+      sessionStorage.removeItem(PIP_RETURN_URL_KEY);
+      router.push(storedUrl);
+      return;
+    }
+
+    // Poll to detect when PiP closes (since event doesn't bubble to document)
+    const checkPiP = setInterval(() => {
+      if (!document.pictureInPictureElement) {
+        clearInterval(checkPiP);
+        const url = sessionStorage.getItem(PIP_RETURN_URL_KEY);
+        if (url && url !== pathname) {
+          sessionStorage.removeItem(PIP_RETURN_URL_KEY);
+          router.push(url);
+        }
+      }
+    }, 200);
+
+    return () => clearInterval(checkPiP);
   }, [pathname, router, PIP_RETURN_URL_KEY]);
 
   return (

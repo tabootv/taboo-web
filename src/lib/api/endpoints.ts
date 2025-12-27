@@ -205,8 +205,8 @@ export const videos = {
     if (process.env.NODE_ENV === 'development') {
       const leakedShort = videosList.find((v: Video) =>
         v.short === true ||
-        (v as any).is_short === true ||
-        (v as any).type === 'short'
+        (v as Video & { is_short?: boolean }).is_short === true ||
+        (v as Video & { type?: string }).type === 'short'
       );
       if (leakedShort) {
         console.error('BACKEND BUG: Short content leaked into /public/videos', leakedShort);
@@ -314,7 +314,7 @@ export const videos = {
       });
       const list = data?.videos || data?.data || data || [];
       return {
-        data: list.filter((v: any) => v?.id !== videoId && v?.short !== true && v?.is_short !== true && v?.type !== 'short'),
+        data: list.filter((v: Video & { is_short?: boolean; type?: string }) => v?.id !== videoId && v?.short !== true && v?.is_short !== true && v?.type !== 'short'),
         current_page: data?.pagination?.current_page ?? page,
         last_page: data?.pagination?.last_page ?? page,
         per_page: perPage,

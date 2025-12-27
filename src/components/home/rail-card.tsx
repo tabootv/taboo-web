@@ -221,12 +221,13 @@ export const RailCard = memo(function RailCard({
           {(() => {
             // Check multiple sources for profile picture (API returns dp in different locations)
             const videoAny = video as Video & {
+              channel?: { dp?: string; small_dp?: string };
               creator?: { dp?: string; channel?: { dp?: string } };
               user?: { dp?: string; small_dp?: string };
             };
             const profilePic =
-              video.channel?.dp ||
-              video.channel?.small_dp ||
+              videoAny.channel?.dp ||
+              videoAny.channel?.small_dp ||
               videoAny.creator?.dp ||
               videoAny.creator?.channel?.dp ||
               videoAny.user?.dp ||

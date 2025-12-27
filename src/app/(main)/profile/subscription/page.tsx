@@ -29,7 +29,6 @@ export default function SubscriptionPage() {
   const { isAuthenticated, user } = useAuthStore();
   const {
     isSubscribed,
-    subscriptionInfo: _subscriptionInfo,
     loading,
     error,
     provider,

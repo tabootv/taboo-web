@@ -329,6 +329,7 @@ export function getTopResult(query: string): TopResult | null {
 
   // Return highest viewed title match
   if (titles.length > 0) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const top = titles.sort((a, b) => (b.views || 0) - (a.views || 0))[0]!;
     return {
       type: 'title',
@@ -347,6 +348,7 @@ export function getTopResult(query: string): TopResult | null {
 
   // Return creator match
   if (creators.length > 0) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const top = creators.sort((a, b) => b.subscriberCount - a.subscriberCount)[0]!;
     return {
       type: 'creator',

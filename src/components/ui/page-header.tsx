@@ -73,7 +73,7 @@ export function PageHeader({
     }
 
     return (
-      <Link href={backHref!} className={buttonClasses}>
+      <Link href={backHref ?? '#'} className={buttonClasses}>
         <ArrowLeft className="w-5 h-5 text-text-secondary" />
       </Link>
     );

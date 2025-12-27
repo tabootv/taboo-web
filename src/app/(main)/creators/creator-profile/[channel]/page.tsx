@@ -44,7 +44,7 @@ export default function CreatorProfilePage({ params }: { params: Promise<{ chann
   const [shortsNextPage, setShortsNextPage] = useState<string | null>(null);
   const [seriesNextPage, setSeriesNextPage] = useState<string | null>(null);
   const [postsNextPage, setPostsNextPage] = useState<string | null>(null);
-  const [_coursesNextPage, setCoursesNextPage] = useState<string | null>(null);
+  const [, setCoursesNextPage] = useState<string | null>(null);
 
   // Loading states
   const [loadingStates, setLoadingStates] = useState({

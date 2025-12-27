@@ -512,6 +512,8 @@ export default function VideoPage() {
                           alt={item.title}
                           fill
                           className="object-cover"
+                          loading="lazy"
+                          sizes="168px"
                         />
                       )}
                     </div>

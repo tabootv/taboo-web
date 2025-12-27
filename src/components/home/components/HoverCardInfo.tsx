@@ -2,6 +2,7 @@
  * Info panel component for hover card (expanded state)
  */
 
+import { memo } from 'react';
 import Image from 'next/image';
 import { Play, Plus, Check, ChevronDown } from 'lucide-react';
 import { formatDuration } from '@/lib/utils';
@@ -18,7 +19,7 @@ interface HoverCardInfoProps {
   onToggleDescription: (e: React.MouseEvent) => void;
 }
 
-export function HoverCardInfo({
+export const HoverCardInfo = memo(function HoverCardInfo({
   video,
   isNew,
   description,
@@ -128,5 +129,5 @@ export function HoverCardInfo({
       )}
     </div>
   );
-}
+});
 
