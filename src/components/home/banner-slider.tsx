@@ -17,6 +17,8 @@ export function BannerSlider({ initialBanners }: BannerSliderProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(!hasInitialData);
   const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
 
   useEffect(() => {
     // Skip fetch if initial data was provided and has content
@@ -67,14 +69,46 @@ export function BannerSlider({ initialBanners }: BannerSliderProps) {
     goToSlide((currentIndex + 1) % banners.length);
   };
 
+  // Touch swipe handlers
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    if (touch) touchStartX.current = touch.clientX;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    if (touch) touchEndX.current = touch.clientX;
+  };
+
+  const handleTouchEnd = () => {
+    if (touchStartX.current === null || touchEndX.current === null) return;
+
+    const diff = touchStartX.current - touchEndX.current;
+    const minSwipeDistance = 50; // Minimum swipe distance in pixels
+
+    if (Math.abs(diff) > minSwipeDistance) {
+      if (diff > 0) {
+        // Swiped left - go to next
+        goToNext();
+      } else {
+        // Swiped right - go to previous
+        goToPrev();
+      }
+    }
+
+    // Reset
+    touchStartX.current = null;
+    touchEndX.current = null;
+  };
+
   if (isLoading) {
     return (
-      <div className="w-full aspect-[16/9] md:aspect-[21/9] lg:aspect-[2.35/1] bg-black animate-pulse">
-        <div className="h-full w-full flex flex-col justify-end items-start p-6 md:p-12 lg:p-16 pb-20">
-          <div className="w-48 h-6 bg-surface rounded mb-4" />
-          <div className="w-96 h-12 bg-surface rounded mb-4" />
-          <div className="w-64 h-4 bg-surface rounded mb-6" />
-          <div className="w-40 h-12 bg-surface rounded-full" />
+      <div className="w-full aspect-[4/5] sm:aspect-[16/9] md:aspect-[21/9] lg:aspect-[2.35/1] bg-black animate-pulse">
+        <div className="h-full w-full flex flex-col justify-end items-start p-4 sm:p-6 md:p-12 lg:p-16 pb-12 sm:pb-20">
+          <div className="w-24 sm:w-48 h-4 sm:h-6 bg-surface rounded mb-2 sm:mb-4" />
+          <div className="w-48 sm:w-96 h-8 sm:h-12 bg-surface rounded mb-2 sm:mb-4" />
+          <div className="hidden sm:block w-64 h-4 bg-surface rounded mb-6" />
+          <div className="w-28 sm:w-40 h-10 sm:h-12 bg-surface rounded-full" />
         </div>
       </div>
     );
@@ -95,33 +129,39 @@ export function BannerSlider({ initialBanners }: BannerSliderProps) {
     : `/videos/${currentBanner.id}`;
 
   return (
-    <div className="relative w-full overflow-hidden group">
+    <div
+      className="relative w-full overflow-hidden group touch-pan-y"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
       {/* Main Banner */}
       <div
-        className="relative w-full aspect-[16/9] md:aspect-[21/9] lg:aspect-[2.35/1] transition-all duration-500"
+        className="relative w-full aspect-[4/5] sm:aspect-[16/9] md:aspect-[21/9] lg:aspect-[2.35/1] transition-all duration-500"
         style={{
           backgroundImage: `url(${thumbnail})`,
-          backgroundPosition: 'top',
+          backgroundPosition: 'center top',
           backgroundSize: 'cover',
         }}
       >
-        {/* Gradient overlays */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-        {/* Content - left aligned with padding */}
-        <div className="absolute inset-0 flex flex-col justify-end sm:justify-center items-start p-4 pb-8 sm:p-6 md:p-12 lg:p-20 lg:pl-24">
-          <div className="text-left backdrop-blur-md sm:backdrop-blur-none rounded-lg p-3 sm:p-4 md:p-0 max-w-[90%] sm:max-w-[600px]">
+        {/* Gradient overlays - lighter on mobile */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/40 sm:from-black/80 via-transparent sm:via-black/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 sm:via-transparent to-transparent" />
+
+        {/* Content - bottom aligned on mobile, left-center on desktop */}
+        <div className="absolute inset-0 flex flex-col justify-end items-start sm:items-start sm:justify-center p-4 pb-12 sm:p-6 md:p-12 lg:p-20 lg:pl-24">
+          <div className="text-left w-full sm:max-w-[600px]">
             {/* Channel name */}
-            <h3 className="text-xs sm:text-sm md:text-base font-bold text-white/80 mb-1 sm:mb-2 drop-shadow-lg">
+            <h3 className="text-[10px] sm:text-sm md:text-base font-semibold text-white/90 mb-0.5 sm:mb-2 drop-shadow-lg">
               {currentBanner.channel?.name}
             </h3>
 
             {/* Title */}
-            <h2 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-2 sm:mb-3 drop-shadow-lg line-clamp-2">
+            <h2 className="text-lg sm:text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-2 sm:mb-3 drop-shadow-lg line-clamp-2">
               {currentBanner.title}
             </h2>
 
-            {/* Description - truncated, hidden on very small screens */}
+            {/* Description - hidden on mobile */}
             {currentBanner.description && (
               <div className="hidden sm:block text-xs md:text-sm text-white/80 drop-shadow-lg mb-3 md:mb-5">
                 <p className="line-clamp-3">{currentBanner.description}</p>
@@ -139,8 +179,8 @@ export function BannerSlider({ initialBanners }: BannerSliderProps) {
 
             {/* CTA Button */}
             <Link href={href}>
-              <Button className="btn-premium px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base font-semibold">
-                <Play className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" fill="white" />
+              <Button className="btn-premium px-4 sm:px-6 py-2 sm:py-3 text-xs sm:text-base font-semibold">
+                <Play className="w-3.5 h-3.5 sm:w-5 sm:h-5 mr-1 sm:mr-2" fill="white" />
                 Play Now
               </Button>
             </Link>
