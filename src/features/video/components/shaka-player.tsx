@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 
 interface ShakaPlayerProps {
   src: string;
@@ -57,6 +57,58 @@ const VOLUME_STORAGE_KEY = STORAGE_KEYS.VOLUME;
 const CONTROLS_HIDE_DELAY = PLAYER_CONFIG.CONTROLS_HIDE_DELAY;
 const PIP_RETURN_URL_KEY = STORAGE_KEYS.PIP_RETURN_URL;
 
+// Batched player state for performance - reduces re-renders during playback
+interface PlayerState {
+  isPlaying: boolean;
+  currentTime: number;
+  duration: number;
+  buffered: number;
+  isBuffering: boolean;
+  isLoading: boolean;
+}
+
+type PlayerAction =
+  | { type: 'PLAY' }
+  | { type: 'PAUSE' }
+  | { type: 'TIME_UPDATE'; currentTime: number }
+  | { type: 'DURATION_CHANGE'; duration: number }
+  | { type: 'BUFFER_UPDATE'; buffered: number }
+  | { type: 'SET_BUFFERING'; isBuffering: boolean }
+  | { type: 'SET_LOADING'; isLoading: boolean }
+  | { type: 'BATCH_UPDATE'; updates: Partial<PlayerState> };
+
+const initialPlayerState: PlayerState = {
+  isPlaying: false,
+  currentTime: 0,
+  duration: 0,
+  buffered: 0,
+  isBuffering: false,
+  isLoading: true,
+};
+
+function playerReducer(state: PlayerState, action: PlayerAction): PlayerState {
+  switch (action.type) {
+    case 'PLAY':
+      return state.isPlaying ? state : { ...state, isPlaying: true };
+    case 'PAUSE':
+      return state.isPlaying ? { ...state, isPlaying: false } : state;
+    case 'TIME_UPDATE':
+      return state.currentTime === action.currentTime ? state : { ...state, currentTime: action.currentTime };
+    case 'DURATION_CHANGE':
+      return state.duration === action.duration ? state : { ...state, duration: action.duration };
+    case 'BUFFER_UPDATE':
+      return state.buffered === action.buffered ? state : { ...state, buffered: action.buffered };
+    case 'SET_BUFFERING':
+      return state.isBuffering === action.isBuffering ? state : { ...state, isBuffering: action.isBuffering };
+    case 'SET_LOADING':
+      return state.isLoading === action.isLoading ? state : { ...state, isLoading: action.isLoading };
+    case 'BATCH_UPDATE':
+      return { ...state, ...action.updates };
+    default:
+      return state;
+  }
+}
+
 export function ShakaPlayer({
   src,
   thumbnail,
@@ -85,20 +137,18 @@ export function ShakaPlayer({
   const previewThrottleRef = useRef<number>(0);
   const pipReturnUrlRef = useRef<string | null>(null);
 
-  const [isPlaying, setIsPlaying] = useState(false);
+  // Batched player state for performance
+  const [playerState, dispatch] = useReducer(playerReducer, initialPlayerState);
+  const { isPlaying, currentTime, duration, buffered, isBuffering, isLoading } = playerState;
+
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(1);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [buffered, setBuffered] = useState(0);
 
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isPiP, setIsPiP] = useState(false);
   const isPiPRef = useRef(false);
   const [showControls, setShowControls] = useState(true);
-  const [isBuffering, setIsBuffering] = useState(false);
   const [showThumbnail, setShowThumbnail] = useState(!!thumbnail);
-  const [isLoading, setIsLoading] = useState(true);
   const [isSeeking, setIsSeeking] = useState(false);
   const [seekPreview, setSeekPreview] = useState<{ time: number; position: number } | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -180,7 +230,7 @@ export function ShakaPlayer({
     if (videoEl && src && !isManifest) {
       videoEl.src = src;
       videoEl.load();
-      setIsLoading(false);
+      dispatch({ type: 'SET_LOADING', isLoading: false });
       return;
     }
 
@@ -228,7 +278,7 @@ export function ShakaPlayer({
 
         await player.load(src);
         updateQualityTracks(player);
-        setIsLoading(false);
+        dispatch({ type: 'SET_LOADING', isLoading: false });
 
         if (videoRef.current) {
           const savedVolume = localStorage.getItem(VOLUME_STORAGE_KEY);
@@ -238,7 +288,7 @@ export function ShakaPlayer({
         }
       } catch (error) {
         console.error('Error initializing Shaka Player:', error);
-        setIsLoading(false);
+        dispatch({ type: 'SET_LOADING', isLoading: false });
       }
     };
 
@@ -565,29 +615,30 @@ export function ShakaPlayer({
     if (!video) return;
 
     const handlePlay = () => {
-      setIsPlaying(true);
+      dispatch({ type: 'PLAY' });
       onPlay?.();
     };
     const handlePause = () => {
-      setIsPlaying(false);
+      dispatch({ type: 'PAUSE' });
       onPause?.();
     };
     const handleTimeUpdate = () => {
-      setCurrentTime(video.currentTime);
+      dispatch({ type: 'TIME_UPDATE', currentTime: video.currentTime });
       if (video.duration) {
         onProgress?.(video.currentTime / video.duration);
       }
     };
-    const handleDurationChange = () => setDuration(video.duration);
+    const handleDurationChange = () => dispatch({ type: 'DURATION_CHANGE', duration: video.duration });
     const handleProgress = () => {
       if (video.buffered.length > 0) {
-        setBuffered((video.buffered.end(video.buffered.length - 1) / video.duration) * 100);
+        const bufferedPercent = (video.buffered.end(video.buffered.length - 1) / video.duration) * 100;
+        dispatch({ type: 'BUFFER_UPDATE', buffered: bufferedPercent });
       }
     };
-    const handleWaiting = () => setIsBuffering(true);
-    const handleCanPlay = () => setIsBuffering(false);
+    const handleWaiting = () => dispatch({ type: 'SET_BUFFERING', isBuffering: true });
+    const handleCanPlay = () => dispatch({ type: 'SET_BUFFERING', isBuffering: false });
     const handleEnded = () => {
-      setIsPlaying(false);
+      dispatch({ type: 'PAUSE' });
       onEnded?.();
     };
     const handleEnterPiP = () => {

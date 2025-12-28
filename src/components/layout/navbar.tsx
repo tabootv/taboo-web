@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Menu, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Logo } from '@/components/ui/logo';
@@ -23,9 +23,13 @@ export function Navbar() {
   // Check if we're on the home page for transparent header
   const isHomePage = pathname === '/home' || pathname === '/';
 
-  // Handle scroll for navbar background
+  // Handle scroll for navbar background (throttled to 100ms)
+  const lastScrollTime = useRef(0);
   useEffect(() => {
     const handleScroll = () => {
+      const now = Date.now();
+      if (now - lastScrollTime.current < 100) return;
+      lastScrollTime.current = now;
       setIsScrolled(window.scrollY > 50);
     };
 

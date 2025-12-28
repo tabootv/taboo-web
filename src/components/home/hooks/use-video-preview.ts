@@ -1,9 +1,10 @@
 /**
- * Hook for managing video preview URL fetching and state
+ * Hook for managing video preview URL
+ * Note: API fetch disabled - previews require HLS streams which aren't available
+ * for most videos (they're MP4). Only use URLs already present on the video object.
  */
 
-import { useState, useCallback } from 'react';
-import { videos as videosApi } from '@/lib/api';
+import { useCallback } from 'react';
 import type { Video } from '@/types';
 
 interface UseVideoPreviewOptions {
@@ -15,35 +16,16 @@ interface UseVideoPreviewOptions {
  * Hook for managing video preview URL
  */
 export function useVideoPreview({ video, initialUrl }: UseVideoPreviewOptions) {
-  const [fetchedPreviewUrl, setFetchedPreviewUrl] = useState<string | null>(null);
-  const [isFetchingUrl, setIsFetchingUrl] = useState(false);
+  // Get video URL for preview (prefer lower quality for preview, fallback to HLS)
+  const previewUrl = initialUrl || video.url_480 || video.url_720 || video.url_1080 || video.url_hls || video.hls_url || null;
 
-  // Get video URL for preview (prefer lower quality for preview, fallback to HLS or fetched URL)
-  const initialPreviewUrl = initialUrl || video.url_480 || video.url_720 || video.url_1080 || video.url_hls || video.hls_url;
-  const previewUrl = initialPreviewUrl || fetchedPreviewUrl;
-
-  const fetchPreviewUrl = useCallback(async () => {
-    // If no preview URL available, fetch it from the API
-    if (!initialPreviewUrl && !fetchedPreviewUrl && !isFetchingUrl && video.id) {
-      setIsFetchingUrl(true);
-      try {
-        const videoDetails = await videosApi.getVideo(video.id);
-        const url = videoDetails.url_480 || videoDetails.url_720 || videoDetails.url_1080 || videoDetails.url_hls || videoDetails.hls_url;
-        if (url) {
-          setFetchedPreviewUrl(url);
-        }
-      } catch (error) {
-        console.error('Failed to fetch video preview URL:', error);
-      } finally {
-        setIsFetchingUrl(false);
-      }
-    }
-  }, [initialPreviewUrl, fetchedPreviewUrl, isFetchingUrl, video.id]);
+  // No-op fetch function - API fetch disabled to avoid unnecessary requests
+  const fetchPreviewUrl = useCallback(() => {}, []);
 
   return {
     previewUrl,
-    fetchedPreviewUrl,
-    isFetchingUrl,
+    fetchedPreviewUrl: null,
+    isFetchingUrl: false,
     fetchPreviewUrl,
   };
 }
