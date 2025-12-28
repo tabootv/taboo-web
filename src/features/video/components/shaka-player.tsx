@@ -825,6 +825,8 @@ export function ShakaPlayer({
         playsInline
         autoPlay={autoplay && !thumbnail}
         onClick={togglePlay}
+        controlsList="nodownload noremoteplayback"
+        onContextMenu={(e) => e.preventDefault()}
       >
         <track kind="captions" />
       </video>
@@ -1206,6 +1208,8 @@ export function ShakaPlayer({
         muted
         playsInline
         crossOrigin="anonymous"
+        controlsList="nodownload noremoteplayback"
+        onContextMenu={(e) => e.preventDefault()}
       />
       <canvas ref={previewCanvasRef} className="hidden" />
     </div>

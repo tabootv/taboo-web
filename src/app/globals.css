@@ -3348,3 +3348,43 @@ section:has(.vertical-series-card:hover) {
     @apply bg-background text-foreground;
   }
 }
+
+/* ============================================
+   Content Protection
+   Prevents casual copying and downloading of media
+   ============================================ */
+
+/* Prevent text selection on video elements and protected content */
+video,
+video *,
+[data-protected],
+[data-protected] * {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Prevent drag-and-drop on video and images */
+video,
+img,
+[data-protected] {
+  -webkit-user-drag: none;
+  user-drag: none;
+}
+
+/* Hide download button in native video controls */
+video::-webkit-media-controls-enclosure {
+  overflow: hidden;
+}
+
+video::-webkit-media-controls-panel {
+  width: calc(100% + 30px);
+}
+
+/* Hide download/fullscreen buttons if native controls show */
+video::-webkit-media-controls-download-button,
+video::-webkit-media-controls-remote-playback-button {
+  display: none !important;
+}

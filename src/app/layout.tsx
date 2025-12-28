@@ -3,6 +3,7 @@ import { Figtree } from 'next/font/google';
 import './globals.css';
 import { QueryProvider } from '@/shared/components/providers';
 import { ErrorBoundary } from '@/shared/components/error-boundary';
+import { ContentProtectionWrapper } from '@/shared/components/content-protection-wrapper';
 
 const figtree = Figtree({
   variable: '--font-figtree',
@@ -66,7 +67,9 @@ export default function RootLayout({
       </head>
       <body className={`${figtree.variable} antialiased`}>
         <ErrorBoundary>
-          <QueryProvider>{children}</QueryProvider>
+          <QueryProvider>
+            <ContentProtectionWrapper>{children}</ContentProtectionWrapper>
+          </QueryProvider>
         </ErrorBoundary>
       </body>
     </html>

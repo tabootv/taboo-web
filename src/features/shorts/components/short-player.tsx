@@ -162,6 +162,8 @@ export function ShortPlayer({ short, isActive, onNext: _onNext, onPrevious: _onP
         loop
         muted={isMuted}
         onClick={togglePlay}
+        controlsList="nodownload noremoteplayback"
+        onContextMenu={(e) => e.preventDefault()}
       />
 
       {/* Progress bar */}
