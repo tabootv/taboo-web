@@ -104,6 +104,7 @@ export function ShakaPlayer({
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isPreviewReady, setIsPreviewReady] = useState(false);
   const [isPiPSupported, setIsPiPSupported] = useState(false);
+  const [isPreviewEnabled, setIsPreviewEnabled] = useState(false);
 
   const [showSettings, setShowSettings] = useState(false);
   const [settingsPanel, setSettingsPanel] = useState<SettingsPanel>('main');
@@ -210,8 +211,8 @@ export function ShakaPlayer({
           },
           abr: {
             enabled: true,
-            defaultBandwidthEstimate: 3500000,
-            switchInterval: 5,
+            defaultBandwidthEstimate: 2000000,
+            switchInterval: 3,
             bandwidthUpgradeTarget: 0.85,
             bandwidthDowngradeTarget: 0.95,
           },
@@ -255,6 +256,9 @@ export function ShakaPlayer({
     // Check if source is HLS/DASH manifest (Shaka Player only works with manifests, not direct MP4 files)
     const isManifest =
       src && (src.includes('.m3u8') || src.includes('.mpd') || src.includes('manifest'));
+
+    if (!isPreviewEnabled) return;
+    setIsPreviewReady(false);
 
     if (!shakaModule || !previewVideoRef.current || !src || !isManifest) {
       // For non-manifest sources (MP4), use native video element
@@ -318,7 +322,7 @@ export function ShakaPlayer({
         previewShakaRef.current = null;
       }
     };
-  }, [shakaModule, src]);
+  }, [isPreviewEnabled, shakaModule, src]);
 
   const capturePreviewFrame = useCallback(
     (time: number) => {
@@ -502,6 +506,9 @@ export function ShakaPlayer({
   const handleProgressHover = useCallback(
     (e: React.MouseEvent<HTMLInputElement>) => {
       if (!progressRef.current || !duration) return;
+      if (!isPreviewEnabled) {
+        setIsPreviewEnabled(true);
+      }
       const rect = progressRef.current.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
@@ -509,7 +516,7 @@ export function ShakaPlayer({
       setSeekPreview({ time: previewTime, position: percent });
       capturePreviewFrame(previewTime);
     },
-    [duration, capturePreviewFrame]
+    [duration, capturePreviewFrame, isPreviewEnabled]
   );
 
   const showControlsTemporarily = useCallback(() => {

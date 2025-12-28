@@ -27,8 +27,8 @@ export function VideoPlayer({
   onEnded,
   className = '',
 }: VideoPlayerProps) {
-  // Determine the best source URL: prefer HLS, then highest quality MP4
-  const src = hls_url || url_1440 || url_1080 || url_720 || url_480;
+  // Prefer HLS for adaptive streaming; otherwise choose a balanced MP4 for faster start
+  const src = hls_url || url_720 || url_1080 || url_480 || url_1440;
 
   if (!src) {
     return (
