@@ -157,8 +157,8 @@ export const RailCard = memo(function RailCard({
             isHovered && !isVideoPlaying ? 'opacity-100' : 'opacity-0'
           }`}
         >
-          <div className="p-3 bg-red-primary rounded-full transform transition-transform hover:scale-110">
-            <Play className="w-6 h-6 text-white fill-white" />
+          <div className="p-2 bg-red-primary rounded-full transform transition-transform hover:scale-110">
+            <Play className="w-4 h-4 text-white fill-white" />
           </div>
         </div>
 

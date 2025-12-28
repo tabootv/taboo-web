@@ -69,8 +69,8 @@ export const HoverCardVideoPreview = memo(function HoverCardVideoPreview({
       {/* Play overlay for non-expanded state */}
       {!isExpanded && isHovered && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/20 transition-opacity">
-          <div className="p-3 bg-red-primary/90 rounded-full transform scale-100 hover:scale-110 transition-transform">
-            <Play className="w-6 h-6 text-white" fill="white" />
+          <div className="p-2 bg-red-primary/90 rounded-full transform scale-100 hover:scale-110 transition-transform">
+            <Play className="w-4 h-4 text-white" fill="white" />
           </div>
         </div>
       )}

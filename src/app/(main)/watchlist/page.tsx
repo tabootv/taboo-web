@@ -179,8 +179,8 @@ function WatchlistCard({
             </span>
           )}
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30">
-            <div className="p-3 bg-red-primary/90 rounded-full">
-              <Play className="w-5 h-5 text-white" fill="white" />
+            <div className="p-2 bg-red-primary/90 rounded-full">
+              <Play className="w-4 h-4 text-white" fill="white" />
             </div>
           </div>
           {/* Type badge */}
