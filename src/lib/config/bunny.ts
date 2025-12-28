@@ -11,7 +11,27 @@ const STREAM_HOSTNAME =
 const CDN_HOSTNAME =
   process.env.NEXT_PUBLIC_BUNNY_CDN_HOSTNAME || 'taboo-cdn.b-cdn.net';
 
+// Server-side only - not exposed to browser
+const LIBRARY_ID = process.env.BUNNY_STREAM_LIBRARY_ID || '513535';
+const API_KEY = process.env.BUNNY_STREAM_API_KEY || '';
+
 export const BUNNY_CONFIG = {
+  /**
+   * API configuration (server-side only)
+   * Use these for server-side operations like video management
+   */
+  api: {
+    libraryId: LIBRARY_ID,
+    apiKey: API_KEY,
+    baseUrl: 'https://video.bunnycdn.com',
+
+    /**
+     * Get API endpoint for library operations
+     */
+    getLibraryEndpoint: (): string =>
+      `https://video.bunnycdn.com/library/${LIBRARY_ID}`,
+  },
+
   /**
    * Bunny Stream configuration for video delivery
    */
