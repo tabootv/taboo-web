@@ -58,7 +58,7 @@ export function VerticalSeriesList({ series, selectedIndex, onSelect }: Vertical
   );
 
   return (
-    <div className="lg:w-[320px] xl:w-[340px] flex-shrink-0 relative lg:h-full">
+    <div className="w-full max-w-full lg:w-[320px] xl:w-[340px] flex-shrink-0 relative lg:h-full overflow-hidden">
       <div className="hidden lg:flex items-center justify-between text-xs text-white/40 mb-2 px-1">
         <span>{series.length} series</span>
         <div className="flex items-center gap-1">
