@@ -54,11 +54,15 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Preconnect to API and CDN for faster loading */}
+        {/* Preconnect to API for faster loading */}
         <link rel="preconnect" href="https://app.taboo.tv" />
         <link rel="preconnect" href="https://beta.taboo.tv" />
         <link rel="dns-prefetch" href="https://app.taboo.tv" />
         <link rel="dns-prefetch" href="https://beta.taboo.tv" />
+
+        {/* Preconnect to Bunny CDN for faster video/image loading */}
+        <link rel="preconnect" href="https://vz-ef3e8794-d5f.b-cdn.net" />
+        <link rel="dns-prefetch" href="https://vz-ef3e8794-d5f.b-cdn.net" />
       </head>
       <body className={`${figtree.variable} antialiased`}>
         <ErrorBoundary>
