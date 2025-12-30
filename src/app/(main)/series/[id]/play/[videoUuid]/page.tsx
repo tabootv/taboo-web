@@ -108,11 +108,19 @@ export default function SeriesPlayerPage({
   };
 
   const handleToggleAutoplay = async () => {
+    // Optimistic update for immediate feedback
+    const previousState = autoplayEnabled;
+    setAutoplayEnabled(!autoplayEnabled);
+
     try {
       const response = await videosApi.toggleAutoplay();
-      setAutoplayEnabled(response.video_autoplay);
+      // Use API response if available, otherwise keep optimistic update
+      if (typeof response?.video_autoplay === 'boolean') {
+        setAutoplayEnabled(response.video_autoplay);
+      }
     } catch {
-      setAutoplayEnabled(!autoplayEnabled);
+      // Revert on error
+      setAutoplayEnabled(previousState);
     }
   };
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Heart } from 'lucide-react';
 import { videos as videosApi } from '@/lib/api';
 import { toast } from 'sonner';
@@ -15,6 +15,12 @@ export function LikeButton({ video, onUpdate }: LikeButtonProps) {
   const [isLiked, setIsLiked] = useState(video.is_liked || false);
   const [likesCount, setLikesCount] = useState(video.likes_count || 0);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Sync state with props when video changes (e.g., after refresh or navigation)
+  useEffect(() => {
+    setIsLiked(video.is_liked || false);
+    setLikesCount(video.likes_count || 0);
+  }, [video.uuid, video.is_liked, video.likes_count]);
 
   const handleToggleLike = useCallback(async () => {
     if (isLoading) return;

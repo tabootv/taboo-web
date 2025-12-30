@@ -45,7 +45,7 @@ function ShortVideoCardComponent({ video, index: _index, isActive, isNearActive 
     isMuted,
     toggleMute,
     hasLiked,
-    setHasLiked,
+    updateVideoLike,
   } = useShortsStore();
   const prefersReducedMotion = usePrefersReducedMotion();
 
@@ -214,10 +214,15 @@ function ShortVideoCardComponent({ video, index: _index, isActive, isNearActive 
   };
 
   const handleToggleLike = async () => {
+    const newLikedState = !hasLiked;
+    // Optimistic update - updates both store state and video in array
+    updateVideoLike(video.uuid, newLikedState);
+
     try {
       await videosApi.toggleLike(video.uuid);
-      setHasLiked(!hasLiked);
     } catch {
+      // Revert on error
+      updateVideoLike(video.uuid, !newLikedState);
       toast.error('Please login to like');
     }
   };

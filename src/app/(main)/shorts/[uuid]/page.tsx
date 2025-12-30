@@ -37,15 +37,19 @@ export default function ShortPage() {
     fetchVideos,
     setCurrentIndex,
     toggleMute,
-    setHasLiked,
+    updateVideoLike,
   } = useShortsStore();
 
-  // Fetch videos with this short as the initial one - only once
+  // Reset store and fetch videos when uuid changes or on page refresh
+  const hasInitializedRef = useRef(false);
   useEffect(() => {
-    if (uuid && !isLoading) {
+    if (uuid && !hasInitializedRef.current) {
+      hasInitializedRef.current = true;
+      // Reset store state first to ensure clean slate on refresh/navigation
+      useShortsStore.getState().reset();
       fetchVideos(uuid);
     }
-  }, [uuid, fetchVideos, isLoading]);
+  }, [uuid, fetchVideos]);
 
   // Mark as ready once we have videos
   useEffect(() => {
@@ -86,12 +90,14 @@ export default function ShortPage() {
         e.preventDefault();
         const currentVideo = videos[currentIndex];
         if (currentVideo) {
+          const newLikedState = !hasLiked;
+          // Optimistic update
+          updateVideoLike(currentVideo.uuid, newLikedState);
           videosApi
             .toggleLike(currentVideo.uuid)
-            .then(() => {
-              setHasLiked(!hasLiked);
-            })
             .catch(() => {
+              // Revert on error
+              updateVideoLike(currentVideo.uuid, !newLikedState);
               toast.error('Please login to like');
             });
         }
@@ -109,7 +115,7 @@ export default function ShortPage() {
         router.push('/shorts');
       }
     },
-    [toggleMute, videos, currentIndex, hasLiked, setHasLiked, router, isReady]
+    [toggleMute, videos, currentIndex, hasLiked, updateVideoLike, router, isReady]
   );
 
   useEffect(() => {
@@ -134,7 +140,7 @@ export default function ShortPage() {
   // Loading state - show during initial load or while fetching
   if ((isLoading || !hasFetched) && videos.length === 0) {
     return (
-      <div className="fixed top-14 left-0 right-0 bottom-0 bg-black flex items-center justify-center z-30 lg:left-[72px]">
+      <div className="fixed top-14 left-0 right-0 bottom-0 bg-black flex items-center justify-center z-30 md:left-[3rem]">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-10 h-10 text-red-primary animate-spin" />
           <p className="text-white/60 text-sm">Loading short...</p>
@@ -146,7 +152,7 @@ export default function ShortPage() {
   // Error state
   if (error && videos.length === 0) {
     return (
-      <div className="fixed top-14 left-0 right-0 bottom-0 bg-black flex flex-col items-center justify-center gap-4 z-30 lg:left-[72px]">
+      <div className="fixed top-14 left-0 right-0 bottom-0 bg-black flex flex-col items-center justify-center gap-4 z-30 md:left-[3rem]">
         <Video className="w-16 h-16 text-white/30 mb-2" />
         {!isAuthenticated ? (
           <>
@@ -178,7 +184,7 @@ export default function ShortPage() {
   // Empty state - only show after fetch attempt
   if (videos.length === 0 && hasFetched) {
     return (
-      <div className="fixed top-14 left-0 right-0 bottom-0 bg-black flex flex-col items-center justify-center gap-4 z-30 lg:left-[72px]">
+      <div className="fixed top-14 left-0 right-0 bottom-0 bg-black flex flex-col items-center justify-center gap-4 z-30 md:left-[3rem]">
         <Video className="w-16 h-16 text-white/30 mb-2" />
         {!isAuthenticated ? (
           <>
@@ -208,7 +214,7 @@ export default function ShortPage() {
   }
 
   return (
-    <div className="fixed top-14 left-0 right-0 bottom-0 bg-black overflow-hidden z-30 lg:left-[72px]">
+    <div className="fixed top-14 left-0 right-0 bottom-0 bg-black overflow-hidden z-30 md:left-[3rem]">
       <Swiper
         modules={[Virtual, Mousewheel, EffectCreative]}
         direction="vertical"

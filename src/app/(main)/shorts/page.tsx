@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Virtual, Mousewheel, EffectCreative } from 'swiper/modules';
 import type { Swiper as SwiperType } from 'swiper';
+import { useSidebar } from '@/components/ui/sidebar';
 import { useShortsStore } from '@/lib/stores/shorts-store';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { ShortVideoCard } from '@/features/shorts';
@@ -22,6 +23,7 @@ export default function ShortsPage() {
   const swiperRef = useRef<SwiperType | null>(null);
   const isInitializedRef = useRef(false);
   const [isReady, setIsReady] = useState(false);
+  const { state: sidebarState } = useSidebar();
 
   const { isAuthenticated } = useAuthStore();
   const {
@@ -63,12 +65,12 @@ export default function ShortsPage() {
     }
   }, [currentIndex, videos, isReady]);
 
-  // Load more when near end
+  // Load more when near end - only when we have videos loaded
   useEffect(() => {
-    if (currentIndex >= videos.length - 3 && !isLoadingMore) {
+    if (videos.length > 0 && currentIndex >= videos.length - 3 && !isLoadingMore && hasFetched) {
       loadMore();
     }
-  }, [currentIndex, videos.length, isLoadingMore, loadMore]);
+  }, [currentIndex, videos.length, isLoadingMore, loadMore, hasFetched]);
 
   // Keyboard shortcuts
   const handleKeyDown = useCallback(
@@ -112,6 +114,8 @@ export default function ShortsPage() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
 
+  const sidebarOffsetClass = sidebarState === 'expanded' ? 'md:left-[16rem]' : 'md:left-[3rem]';
+
   const handleSlideChange = useCallback(
     (swiper: SwiperType) => {
       if (!isInitializedRef.current) return;
@@ -127,7 +131,7 @@ export default function ShortsPage() {
   // Loading state - show during initial load or while fetching
   if ((isLoading || !hasFetched) && videos.length === 0) {
     return (
-      <div className="fixed top-14 left-0 right-0 bottom-0 bg-black flex items-center justify-center z-30 lg:left-[72px]">
+      <div className={`fixed top-14 left-0 right-0 bottom-0 bg-black flex items-center justify-center z-30 ${sidebarOffsetClass}`}>
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-10 h-10 text-red-primary animate-spin" />
           <p className="text-white/60 text-sm">Loading shorts...</p>
@@ -139,7 +143,7 @@ export default function ShortsPage() {
   // Error state
   if (error && videos.length === 0) {
     return (
-      <div className="fixed top-14 left-0 right-0 bottom-0 bg-black flex flex-col items-center justify-center gap-4 z-30 lg:left-[72px]">
+      <div className={`fixed top-14 left-0 right-0 bottom-0 bg-black flex flex-col items-center justify-center gap-4 z-30 ${sidebarOffsetClass}`}>
         <Video className="w-16 h-16 text-white/30 mb-2" />
         {!isAuthenticated ? (
           <>
@@ -171,7 +175,7 @@ export default function ShortsPage() {
   // Empty state
   if (videos.length === 0 && hasFetched) {
     return (
-      <div className="fixed top-14 left-0 right-0 bottom-0 bg-black flex flex-col items-center justify-center gap-4 z-30 lg:left-[72px]">
+      <div className={`fixed top-14 left-0 right-0 bottom-0 bg-black flex flex-col items-center justify-center gap-4 z-30 ${sidebarOffsetClass}`}>
         <Video className="w-16 h-16 text-white/30 mb-2" />
         {!isAuthenticated ? (
           <>
@@ -202,7 +206,7 @@ export default function ShortsPage() {
 
   return (
     <div
-      className="fixed top-14 left-0 right-0 bottom-0 bg-black overflow-hidden z-30 lg:left-[72px]"
+      className={`fixed top-14 left-0 right-0 bottom-0 bg-black overflow-hidden z-30 ${sidebarOffsetClass}`}
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
     >
       {/* Full screen swiper */}

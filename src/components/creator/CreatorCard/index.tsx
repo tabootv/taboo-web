@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Video } from 'lucide-react';
 import { creators as creatorsApi } from '@/lib/api';
 import { usePrefetch } from '@/lib/hooks/use-prefetch';
+import { toast } from 'sonner';
 import type { Creator } from '@/types';
 
 interface CreatorCardProps {
@@ -15,18 +16,35 @@ interface CreatorCardProps {
 export function CreatorCard({ creator }: CreatorCardProps) {
   const { prefetchRoute } = usePrefetch();
   const [isFollowing, setIsFollowing] = useState(creator.following ?? false);
+  const [isLoading, setIsLoading] = useState(false);
   const href = `/creators/creator-profile/${creator.id}`;
+
+  // Sync state with props when creator changes (e.g., after refresh or navigation)
+  useEffect(() => {
+    setIsFollowing(creator.following ?? false);
+  }, [creator.id, creator.following]);
 
   const handleFollow = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (isLoading) return;
+
+    // Optimistic update for immediate feedback
+    const previousState = isFollowing;
+    setIsFollowing(!isFollowing);
+    setIsLoading(true);
+
     try {
       const response = await creatorsApi.toggleFollow(creator.id);
       if (response) {
         setIsFollowing(response.is_following);
       }
-    } catch (error) {
-      console.error('Error toggling follow:', error);
+    } catch {
+      // Revert on error
+      setIsFollowing(previousState);
+      toast.error('Please login to follow');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -81,8 +99,9 @@ export function CreatorCard({ creator }: CreatorCardProps) {
               <div className="hidden md:block">
                 <button
                   onClick={handleFollow}
+                  disabled={isLoading}
                   aria-pressed={isFollowing}
-                  className="btn btn-primary btn-sm min-w-24 justify-center"
+                  className={`btn btn-primary btn-sm min-w-24 justify-center ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
                 >
                   {isFollowing ? 'Following' : 'Follow'}
                 </button>
@@ -98,8 +117,9 @@ export function CreatorCard({ creator }: CreatorCardProps) {
         <div className="md:hidden">
           <button
             onClick={handleFollow}
+            disabled={isLoading}
             aria-pressed={isFollowing}
-            className="btn btn-primary btn-sm w-[93%] mx-auto my-[15px] min-w-[120px] justify-center"
+            className={`btn btn-primary btn-sm w-[93%] mx-auto my-[15px] min-w-[120px] justify-center ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
           >
             {isFollowing ? 'Following' : 'Follow'}
           </button>

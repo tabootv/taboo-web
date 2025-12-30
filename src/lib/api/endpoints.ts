@@ -1135,6 +1135,10 @@ export const notifications = {
     return data.notifications || data.data;
   },
 
+  markRead: async (id: string): Promise<void> => {
+    await apiClient.post(`/notifications/${id}/read`);
+  },
+
   readAll: async (): Promise<void> => {
     await apiClient.post('/notifications/read-all');
   },

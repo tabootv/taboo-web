@@ -34,6 +34,7 @@ interface ShortsState {
   updateCommentList: (comments: Comment[]) => void;
   appendComment: (comment: Comment) => void;
   setHasLiked: (liked: boolean) => void;
+  updateVideoLike: (uuid: string, isLiked: boolean) => void;
 }
 
 export const useShortsStore = create<ShortsState>((set, get) => ({
@@ -232,5 +233,21 @@ export const useShortsStore = create<ShortsState>((set, get) => ({
 
   setHasLiked: (liked: boolean) => {
     set({ hasLiked: liked });
+  },
+
+  updateVideoLike: (uuid: string, isLiked: boolean) => {
+    set((state) => ({
+      videos: state.videos.map((video) =>
+        video.uuid === uuid
+          ? {
+              ...video,
+              has_liked: isLiked,
+              is_liked: isLiked,
+              likes_count: (video.likes_count || 0) + (isLiked ? 1 : -1),
+            }
+          : video
+      ),
+      hasLiked: isLiked,
+    }));
   },
 }));

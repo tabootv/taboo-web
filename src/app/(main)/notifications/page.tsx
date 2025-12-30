@@ -74,6 +74,20 @@ export default function NotificationsPage() {
     }
   };
 
+  const handleMarkRead = async (id: string) => {
+    // Optimistic update
+    setNotificationsList((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, read_at: new Date().toISOString() } : n))
+    );
+
+    try {
+      await notificationsApi.markRead(id);
+    } catch {
+      // Silently fail - the notification is still marked as read locally
+      console.error('Failed to mark notification as read');
+    }
+  };
+
   if (!isAuthenticated) {
     return <LoadingScreen message="Redirecting..." />;
   }
@@ -149,6 +163,7 @@ export default function NotificationsPage() {
                     key={`${notification.id}${notification.created_at}`}
                     notification={notification}
                     onDelete={handleDelete}
+                    onMarkRead={handleMarkRead}
                   />
                 ))}
               </div>
@@ -168,6 +183,7 @@ export default function NotificationsPage() {
                     key={notification.id}
                     notification={notification}
                     onDelete={handleDelete}
+                    onMarkRead={handleMarkRead}
                   />
                 ))}
               </div>
@@ -182,9 +198,11 @@ export default function NotificationsPage() {
 function NotificationCard({
   notification,
   onDelete,
+  onMarkRead,
 }: {
   notification: Notification;
   onDelete: (id: string) => void;
+  onMarkRead: (id: string) => void;
 }) {
   const isUnread = !notification.read_at;
   const data = notification.data as Record<string, string | number | boolean | undefined>;
@@ -237,7 +255,15 @@ function NotificationCard({
       </div>
 
       <div className="flex-1 min-w-0">
-        <Link href={getNotificationLink()} className="block">
+        <Link
+          href={getNotificationLink()}
+          className="block"
+          onClick={() => {
+            if (isUnread) {
+              onMarkRead(notification.id);
+            }
+          }}
+        >
           <p
             className={`text-sm ${
               isUnread ? 'text-text-primary font-medium' : 'text-text-secondary'
