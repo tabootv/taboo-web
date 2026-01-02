@@ -147,14 +147,15 @@
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* Sidebar - Pure Black Theme */
+  --sidebar: #000000;
+  --sidebar-foreground: #e6e7ea;
+  --sidebar-primary: #ab0013;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #0d0d0d;
+  --sidebar-accent-foreground: #e6e7ea;
+  --sidebar-border: rgba(255, 255, 255, 0.06);
+  --sidebar-ring: #ab0013;
 }
 
 @theme inline {
@@ -3330,14 +3331,15 @@ section:has(.vertical-series-card:hover) {
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* Sidebar - Dark theme matching TabooTV design */
+  --sidebar: #000000;
+  --sidebar-foreground: #e6e7ea;
+  --sidebar-primary: #ab0013;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #161616;
+  --sidebar-accent-foreground: #e6e7ea;
+  --sidebar-border: rgba(255, 255, 255, 0.06);
+  --sidebar-ring: #ab0013;
 }
 
 @layer base {
@@ -3347,6 +3349,20 @@ section:has(.vertical-series-card:hover) {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Sidebar: force pure black and remove divider borders */
+[data-slot='sidebar-wrapper'],
+[data-slot='sidebar-container'],
+[data-slot='sidebar-inner'] {
+  background: #000 !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+[data-slot='sidebar-gap'],
+[data-slot='sidebar-separator'] {
+  border: none !important;
 }
 
 /* ============================================

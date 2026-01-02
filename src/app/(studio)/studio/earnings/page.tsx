@@ -18,7 +18,6 @@ import {
   Clock,
   Percent,
   CreditCard,
-  ArrowUpRight,
 } from 'lucide-react';
 import { Button } from '@/components/ui';
 import { Card, CardContent } from '@/components/ui/card';
@@ -129,16 +128,16 @@ interface StatCardProps {
 
 function StatCard({ title, value, icon, subtitle, tooltip, highlight }: StatCardProps) {
   return (
-    <Card className="transition-all hover:scale-[1.01]">
-      <CardContent className="p-4">
+    <Card className="transition-all hover:scale-[1.01] overflow-visible">
+      <CardContent className="p-4 overflow-visible">
         <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1.5 mb-1">
+          <div className="min-w-0 flex-1 overflow-visible">
+            <div className="flex items-center gap-1.5 mb-1 overflow-visible">
               <p className="text-xs text-white/50 font-medium truncate">{title}</p>
               {tooltip && (
                 <div className="relative group/info flex-shrink-0">
                   <Info className="w-3.5 h-3.5 text-white/30 cursor-help hover:text-white/60 transition-colors" />
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1.5 rounded-lg text-xs text-white bg-black/95 border border-white/10 opacity-0 invisible group-hover/info:opacity-100 group-hover/info:visible transition-all duration-200 w-44 text-center z-50 shadow-lg backdrop-blur-xl">
+                  <div className="absolute bottom-full left-0 mb-2 px-2.5 py-1.5 rounded-lg text-xs text-white bg-zinc-900 border border-white/10 opacity-0 invisible group-hover/info:opacity-100 group-hover/info:visible transition-all duration-200 w-44 text-center shadow-xl z-[9999] whitespace-normal">
                     {tooltip}
                   </div>
                 </div>
@@ -169,46 +168,6 @@ function formatNumber(num: number): string {
   if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
   return num.toLocaleString();
 }
-
-function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
-}
-
-function formatDateTime(dateStr: string): string {
-  return new Date(dateStr).toLocaleString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  });
-}
-
-function getPlanLabel(planId: string): string {
-  if (planId.includes('yearly') || planId.includes('year')) return 'Yearly';
-  if (planId.includes('monthly') || planId.includes('month')) return 'Monthly';
-  return planId;
-}
-
-function getStatusColor(status: string): string {
-  switch (status.toLowerCase()) {
-    case 'approved':
-    case 'paid':
-      return 'text-[#ab0013]';
-    case 'pending':
-    case 'processing':
-      return 'text-muted-foreground';
-    case 'denied':
-    case 'failed':
-      return 'text-destructive';
-    default:
-      return 'text-muted-foreground';
-  }
-}
-
 
 export default function EarningsPage() {
   const [data, setData] = useState<EarningsData | null>(null);
@@ -453,11 +412,11 @@ export default function EarningsPage() {
           tooltip="Referral link clicks in selected period"
         />
         <StatCard
-          title="Signups"
+          title="Leads"
           value={formatNumber(data?.summary?.signups || 0)}
           icon={<UserPlus className="w-5 h-5" />}
           subtitle={periodLabel}
-          tooltip="New signups from your referrals"
+          tooltip="New leads from your referrals"
         />
         <StatCard
           title="Customers"
@@ -506,7 +465,7 @@ export default function EarningsPage() {
                 <p className="text-lg font-bold text-white">{formatNumber(data?.allTimeStats?.clicks || 0)}</p>
               </div>
               <div>
-                <p className="text-xs text-white/40 mb-1">Total Signups</p>
+                <p className="text-xs text-white/40 mb-1">Total Leads</p>
                 <p className="text-lg font-bold text-white">{formatNumber(data?.allTimeStats?.signups || 0)}</p>
               </div>
               <div>
@@ -531,7 +490,7 @@ export default function EarningsPage() {
             <div className="space-y-4">
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs text-white/40">Click to Signup</span>
+                  <span className="text-xs text-white/40">Click to Lead</span>
                   <span className="text-sm font-medium text-white">{data?.conversionRates?.clickToSignup || 0}%</span>
                 </div>
                 <div className="h-2 rounded-full bg-white/5 overflow-hidden">
@@ -543,7 +502,7 @@ export default function EarningsPage() {
               </div>
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs text-white/40">Signup to Customer</span>
+                  <span className="text-xs text-white/40">Lead to Customer</span>
                   <span className="text-sm font-medium text-white">{data?.conversionRates?.signupToCustomer || 0}%</span>
                 </div>
                 <div className="h-2 rounded-full bg-white/5 overflow-hidden">
@@ -580,9 +539,8 @@ export default function EarningsPage() {
         </CardContent>
       </Card>
 
-      {/* Recent Commissions & Payout History */}
+{/* Recent Commissions & Payout History - Disabled for performance
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-        {/* Recent Commissions */}
         <Card>
           <CardContent className="p-0">
             <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5">
@@ -623,7 +581,6 @@ export default function EarningsPage() {
           </CardContent>
         </Card>
 
-        {/* Payout History */}
         <Card>
           <CardContent className="p-0">
             <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5">
@@ -664,6 +621,7 @@ export default function EarningsPage() {
           </CardContent>
         </Card>
       </div>
+      */}
 
       {/* Earnings Breakdown Table */}
       <Card>

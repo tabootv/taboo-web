@@ -331,7 +331,7 @@ export async function getPromoterReports(
     const response = await fetch(url, {
       method: 'GET',
       headers: getV2Headers(),
-      next: { revalidate: 60 },
+      next: { revalidate: 300 }, // Cache for 5 minutes
     });
 
     if (!response.ok) {
@@ -353,21 +353,25 @@ export async function getPromoterReports(
 }
 
 /**
- * Get rewards list for time series data (with pagination to fetch ALL records)
+ * Get rewards list for time series data (with pagination, limited to max pages for performance)
  */
-export async function getRewardsList(promoterId: number): Promise<RewardV1Response[]> {
+export async function getRewardsList(
+  promoterId: number,
+  options: { maxPages?: number } = {}
+): Promise<RewardV1Response[]> {
   const allRewards: RewardV1Response[] = [];
   let page = 1;
   const perPage = 100;
+  const maxPages = options.maxPages ?? 5; // Limit to 500 rewards max by default
 
   try {
-    while (true) {
+    while (page <= maxPages) {
       const response = await fetch(
         `${V1_BASE_URL}/rewards/list?promoter_id=${promoterId}&page=${page}&per_page=${perPage}`,
         {
           method: 'GET',
           headers: getV1Headers(),
-          next: { revalidate: 60 },
+          next: { revalidate: 300 }, // Cache for 5 minutes
         }
       );
 
@@ -540,7 +544,7 @@ export async function getPromoterProfileV2(promoterId: number): Promise<V2Promot
     const response = await fetch(`${V2_BASE_URL}/promoters/${promoterId}`, {
       method: 'GET',
       headers: getV2Headers(),
-      next: { revalidate: 60 },
+      next: { revalidate: 300 }, // Cache for 5 minutes
     });
 
     if (!response.ok) {
@@ -581,7 +585,7 @@ export async function getCommissionsList(
     const response = await fetch(url, {
       method: 'GET',
       headers: getV2Headers(),
-      next: { revalidate: 60 },
+      next: { revalidate: 300 }, // Cache for 5 minutes
     });
 
     if (!response.ok) {
@@ -657,7 +661,7 @@ export async function getPayoutsList(
     const response = await fetch(url, {
       method: 'GET',
       headers: getV2Headers(),
-      next: { revalidate: 60 },
+      next: { revalidate: 300 }, // Cache for 5 minutes
     });
 
     if (!response.ok) {
@@ -677,16 +681,11 @@ export async function getPayoutsList(
  * Get comprehensive earnings data with all V2 API data
  */
 export async function getComprehensiveEarningsData(params: ReportParams) {
-  const [profileV2, rewards, v2Reports, commissions, payouts] = await Promise.all([
+  // Only fetch essential data - commissions and payouts disabled for performance
+  const [profileV2, rewards, v2Reports] = await Promise.all([
     getPromoterProfileV2(params.promoterId),
     getRewardsList(params.promoterId),
     getPromoterReports(params.promoterId, params.startDate, params.endDate, params.groupBy),
-    getCommissionsList(params.promoterId, {
-      perPage: 10,
-      startDate: params.startDate,
-      endDate: params.endDate,
-    }),
-    getPayoutsList(params.promoterId, { perPage: 10 }),
   ]);
 
   const series = groupRewardsByPeriod(rewards, params.groupBy, params.startDate, params.endDate);
@@ -737,8 +736,8 @@ export async function getComprehensiveEarningsData(params: ReportParams) {
     profile,
     series,
     filteredStats,
-    recentCommissions: commissions.commissions,
-    payoutHistory: payouts,
+    recentCommissions: [], // Disabled for performance
+    payoutHistory: [], // Disabled for performance
     v2Reports,
   };
 }

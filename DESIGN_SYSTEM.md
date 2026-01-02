@@ -1,73 +1,6 @@
 # TabooTV Design System
 
-A unified design language for the TabooTV streaming platform, providing consistency, polish, and premium UX quality across all pages.
-
----
-
-## Table of Contents
-
-1. [Design Tokens](#design-tokens)
-2. [Typography](#typography)
-3. [Colors](#colors)
-4. [Spacing](#spacing)
-5. [Components](#components)
-6. [Page Layout Standards](#page-layout-standards)
-7. [Migration Guide](#migration-guide)
-
----
-
-## Design Tokens
-
-All design values are centralized in `src/lib/design-tokens.ts`. Import and use these tokens for consistent styling:
-
-```typescript
-import { colors, spacing, typography, borderRadius, shadows } from '@/lib/design-tokens';
-```
-
----
-
-## Typography
-
-### Scale (Major Third - 1.25 ratio)
-
-| Token | Size | Use Case |
-|-------|------|----------|
-| `--text-xs` | 12px | Captions, timestamps |
-| `--text-sm` | 14px | Body small, metadata |
-| `--text-base` | 16px | Body text |
-| `--text-lg` | 18px | Large body, card titles |
-| `--text-xl` | 20px | Section titles |
-| `--text-2xl` | 24px | Page titles (mobile) |
-| `--text-3xl` | 30px | Page titles (desktop) |
-| `--text-4xl` | 36px | Hero titles (mobile) |
-| `--text-5xl` | 48px | Hero titles (desktop) |
-
-### Typography Classes
-
-Use these pre-built classes for consistent text styling:
-
-```html
-<!-- Hero titles (homepage, featured) -->
-<h1 class="title-hero">Featured Content</h1>
-
-<!-- Page titles -->
-<h1 class="title-page">Videos</h1>
-
-<!-- Section titles -->
-<h2 class="title-section">Popular This Week</h2>
-
-<!-- Card titles -->
-<h3 class="title-card">Video Title</h3>
-
-<!-- Body text -->
-<p class="body-large">Description text</p>
-<p class="body-base">Regular text</p>
-<p class="body-small">Metadata text</p>
-
-<!-- Labels & Captions -->
-<span class="label">CATEGORY</span>
-<span class="caption">2 hours ago</span>
-```
+Cross-platform design specification for web (Next.js) and mobile (Flutter) applications.
 
 ---
 
@@ -75,364 +8,510 @@ Use these pre-built classes for consistent text styling:
 
 ### Background Hierarchy
 
-| Token | Hex | Usage |
-|-------|-----|-------|
-| `--bg` | #000000 | Page background |
-| `--surface` | #0d0d0d | Cards, modals |
-| `--surface-hover` | #161616 | Hover states |
-| `bg-card` | #131315 | Elevated cards |
-
-### Taboo Red (Brand)
-
-| Token | Hex | Usage |
-|-------|-----|-------|
-| `--red-primary` | #ab0013 | Primary actions, accents |
-| `--red-hover` | #d4001a | Hover states |
-| `--red-dark` | #8a0010 | Pressed states |
-| `--red-deep` | #7a000e | Gradients |
+| Token | Hex | RGB | Flutter |
+|-------|-----|-----|---------|
+| `background` | `#000000` | `0, 0, 0` | `Color(0xFF000000)` |
+| `surface` | `#0D0D0D` | `13, 13, 13` | `Color(0xFF0D0D0D)` |
+| `surfaceHover` | `#161616` | `22, 22, 22` | `Color(0xFF161616)` |
+| `elevated` | `#1A1A1A` | `26, 26, 26` | `Color(0xFF1A1A1A)` |
+| `card` | `#131315` | `19, 19, 21` | `Color(0xFF131315)` |
 
 ### Text Colors
 
-| Token | Hex | Usage |
-|-------|-----|-------|
-| `--text-primary` | #e6e7ea | Headings, primary text |
-| `--text-secondary` | #9aa0a6 | Descriptions, metadata |
+| Token | Hex | RGB | Opacity | Flutter |
+|-------|-----|-----|---------|---------|
+| `textPrimary` | `#E6E7EA` | `230, 231, 234` | 100% | `Color(0xFFE6E7EA)` |
+| `textSecondary` | `#9AA0A6` | `154, 160, 166` | 100% | `Color(0xFF9AA0A6)` |
+| `textTertiary` | `#6B7280` | `107, 114, 128` | 100% | `Color(0xFF6B7280)` |
+| `textMuted` | `#4B5563` | `75, 85, 99` | 100% | `Color(0xFF4B5563)` |
+| `textInverse` | `#000000` | `0, 0, 0` | 100% | `Color(0xFF000000)` |
+
+### Brand Red (Primary)
+
+| Token | Hex | RGB | Flutter |
+|-------|-----|-----|---------|
+| `redPrimary` | `#AB0013` | `171, 0, 19` | `Color(0xFFAB0013)` |
+| `redHover` | `#D4001A` | `212, 0, 26` | `Color(0xFFD4001A)` |
+| `redDark` | `#8A0010` | `138, 0, 16` | `Color(0xFF8A0010)` |
+| `redDeep` | `#7A000E` | `122, 0, 14` | `Color(0xFF7A000E)` |
+| `redMuted` | `rgba(171, 0, 19, 0.1)` | - | `Color(0x1AAB0013)` |
+| `redGlow` | `rgba(171, 0, 19, 0.4)` | - | `Color(0x66AB0013)` |
+
+### Border Colors
+
+| Token | Value | Flutter |
+|-------|-------|---------|
+| `borderDefault` | `#1F1F1F` | `Color(0xFF1F1F1F)` |
+| `borderSubtle` | `rgba(255, 255, 255, 0.06)` | `Color(0x0FFFFFFF)` |
+| `borderHover` | `rgba(255, 255, 255, 0.1)` | `Color(0x1AFFFFFF)` |
+| `borderAccent` | `rgba(171, 0, 19, 0.3)` | `Color(0x4DAB0013)` |
+
+### Semantic Colors
+
+| Token | Hex | Flutter |
+|-------|-----|---------|
+| `success` | `#22C55E` | `Color(0xFF22C55E)` |
+| `warning` | `#F59E0B` | `Color(0xFFF59E0B)` |
+| `error` | `#EF4444` | `Color(0xFFEF4444)` |
+| `info` | `#3B82F6` | `Color(0xFF3B82F6)` |
+
+### Overlay Colors
+
+| Token | Value | Flutter |
+|-------|-------|---------|
+| `overlayLight` | `rgba(255, 255, 255, 0.05)` | `Color(0x0DFFFFFF)` |
+| `overlayMedium` | `rgba(255, 255, 255, 0.1)` | `Color(0x1AFFFFFF)` |
+| `overlayDark` | `rgba(0, 0, 0, 0.6)` | `Color(0x99000000)` |
+
+---
+
+## Typography
+
+### Font Family
+
+| Platform | Primary Font | Fallback |
+|----------|-------------|----------|
+| Web | Figtree | system-ui, sans-serif |
+| Flutter | Figtree | System default |
+
+### Font Sizes
+
+| Token | Size (px) | Size (rem) | Flutter |
+|-------|-----------|------------|---------|
+| `xs` | 12 | 0.75 | `12.0` |
+| `sm` | 14 | 0.875 | `14.0` |
+| `base` | 16 | 1.0 | `16.0` |
+| `lg` | 18 | 1.125 | `18.0` |
+| `xl` | 20 | 1.25 | `20.0` |
+| `2xl` | 24 | 1.5 | `24.0` |
+| `3xl` | 30 | 1.875 | `30.0` |
+| `4xl` | 36 | 2.25 | `36.0` |
+| `5xl` | 48 | 3.0 | `48.0` |
+
+### Font Weights
+
+| Token | Value | Flutter |
+|-------|-------|---------|
+| `normal` | 400 | `FontWeight.w400` |
+| `medium` | 500 | `FontWeight.w500` |
+| `semibold` | 600 | `FontWeight.w600` |
+| `bold` | 700 | `FontWeight.w700` |
+| `extrabold` | 800 | `FontWeight.w800` |
+
+### Line Heights
+
+| Token | Value | Flutter (height) |
+|-------|-------|------------------|
+| `none` | 1.0 | `1.0` |
+| `tight` | 1.25 | `1.25` |
+| `snug` | 1.375 | `1.375` |
+| `normal` | 1.5 | `1.5` |
+| `relaxed` | 1.625 | `1.625` |
+
+### Letter Spacing
+
+| Token | Value | Flutter |
+|-------|-------|---------|
+| `tighter` | -0.05em | `-0.8` (at 16px) |
+| `tight` | -0.025em | `-0.4` (at 16px) |
+| `normal` | 0 | `0` |
+| `wide` | 0.025em | `0.4` (at 16px) |
+| `wider` | 0.05em | `0.8` (at 16px) |
+
+### Text Styles (Presets)
+
+| Style | Mobile | Desktop | Weight | Letter Spacing |
+|-------|--------|---------|--------|----------------|
+| `titleHero` | 36px | 48px | bold (700) | tight (-0.025em) |
+| `titlePage` | 24px | 30px | bold (700) | tight (-0.025em) |
+| `titleSection` | 18px | 20px | semibold (600) | tight (-0.025em) |
+| `titleCard` | 16px | 16px | semibold (600) | normal (0) |
+| `bodyLarge` | 18px | 18px | normal (400) | normal (0) |
+| `bodyBase` | 16px | 16px | normal (400) | normal (0) |
+| `bodySmall` | 14px | 14px | normal (400) | normal (0) |
+| `label` | 14px | 14px | medium (500) | wide (0.025em) + UPPERCASE |
+| `caption` | 12px | 12px | normal (400) | normal (0) |
+| `statNumber` | 24px | 30px | extrabold (800) | tight (-0.025em) |
 
 ---
 
 ## Spacing
 
-### Scale
+### Base Scale
 
-| Token | Value | Usage |
-|-------|-------|-------|
-| `spacing-1` | 4px | Tight gaps |
-| `spacing-2` | 8px | Icon gaps |
-| `spacing-3` | 12px | Small padding |
-| `spacing-4` | 16px | Default padding |
-| `spacing-6` | 24px | Card padding |
-| `spacing-8` | 32px | Section gaps |
-| `spacing-10` | 40px | Large gaps |
+| Token | Value (px) | Flutter |
+|-------|------------|---------|
+| `spacing0` | 0 | `0` |
+| `spacing1` | 4 | `4.0` |
+| `spacing2` | 8 | `8.0` |
+| `spacing3` | 12 | `12.0` |
+| `spacing4` | 16 | `16.0` |
+| `spacing5` | 20 | `20.0` |
+| `spacing6` | 24 | `24.0` |
+| `spacing8` | 32 | `32.0` |
+| `spacing10` | 40 | `40.0` |
+| `spacing12` | 48 | `48.0` |
+| `spacing16` | 64 | `64.0` |
+| `spacing20` | 80 | `80.0` |
+| `spacing24` | 96 | `96.0` |
 
 ### Page Spacing
 
-- **Horizontal Padding**: 16px (mobile) → 24px (tablet) → 32px (desktop)
-- **Max Content Width**: 1400px (default), 800px (narrow), 1600px (wide)
-- **Section Gap**: 40px between major sections
-- **Header to Content Gap**: 32px
-
----
-
-## Components
-
-### PageHeader
-
-Unified page header with optional back button and filters.
-
-```tsx
-import { PageHeader } from '@/components/ui';
-
-// Basic
-<PageHeader title="Videos" subtitle="Browse all videos" />
-
-// With back button
-<PageHeader
-  title="Upload Video"
-  subtitle="Share your content"
-  backHref="/studio"
-/>
-
-// With filters
-<PageHeader
-  title="Series"
-  actions={<FilterChips options={filters} selected={filter} onSelect={setFilter} />}
-/>
-```
-
-**Props:**
-- `title` (string): Main title
-- `subtitle?` (string): Optional subtitle
-- `backHref?` (string): Back navigation link
-- `actions?` (ReactNode): Filter/action slot
-- `variant?` ('default' | 'large' | 'hero'): Title size
-
----
-
-### FilterChips
-
-Consistent filter pills across pages.
-
-```tsx
-import { FilterChips } from '@/components/ui';
-
-<FilterChips
-  options={[
-    { id: 'all', label: 'All' },
-    { id: 'popular', label: 'Popular' },
-    { id: 'recent', label: 'Recent' },
-  ]}
-  selected="all"
-  onSelect={(id) => setFilter(id)}
-  variant="default" // or 'pills', 'underline'
-/>
-```
-
-**Props:**
-- `options` (FilterOption[]): Array of filter options
-- `selected` (string): Currently selected filter ID
-- `onSelect` (function): Callback when filter changes
-- `variant?` ('default' | 'pills' | 'underline'): Visual style
-- `scrollable?` (boolean): Enable horizontal scroll on mobile
-
----
-
-### MediaCard
-
-Unified card for videos, shorts, and series.
-
-```tsx
-import { MediaCard } from '@/components/ui';
-
-<MediaCard
-  id={1}
-  uuid="abc123"
-  type="video" // or 'short', 'series'
-  title="Amazing Video"
-  thumbnail="/thumb.jpg"
-  duration={320}
-  views={15000}
-  channel={{
-    name: "Creator",
-    slug: "creator",
-    avatar: "/avatar.jpg"
-  }}
-  isNsfw={false}
-  isPremium={false}
-/>
-```
-
-**Props:**
-- `id`, `uuid`: Identifiers
-- `type` ('video' | 'short' | 'series'): Content type
-- `title`, `thumbnail`: Display info
-- `duration?` (number): Duration in seconds (videos)
-- `episodeCount?` (number): Episodes (series)
-- `views?`, `likes?`, `date?`: Metadata
-- `channel?`: Creator info
-- `isNsfw?`, `isPremium?`: Badges
-- `size?` ('sm' | 'md' | 'lg'): Card size
-
----
-
-### ContentGrid
-
-Responsive grid for content layout.
-
-```tsx
-import { ContentGrid } from '@/components/ui';
-
-// Default media grid
-<ContentGrid variant="media">
-  {videos.map(video => <MediaCard key={video.id} {...video} />)}
-</ContentGrid>
-
-// Series grid
-<ContentGrid variant="series">
-  {series.map(s => <MediaCard key={s.id} type="series" {...s} />)}
-</ContentGrid>
-
-// Custom columns
-<ContentGrid columns={{ default: 1, sm: 2, lg: 4 }}>
-  {items.map(item => <Card key={item.id} />)}
-</ContentGrid>
-```
-
-**Variants:**
-- `media`: 1 → 2 → 3 → 4 → 5 columns
-- `creator`: 1 → 2 → 3 → 4 columns
-- `series`: 1 → 2 → 3 → 4 columns
-- `shorts`: 2 → 3 → 4 → 5 → 6 columns
-- `posts`: 1 column (feed layout)
-
----
-
-## Page Layout Standards
-
-### Standard Page Template
-
-```tsx
-export default function ExamplePage() {
-  return (
-    <div className="series-page-atmosphere min-h-screen">
-      {/* Atmospheric Background */}
-      <div className="series-atmosphere-bg" />
-
-      <div className="relative z-10 max-w-[1400px] mx-auto px-4 md:px-6 lg:px-8 py-8">
-        {/* Page Header */}
-        <PageHeader
-          title="Page Title"
-          subtitle="Description text"
-          actions={<FilterChips ... />}
-        />
-
-        {/* Content Grid */}
-        <ContentGrid variant="media">
-          {items.map(item => <MediaCard key={item.id} {...item} />)}
-        </ContentGrid>
-      </div>
-    </div>
-  );
-}
-```
-
-### Page Backgrounds
-
-Use atmospheric backgrounds for premium feel:
-
-- `.series-page-atmosphere` + `.series-atmosphere-bg`: Series/Videos pages
-- `.creators-page-atmosphere` + `.creators-atmosphere-bg`: Creator pages
-- `.studio-page-atmosphere` + `.studio-atmosphere-bg`: Studio pages
-
-### Consistent Padding
-
-```css
-/* Mobile: 16px */
-px-4
-
-/* Tablet: 24px */
-md:px-6
-
-/* Desktop: 32px */
-lg:px-8
-```
+| Context | Mobile | Tablet | Desktop |
+|---------|--------|--------|---------|
+| Horizontal Padding | 16px | 24px | 32px |
+| Vertical Padding | 24px | 24px | 32px |
+| Section Gap | 40px | 40px | 40px |
+| Header to Content | 32px | 32px | 32px |
 
 ### Max Content Width
 
+| Variant | Value |
+|---------|-------|
+| Default | 1400px |
+| Narrow | 800px |
+| Wide | 1600px |
+
+---
+
+## Border Radius
+
+### Base Scale
+
+| Token | Value (px) | Flutter |
+|-------|------------|---------|
+| `none` | 0 | `0` |
+| `xs` | 4 | `4.0` |
+| `sm` | 6 | `6.0` |
+| `md` | 8 | `8.0` |
+| `lg` | 12 | `12.0` |
+| `xl` | 16 | `16.0` |
+| `2xl` | 20 | `20.0` |
+| `full` | 9999 | `Radius.circular(9999)` |
+
+### Component Radius
+
+| Component | Radius (px) |
+|-----------|-------------|
+| Button | 12 |
+| Card | 16 |
+| Thumbnail | 12 |
+| Avatar | 9999 (full circle) |
+| Input | 12 |
+| Chip | 9999 (pill) |
+| Modal | 16 |
+
+---
+
+## Shadows
+
+### Elevation
+
+| Token | Value | Flutter |
+|-------|-------|---------|
+| `none` | none | `[]` |
+| `low` | `0 4px 12px rgba(0,0,0,0.4)` | `BoxShadow(offset: Offset(0, 4), blurRadius: 12, color: Color(0x66000000))` |
+| `medium` | `0 8px 32px rgba(0,0,0,0.6)` | `BoxShadow(offset: Offset(0, 8), blurRadius: 32, color: Color(0x99000000))` |
+| `high` | `0 16px 64px rgba(0,0,0,0.8)` | `BoxShadow(offset: Offset(0, 16), blurRadius: 64, color: Color(0xCC000000))` |
+| `cardHover` | `0 12px 40px rgba(0,0,0,0.5)` | `BoxShadow(offset: Offset(0, 12), blurRadius: 40, color: Color(0x80000000))` |
+
+### Red Glow Effects
+
+| Token | Value | Flutter |
+|-------|-------|---------|
+| `glowSoft` | `0 0 20px rgba(171,0,19,0.3)` | `BoxShadow(blurRadius: 20, color: Color(0x4DAB0013))` |
+| `glowMedium` | `0 0 30px rgba(171,0,19,0.4)` | `BoxShadow(blurRadius: 30, color: Color(0x66AB0013))` |
+| `glowStrong` | `0 0 40px rgba(171,0,19,0.5)` | `BoxShadow(blurRadius: 40, color: Color(0x80AB0013))` |
+| `glowIntense` | `0 0 60px rgba(171,0,19,0.6)` | `BoxShadow(blurRadius: 60, color: Color(0x99AB0013))` |
+
+---
+
+## Animations & Transitions
+
+### Durations
+
+| Token | Duration | Curve |
+|-------|----------|-------|
+| `fast` | 150ms | ease |
+| `normal` | 300ms | ease |
+| `slow` | 400ms | ease |
+| `bouncy` | 300ms | `cubic-bezier(0.34, 1.56, 0.64, 1)` |
+| `smooth` | 400ms | `cubic-bezier(0.4, 0, 0.2, 1)` |
+
+### Flutter Curves
+
+```dart
+// Bouncy curve for interactive elements
+final bouncyCurve = Curves.elasticOut;
+
+// Smooth curve for transitions
+final smoothCurve = Curves.easeInOutCubic;
+```
+
+### Common Animations
+
+| Animation | Properties |
+|-----------|------------|
+| Card Hover | `translateY(-4px)` + `shadow: medium` |
+| Card Interactive | `translateY(-4px) scale(1.01)` |
+| Button Hover | `translateY(-2px)` + glow |
+| Hover Lift | `translateY(-4px)` |
+| Hover Scale | `scale(1.02)` |
+
+---
+
+## Component Sizes
+
+### Avatar
+
+| Size | Value (px) | Flutter |
+|------|------------|---------|
+| `xs` | 24 | `24.0` |
+| `sm` | 32 | `32.0` |
+| `md` | 40 | `40.0` |
+| `lg` | 48 | `48.0` |
+| `xl` | 64 | `64.0` |
+| `2xl` | 80 | `80.0` |
+
+### Button Height
+
+| Size | Value (px) |
+|------|------------|
+| `sm` | 32 |
+| `md` | 40 |
+| `lg` | 48 |
+
+### Input Height
+
+| Size | Value (px) |
+|------|------------|
+| `sm` | 36 |
+| `md` | 44 |
+| `lg` | 52 |
+
+### Icon
+
+| Size | Value (px) |
+|------|------------|
+| `xs` | 12 |
+| `sm` | 16 |
+| `md` | 20 |
+| `lg` | 24 |
+| `xl` | 32 |
+
+### Chip Height
+
+| Size | Value (px) |
+|------|------------|
+| `sm` | 28 |
+| `md` | 36 |
+| `lg` | 44 |
+
+---
+
+## Aspect Ratios
+
+| Type | Ratio | Flutter |
+|------|-------|---------|
+| Video/Thumbnail | 16:9 | `16 / 9` |
+| Short | 9:16 | `9 / 16` |
+| Square | 1:1 | `1.0` |
+| Portrait | 3:4 | `3 / 4` |
+| Banner | 21:9 | `21 / 9` |
+
+---
+
+## Grid Configurations
+
+### Media Grid (Videos)
+
+| Breakpoint | Columns |
+|------------|---------|
+| Mobile (<640px) | 1 |
+| sm (640px) | 2 |
+| md (768px) | 3 |
+| lg (1024px) | 4 |
+| xl (1280px) | 5 |
+
+### Creator Grid
+
+| Breakpoint | Columns |
+|------------|---------|
+| Mobile | 1 |
+| sm | 2 |
+| md | 3 |
+| lg | 4 |
+
+### Series Grid
+
+| Breakpoint | Columns |
+|------------|---------|
+| Mobile | 1 |
+| sm | 2 |
+| lg | 3 |
+| xl | 4 |
+
+### Grid Gap
+
+| Context | Mobile | Desktop |
+|---------|--------|---------|
+| Media Grid | 16px | 24px |
+| Creator Grid | 24px | 24px |
+| Series Grid | 24px | 24px |
+
+---
+
+## Z-Index Scale
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `base` | 0 | Default |
+| `dropdown` | 10 | Dropdowns |
+| `sticky` | 20 | Sticky headers |
+| `fixed` | 30 | Fixed elements |
+| `modalBackdrop` | 40 | Modal overlay |
+| `modal` | 50 | Modal content |
+| `popover` | 60 | Popovers |
+| `tooltip` | 70 | Tooltips |
+| `toast` | 80 | Toast notifications |
+
+---
+
+## Breakpoints
+
+| Token | Value |
+|-------|-------|
+| `sm` | 640px |
+| `md` | 768px |
+| `lg` | 1024px |
+| `xl` | 1280px |
+| `2xl` | 1400px |
+
+---
+
+## Special Effects
+
+### Glass Morphism
+
 ```css
-/* Default */
-max-w-[1400px]
+/* Standard glass */
+background: rgba(13, 13, 13, 0.85);
+backdrop-filter: blur(24px);
+border: 1px solid rgba(31, 31, 31, 0.5);
 
-/* Narrow (forms, settings) */
-max-w-[800px]
+/* Strong glass */
+background: rgba(13, 13, 13, 0.95);
+backdrop-filter: blur(32px);
+border: 1px solid rgba(31, 31, 31, 0.6);
+```
 
-/* Wide (home, featured) */
-max-w-[1600px]
+### Flutter Glass
+
+```dart
+// Standard glass
+Container(
+  decoration: BoxDecoration(
+    color: Color(0xD90D0D0D), // 85% opacity
+    border: Border.all(color: Color(0x801F1F1F)),
+  ),
+  child: BackdropFilter(
+    filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+    child: content,
+  ),
+)
+```
+
+### Skeleton Loading
+
+```dart
+// Shimmer animation colors
+final shimmerGradient = LinearGradient(
+  colors: [
+    Color(0xFF0D0D0D),
+    Color(0xFF1A1A1A),
+    Color(0xFF0D0D0D),
+  ],
+);
+```
+
+### Gradient Text
+
+```dart
+ShaderMask(
+  shaderCallback: (bounds) => LinearGradient(
+    colors: [Color(0xFFD4001A), Color(0xFFAB0013)],
+  ).createShader(bounds),
+  child: Text('Gradient', style: TextStyle(color: Colors.white)),
+)
 ```
 
 ---
 
-## Migration Guide
+## Flutter Theme Reference
 
-### Step-by-Step for Each Page
+```dart
+class TabooColors {
+  // Backgrounds
+  static const background = Color(0xFF000000);
+  static const surface = Color(0xFF0D0D0D);
+  static const surfaceHover = Color(0xFF161616);
+  static const elevated = Color(0xFF1A1A1A);
+  static const card = Color(0xFF131315);
 
-1. **Import new components:**
-   ```tsx
-   import { PageHeader, FilterChips, MediaCard, ContentGrid } from '@/components/ui';
-   ```
+  // Text
+  static const textPrimary = Color(0xFFE6E7EA);
+  static const textSecondary = Color(0xFF9AA0A6);
+  static const textTertiary = Color(0xFF6B7280);
+  static const textMuted = Color(0xFF4B5563);
 
-2. **Replace page header:**
-   ```tsx
-   // Before
-   <h1 className="text-2xl font-bold">Title</h1>
+  // Brand Red
+  static const redPrimary = Color(0xFFAB0013);
+  static const redHover = Color(0xFFD4001A);
+  static const redDark = Color(0xFF8A0010);
+  static const redDeep = Color(0xFF7A000E);
 
-   // After
-   <PageHeader title="Title" subtitle="Description" />
-   ```
+  // Borders
+  static const borderDefault = Color(0xFF1F1F1F);
+  static const borderSubtle = Color(0x0FFFFFFF);
+  static const borderHover = Color(0x1AFFFFFF);
 
-3. **Replace filters:**
-   ```tsx
-   // Before
-   <div className="flex gap-2">
-     {filters.map(f => <button>...</button>)}
-   </div>
+  // Semantic
+  static const success = Color(0xFF22C55E);
+  static const warning = Color(0xFFF59E0B);
+  static const error = Color(0xFFEF4444);
+  static const info = Color(0xFF3B82F6);
+}
 
-   // After
-   <FilterChips options={filters} selected={active} onSelect={setActive} />
-   ```
+class TabooSpacing {
+  static const s0 = 0.0;
+  static const s1 = 4.0;
+  static const s2 = 8.0;
+  static const s3 = 12.0;
+  static const s4 = 16.0;
+  static const s5 = 20.0;
+  static const s6 = 24.0;
+  static const s8 = 32.0;
+  static const s10 = 40.0;
+  static const s12 = 48.0;
+  static const s16 = 64.0;
+}
 
-4. **Replace grids:**
-   ```tsx
-   // Before
-   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-   // After
-   <ContentGrid variant="media">
-   ```
-
-5. **Replace cards:**
-   ```tsx
-   // Before
-   <CustomVideoCard video={video} />
-
-   // After
-   <MediaCard type="video" {...video} />
-   ```
-
-### Page-Specific Updates
-
-#### Videos Page
-- Use `PageHeader` with filter actions
-- Use `ContentGrid variant="media"`
-- Use `MediaCard type="video"`
-
-#### Series Page
-- Use `PageHeader` with filter actions
-- Use `ContentGrid variant="series"`
-- Use `MediaCard type="series"`
-
-#### Creators Page
-- Use `PageHeader` with sort dropdown
-- Use `ContentGrid variant="creator"`
-- Keep existing `CreatorCard` or migrate to new system
-
-#### Community Page
-- Use `PageHeader` without filters
-- Keep single-column feed layout
-- Update post cards to match new styling
-
-#### Studio Pages
-- Already updated with typography classes
-- Use `PageHeader` with back button
-- Use `title-section` for form sections
-
----
-
-## Best Practices
-
-1. **Always use design tokens** instead of hardcoded values
-2. **Use semantic color classes** (`text-text-primary`, `bg-surface`)
-3. **Use typography classes** (`title-page`, `body-small`) for consistency
-4. **Use the component library** instead of custom implementations
-5. **Follow the spacing scale** (4, 8, 12, 16, 24, 32px)
-6. **Apply hover effects consistently** (card-hover, hover-lift)
-7. **Use atmospheric backgrounds** for premium feel
-8. **Keep cards unified** - same border radius, shadows, hover states
-
----
-
-## File Structure
-
-```
-src/
-├── lib/
-│   ├── design-tokens.ts    # All design values
-│   └── utils.ts            # Utility functions
-├── components/
-│   └── ui/
-│       ├── index.ts        # Exports
-│       ├── page-header.tsx
-│       ├── filter-chips.tsx
-│       ├── media-card.tsx
-│       └── content-grid.tsx
-└── app/
-    └── globals.css         # CSS variables & utility classes
+class TabooRadius {
+  static const none = 0.0;
+  static const xs = 4.0;
+  static const sm = 6.0;
+  static const md = 8.0;
+  static const lg = 12.0;
+  static const xl = 16.0;
+  static const xxl = 20.0;
+  static const full = 9999.0;
+}
 ```
 
 ---
 
-## Questions?
+## Source Files
 
-Refer to the source files for implementation details:
-- [design-tokens.ts](src/lib/design-tokens.ts)
-- [globals.css](src/app/globals.css)
-- [UI Components](src/components/ui/)
+- Web tokens: `src/lib/design-tokens.ts`
+- CSS variables: `src/app/globals.css`
+- UI components: `src/components/ui/`

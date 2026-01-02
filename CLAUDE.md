@@ -9,16 +9,18 @@ TabooTV is a video streaming platform frontend built with Next.js 16 and React 1
 ## Commands
 
 ```bash
-npm run dev          # Start development server (port 3000)
-npm run build        # Production build
-npm run start        # Start production server
-npm run lint         # Run ESLint (--max-warnings=0)
-npm run lint:fix     # Run ESLint with auto-fix
-npm run format       # Format code with Prettier
-npm run format:check # Check formatting
-npm run type-check   # Type check without emitting (tsc --noEmit)
-npm run test         # Run unit tests (Vitest)
-npm run test:ui      # Run tests with Vitest UI
+npm run dev              # Start development server (port 3000)
+npm run build            # Production build
+npm run start            # Start production server
+npm run lint             # Run ESLint (--max-warnings=0)
+npm run lint:fix         # Run ESLint with auto-fix
+npm run format           # Format code with Prettier
+npm run format:check     # Check formatting
+npm run type-check       # Type check without emitting (tsc --noEmit)
+npm run test             # Run unit tests (Vitest)
+npm run test:ui          # Run tests with Vitest UI
+npm run test:e2e         # Run E2E tests (Cypress)
+npx vitest run src/path  # Run single test file
 ```
 
 ## Architecture
@@ -38,25 +40,35 @@ src/
 ├── app/
 │   ├── (main)/      # Main app pages with navbar (videos, series, profile, studio)
 │   ├── (auth)/      # Auth pages without main layout (login, register, plans)
+│   ├── (studio)/    # Creator studio pages with studio layout
+│   ├── api/         # Next.js API routes (checked BEFORE rewrites to backend)
 │   └── layout.tsx   # Root layout with QueryProvider and ErrorBoundary
-├── api/             # NEW: TanStack Query API layer
+├── api/             # TanStack Query API layer (preferred for new code)
 │   ├── client/      # Domain-specific API clients (video, auth, home, series, posts)
 │   ├── queries/     # TanStack Query hooks (useVideo, useVideoList, etc.)
 │   ├── mutations/   # TanStack mutation hooks (useLogin, useToggleLike, etc.)
 │   ├── query-keys.ts  # Centralized query key factories
 │   └── types/       # API-specific types
+├── features/        # Feature modules with co-located components
+│   ├── auth/        # Login, register, OAuth flows
+│   ├── creator-studio/  # Studio header, sidebar, components
+│   ├── shorts/      # Shorts feed and player
+│   ├── series/      # Series detail and player
+│   └── video/       # Video player and related
 ├── components/
 │   ├── ui/          # Design system components (PageHeader, MediaCard, etc.)
 │   ├── layout/      # Navbar, Footer, MainLayout
 │   ├── home/        # Homepage sections (BannerSlider, Featured, etc.)
 │   ├── video/       # Video player components, ShakaPlayer
 │   └── shorts/      # Shorts feed components
+├── hooks/           # Custom React hooks (use-mobile, use-sidebar, etc.)
 ├── lib/
-│   ├── api/         # Legacy API endpoints (being migrated to src/api/)
+│   ├── api/         # Legacy API endpoints (use src/api/ for new code)
 │   ├── stores/      # Zustand stores
-│   ├── hooks/       # Custom React hooks
 │   ├── utils.ts     # Utility functions (cn, formatDuration, formatNumber)
 │   └── design-tokens.ts  # Design system tokens
+├── server/
+│   └── actions/     # Next.js Server Actions
 ├── shared/          # Shared infrastructure
 │   ├── components/  # Providers (QueryProvider), ErrorBoundary
 │   └── lib/         # Query client config, utilities, env helpers
@@ -71,18 +83,30 @@ src/
 - **Posts**: Community feed content with text/images
 
 ### API Layer
-- **Client** (`src/lib/api/client.ts`): Axios instance with auth token interceptor
-- **Endpoints** (`src/lib/api/endpoints.ts`): All API calls organized by domain
-- **Studio** (`src/lib/api/studio.ts`): Creator dashboard and content upload APIs
-- **Proxy**: All `/api/*` requests are proxied to the backend via Next.js rewrites to avoid CORS
-- **API Versions**: Some endpoints have V1 and V2 variants (e.g., `/shorts` vs `/v2/shorts`)
+
+Two API systems exist - prefer TanStack Query (`src/api/`) for new code:
+
+**TanStack Query layer (`src/api/`)** - preferred:
+- Query hooks: `useVideo()`, `useVideoList()`, `useSeries()`, etc.
+- Mutation hooks: `useLogin()`, `useToggleLike()`, etc.
+- Query keys: Use `queryKeys` factory from `src/api/query-keys.ts` for cache invalidation
+
+**Legacy layer (`src/lib/api/`)** - for existing features:
+- **Client** (`client.ts`): Axios instance with auth token interceptor
+- **Endpoints** (`endpoints.ts`): All API calls organized by domain
+- **Studio** (`studio.ts`): Creator dashboard and content upload APIs
+
+**Shared patterns:**
+- All `/api/*` requests are proxied to the backend via Next.js rewrites (see `next.config.ts`)
+- Some endpoints have V1 and V2 variants (e.g., `/shorts` vs `/v2/shorts`)
 
 ### State Management (Zustand Stores)
 - **Auth Store**: User session, login/logout, subscription status (persisted to localStorage)
 - **Shorts Store**: Infinite scroll state for shorts feed
 - **Watchlist Store**: User's saved videos
 - **Saved Videos Store**: Bookmarked content
-- **Sidebar Store**: Navigation sidebar state
+- **Sidebar Store**: Main navigation sidebar state
+- **Studio Sidebar Store**: Creator studio sidebar state
 - **Live Chat Store**: Real-time chat messages
 
 ### Video Player Architecture
@@ -121,7 +145,17 @@ Copy `.env.local.example` to `.env.local`:
 ### Path Aliases
 - `@/` maps to `src/`
 
-### API Calls
+### API Calls (TanStack Query - preferred)
+```tsx
+import { useVideo, useVideoList } from '@/api/queries';
+import { useToggleLike } from '@/api/mutations';
+
+const { data: video, isLoading } = useVideo(uuid);
+const { data: videos } = useVideoList({ page: 1 });
+const likeMutation = useToggleLike();
+```
+
+### API Calls (Legacy)
 ```tsx
 import { videos, auth, home } from '@/lib/api';
 const data = await videos.play(id);  // Returns { video, videos }

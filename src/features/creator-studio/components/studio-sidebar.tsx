@@ -1,3 +1,18 @@
+/**
+ * OLD STUDIO SIDEBAR COMPONENT - COMMENTED OUT
+ *
+ * This sidebar was replaced with shadcn/ui Sidebar component for:
+ * - Better composability and DRY code
+ * - Built-in accessibility (keyboard nav, ARIA)
+ * - Automatic mobile/desktop handling via Sheet
+ * - Tooltip support in collapsed state
+ *
+ * New sidebar location: src/components/sidebar/studio-sidebar.tsx
+ *
+ * To restore: uncomment the code below and update imports in (studio)/layout.tsx
+ */
+
+/*
 'use client';
 
 import Link from 'next/link';
@@ -40,7 +55,7 @@ export function StudioSidebar() {
 
   return (
     <>
-      {/* Mobile Overlay */}
+      {/- Mobile Overlay -/}
       {isMobileOpen && (
         <div
           className="fixed inset-0 bg-black/60 z-40 lg:hidden"
@@ -48,7 +63,7 @@ export function StudioSidebar() {
         />
       )}
 
-      {/* Desktop Sidebar */}
+      {/- Desktop Sidebar -/}
       <aside
         className={cn(
           'fixed top-14 left-0 bottom-0 z-40 bg-background border-r border-black flex flex-col transition-all duration-300',
@@ -56,7 +71,7 @@ export function StudioSidebar() {
           isExpanded ? 'w-60' : 'w-[72px]'
         )}
       >
-        {/* Navigation */}
+        {/- Navigation -/}
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
           {navigation.map((item) => {
             const active = isActive(item.href);
@@ -84,7 +99,7 @@ export function StudioSidebar() {
           })}
         </nav>
 
-        {/* Back to Taboo */}
+        {/- Back to Taboo -/}
         <div className="p-3 border-t border-border">
           <Link
             href="/home"
@@ -103,7 +118,7 @@ export function StudioSidebar() {
           </Link>
         </div>
 
-        {/* Footer - Only when expanded */}
+        {/- Footer - Only when expanded -/}
         {isExpanded && (
           <div className="px-4 py-3 border-t border-border">
             <p className="text-[10px] text-text-secondary leading-relaxed">
@@ -113,14 +128,14 @@ export function StudioSidebar() {
         )}
       </aside>
 
-      {/* Mobile Sidebar */}
+      {/- Mobile Sidebar -/}
       <aside
         className={cn(
           'fixed top-0 left-0 bottom-0 z-50 bg-background border-r border-black flex flex-col w-60 transition-transform duration-300 lg:hidden',
           isMobileOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
-        {/* Mobile Header */}
+        {/- Mobile Header -/}
         <div className="h-14 flex items-center justify-between px-4 border-b border-black bg-black">
           <div className="flex items-center gap-2">
             <Logo size="sm" linkTo="/home" />
@@ -136,7 +151,7 @@ export function StudioSidebar() {
           </button>
         </div>
 
-        {/* Mobile Navigation */}
+        {/- Mobile Navigation -/}
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
           {navigation.map((item) => {
             const active = isActive(item.href);
@@ -159,7 +174,7 @@ export function StudioSidebar() {
           })}
         </nav>
 
-        {/* Mobile Back to Taboo */}
+        {/- Mobile Back to Taboo -/}
         <div className="p-3 border-t border-border">
           <Link
             href="/home"
@@ -171,7 +186,7 @@ export function StudioSidebar() {
           </Link>
         </div>
 
-        {/* Mobile Footer */}
+        {/- Mobile Footer -/}
         <div className="px-4 py-3 border-t border-border">
           <p className="text-[10px] text-text-secondary">
             &copy; {new Date().getFullYear()} TabooTV
@@ -181,3 +196,7 @@ export function StudioSidebar() {
     </>
   );
 }
+*/
+
+// Export nothing - this file is preserved for reference only
+export {};

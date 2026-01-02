@@ -3,12 +3,12 @@
 import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { TopHeader } from './top-header';
-import { Sidebar } from './sidebar';
 import { Footer } from './footer';
 import { NavigationProgress } from '@/components/navigation/NavigationProgress';
-import { useAuthStore, useSidebarStore } from '@/lib/stores';
+import { useAuthStore } from '@/lib/stores';
 import { Toaster } from 'sonner';
-import { cn } from '@/lib/utils';
+import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
+import { AppSidebar } from '@/components/sidebar';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -17,7 +17,6 @@ interface MainLayoutProps {
 
 export function MainLayout({ children, showFooter = true }: MainLayoutProps) {
   const { checkAuth } = useAuthStore();
-  const { isExpanded } = useSidebarStore();
   const pathname = usePathname();
   const router = useRouter();
   const PIP_RETURN_URL_KEY = 'tabootv_pip_return_url';
@@ -67,35 +66,30 @@ export function MainLayout({ children, showFooter = true }: MainLayoutProps) {
   }, [pathname, router, PIP_RETURN_URL_KEY]);
 
   return (
-    <div className="bg-background min-h-screen">
-      <NavigationProgress />
-      <TopHeader />
-      <Sidebar />
+    <SidebarProvider defaultOpen={false}>
+      <AppSidebar />
+      <SidebarInset className="bg-background min-h-screen">
+        <NavigationProgress />
+        <TopHeader />
 
-      {/* Main content area - shifts based on sidebar state */}
-      <div
-        className={cn(
-          'pt-14 transition-all duration-300',
-          // Desktop: margin-left based on sidebar expanded state
-          'lg:ml-[72px]',
-          isExpanded && 'lg:ml-60'
-        )}
-      >
-        <main className={isHomePage ? '' : ''}>{children}</main>
-        {showFooter && <Footer />}
-      </div>
+        {/* Main content area */}
+        <div className="pt-14">
+          <main className={isHomePage ? '' : ''}>{children}</main>
+          {showFooter && <Footer />}
+        </div>
 
-      <Toaster
-        position="top-right"
-        richColors
-        toastOptions={{
-          style: {
-            background: 'var(--surface)',
-            border: '1px solid var(--border)',
-            color: 'var(--text-primary)',
-          },
-        }}
-      />
-    </div>
+        <Toaster
+          position="top-right"
+          richColors
+          toastOptions={{
+            style: {
+              background: 'var(--surface)',
+              border: '1px solid var(--border)',
+              color: 'var(--text-primary)',
+            },
+          }}
+        />
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

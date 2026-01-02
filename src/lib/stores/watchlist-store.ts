@@ -3,6 +3,9 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 
 export type WatchlistItemType = 'video' | 'series' | 'course';
 
+// Helper to create composite key for O(1) lookups
+const createWatchlistKey = (id: number, type: WatchlistItemType) => `${type}:${id}`;
+
 export interface WatchlistItem {
   id: number;
   uuid?: string | undefined;
@@ -40,8 +43,9 @@ export const useWatchlistStore = create<WatchlistState>()(
 
       addItem: (item: WatchlistItem) => {
         const { items } = get();
-        // Check if item already exists (by id and type)
-        if (!items.some((i) => i.id === item.id && i.type === item.type)) {
+        // Check if item already exists using Set for O(1) lookup
+        const index = new Set(items.map((i) => createWatchlistKey(i.id, i.type)));
+        if (!index.has(createWatchlistKey(item.id, item.type))) {
           set({ items: [{ ...item, addedAt: Date.now() }, ...items] });
         }
       },
@@ -53,7 +57,10 @@ export const useWatchlistStore = create<WatchlistState>()(
       },
 
       isInWatchlist: (itemId: number, type: WatchlistItemType) => {
-        return get().items.some((i) => i.id === itemId && i.type === type);
+        const { items } = get();
+        // Use Set for O(1) lookup instead of Array.some() O(n)
+        const index = new Set(items.map((i) => createWatchlistKey(i.id, i.type)));
+        return index.has(createWatchlistKey(itemId, type));
       },
 
       toggleWatchlist: (item: WatchlistItem) => {
@@ -91,6 +98,14 @@ export const useWatchlistStore = create<WatchlistState>()(
     }
   )
 );
+
+// Selector for O(1) watchlist lookups - use with useMemo in components
+export const selectWatchlistIndex = (state: { items: WatchlistItem[] }) =>
+  new Set(state.items.map((i) => createWatchlistKey(i.id, i.type)));
+
+// Helper to check if item is in watchlist using the Set index
+export const isInWatchlistIndex = (index: Set<string>, id: number, type: WatchlistItemType) =>
+  index.has(createWatchlistKey(id, type));
 
 // Helper function to format the "added at" time
 export function formatAddedAt(timestamp: number): string {

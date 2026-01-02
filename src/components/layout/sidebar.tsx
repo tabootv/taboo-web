@@ -1,3 +1,18 @@
+/**
+ * OLD SIDEBAR COMPONENT - COMMENTED OUT
+ *
+ * This sidebar was replaced with shadcn/ui Sidebar component for:
+ * - Better composability and DRY code
+ * - Built-in accessibility (keyboard nav, ARIA)
+ * - Automatic mobile/desktop handling via Sheet
+ * - Tooltip support in collapsed state
+ *
+ * New sidebar location: src/components/sidebar/app-sidebar.tsx
+ *
+ * To restore: uncomment the code below and update imports in main-layout.tsx
+ */
+
+/*
 'use client';
 
 import Link from 'next/link';
@@ -20,7 +35,7 @@ export function Sidebar() {
 
   return (
     <>
-      {/* Mobile Overlay */}
+      {/- Mobile Overlay -/}
       {isMobileOpen && (
         <div
           className="fixed inset-0 bg-black/60 z-40 lg:hidden"
@@ -28,7 +43,7 @@ export function Sidebar() {
         />
       )}
 
-      {/* Sidebar */}
+      {/- Sidebar -/}
       <aside
         className={cn(
           'fixed top-14 left-0 bottom-0 z-40 bg-background border-r border-black flex flex-col transition-all duration-300',
@@ -39,7 +54,7 @@ export function Sidebar() {
           isMobileOpen && 'flex !w-60'
         )}
       >
-        {/* Mobile Close Button */}
+        {/- Mobile Close Button -/}
         <button
           onClick={() => setMobileOpen(false)}
           className="lg:hidden absolute top-3 right-3 p-1.5 rounded-full hover:bg-hover text-text-secondary hover:text-text-primary transition-colors"
@@ -47,9 +62,9 @@ export function Sidebar() {
           <X className="w-5 h-5" />
         </button>
 
-        {/* Scrollable Content */}
+        {/- Scrollable Content -/}
         <div className="flex-1 overflow-y-auto overflow-x-hidden py-3 custom-scrollbar flex flex-col">
-          {/* Main Navigation */}
+          {/- Main Navigation -/}
           <nav className="px-2 space-y-1">
             {mainNavigation.map((item) => {
               const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
@@ -81,13 +96,13 @@ export function Sidebar() {
             })}
           </nav>
 
-          {/* Spacer to push You section to bottom */}
+          {/- Spacer to push You section to bottom -/}
           <div className="flex-1 min-h-4" />
 
-          {/* You Section - Only when authenticated and expanded */}
+          {/- You Section - Only when authenticated and expanded -/}
           {isAuthenticated && (isExpanded || isMobileOpen) && (
             <>
-              {/* Divider */}
+              {/- Divider -/}
               <div className="my-2 mx-3 border-t border-border" />
 
               <div className="px-2">
@@ -117,7 +132,7 @@ export function Sidebar() {
                     );
                   })}
 
-                  {/* Your videos - Only for creators */}
+                  {/- Your videos - Only for creators -/}
                   {isCreator && (
                     <Link
                       href="/studio"
@@ -139,7 +154,7 @@ export function Sidebar() {
           )}
         </div>
 
-        {/* Footer - Only when expanded */}
+        {/- Footer - Only when expanded -/}
         {(isExpanded || isMobileOpen) && (
           <div className="px-4 py-3 border-t border-border">
             <p className="text-[10px] text-text-secondary leading-relaxed">
@@ -149,14 +164,14 @@ export function Sidebar() {
         )}
       </aside>
 
-      {/* Mobile Sidebar - Separate element for mobile overlay */}
+      {/- Mobile Sidebar - Separate element for mobile overlay -/}
       <aside
         className={cn(
           'fixed top-0 left-0 bottom-0 z-50 bg-background border-r border-black flex flex-col w-60 transition-transform duration-300 lg:hidden',
           isMobileOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
-        {/* Mobile Close Button */}
+        {/- Mobile Close Button -/}
         <div className="h-14 flex items-center justify-between px-4 border-b border-black">
           <span className="text-lg font-bold text-red-primary">TabooTV</span>
           <button
@@ -167,9 +182,9 @@ export function Sidebar() {
           </button>
         </div>
 
-        {/* Scrollable Content */}
+        {/- Scrollable Content -/}
         <div className="flex-1 overflow-y-auto overflow-x-hidden py-3 custom-scrollbar">
-          {/* Main Navigation */}
+          {/- Main Navigation -/}
           <nav className="px-2 space-y-1">
             {mainNavigation.map((item) => {
               const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
@@ -195,12 +210,12 @@ export function Sidebar() {
             })}
           </nav>
 
-          {/* Divider */}
+          {/- Divider -/}
           {isAuthenticated && (
             <div className="my-3 mx-3 border-t border-border" />
           )}
 
-          {/* You Section */}
+          {/- You Section -/}
           {isAuthenticated && (
             <div className="px-2">
               <div className="flex items-center gap-2 px-3 py-2 text-text-primary">
@@ -249,7 +264,7 @@ export function Sidebar() {
           )}
         </div>
 
-        {/* Footer */}
+        {/- Footer -/}
         <div className="px-4 py-3 border-t border-border">
           <p className="text-[10px] text-text-secondary">
             &copy; {new Date().getFullYear()} TabooTV
@@ -259,3 +274,7 @@ export function Sidebar() {
     </>
   );
 }
+*/
+
+// Export nothing - this file is preserved for reference only
+export {};

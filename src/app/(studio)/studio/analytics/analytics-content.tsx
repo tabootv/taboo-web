@@ -168,13 +168,13 @@ function MetricCard({ title, value, icon, subtitle, trend, description, highligh
 
 // Chart configurations
 const growthChartConfig = {
-  signups: { label: 'Signups', color: '#f87171' },
+  signups: { label: 'Leads', color: '#f87171' },
   customers: { label: 'Customers', color: '#ab0013' },
 } satisfies ChartConfig;
 
 const funnelChartConfig = {
   clicks: { label: 'Clicks', color: '#fca5a5' },
-  signups: { label: 'Signups', color: '#f87171' },
+  signups: { label: 'Leads', color: '#f87171' },
   customers: { label: 'Customers', color: '#ab0013' },
 } satisfies ChartConfig;
 
@@ -498,7 +498,7 @@ export function AnalyticsContent() {
     const { summary } = earningsData;
     return [
       { name: 'Clicks', value: summary.clicks, fill: '#fca5a5' },
-      { name: 'Signups', value: summary.signups, fill: '#f87171' },
+      { name: 'Leads', value: summary.signups, fill: '#f87171' },
       { name: 'Customers', value: summary.customers, fill: '#ab0013' },
     ];
   }, [earningsData]);
@@ -999,7 +999,7 @@ export function AnalyticsContent() {
             <div className="flex items-center gap-4 text-xs">
               <div className="flex items-center gap-1.5">
                 <div className="w-2 h-2 rounded-full bg-[#f87171]" />
-                <span className="text-white/50">Signups</span>
+                <span className="text-white/50">Leads</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <div className="w-2 h-2 rounded-full bg-[#ab0013]" />

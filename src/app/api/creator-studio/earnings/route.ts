@@ -317,7 +317,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(response, {
       headers: {
-        'Cache-Control': 'private, max-age=60',
+        'Cache-Control': 'private, max-age=300, stale-while-revalidate=60',
       },
     });
   } catch (error) {

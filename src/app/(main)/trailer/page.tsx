@@ -2,10 +2,16 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { X, Loader2 } from 'lucide-react';
 import { series as seriesApi, courses as coursesApi } from '@/lib/api';
-import { VideoPlayer } from '@/features/video';
 import { Button, LoadingScreen } from '@/components/ui';
+import { VideoPlayerSkeleton } from '@/components/video';
+
+const VideoPlayer = dynamic(
+  () => import('@/features/video').then((mod) => ({ default: mod.VideoPlayer })),
+  { loading: () => <VideoPlayerSkeleton />, ssr: false }
+);
 
 function TrailerContent() {
   const searchParams = useSearchParams();

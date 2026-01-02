@@ -310,6 +310,7 @@ function VideoCard({ video, priority = false, onOpenPreview }: { video: Video; p
     video.published_at &&
     new Date(video.published_at).getTime() > Date.now() - NEW_THRESHOLD_DAYS * 24 * 60 * 60 * 1000;
 
+  // Check multiple sources for profile picture (API returns dp in different locations)
   const videoAny = video as Video & {
     channel?: { dp?: string; small_dp?: string };
     creator?: { dp?: string; channel?: { dp?: string } };

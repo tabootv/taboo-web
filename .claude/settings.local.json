@@ -33,7 +33,11 @@
       "Bash(npx shadcn@latest add popover:*)",
       "Bash(npx shadcn@latest add chart:*)",
       "Bash(npx shadcn@latest add select:*)",
-      "Bash(npx shadcn@latest init:*)"
+      "Bash(npx shadcn@latest init:*)",
+      "Bash(git push:*)",
+      "Bash(npm run lint:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []
