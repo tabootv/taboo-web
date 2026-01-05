@@ -2,7 +2,7 @@
  * Individual playlist rail component
  */
 
-import { useRef, useEffect, useCallback } from 'react';
+import { memo, useRef, useEffect, useCallback } from 'react';
 import { RailRow, RailCard } from '@/components/home';
 import type { Video } from '@/types';
 
@@ -23,7 +23,7 @@ interface PlaylistRailProps {
   onLoadMore: () => void;
 }
 
-export function PlaylistRail({ playlist, onOpenPreview, onLoadMore }: PlaylistRailProps) {
+export const PlaylistRail = memo(function PlaylistRail({ playlist, onOpenPreview, onLoadMore }: PlaylistRailProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Trigger load more when reaching end
@@ -69,7 +69,7 @@ export function PlaylistRail({ playlist, onOpenPreview, onLoadMore }: PlaylistRa
   }
 
   return (
-    <RailRow title={playlist.description || playlist.name || 'Playlist'}>
+    <RailRow title={playlist.description || playlist.name || 'Playlist'} fullBleed>
       {playlist.videos.data.map((video, index) => (
         <RailCard
           key={video.uuid || video.id}
@@ -86,5 +86,4 @@ export function PlaylistRail({ playlist, onOpenPreview, onLoadMore }: PlaylistRa
       )}
     </RailRow>
   );
-}
-
+});

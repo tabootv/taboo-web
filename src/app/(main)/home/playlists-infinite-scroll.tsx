@@ -70,6 +70,8 @@ export function PlaylistsInfiniteScroll({
   const observerRef = useRef<IntersectionObserver | null>(null);
   const isLoadingRef = useRef(false); // Guard against double-triggers
   const playlistObserversRef = useRef<Map<number, IntersectionObserver>>(new Map());
+  const playlistsListRef = useRef(playlistsList); // Track latest playlists for observer callbacks
+  playlistsListRef.current = playlistsList;
 
   // ============================================
   // Handlers
@@ -211,14 +213,16 @@ export function PlaylistsInfiniteScroll({
       // Already has observer
       if (playlistObserversRef.current.has(playlistId)) return;
 
-      const playlist = playlistsList.find((p) => p.id === playlistId);
+      // Use ref to get latest state and avoid stale closures
+      const playlist = playlistsListRef.current.find((p) => p.id === playlistId);
       if (!playlist || playlist._videosLoaded) return;
 
       const obs = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
             if (entry.isIntersecting) {
-              const currentPlaylist = playlistsList.find((p) => p.id === playlistId);
+              // Use ref for latest state in async callback
+              const currentPlaylist = playlistsListRef.current.find((p) => p.id === playlistId);
               if (currentPlaylist && !currentPlaylist._videosLoaded) {
                 fetchPlaylistVideos(currentPlaylist);
               }
@@ -237,7 +241,7 @@ export function PlaylistsInfiniteScroll({
       obs.observe(el);
       playlistObserversRef.current.set(playlistId, obs);
     },
-    [playlistsList, fetchPlaylistVideos]
+    [fetchPlaylistVideos]
   );
 
   // Cleanup observers on unmount

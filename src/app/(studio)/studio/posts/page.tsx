@@ -3,7 +3,11 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 import {
+  Video,
+  Film,
+  FileText,
   Image as ImageIcon,
   Mic,
   X,
@@ -156,11 +160,35 @@ export default function CreatePostPage() {
     }
   };
 
+  const contentTypes = [
+    { name: 'Video', href: '/studio/upload/video', icon: Video, active: false },
+    { name: 'Short', href: '/studio/upload/short', icon: Film, active: false },
+    { name: 'Post', href: '/studio/posts', icon: FileText, active: true },
+  ];
+
   return (
     <div className="p-6 lg:p-8 max-w-2xl">
       <div className="mb-8">
         <h1 className="text-2xl font-semibold text-white">Create Post</h1>
-        <p className="text-white/40">Share an update with your community</p>
+        <p className="text-white/40">Share your content with your audience</p>
+
+        {/* Content Type Selector */}
+        <div className="flex gap-2 mt-4">
+          {contentTypes.map((type) => (
+            <Link
+              key={type.name}
+              href={type.href}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+                type.active
+                  ? 'bg-red-primary text-white'
+                  : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white border border-white/10'
+              }`}
+            >
+              <type.icon className="w-4 h-4" />
+              {type.name}
+            </Link>
+          ))}
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">

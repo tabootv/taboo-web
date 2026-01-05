@@ -58,8 +58,8 @@ export function VerticalSeriesList({ series, selectedIndex, onSelect }: Vertical
   );
 
   return (
-    <div className="w-full max-w-full lg:w-[320px] xl:w-[340px] flex-shrink-0 relative lg:h-full lg:overflow-hidden">
-      <div className="hidden lg:flex items-center justify-between text-xs text-white/40 mb-2 px-1">
+    <div className="w-full max-w-full lg:w-[280px] xl:w-[300px] flex-shrink-0 relative lg:h-full lg:overflow-hidden">
+      <div className="hidden lg:flex items-center justify-between text-[11px] text-white/40 mb-2 px-0.5">
         <span>{series.length} series</span>
         <div className="flex items-center gap-1">
           <ChevronUp className="w-3 h-3" />
@@ -70,7 +70,7 @@ export function VerticalSeriesList({ series, selectedIndex, onSelect }: Vertical
 
       <div
         ref={listRef}
-        className="flex lg:flex-col gap-3 lg:gap-1.5 overflow-x-auto lg:overflow-x-visible lg:overflow-y-auto lg:h-full lg:max-h-full pb-2 lg:pb-0 lg:pr-3 scroll-smooth series-list-scroll touch-pan-x lg:touch-auto"
+        className="flex lg:flex-col gap-3 lg:gap-1 overflow-x-auto lg:overflow-x-visible lg:overflow-y-auto lg:h-full lg:max-h-full pb-2 lg:pb-0 lg:pr-2 scroll-smooth series-list-scroll touch-pan-x lg:touch-auto"
         style={{ WebkitOverflowScrolling: 'touch' }}
       >
         {series.map((item, index) => (
@@ -129,4 +129,3 @@ export function VerticalSeriesList({ series, selectedIndex, onSelect }: Vertical
     </div>
   );
 }
-

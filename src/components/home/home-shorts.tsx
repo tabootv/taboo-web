@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { home } from '@/lib/api';
 import type { Video } from '@/types';
@@ -31,7 +31,7 @@ function shuffleShorts(shorts: Video[]): Video[] {
   return [...recent, ...rest];
 }
 
-export function HomeShortsSection({ initialShorts }: HomeShortsSectionProps) {
+export const HomeShortsSection = memo(function HomeShortsSection({ initialShorts }: HomeShortsSectionProps) {
   const [videos, setVideos] = useState<Video[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { scrollRef, showLeftGradient, showRightGradient, scroll } = useHorizontalScroll();
@@ -133,4 +133,4 @@ export function HomeShortsSection({ initialShorts }: HomeShortsSectionProps) {
       </div>
     </SectionCard>
   );
-}
+});

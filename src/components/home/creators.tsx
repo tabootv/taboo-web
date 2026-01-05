@@ -1,18 +1,18 @@
 'use client';
 
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { SectionCard } from '@/components/home';
 import { home } from '@/lib/api';
 import type { Creator } from '@/types';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface CreatorsSectionProps {
   initialCreators?: Creator[];
 }
 
-export function CreatorsSection({ initialCreators }: CreatorsSectionProps) {
+export const CreatorsSection = memo(function CreatorsSection({ initialCreators }: CreatorsSectionProps) {
   // Filter creators (remove id 8 as per Vue implementation)
   const filterCreators = (data: Creator[]) =>
     data.filter((c: Creator) => {
@@ -57,12 +57,12 @@ export function CreatorsSection({ initialCreators }: CreatorsSectionProps) {
   useEffect(() => {
     const el = scrollRef.current;
     if (el) {
-      el.addEventListener('scroll', handleScroll);
+      el.addEventListener('scroll', handleScroll, { passive: true });
       handleScroll();
       return () => el.removeEventListener('scroll', handleScroll);
     }
     return undefined;
-  }, [handleScroll, creators]);
+  }, [handleScroll]);
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
@@ -163,6 +163,7 @@ export function CreatorsSection({ initialCreators }: CreatorsSectionProps) {
                         src={displayImage}
                         alt={displayName}
                         fill
+                        sizes="90px"
                         className="object-cover group-hover:scale-110 transition-transform duration-300"
                       />
                     ) : (
@@ -184,4 +185,4 @@ export function CreatorsSection({ initialCreators }: CreatorsSectionProps) {
       </div>
     </SectionCard>
   );
-}
+});

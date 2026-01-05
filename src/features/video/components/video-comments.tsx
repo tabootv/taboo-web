@@ -61,24 +61,6 @@ export function VideoComments({ video, initialComments = [] }: VideoCommentsProp
     }
   };
 
-  const handleReplyAdded = useCallback((reply: Comment) => {
-    // Find parent comment and add reply to it
-    setCommentList((prev) => {
-      const parentId = reply.parent_id;
-      if (!parentId) return prev;
-
-      return prev.map((comment) => {
-        if (comment.id === parentId) {
-          return {
-            ...comment,
-            replies: [...(comment.replies || []), reply],
-          };
-        }
-        return comment;
-      });
-    });
-  }, []);
-
   return (
     <div>
       <p className="text-sm font-medium text-white/70">
@@ -125,7 +107,6 @@ export function VideoComments({ video, initialComments = [] }: VideoCommentsProp
             key={comment.uuid}
             comment={comment}
             videoUuid={video.uuid}
-            onReplyAdded={handleReplyAdded}
           />
         ))}
       </div>

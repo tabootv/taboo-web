@@ -128,12 +128,39 @@ export const useShortsStore = create<ShortsState>((set, get) => ({
         per_page: 10,
       });
 
-      set((state) => ({
-        videos: [...state.videos, ...(response.data || [])],
-        nextPageUrl: response.next_page_url,
-        isLastPage: !response.next_page_url,
-        isLoadingMore: false,
-      }));
+      const newVideos = response.data || [];
+
+      // Skip update if no new videos
+      if (newVideos.length === 0) {
+        set({
+          nextPageUrl: response.next_page_url,
+          isLastPage: true,
+          isLoadingMore: false,
+        });
+        return;
+      }
+
+      set((state) => {
+        // Deduplicate using Set for O(1) lookups
+        const existingIds = new Set(state.videos.map((v) => v.uuid));
+        const uniqueNewVideos = newVideos.filter((v: Video) => !existingIds.has(v.uuid));
+
+        // Skip array spread if no unique videos to add
+        if (uniqueNewVideos.length === 0) {
+          return {
+            nextPageUrl: response.next_page_url,
+            isLastPage: !response.next_page_url,
+            isLoadingMore: false,
+          };
+        }
+
+        return {
+          videos: [...state.videos, ...uniqueNewVideos],
+          nextPageUrl: response.next_page_url,
+          isLastPage: !response.next_page_url,
+          isLoadingMore: false,
+        };
+      });
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Failed to load more shorts';
       set({ error: message, isLoadingMore: false });
@@ -179,10 +206,21 @@ export const useShortsStore = create<ShortsState>((set, get) => ({
     }));
   },
 
-  appendVideos: (videos: Video[]) => {
-    set((state) => ({
-      videos: [...state.videos, ...videos],
-    }));
+  appendVideos: (newVideos: Video[]) => {
+    if (newVideos.length === 0) return;
+
+    set((state) => {
+      // Deduplicate using Set for O(1) lookups
+      const existingIds = new Set(state.videos.map((v) => v.uuid));
+      const uniqueNewVideos = newVideos.filter((v) => !existingIds.has(v.uuid));
+
+      // Skip update if no unique videos to add
+      if (uniqueNewVideos.length === 0) return state;
+
+      return {
+        videos: [...state.videos, ...uniqueNewVideos],
+      };
+    });
   },
 
   reset: () => {

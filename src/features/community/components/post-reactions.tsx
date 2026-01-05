@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Flame, Trash2, MessageCircle } from 'lucide-react';
+import { Heart, ThumbsDown, MessageCircle } from 'lucide-react';
 import { posts as postsApi } from '@/lib/api';
 import type { Post } from '@/types';
 
@@ -36,21 +36,21 @@ export function PostReactions({ post, onToggleReply }: PostReactionsProps) {
 
   return (
     <div className="flex items-center gap-3">
-      {/* Like (Fire) */}
+      {/* Like (Heart) */}
       <button
         onClick={like}
         className="cursor-pointer flex items-center gap-2.5 pl-2 hover:opacity-80 transition-opacity"
       >
-        <Flame className="w-5 h-5 text-[#9F9F9F]" />
+        <Heart className="w-5 h-5 text-[#9F9F9F]" />
         <p className="text-[16px] leading-[16px] text-[#9F9F9F]">{likeCounter}</p>
       </button>
 
-      {/* Dislike (Trash) */}
+      {/* Dislike (ThumbsDown) */}
       <button
         onClick={dislike}
         className="cursor-pointer flex items-center gap-2.5 pl-2 hover:opacity-80 transition-opacity"
       >
-        <Trash2 className="w-5 h-5 text-[#9F9F9F]" />
+        <ThumbsDown className="w-5 h-5 text-[#9F9F9F]" />
         <p className="text-[16px] leading-[16px] text-[#9F9F9F]">{disLikeCounter}</p>
       </button>
 

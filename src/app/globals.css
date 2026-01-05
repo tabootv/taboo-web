@@ -425,6 +425,7 @@ body {
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden; /* prevent horizontal drift from full-bleed rails */
 }
 
 /* Typography */

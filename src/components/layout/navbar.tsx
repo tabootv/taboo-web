@@ -23,20 +23,32 @@ export function Navbar() {
   // Check if we're on the home page for transparent header
   const isHomePage = pathname === '/home' || pathname === '/';
 
-  // Handle scroll for navbar background (throttled to 100ms)
-  const lastScrollTime = useRef(0);
+  // Handle scroll for navbar background - only update state when crossing threshold
+  const isScrolledRef = useRef(false);
+  const rafId = useRef<number | null>(null);
   useEffect(() => {
     const handleScroll = () => {
-      const now = Date.now();
-      if (now - lastScrollTime.current < 100) return;
-      lastScrollTime.current = now;
-      setIsScrolled(window.scrollY > 50);
+      // Debounce with rAF for smooth updates aligned with browser paint
+      if (rafId.current) return;
+
+      rafId.current = requestAnimationFrame(() => {
+        rafId.current = null;
+        const scrolled = window.scrollY > 50;
+        // Only update state when value actually changes
+        if (scrolled !== isScrolledRef.current) {
+          isScrolledRef.current = scrolled;
+          setIsScrolled(scrolled);
+        }
+      });
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll(); // Check initial state
 
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (rafId.current) cancelAnimationFrame(rafId.current);
+    };
   }, []);
 
   const handleSearchSubmit = useCallback(

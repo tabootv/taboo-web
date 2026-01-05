@@ -13,8 +13,8 @@ interface SeriesSectionProps {
 
 export function SeriesSection({ title = 'Top Series', viewAllHref = '/series', children }: SeriesSectionProps) {
   return (
-    <section className="mt-8 md:mt-10">
-      <div className="flex items-center justify-between mb-4">
+    <section className="mt-6 md:mt-8">
+      <div className="flex items-center justify-between mb-3">
         <h2 className="text-lg md:text-xl font-semibold text-white">{title}</h2>
         <Link
           href={viewAllHref}
@@ -28,4 +28,3 @@ export function SeriesSection({ title = 'Top Series', viewAllHref = '/series', c
     </section>
   );
 }
-

@@ -2,6 +2,7 @@
  * Individual series card component for the vertical list
  */
 
+import { memo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Play, Film, ChevronRight } from 'lucide-react';
@@ -15,7 +16,7 @@ interface SeriesCardProps {
   onClick: () => void;
 }
 
-export function SeriesCard({ item, index, isSelected, onClick }: SeriesCardProps) {
+export const SeriesCard = memo(function SeriesCard({ item, index: _index, isSelected, onClick }: SeriesCardProps) {
   const thumbnail = item.card_thumbnail || item.thumbnail || item.trailer_thumbnail;
   const isNew = item.latest;
 
@@ -42,10 +43,6 @@ export function SeriesCard({ item, index, isSelected, onClick }: SeriesCardProps
           </div>
         )}
 
-        <div className="lg:hidden absolute top-1 left-1 w-4 h-4 bg-black/70 rounded flex items-center justify-center">
-          <span className="text-[9px] font-bold text-white">{index + 1}</span>
-        </div>
-
         {isNew && (
           <div className="absolute top-1 right-1 px-1 py-0.5 bg-red-primary text-white text-[7px] font-bold rounded">
             NEW
@@ -62,17 +59,6 @@ export function SeriesCard({ item, index, isSelected, onClick }: SeriesCardProps
       </div>
 
       <div className="flex-1 min-w-0">
-        <div className="hidden lg:flex items-center gap-1.5 mb-0.5">
-          <span
-            className={cn(
-              'text-sm font-bold transition-colors',
-              isSelected ? 'text-white' : 'text-white/30'
-            )}
-          >
-            #{index + 1}
-          </span>
-        </div>
-
         <h3
           className={cn(
             'font-medium text-xs lg:text-sm line-clamp-2 lg:line-clamp-1 transition-colors',
@@ -113,5 +99,5 @@ export function SeriesCard({ item, index, isSelected, onClick }: SeriesCardProps
       />
     </button>
   );
-}
+});
 

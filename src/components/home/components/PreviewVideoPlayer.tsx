@@ -2,6 +2,7 @@
  * Video player component for preview modal
  */
 
+import { memo } from 'react';
 import Image from 'next/image';
 import { Play, Volume2, VolumeX } from 'lucide-react';
 import type { Video } from '@/types';
@@ -20,7 +21,7 @@ interface PreviewVideoPlayerProps {
   onToggleMute: () => void;
 }
 
-export function PreviewVideoPlayer({
+export const PreviewVideoPlayer = memo(function PreviewVideoPlayer({
   video,
   thumbnail,
   previewUrl,
@@ -103,5 +104,5 @@ export function PreviewVideoPlayer({
       )}
     </div>
   );
-}
+});
 

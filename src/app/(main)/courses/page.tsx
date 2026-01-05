@@ -156,6 +156,21 @@ function CourseCard({ course }: { course: Course }) {
           </span>
         </div>
 
+        {/* Creator Avatar */}
+        {course.channel?.dp && (
+          <div className="absolute top-3 right-3">
+            <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-white/30 bg-surface">
+              <Image
+                src={course.channel.dp}
+                alt={course.channel.name || 'Creator'}
+                width={36}
+                height={36}
+                className="object-cover w-full h-full"
+              />
+            </div>
+          </div>
+        )}
+
         {/* Bottom info */}
         <div className="absolute bottom-0 left-0 right-0 p-4">
           <h3 className="font-bold text-white text-lg line-clamp-2">{course.title}</h3>

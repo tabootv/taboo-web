@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { memo, useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { Play, ChevronLeft, ChevronRight } from 'lucide-react';
 import { home } from '@/lib/api';
@@ -11,7 +11,7 @@ interface BannerSliderProps {
   initialBanners?: Banner[];
 }
 
-export function BannerSlider({ initialBanners }: BannerSliderProps) {
+export const BannerSlider = memo(function BannerSlider({ initialBanners }: BannerSliderProps) {
   const hasInitialData = initialBanners && initialBanners.length > 0;
   const [banners, setBanners] = useState<Banner[]>(initialBanners || []);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -225,4 +225,4 @@ export function BannerSlider({ initialBanners }: BannerSliderProps) {
       </div>
     </div>
   );
-}
+});

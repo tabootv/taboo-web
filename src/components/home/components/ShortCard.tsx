@@ -2,6 +2,7 @@
  * Individual short card component - simplified without video preview
  */
 
+import { memo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Play } from 'lucide-react';
@@ -12,7 +13,7 @@ interface ShortCardProps {
   index: number;
 }
 
-export function ShortCard({ video, index }: ShortCardProps) {
+export const ShortCard = memo(function ShortCard({ video, index }: ShortCardProps) {
   const thumbnail = video.thumbnail || video.thumbnail_webp || video.card_thumbnail;
 
   return (
@@ -57,4 +58,4 @@ export function ShortCard({ video, index }: ShortCardProps) {
       </div>
     </Link>
   );
-}
+});

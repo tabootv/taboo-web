@@ -1,8 +1,8 @@
 'use client';
 
+import { memo, useEffect, useState } from 'react';
 import { home } from '@/lib/api';
 import type { Series } from '@/types';
-import { useEffect, useState } from 'react';
 import { SeriesSection } from './components/SeriesSection';
 import { SeriesSidePanel } from './components/SeriesSidePanel';
 import { SeriesSkeleton } from './components/SeriesSkeleton';
@@ -12,7 +12,7 @@ interface HomeSeriesSectionProps {
   initialSeries?: Series[];
 }
 
-export function HomeSeriesSection({ initialSeries }: HomeSeriesSectionProps) {
+export const HomeSeriesSection = memo(function HomeSeriesSection({ initialSeries }: HomeSeriesSectionProps) {
   const hasInitialData = initialSeries && initialSeries.length > 0;
   const [series, setSeries] = useState<Series[]>(initialSeries || []);
   const [isLoading, setIsLoading] = useState(!hasInitialData);
@@ -59,7 +59,7 @@ export function HomeSeriesSection({ initialSeries }: HomeSeriesSectionProps) {
 
   return (
     <SeriesSection>
-      <div className="grid lg:grid-cols-[340px_1fr] gap-4 lg:gap-6 items-start lg:items-stretch">
+      <div className="grid lg:grid-cols-[300px_1fr] xl:grid-cols-[320px_1fr] gap-4 lg:gap-5 xl:gap-6 items-start lg:items-stretch">
         <VerticalSeriesList
           series={series}
           selectedIndex={selectedIndex}
@@ -69,4 +69,4 @@ export function HomeSeriesSection({ initialSeries }: HomeSeriesSectionProps) {
       </div>
     </SeriesSection>
   );
-}
+});

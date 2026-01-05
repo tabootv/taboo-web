@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { memo, useEffect, useState, useRef, useCallback } from 'react';
 import type { Video } from '@/types';
 import { MediaPreviewModal } from '@/components/home';
 import { PlaylistRail } from './components/PlaylistRail';
@@ -12,7 +12,7 @@ interface PlaylistsSectionProps {
   onAllLoaded: () => void;
 }
 
-export function PlaylistsSection({ instanceId, onAllLoaded }: PlaylistsSectionProps) {
+export const PlaylistsSection = memo(function PlaylistsSection({ instanceId, onAllLoaded }: PlaylistsSectionProps) {
   const [previewVideo, setPreviewVideo] = useState<Video | null>(null);
   const observersRef = useRef<Map<number, IntersectionObserver>>(new Map());
   const sentinelObserverRef = useRef<IntersectionObserver | null>(null);
@@ -161,5 +161,4 @@ export function PlaylistsSection({ instanceId, onAllLoaded }: PlaylistsSectionPr
       />
     </>
   );
-}
-
+});

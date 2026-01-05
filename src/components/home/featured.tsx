@@ -1,23 +1,30 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
-import { home } from '@/lib/api';
-import type { Video } from '@/types';
+import { memo, useEffect, useState, useCallback, useRef } from 'react';
+import { home, publicContent } from '@/lib/api';
+import type { Video, PaginatedResponse } from '@/types';
 import { RailRow, RailCard, MediaPreviewModal } from '@/components/home';
 
 interface FeaturedSectionProps {
   initialVideos?: Video[];
 }
 
-export function FeaturedSection({ initialVideos }: FeaturedSectionProps) {
+export const FeaturedSection = memo(function FeaturedSection({ initialVideos }: FeaturedSectionProps) {
   const hasInitialData = initialVideos && initialVideos.length > 0;
   const [videos, setVideos] = useState<Video[]>(initialVideos || []);
   const [isLoading, setIsLoading] = useState(!hasInitialData);
   const [previewVideo, setPreviewVideo] = useState<Video | null>(null);
+  const [page, setPage] = useState(1);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [isExhausted, setIsExhausted] = useState(false);
+  const didInitialFetch = useRef(hasInitialData);
+  const desiredMinItems = 14;
+  const topUpRequested = useRef(false);
 
   useEffect(() => {
-    // Skip fetch if initial data was provided and has content
-    if (initialVideos && initialVideos.length > 0) return;
+    // Skip if we already have initial data or already fetched
+    if (didInitialFetch.current) return;
+    didInitialFetch.current = true;
 
     async function fetchVideos() {
       try {
@@ -30,7 +37,7 @@ export function FeaturedSection({ initialVideos }: FeaturedSectionProps) {
       }
     }
     fetchVideos();
-  }, [initialVideos]);
+  }, []);
 
   const handleOpenPreview = useCallback((video: Video) => {
     setPreviewVideo(video);
@@ -39,6 +46,70 @@ export function FeaturedSection({ initialVideos }: FeaturedSectionProps) {
   const handleClosePreview = useCallback(() => {
     setPreviewVideo(null);
   }, []);
+
+  const handleLoadMore = useCallback(async () => {
+    if (isLoadingMore || isExhausted) return;
+    setIsLoadingMore(true);
+    try {
+      const nextPage = page + 1;
+      const resp = await publicContent.getVideos({ page: nextPage, per_page: 24 });
+      const payload = (resp as PaginatedResponse<Video>).data || (resp as any).videos || (resp as any).data || [];
+      const newItems = Array.isArray(payload) ? payload : [];
+
+      const existingIds = new Set(videos.map((v) => v.id || v.uuid));
+      const merged = [...videos, ...newItems.filter((v) => !existingIds.has(v.id || v.uuid))];
+      setVideos(merged);
+      setPage(nextPage);
+
+      const current = (resp as PaginatedResponse<Video>).current_page || nextPage;
+      const last = (resp as PaginatedResponse<Video>).last_page || current;
+      if (current >= last || newItems.length === 0) {
+        setIsExhausted(true);
+      }
+    } catch (error) {
+      console.error('Error loading more featured videos:', error);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [isLoadingMore, isExhausted, page, videos]);
+
+  // Auto-load until we reach a comfortable minimum count
+  useEffect(() => {
+    if (isLoading || isLoadingMore || isExhausted) return;
+    if (videos.length >= desiredMinItems) return;
+    handleLoadMore();
+  }, [videos.length, isLoading, isLoadingMore, isExhausted, handleLoadMore, desiredMinItems]);
+
+  // Top-up from page 1 with a larger batch if we still have too few items
+  useEffect(() => {
+    if (topUpRequested.current) return;
+    if (isLoading || isLoadingMore) return;
+    if (videos.length >= desiredMinItems) return;
+
+    topUpRequested.current = true;
+    (async () => {
+      try {
+        setIsLoadingMore(true);
+        const resp = await publicContent.getVideos({ page: 1, per_page: 40 });
+        const payload = (resp as PaginatedResponse<Video>).data || (resp as any).videos || (resp as any).data || [];
+        const newItems = Array.isArray(payload) ? payload : [];
+        const existingIds = new Set(videos.map((v) => v.id || v.uuid));
+        const merged = [...videos, ...newItems.filter((v) => !existingIds.has(v.id || v.uuid))];
+        setVideos(merged);
+
+        const current = (resp as PaginatedResponse<Video>).current_page || 1;
+        const last = (resp as PaginatedResponse<Video>).last_page || current;
+        setPage(Math.max(page, current));
+        if (current >= last || newItems.length === 0) {
+          setIsExhausted(true);
+        }
+      } catch (error) {
+        console.error('Error topping up featured videos:', error);
+      } finally {
+        setIsLoadingMore(false);
+      }
+    })();
+  }, [videos.length, isLoading, isLoadingMore, desiredMinItems, page]);
 
   if (isLoading) {
     return (
@@ -63,7 +134,15 @@ export function FeaturedSection({ initialVideos }: FeaturedSectionProps) {
 
   return (
     <>
-      <RailRow title="Featured" href="/videos">
+      <RailRow
+        title="Featured"
+        href="/videos"
+        fullBleed
+        cardWidth={220}
+        cardWidthMobile={170}
+        onEndReached={handleLoadMore}
+        loadingMore={isLoadingMore}
+      >
         {videos.map((video, index) => (
           <RailCard
             key={video.uuid || video.id}
@@ -82,4 +161,4 @@ export function FeaturedSection({ initialVideos }: FeaturedSectionProps) {
       />
     </>
   );
-}
+});

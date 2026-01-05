@@ -1,9 +1,7 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
-import { ThumbsUp, ThumbsDown, Reply, Send } from 'lucide-react';
-import { comments as commentsApi, videos as videosApi } from '@/lib/api';
 import type { Comment } from '@/types';
 import { formatRelativeTime } from '@/lib/utils';
 
@@ -11,72 +9,15 @@ interface SingleCommentProps {
   comment: Comment;
   videoUuid: string;
   isReply?: boolean;
-  onReplyAdded?: (reply: Comment) => void;
 }
 
 export function SingleComment({
   comment,
   videoUuid,
   isReply = false,
-  onReplyAdded,
 }: SingleCommentProps) {
-  const [liked, setLiked] = useState(comment.has_liked);
-  const [disliked, setDisliked] = useState(comment.has_disliked);
   const [showReplies, setShowReplies] = useState(false);
-  const [showReplyInput, setShowReplyInput] = useState(false);
-  const [replyContent, setReplyContent] = useState('');
-  const [replies, setReplies] = useState<Comment[]>(comment.replies || []);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const toggleLike = useCallback(async () => {
-    try {
-      await commentsApi.toggleLike(comment.uuid);
-      if (disliked) {
-        setDisliked(false);
-      }
-      setLiked(!liked);
-    } catch (error) {
-      console.error('Failed to toggle like:', error);
-    }
-  }, [comment.uuid, liked, disliked]);
-
-  const toggleDislike = useCallback(async () => {
-    try {
-      await commentsApi.toggleDislike(comment.uuid);
-      if (liked) {
-        setLiked(false);
-      }
-      setDisliked(!disliked);
-    } catch (error) {
-      console.error('Failed to toggle dislike:', error);
-    }
-  }, [comment.uuid, liked, disliked]);
-
-  const postReply = useCallback(async () => {
-    if (!replyContent.trim() || isSubmitting) return;
-
-    setIsSubmitting(true);
-    try {
-      const parentId = comment.parent_id ?? comment.id;
-      const newReply = await videosApi.addComment(videoUuid, replyContent, parentId);
-      setReplies((prev) => [...prev, newReply]);
-      setReplyContent('');
-      setShowReplies(true);
-      setShowReplyInput(false);
-      onReplyAdded?.(newReply);
-    } catch (error) {
-      console.error('Failed to post reply:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [comment.id, comment.parent_id, videoUuid, replyContent, isSubmitting, onReplyAdded]);
-
-  const handleKeyDown = (event: React.KeyboardEvent) => {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault();
-      postReply();
-    }
-  };
+  const [replies] = useState<Comment[]>(comment.replies || []);
 
   return (
     <div className="w-full">
@@ -115,56 +56,11 @@ export function SingleComment({
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            onClick={toggleLike}
-            className="cursor-pointer p-1.5 hover:bg-white/10 rounded-full transition-colors"
-          >
-            <ThumbsUp
-              className={`w-4 h-4 ${liked ? 'text-red-primary fill-red-primary' : 'text-white'}`}
-            />
-          </button>
-          <button
-            onClick={toggleDislike}
-            className="cursor-pointer p-1.5 hover:bg-white/10 rounded-full transition-colors"
-          >
-            <ThumbsDown
-              className={`w-4 h-4 ${disliked ? 'text-red-primary fill-red-primary' : 'text-white'}`}
-            />
-          </button>
-          <button
-            onClick={() => setShowReplyInput(!showReplyInput)}
-            className="min-h-[38px] p-1 flex items-center hover:bg-white/10 rounded-full transition-colors"
-          >
-            <Reply className="w-4 h-4 text-white" style={{ transform: 'scaleX(-1)' }} />
-          </button>
-        </div>
       </div>
 
       <p className="text-[14px] md:text-[15px] font-normal whitespace-pre-wrap break-words mt-2 leading-[20px] md:leading-[22px]">
         {comment.content}
       </p>
-
-      {/* Reply Input */}
-      {showReplyInput && (
-        <div className="flex items-end gap-2 mt-4">
-          <textarea
-            value={replyContent}
-            onChange={(e) => setReplyContent(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Reply Comment"
-            rows={1}
-            className="flex-1 bg-transparent border-b border-white/30 focus:border-white/60 outline-none resize-none py-2 text-white placeholder:text-white/50"
-          />
-          <button
-            onClick={postReply}
-            disabled={isSubmitting || !replyContent.trim()}
-            className="p-2 hover:bg-white/10 rounded-full transition-colors disabled:opacity-50"
-          >
-            <Send className="w-5 h-5 text-white" />
-          </button>
-        </div>
-      )}
 
       {/* Show Replies Toggle */}
       {replies.length > 0 && (

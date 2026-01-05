@@ -4,9 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
-  Video,
-  Film,
-  FileText,
+  Upload,
   DollarSign,
   Wallet,
   Settings,
@@ -31,9 +29,7 @@ import { Logo } from '@/components/ui/logo';
 
 const studioNavigation = [
   { name: 'Dashboard', href: '/studio', icon: LayoutDashboard },
-  { name: 'Upload Video', href: '/studio/upload/video', icon: Video },
-  { name: 'Upload Short', href: '/studio/upload/short', icon: Film },
-  { name: 'Posts', href: '/studio/posts', icon: FileText },
+  { name: 'Upload', href: '/studio/upload/video', icon: Upload },
   { name: 'Analytics', href: '/studio/analytics', icon: BarChart3 },
   { name: 'Earnings', href: '/studio/earnings', icon: DollarSign },
   { name: 'Payouts', href: '/studio/payouts', icon: Wallet },
@@ -46,6 +42,10 @@ export function StudioSidebar({ ...props }: React.ComponentProps<typeof Sidebar>
   const isActive = (href: string) => {
     if (href === '/studio') {
       return pathname === '/studio';
+    }
+    // For Upload, match any upload path or posts
+    if (href === '/studio/upload/video') {
+      return pathname.startsWith('/studio/upload') || pathname === '/studio/posts';
     }
     return pathname.startsWith(href);
   };

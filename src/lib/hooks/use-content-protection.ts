@@ -12,6 +12,7 @@ import { useEffect } from 'react';
 export function useContentProtection() {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (!e.key) return;
       const key = e.key.toLowerCase();
 
       // Block F12 (Dev Tools)

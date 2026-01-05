@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { memo, useEffect, useRef, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { X } from 'lucide-react';
@@ -15,7 +15,7 @@ interface MediaPreviewModalProps {
   triggerRef?: React.RefObject<HTMLElement>;
 }
 
-export function MediaPreviewModal({ video, onClose, triggerRef: _triggerRef }: MediaPreviewModalProps) {
+export const MediaPreviewModal = memo(function MediaPreviewModal({ video, onClose, triggerRef: _triggerRef }: MediaPreviewModalProps) {
   const [mounted, setMounted] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
@@ -225,4 +225,4 @@ export function MediaPreviewModal({ video, onClose, triggerRef: _triggerRef }: M
   );
 
   return createPortal(modalContent, document.body);
-}
+});

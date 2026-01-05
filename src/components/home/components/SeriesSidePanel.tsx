@@ -80,7 +80,7 @@ export function SeriesSidePanel({ series }: SeriesSidePanelProps) {
 
   return (
     <div className="hidden lg:block flex-1 min-w-0 h-full">
-      <div className="bg-surface/40 rounded-xl overflow-hidden border border-white/5 h-full flex flex-col">
+      <div className="bg-surface/40 rounded-xl overflow-hidden border border-white/5 h-full flex flex-col shadow-lg shadow-black/30">
         <div className="relative aspect-video">
           {thumbnail && (
             <Image
@@ -131,8 +131,8 @@ export function SeriesSidePanel({ series }: SeriesSidePanelProps) {
           </div>
         </div>
 
-        <div className="p-6 flex-1 flex flex-col">
-          <h3 className="text-2xl font-bold text-white mb-3 line-clamp-2">
+        <div className="p-5 xl:p-6 flex-1 flex flex-col">
+          <h3 className="text-xl xl:text-2xl font-bold text-white mb-3 line-clamp-2">
             {series.title}
           </h3>
 
@@ -188,7 +188,7 @@ export function SeriesSidePanel({ series }: SeriesSidePanelProps) {
           )}
 
           {description && (
-            <p className="text-sm text-white/60 leading-relaxed line-clamp-3 mb-5">
+            <p className="text-sm text-white/60 leading-relaxed line-clamp-3 mb-4 xl:mb-5">
               {description}
             </p>
           )}
@@ -237,4 +237,3 @@ export function SeriesSidePanel({ series }: SeriesSidePanelProps) {
     </div>
   );
 }
-
