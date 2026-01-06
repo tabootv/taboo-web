@@ -1,22 +1,10 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Apple, ExternalLink, Settings, CreditCard } from 'lucide-react';
-import { useAuthStore } from '@/lib/stores';
 import { Button } from '@/components/ui';
 
 export default function ManageApplePage() {
-  const router = useRouter();
-  const { isAuthenticated } = useAuthStore();
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/sign-in?redirect=/payment/manage-apple');
-    }
-  }, [isAuthenticated, router]);
-
   const openAppStoreSubscriptions = () => {
     // Deep link to App Store subscriptions
     window.open('https://apps.apple.com/account/subscriptions', '_blank');

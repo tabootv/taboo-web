@@ -10,7 +10,7 @@ import { VideoPlayer } from '@/features/video';
 import { useAuthStore } from '@/lib/stores';
 import { formatCompactNumber, formatDuration, formatRelativeTime } from '@/lib/utils';
 import { toast } from 'sonner';
-import apiClient from '@/lib/api/client';
+import { apiClient } from '@/api/client';
 import type { Video } from '@/types';
 
 export default function ShowVideoPage({ params }: { params: Promise<{ id: string }> }) {
@@ -20,15 +20,6 @@ export default function ShowVideoPage({ params }: { params: Promise<{ id: string
 
   const [video, setVideo] = useState<Video | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/login');
-    } else if (user && !user.is_creator) {
-      router.push('/home');
-      toast.error('You need to be a creator to access this page');
-    }
-  }, [isAuthenticated, user, router]);
 
   useEffect(() => {
     async function fetchVideo() {
@@ -49,10 +40,6 @@ export default function ShowVideoPage({ params }: { params: Promise<{ id: string
       fetchVideo();
     }
   }, [id, router, user?.is_creator]);
-
-  if (!user?.is_creator) {
-    return null;
-  }
 
   if (isLoading || !video) {
     return <LoadingScreen message="Loading video..." />;

@@ -46,18 +46,8 @@ export default function CreateContentPage() {
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/sign-in?redirect=/content/create');
-      return;
-    }
-
-    if (!user?.is_creator) {
-      router.push('/home');
-      return;
-    }
-
     setIsLoading(false);
-  }, [isAuthenticated, user, router]);
+  }, []);
 
   const handleVideoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

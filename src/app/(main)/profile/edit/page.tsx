@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import type { User } from '@/types';
-import { profile as profileApi } from '@/lib/api';
+import { profileClient as profileApi } from '@/api/client';
 import { Button, LoadingScreen } from '@/components/ui';
 import { toast } from 'sonner';
 import Link from 'next/link';
@@ -28,11 +28,6 @@ export default function SettingsPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/sign-in');
-      return;
-    }
-
     async function loadUser() {
       try {
         await fetchUser();
@@ -42,11 +37,7 @@ export default function SettingsPage() {
     }
 
     loadUser();
-  }, [isAuthenticated, router, fetchUser]);
-
-  if (!isAuthenticated) {
-    return <LoadingScreen message="Redirecting..." />;
-  }
+  }, [fetchUser]);
 
   if (isLoading) {
     return <LoadingScreen message="Loading settings..." />;

@@ -8,7 +8,7 @@ import { ArrowLeft, Upload, X, Film, AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui';
 import { useAuthStore } from '@/lib/stores';
 import { toast } from 'sonner';
-import apiClient from '@/lib/api/client';
+import { apiClient } from '@/api/client';
 
 export default function CreateShortPage() {
   const router = useRouter();
@@ -29,15 +29,6 @@ export default function CreateShortPage() {
   const [videoPreview, setVideoPreview] = useState<string | null>(null);
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/login');
-    } else if (user && !user.is_creator) {
-      router.push('/home');
-      toast.error('You need to be a creator to access this page');
-    }
-  }, [isAuthenticated, user, router]);
 
   const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

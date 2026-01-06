@@ -4,7 +4,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Crown, Check, CreditCard, Lock, AlertCircle } from 'lucide-react';
-import { subscriptions as subscriptionsApi } from '@/lib/api';
+import { subscriptionsClient as subscriptionsApi } from '@/api/client';
 import type { Plan } from '@/types';
 import { useAuthStore } from '@/lib/stores';
 import { Button, LoadingScreen } from '@/components/ui';
@@ -24,11 +24,6 @@ function CheckoutForm() {
   const interval = searchParams.get('interval') as 'monthly' | 'yearly' | null;
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push(`/sign-in?redirect=/checkout?plan=${planId}&interval=${interval}`);
-      return;
-    }
-
     async function fetchPlan() {
       try {
         setIsLoading(true);
@@ -46,7 +41,7 @@ function CheckoutForm() {
     }
 
     fetchPlan();
-  }, [planId, interval, isAuthenticated, router]);
+  }, [planId, interval]);
 
   const handleSubscribe = async () => {
     if (!plan) return;

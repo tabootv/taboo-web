@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Mail, Lock, AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui';
-import { profile as profileApi } from '@/lib/api';
+import { profileClient as profileApi } from '@/api/client';
 import { useAuthStore } from '@/lib/stores';
 import { toast } from 'sonner';
 

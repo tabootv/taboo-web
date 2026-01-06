@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { subscriptions } from '@/lib/api/endpoints';
+import { subscriptionsClient } from '@/api/client';
 import { useAuthStore } from '@/lib/stores';
 import type { SubscriptionInfo, Plan } from '@/types';
 
@@ -33,7 +33,7 @@ export function useSubscription() {
     setError(null);
 
     try {
-      const info = await subscriptions.getSubscriptionInfo();
+      const info = await subscriptionsClient.getSubscriptionInfo();
       setSubscriptionInfo(info);
     } catch (err) {
       console.error('Failed to fetch subscription info:', err);
@@ -118,7 +118,7 @@ export function usePlans() {
     setError(null);
 
     try {
-      const plansData = await subscriptions.getPlans();
+      const plansData = await subscriptionsClient.getPlans();
       // Filter to only active plans
       const activePlans = plansData.filter(p => p.is_active !== false);
       setPlans(activePlans);

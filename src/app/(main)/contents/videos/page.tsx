@@ -5,13 +5,13 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Plus, Play, Edit, Trash2, Eye, ThumbsUp, Clock, MoreVertical } from 'lucide-react';
-import { videos as videosApi } from '@/lib/api';
+import { videoClient as videosApi } from '@/api/client';
 import type { Video } from '@/types';
 import { Button, LoadingScreen, Spinner } from '@/components/ui';
 import { formatCompactNumber, formatDuration, formatRelativeTime } from '@/lib/utils';
 import { useAuthStore } from '@/lib/stores';
 import { toast } from 'sonner';
-import apiClient from '@/lib/api/client';
+import { apiClient } from '@/api/client';
 
 export default function ContentVideosPage() {
   const router = useRouter();
@@ -23,16 +23,6 @@ export default function ContentVideosPage() {
   const [hasMore, setHasMore] = useState(true);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
-
-  // Redirect if not a creator
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/login');
-    } else if (user && !user.is_creator) {
-      router.push('/home');
-      toast.error('You need to be a creator to access this page');
-    }
-  }, [isAuthenticated, user, router]);
 
   const fetchVideos = useCallback(async (pageNum: number, reset = false) => {
     try {

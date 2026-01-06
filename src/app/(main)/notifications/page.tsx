@@ -1,31 +1,24 @@
 'use client';
 
-import { Button, LoadingScreen } from '@/components/ui';
+import {
+  useDeleteAllNotifications,
+  useDeleteNotification,
+  useMarkAllNotificationsRead,
+} from '@/api/mutations';
 import { useNotifications } from '@/api/queries';
-import { useMarkAllNotificationsRead, useDeleteNotification, useDeleteAllNotifications } from '@/api/mutations';
-import { useAuthStore } from '@/lib/stores';
+import { Button, LoadingScreen } from '@/components/ui';
 import type { Notification } from '@/types';
 import { formatDistanceToNow } from 'date-fns';
 import { Bell, Check, Film, Heart, MessageSquare, Trash2, UserPlus, X } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 export default function NotificationsPage() {
-  const router = useRouter();
-  const { isAuthenticated } = useAuthStore();
   const { data: notificationsList = [], isLoading } = useNotifications();
   const markAllRead = useMarkAllNotificationsRead();
   const deleteNotification = useDeleteNotification();
   const deleteAll = useDeleteAllNotifications();
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/sign-in');
-    }
-  }, [isAuthenticated, router]);
 
   const handleMarkAllRead = () => {
     markAllRead.mutate(undefined, {
@@ -60,16 +53,16 @@ export default function NotificationsPage() {
     });
   };
 
-  if (!isAuthenticated) {
-    return <LoadingScreen message="Redirecting..." />;
-  }
-
   if (isLoading) {
     return <LoadingScreen message="Loading notifications..." />;
   }
 
-  const unreadNotifications = notificationsList.filter((n) => n && !n.read_at);
-  const readNotifications = notificationsList.filter((n) => n && n.read_at);
+  const unreadNotifications = (
+    Array.isArray(notificationsList) ? notificationsList.flat() : []
+  ).filter((n) => n && !n.read_at);
+  const readNotifications = (
+    Array.isArray(notificationsList) ? notificationsList.flat() : []
+  ).filter((n) => n && n.read_at);
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
@@ -91,25 +84,28 @@ export default function NotificationsPage() {
         {notificationsList.length > 0 && (
           <div className="flex items-center gap-2">
             {unreadNotifications.length > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleMarkAllRead}
-                className="text-text-secondary hover:text-text-primary"
-              >
-                <Check className="w-4 h-4 mr-2" />
-                Mark all read
-              </Button>
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleMarkAllRead}
+                  className="text-text-secondary hover:text-text-primary"
+                >
+                  <Check className="w-4 h-4 mr-2" />
+                  Mark all read
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleDeleteAll}
+                  className="text-red-500 hover:text-red-400"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Clear all
+                </Button>
+              </>
             )}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleDeleteAll}
-              className="text-red-500 hover:text-red-400"
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Clear all
-            </Button>
           </div>
         )}
       </div>
@@ -200,6 +196,8 @@ function NotificationCard({
     if (data.creator_id) return `/creators/creator-profile/${data.creator_id}`;
     return '#';
   };
+
+  console.log(data);
 
   const title = (data.title as string) || (data.message as string) || 'New notification';
   const image = data.thumbnail as string | undefined;

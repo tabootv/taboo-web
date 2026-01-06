@@ -10,7 +10,7 @@ import { Button, LoadingScreen, Spinner } from '@/components/ui';
 import { formatCompactNumber } from '@/lib/utils';
 import { useAuthStore } from '@/lib/stores';
 import { toast } from 'sonner';
-import apiClient from '@/lib/api/client';
+import { apiClient } from '@/api/client';
 
 export default function ContentShortsPage() {
   const router = useRouter();
@@ -22,15 +22,6 @@ export default function ContentShortsPage() {
   const [hasMore, setHasMore] = useState(true);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/login');
-    } else if (user && !user.is_creator) {
-      router.push('/home');
-      toast.error('You need to be a creator to access this page');
-    }
-  }, [isAuthenticated, user, router]);
 
   const fetchShorts = useCallback(async (pageNum: number, reset = false) => {
     try {

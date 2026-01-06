@@ -26,22 +26,11 @@ export default function ContentDashboardPage() {
   const [showMenu, setShowMenu] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/sign-in?redirect=/content');
-      return;
-    }
-
-    // Check if user is a creator
-    if (!user?.is_creator) {
-      router.push('/home');
-      return;
-    }
-
     // TODO: Fetch creator's content from API when endpoint is available
     // For now, show empty state
     setIsLoading(false);
     setContent([]);
-  }, [isAuthenticated, user, router]);
+  }, []);
 
   if (isLoading) {
     return <LoadingScreen message="Loading your content..." />;

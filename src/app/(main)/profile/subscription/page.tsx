@@ -41,12 +41,6 @@ export default function SubscriptionPage() {
     refreshSubscription,
   } = useSubscription();
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/sign-in?redirect=/profile/subscription');
-    }
-  }, [isAuthenticated, router]);
-
   // Format date helper
   const formatDateLocal = (dateString?: string) => {
     if (!dateString) return 'N/A';

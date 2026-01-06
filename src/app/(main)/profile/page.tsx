@@ -40,12 +40,6 @@ export default function ProfilePage() {
   const history = historyData?.data || [];
   const liked = likedData?.data || [];
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/sign-in');
-    }
-  }, [isAuthenticated, router]);
-
   const handleLogout = async () => {
     try {
       await logout();
@@ -78,10 +72,6 @@ export default function ProfilePage() {
       setIsUploadingDp(false);
     }
   };
-
-  if (!isAuthenticated) {
-    return <LoadingScreen message="Redirecting..." />;
-  }
 
   if (isLoading) {
     return <LoadingScreen message="Loading profile..." />;

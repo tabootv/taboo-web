@@ -42,21 +42,11 @@ export default function EditContentPage({ params }: { params: Promise<{ uuid: st
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push(`/sign-in?redirect=/content/edit/${uuid}`);
-      return;
-    }
-
-    if (!user?.is_creator) {
-      router.push('/home');
-      return;
-    }
-
     // TODO: Fetch content details from API when endpoint is available
     // For now, show placeholder
     setIsLoading(false);
     toast.info('Content editing coming soon. Backend integration in progress.');
-  }, [isAuthenticated, user, router, uuid]);
+  }, [uuid]);
 
   const handleThumbnailSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
