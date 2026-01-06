@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import type { Video, Comment } from '@/types';
-import { shorts } from '@/lib/api';
+import { shortsClient } from '@/api/client';
 
 interface ShortsState {
   videos: Video[];
@@ -66,8 +66,8 @@ export const useShortsStore = create<ShortsState>((set, get) => ({
     try {
       // If we have an initial UUID, fetch that specific short first
       if (initialUuid) {
-        const shortData = await shorts.getV2(initialUuid);
-        const response = await shorts.listV2({ per_page: 10 });
+        const shortData = await shortsClient.get(initialUuid);
+        const response = await shortsClient.list({ per_page: 10 });
 
         // Filter out the initial video from the list and prepend it
         const filteredVideos = (response.data || []).filter(
@@ -88,7 +88,7 @@ export const useShortsStore = create<ShortsState>((set, get) => ({
           hasLiked: shortData?.has_liked ?? false,
         });
       } else {
-        const response = await shorts.listV2({ per_page: 10 });
+        const response = await shortsClient.list({ per_page: 10 });
         const fetchedVideos = response.data || [];
         const firstVideo = fetchedVideos[0];
 
@@ -122,7 +122,7 @@ export const useShortsStore = create<ShortsState>((set, get) => ({
       const url = new URL(nextPageUrl);
       const page = url.searchParams.get('page') || '2';
 
-      const response = await shorts.listV2({
+      const response = await shortsClient.list({
         page: parseInt(page),
         per_page: 10,
       });

@@ -3,7 +3,7 @@
 import { useState, useEffect, use } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { creators } from '@/lib/api';
+import { creatorsClient } from '@/api/client';
 import type { Creator, Video, Series } from '@/types';
 import { formatDuration } from '@/lib/utils';
 

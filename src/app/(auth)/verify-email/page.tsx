@@ -7,7 +7,7 @@ import { Mail, CheckCircle, XCircle, Loader2, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui';
 import { Logo } from '@/components/ui/logo';
 import { toast } from 'sonner';
-import apiClient from '@/lib/api/client';
+import { apiClient } from '@/api/client';
 
 function VerifyEmailContent() {
   const searchParams = useSearchParams();

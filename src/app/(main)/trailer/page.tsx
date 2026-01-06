@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { X, Loader2 } from 'lucide-react';
-import { series as seriesApi, courses as coursesApi } from '@/lib/api';
+import { seriesClient as seriesApi, coursesClient as coursesApi } from '@/api/client';
 import { VideoPlayer } from '@/features/video';
 import { Button, LoadingScreen } from '@/components/ui';
 

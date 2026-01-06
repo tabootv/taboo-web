@@ -19,23 +19,37 @@ export const subscriptionsClient = {
    * Get all available plans with Whop checkout URLs
    */
   getPlans: async (): Promise<Plan[]> => {
-    const { data } = await apiClient.get('/plans/list');
-    return data.plans || data.data || [];
+    const data = await apiClient.get<{ plans?: Plan[]; data?: Plan[] } | Plan[]>('/plans/list');
+    if (Array.isArray(data)) return data;
+    if (data && typeof data === 'object') {
+      if ('plans' in data && Array.isArray(data.plans)) return data.plans;
+      if ('data' in data && Array.isArray(data.data)) return data.data;
+    }
+    return [];
   },
 
   /**
    * Get plans filtered by country (for regional pricing)
    */
   getPlansByCountry: async (country?: string): Promise<Plan[]> => {
-    const { data } = await apiClient.get('/plans/by-country', { params: { country } });
-    return data.plans || data.data || [];
+    const data = await apiClient.get<{ plans?: Plan[]; data?: Plan[] } | Plan[]>('/plans/by-country', {
+      params: { country } as Record<string, unknown>,
+    });
+    if (Array.isArray(data)) return data;
+    if (data && typeof data === 'object') {
+      if ('plans' in data && Array.isArray(data.plans)) return data.plans;
+      if ('data' in data && Array.isArray(data.data)) return data.data;
+    }
+    return [];
   },
 
   /**
    * Quick subscription status check
    */
   getStatus: async (): Promise<{ is_subscribed: boolean }> => {
-    const { data } = await apiClient.get('/subscription/status');
+    const data = await apiClient.get<{ is_subscribed?: boolean; subscribed?: boolean }>(
+      '/subscription/status'
+    );
     return { is_subscribed: data.is_subscribed || data.subscribed || false };
   },
 
@@ -44,8 +58,11 @@ export const subscriptionsClient = {
    */
   getSubscription: async (): Promise<Subscription | null> => {
     try {
-      const { data } = await apiClient.get<ApiResponse<Subscription>>('/subscription');
-      return data.data || data;
+      const data = await apiClient.get<ApiResponse<Subscription> | Subscription>('/subscription');
+      if (data && typeof data === 'object' && 'data' in data) {
+        return (data as ApiResponse<Subscription>).data;
+      }
+      return data as Subscription;
     } catch {
       return null;
     }
@@ -56,7 +73,7 @@ export const subscriptionsClient = {
    */
   getSubscriptionInfo: async (): Promise<SubscriptionInfo> => {
     try {
-      const { data } = await apiClient.get('/subscription-info');
+      const data = await apiClient.get<SubscriptionInfo>('/subscription-info');
       return {
         is_subscribed: data.is_subscribed ?? false,
         provider: data.provider,
@@ -89,7 +106,7 @@ export const subscriptionsClient = {
    * Create subscription via Apple In-App Purchase
    */
   createApple: async (receipt: string): Promise<Subscription> => {
-    const { data } = await apiClient.post<ApiResponse<Subscription>>('/subscription/create', {
+    const data = await apiClient.post<ApiResponse<Subscription>>('/subscription/create', {
       receipt,
     });
     return data.data;
@@ -99,7 +116,7 @@ export const subscriptionsClient = {
    * Create subscription via Google Play
    */
   createGooglePlay: async (purchaseToken: string, productId: string): Promise<Subscription> => {
-    const { data } = await apiClient.post<ApiResponse<Subscription>>(
+    const data = await apiClient.post<ApiResponse<Subscription>>(
       '/subscription/google-play/create',
       {
         purchase_token: purchaseToken,

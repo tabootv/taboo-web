@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import type { ChatMessage } from '@/types';
-import { liveChat } from '@/lib/api';
+import { livechatClient } from '@/api/client';
 
 interface LiveChatState {
   isOpen: boolean;
@@ -33,7 +33,7 @@ export const useLiveChatStore = create<LiveChatState>((set, get) => ({
   fetchMessages: async () => {
     set({ isLoading: true, error: null });
     try {
-      const response = await liveChat.getMessages();
+      const response = await livechatClient.getMessages();
       set({ messages: response.data, isLoading: false });
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Failed to fetch messages';
@@ -43,7 +43,7 @@ export const useLiveChatStore = create<LiveChatState>((set, get) => ({
 
   sendMessage: async (content: string) => {
     try {
-      const message = await liveChat.sendMessage(content);
+      const message = await livechatClient.sendMessage(content);
       // Append the new message optimistically (or it may come via WebSocket)
       get().appendMessage(message);
     } catch (error: unknown) {
@@ -61,7 +61,7 @@ export const useLiveChatStore = create<LiveChatState>((set, get) => ({
 
   fetchUsersCount: async () => {
     try {
-      const { count } = await liveChat.getPlatformUsersCount();
+      const { count } = await livechatClient.getPlatformUsersCount();
       set({ platformUsersCount: count });
     } catch {
       // Silent fail for user count

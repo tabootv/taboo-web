@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import Image from 'next/image';
 import { Send } from 'lucide-react';
-import { videos as videosApi } from '@/lib/api';
+import { videoClient } from '@/api/client';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import type { Comment, Video } from '@/types';
 import { SingleComment } from './single-comment';
@@ -45,7 +45,7 @@ export function VideoComments({ video, initialComments = [] }: VideoCommentsProp
 
     setIsSubmitting(true);
     try {
-      const newComment = await videosApi.addComment(video.uuid, content);
+      const newComment = await videoClient.addComment(video.uuid, content);
       setCommentList((prev) => [newComment, ...prev]);
       setContent('');
     } catch (error) {

@@ -1,6 +1,6 @@
 'use client';
 
-import { home } from '@/lib/api';
+import { homeClient } from '@/api/client';
 import type { Series } from '@/types';
 import { useEffect, useState } from 'react';
 import { SeriesSection } from './components/SeriesSection';
@@ -23,7 +23,7 @@ export function HomeSeriesSection({ initialSeries }: HomeSeriesSectionProps) {
 
     async function fetchSeries() {
       try {
-        const data = await home.getSeries();
+        const data = await homeClient.getSeries();
         setSeries(data || []);
       } catch (error) {
         console.error('Error fetching series:', error);

@@ -19,8 +19,15 @@ export const notificationsClient = {
    * Get list of notifications
    */
   list: async (): Promise<Notification[]> => {
-    const { data } = await apiClient.get('/notifications/list');
-    return data.notifications || data.data || [];
+    const data = await apiClient.get<
+      { notifications?: Notification[]; data?: Notification[] } | Notification[]
+    >('/notifications/list');
+    if (Array.isArray(data)) return data;
+    if (data && typeof data === 'object') {
+      if ('notifications' in data && Array.isArray(data.notifications)) return data.notifications;
+      if ('data' in data && Array.isArray(data.data)) return data.data;
+    }
+    return [];
   },
 
   /**
@@ -48,8 +55,15 @@ export const notificationsClient = {
    * Get contact preferences
    */
   getContactPreferences: async (): Promise<ContactPreferences> => {
-    const { data } = await apiClient.get('/notifications/contacts');
-    return data.contacts || data.data || {};
+    const data = await apiClient.get<
+      { contacts?: ContactPreferences; data?: ContactPreferences } | ContactPreferences
+    >('/notifications/contacts');
+    if (data && typeof data === 'object') {
+      if ('contacts' in data && typeof data.contacts === 'object') return data.contacts;
+      if ('data' in data && typeof data.data === 'object') return data.data;
+      if (!Array.isArray(data) && !('contacts' in data) && !('data' in data))
+        return data as ContactPreferences;
+    }
+    return {};
   },
 };
-

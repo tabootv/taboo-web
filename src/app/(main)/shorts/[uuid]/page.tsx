@@ -10,7 +10,7 @@ import Link from 'next/link';
 import { useShortsStore } from '@/lib/stores/shorts-store';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { ShortVideoCard } from '@/features/shorts';
-import { videos as videosApi } from '@/lib/api';
+import { videoClient as videosApi } from '@/api/client';
 import { toast } from 'sonner';
 
 import 'swiper/css';

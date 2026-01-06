@@ -10,7 +10,7 @@ import {
   Play,
 } from 'lucide-react';
 import { useShortsStore } from '@/lib/stores/shorts-store';
-import { videos as videosApi } from '@/lib/api';
+import { videoClient } from '@/api/client';
 import { formatCompactNumber } from '@/lib/utils';
 import { toast } from 'sonner';
 import type { Video } from '@/types';
@@ -215,7 +215,7 @@ function ShortVideoCardComponent({ video, index: _index, isActive, isNearActive 
 
   const handleToggleLike = async () => {
     try {
-      await videosApi.toggleLike(video.uuid);
+      await videoClient.toggleLike(video.uuid);
       setHasLiked(!hasLiked);
     } catch {
       toast.error('Please login to like');

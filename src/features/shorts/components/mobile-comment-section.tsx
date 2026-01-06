@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { X, Send } from 'lucide-react';
 import { useShortsStore } from '@/lib/stores/shorts-store';
 import { useAuthStore } from '@/lib/stores/auth-store';
-import { videos as videosApi } from '@/lib/api';
+import { videoClient } from '@/api/client';
 import type { Video } from '@/types';
 import { formatRelativeTime } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -25,7 +25,7 @@ export function MobileCommentSection({ video }: MobileCommentSectionProps) {
 
     setIsSubmitting(true);
     try {
-      const comment = await videosApi.postComment(video.uuid, content);
+      const comment = await videoClient.postComment(video.uuid, content);
       appendComment(comment);
       setContent('');
     } catch {

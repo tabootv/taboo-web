@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { Flame, Trash2 } from 'lucide-react';
-import { videos as videosApi } from '@/lib/api';
+import { videoClient } from '@/api/client';
 import type { Video } from '@/types';
 
 interface LikeDislikeButtonGroupProps {
@@ -15,7 +15,7 @@ export function LikeDislikeButtonGroup({ video, onUpdate }: LikeDislikeButtonGro
 
   const toggleLike = useCallback(async () => {
     try {
-      await videosApi.toggleLike(localVideo.uuid);
+      await videoClient.toggleLike(localVideo.uuid);
       const updatedVideo = { ...localVideo };
 
       if (localVideo.is_disliked) {
@@ -40,7 +40,7 @@ export function LikeDislikeButtonGroup({ video, onUpdate }: LikeDislikeButtonGro
 
   const toggleDislike = useCallback(async () => {
     try {
-      await videosApi.toggleDislike(localVideo.uuid);
+      await videoClient.toggleDislike(localVideo.uuid);
       const updatedVideo = { ...localVideo };
 
       if (localVideo.is_liked) {

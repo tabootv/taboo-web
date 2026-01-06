@@ -1,13 +1,12 @@
 'use client';
 
-import { CoursePlayerPageSkeleton, LessonCardPlayer } from '@/components/courses';
-import { VideoPlayerSkeleton } from '@/components/video';
-import { useCourseDetail, useCoursePlay, useVideo, useMe } from '@/api/queries';
 import { useToggleAutoplay } from '@/api/mutations';
-import { cn, formatDuration, formatRelativeTime } from '@/lib/utils';
-import type { Course, Video } from '@/types';
-import { ChevronRight, Clock, Play, SkipForward } from 'lucide-react';
+import { useCourseDetail, useCoursePlay, useMe } from '@/api/queries';
+import { CoursePlayerPageSkeleton, LessonCardPlayer } from '@/components/courses';
 import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
+import { VideoPlayerSkeleton } from '@/components/video';
+import { cn, formatDuration, formatRelativeTime } from '@/lib/utils';
+import { ChevronRight, Clock, Play, SkipForward } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -32,7 +31,12 @@ export default function CoursePlayerPage({
   const lessonsRef = useRef<HTMLDivElement>(null);
 
   const { data: courseData, isLoading: isLoadingCourse } = useCourseDetail(courseId);
-  const { data: currentVideo, isLoading: isLoadingPlay } = useCoursePlay(videoUuid);
+  const {
+    data: currentVideo,
+    isLoading: isLoadingPlay,
+    isError: isErrorPlay,
+    error: playError,
+  } = useCoursePlay(videoUuid);
   const { data: meData } = useMe();
   const toggleAutoplay = useToggleAutoplay();
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
@@ -74,6 +78,20 @@ export default function CoursePlayerPage({
 
   if (isLoading) {
     return <CoursePlayerPageSkeleton />;
+  }
+
+  if (isErrorPlay) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-white mb-4">Error loading lesson</h1>
+          <p className="text-white/60 mb-4">{playError?.message || 'Failed to load video'}</p>
+          <Link href={`/courses/${courseId}`} className="text-red-primary hover:underline">
+            Back to course
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   if (!courseData || !currentVideo) {
@@ -177,7 +195,9 @@ export default function CoursePlayerPage({
                     <span className="font-medium text-white group-hover:text-red-primary transition-colors truncate">
                       {currentVideo.channel?.name}
                     </span>
-                    <span className="shrink-0"><VerifiedBadge size={14} /></span>
+                    <span className="shrink-0">
+                      <VerifiedBadge size={14} />
+                    </span>
                   </Link>
                   <p className="text-xs text-white/50">
                     {currentVideo.humans_publish_at ||
@@ -241,9 +261,20 @@ export default function CoursePlayerPage({
               className="flex items-center gap-3 p-3 bg-surface/50 rounded-xl mb-4 group hover:bg-surface/70 transition-colors"
             >
               <div className="relative w-16 h-9 rounded-lg overflow-hidden shrink-0">
-                {(courseData.course_thumbnail || courseData.card_thumbnail || courseData.thumbnail || courseData.trailer_thumbnail || courseData.desktop_banner) && (
+                {(courseData.course_thumbnail ||
+                  courseData.card_thumbnail ||
+                  courseData.thumbnail ||
+                  courseData.trailer_thumbnail ||
+                  courseData.desktop_banner) && (
                   <Image
-                    src={courseData.course_thumbnail || courseData.card_thumbnail || courseData.thumbnail || courseData.trailer_thumbnail || courseData.desktop_banner || ''}
+                    src={
+                      courseData.course_thumbnail ||
+                      courseData.card_thumbnail ||
+                      courseData.thumbnail ||
+                      courseData.trailer_thumbnail ||
+                      courseData.desktop_banner ||
+                      ''
+                    }
                     alt={courseData.title}
                     fill
                     className="object-cover"

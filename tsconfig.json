@@ -44,6 +44,7 @@
     "src/infrastructure/testing/**",
     "vitest.config.ts",
     "src/app/(studio)/__tests__/**",
-    "src/**/__tests__/**"
+    "src/**/__tests__/**",
+    "depreciated/**"
   ]
 }

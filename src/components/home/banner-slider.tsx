@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { Play, ChevronLeft, ChevronRight } from 'lucide-react';
-import { home } from '@/lib/api';
+import { homeClient } from '@/api/client';
 import type { Banner } from '@/types';
 import { Button } from '@/components/ui';
 
@@ -24,7 +24,7 @@ export function BannerSlider({ initialBanners }: BannerSliderProps) {
 
     async function fetchBanners() {
       try {
-        const data = await home.getBanners();
+        const data = await homeClient.getBanners();
         setBanners(data || []);
       } catch (error) {
         console.error('Error fetching banners:', error);

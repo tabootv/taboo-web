@@ -6,12 +6,13 @@ import { CommunityPost } from '@/features/community';
 import { useAuthStore } from '@/lib/stores';
 import { formatDuration, formatRelativeTime } from '@/lib/utils';
 import type { Creator, Post, Series, Video } from '@/types';
-import { ChevronDown, Clapperboard, Play } from 'lucide-react';
+import { ChevronDown, Clapperboard, Play, Globe, ChevronRight, Lock } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { use, useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { creatorsClient } from '@/api/client';
 
 type TabIndex = 0 | 1 | 2 | 3 | 4 | 5;
 type SortBy = 'newest' | 'trending' | 'old';
@@ -75,7 +76,7 @@ export default function CreatorProfilePage({ params }: { params: Promise<{ chann
 
       try {
         setIsLoading(true);
-        const creatorData = await creatorsApi.get(creatorId);
+        const creatorData = await creatorsClient.getProfile(creatorId);
         setCreator(creatorData);
         setTabs([
           { label: 'Home', count: 0, hideCount: true },
@@ -142,7 +143,7 @@ export default function CreatorProfilePage({ params }: { params: Promise<{ chann
     if (loadingStates.videos) return;
     setLoadingStates((prev) => ({ ...prev, videos: true }));
     try {
-      const response = await creatorsApi.getVideos(creatorId, { sort_by: sort || sortBy, ...(nextPage ? { page_url: nextPage } : {}) });
+      const response = await creatorsClient.getVideos(creatorId, { sort_by: sort || sortBy, ...(nextPage ? { page_url: nextPage } : {}) });
       if (nextPage) {
         setCreatorVideos((prev) => [...prev, ...(response.data || [])]);
       } else {
@@ -160,7 +161,7 @@ export default function CreatorProfilePage({ params }: { params: Promise<{ chann
     if (loadingStates.shorts) return;
     setLoadingStates((prev) => ({ ...prev, shorts: true }));
     try {
-      const response = await creatorsApi.getShorts(creatorId, { sort_by: sort || sortBy, ...(nextPage ? { page_url: nextPage } : {}) });
+      const response = await creatorsClient.getShorts(creatorId, { sort_by: sort || sortBy, ...(nextPage ? { page_url: nextPage } : {}) });
       if (nextPage) {
         setCreatorShorts((prev) => [...prev, ...(response.data || [])]);
       } else {
@@ -178,7 +179,7 @@ export default function CreatorProfilePage({ params }: { params: Promise<{ chann
     if (loadingStates.series) return;
     setLoadingStates((prev) => ({ ...prev, series: true }));
     try {
-      const response = await creatorsApi.getSeries(creatorId, { sort_by: sort || sortBy, ...(nextPage ? { page_url: nextPage } : {}) });
+      const response = await creatorsClient.getSeries(creatorId, { sort_by: sort || sortBy, ...(nextPage ? { page_url: nextPage } : {}) });
       if (nextPage) {
         setCreatorSeries((prev) => [...prev, ...(response.data || [])]);
       } else {
@@ -196,7 +197,7 @@ export default function CreatorProfilePage({ params }: { params: Promise<{ chann
     if (loadingStates.posts) return;
     setLoadingStates((prev) => ({ ...prev, posts: true }));
     try {
-      const response = await creatorsApi.getPosts(creatorId, { sort_by: sort || sortBy, ...(nextPage ? { page_url: nextPage } : {}) });
+      const response = await creatorsClient.getPosts(creatorId, { sort_by: sort || sortBy, ...(nextPage ? { page_url: nextPage } : {}) });
       if (nextPage) {
         setCreatorPosts((prev) => [...prev, ...(response.data || [])]);
       } else {
@@ -214,7 +215,7 @@ export default function CreatorProfilePage({ params }: { params: Promise<{ chann
     if (loadingStates.courses) return;
     setLoadingStates((prev) => ({ ...prev, courses: true }));
     try {
-      const response = await creatorsApi.getCourses(creatorId, { sort_by: sort || sortBy, ...(nextPage ? { page_url: nextPage } : {}) });
+      const response = await creatorsClient.getCourses(creatorId, { sort_by: sort || sortBy, ...(nextPage ? { page_url: nextPage } : {}) });
       if (nextPage) {
         setCreatorCourses((prev) => [...prev, ...(response.data || [])]);
       } else {

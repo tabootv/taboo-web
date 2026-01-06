@@ -3,7 +3,7 @@
  */
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { shorts } from '@/lib/api';
+import { shortsClient } from '@/api/client';
 import { getVideoUrl } from '../utils/shorts-utils';
 import { HOVER_DELAY, VIDEO_PREVIEW_DELAY } from '../constants/home-constants';
 import type { Video } from '@/types';
@@ -34,7 +34,7 @@ export function useShortVideoPreview(video: Video) {
     if (!initialPreviewUrl && !fetchedPreviewUrl && !isFetchingUrl) {
       setIsFetchingUrl(true);
       try {
-        const fullShort = await shorts.getV2(video.uuid);
+        const fullShort = await shortsClient.getV2(video.uuid);
         const url = getVideoUrl(fullShort);
         if (url) {
           setFetchedPreviewUrl(url);

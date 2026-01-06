@@ -11,7 +11,7 @@
 import type { ApiResponse, Course, PaginatedResponse, Video } from '../types';
 import { apiClient } from './base-client';
 
-export interface CourseListFilters {
+export interface CourseListFilters extends Record<string, unknown> {
   page?: number;
   per_page?: number;
   sort_by?: string;
@@ -25,13 +25,27 @@ export const coursesClient = {
    */
   list: async (filters?: CourseListFilters): Promise<CourseListResponse> => {
     try {
-      const { data } = await apiClient.get('/courses', { params: filters });
-      const coursesData = data.courses || data;
-      
-      if (coursesData.data) {
-        return coursesData;
+      const data = await apiClient.get<
+        { courses?: Course[]; data?: CourseListResponse } | CourseListResponse | Course[]
+      >('/courses', {
+        params: filters as Record<string, unknown>,
+      });
+
+      let coursesData: unknown = data;
+      if (typeof data === 'object' && data !== null && 'courses' in data) {
+        const obj = data as { courses?: Course[]; data?: CourseListResponse };
+        coursesData = obj.courses || obj.data || data;
       }
-      
+
+      if (
+        coursesData &&
+        typeof coursesData === 'object' &&
+        'data' in coursesData &&
+        'current_page' in coursesData
+      ) {
+        return coursesData as CourseListResponse;
+      }
+
       if (Array.isArray(coursesData)) {
         return {
           data: coursesData,
@@ -49,13 +63,28 @@ export const coursesClient = {
           to: null,
         };
       }
-      
-      return coursesData;
+
+      return coursesData as unknown as CourseListResponse;
     } catch {
       try {
-        const { data } = await apiClient.get('/home/courses');
-        const coursesData = data.courses || data.data || data;
-        const coursesArray = Array.isArray(coursesData) ? coursesData : (coursesData?.data || []);
+        const data = await apiClient.get<
+          { courses?: Course[]; data?: CourseListResponse } | CourseListResponse | Course[]
+        >('/home/courses');
+
+        let coursesData: unknown = data;
+        if (typeof data === 'object' && data !== null && 'courses' in data) {
+          const obj = data as { courses?: Course[]; data?: CourseListResponse };
+          coursesData = obj.courses || obj.data || data;
+        }
+
+        let coursesArray: Course[];
+        if (Array.isArray(coursesData)) {
+          coursesArray = coursesData;
+        } else if (coursesData && typeof coursesData === 'object' && 'data' in coursesData) {
+          coursesArray = (coursesData as CourseListResponse).data;
+        } else {
+          coursesArray = [];
+        }
         return {
           data: coursesArray,
           current_page: 1,
@@ -73,9 +102,24 @@ export const coursesClient = {
         };
       } catch {
         try {
-          const { data } = await apiClient.get('/home/series');
-          const seriesData = data.series || data.data || data;
-          const seriesArray = Array.isArray(seriesData) ? seriesData : (seriesData?.data || []);
+          const data = await apiClient.get<
+            { series?: Course[]; data?: CourseListResponse } | CourseListResponse | Course[]
+          >('/home/series');
+
+          let seriesData: unknown = data;
+          if (typeof data === 'object' && data !== null && 'series' in data) {
+            const obj = data as { series?: Course[]; data?: CourseListResponse };
+            seriesData = obj.series || obj.data || data;
+          }
+
+          let seriesArray: Course[];
+          if (Array.isArray(seriesData)) {
+            seriesArray = seriesData;
+          } else if (seriesData && typeof seriesData === 'object' && 'data' in seriesData) {
+            seriesArray = (seriesData as CourseListResponse).data;
+          } else {
+            seriesArray = [];
+          }
           const coursesArray = seriesArray.filter(
             (s: { type?: string; module_type?: string }) =>
               s.type === 'course' || s.module_type === 'course'
@@ -121,9 +165,15 @@ export const coursesClient = {
    */
   getDetail: async (id: string | number): Promise<Course | null> => {
     try {
-      const { data } = await apiClient.get<ApiResponse<Course>>(`/courses/${id}`);
-      const courseData = data.series || data.data || data;
-      return courseData || null;
+      const data = await apiClient.get<
+        ApiResponse<Course> | { series?: Course; data?: Course } | Course
+      >(`/courses/${id}`);
+      if (data && typeof data === 'object') {
+        if ('series' in data && data.series) return data.series;
+        if ('data' in data && data.data) return data.data;
+        if ('type' in data) return data as Course;
+      }
+      return null;
     } catch {
       return null;
     }
@@ -134,9 +184,26 @@ export const coursesClient = {
    */
   getVideos: async (id: string | number): Promise<Video[]> => {
     try {
-      const { data } = await apiClient.get(`/courses/${id}`);
-      const courseData = data.series || data.data || data;
-      return courseData?.videos || [];
+      const data = await apiClient.get<
+        { series?: { videos?: Video[] }; data?: { videos?: Video[] } } | { videos?: Video[] }
+      >(`/courses/${id}`);
+      if (data && typeof data === 'object') {
+        if (
+          'series' in data &&
+          data.series &&
+          typeof data.series === 'object' &&
+          'videos' in data.series
+        ) {
+          return (data.series as { videos?: Video[] }).videos || [];
+        }
+        if ('data' in data && data.data && typeof data.data === 'object' && 'videos' in data.data) {
+          return (data.data as { videos?: Video[] }).videos || [];
+        }
+        if ('videos' in data && Array.isArray(data.videos)) {
+          return data.videos;
+        }
+      }
+      return [];
     } catch {
       return [];
     }
@@ -146,16 +213,46 @@ export const coursesClient = {
    * Play course video by UUID
    */
   playVideo: async (uuid: string): Promise<Video> => {
-    const { data } = await apiClient.get<ApiResponse<Video>>(`/courses/play/${uuid}`);
-    return data.data;
+    try {
+      const data = await apiClient.get<
+        ApiResponse<Video> | { video?: Video; message?: string } | Video
+      >(`/courses/play/${uuid}`);
+
+      if (!data || typeof data !== 'object') {
+        throw new Error(`Invalid response format for video with UUID ${uuid}`);
+      }
+
+      if (
+        'video' in data &&
+        data.video &&
+        typeof data.video === 'object' &&
+        !Array.isArray(data.video)
+      ) {
+        return data.video as Video;
+      }
+
+      if ('data' in data && data.data) {
+        return data.data;
+      }
+
+      if ('uuid' in data || 'title' in data || 'url' in data || 'id' in data) {
+        return data as Video;
+      }
+
+      throw new Error(`Video with UUID ${uuid} not found or invalid format`);
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error(`Failed to fetch video with UUID ${uuid}: ${String(error)}`);
+    }
   },
 
   /**
    * Get course trailer
    */
   getTrailer: async (id: string | number): Promise<{ url: string }> => {
-    const { data } = await apiClient.get(`/course/${id}/trailer`);
+    const data = await apiClient.get<{ url: string }>(`/course/${id}/trailer`);
     return data;
   },
 };
-

@@ -1,5 +1,6 @@
 @import "tailwindcss";
-@import "tw-animate-css";
+/* @import "tw-animate-css"; */
+/* Temporarily disabled - uncomment after running npm install */
 
 @custom-variant dark (&:is(.dark *));
 
@@ -3043,6 +3044,7 @@ section:has(.vertical-series-card:hover) {
 
 /* Mobile-specific touch optimizations */
 @media (max-width: 768px) {
+
   /* Disable hover effects on touch devices for cleaner UX */
   .hover-lift:hover,
   .card-hover:hover,
@@ -3121,7 +3123,7 @@ section:has(.vertical-series-card:hover) {
     scroll-padding: 16px;
   }
 
-  .snap-mobile > * {
+  .snap-mobile>* {
     scroll-snap-align: start;
   }
 }
@@ -3226,12 +3228,14 @@ section:has(.vertical-series-card:hover) {
 
 /* Mobile navigation bar offset */
 .mobile-nav-offset {
-  padding-top: 56px; /* 14 * 4 = 56px navbar height */
+  padding-top: 56px;
+  /* 14 * 4 = 56px navbar height */
 }
 
 @media (min-width: 1024px) {
   .mobile-nav-offset {
-    padding-top: 64px; /* Slightly taller on desktop */
+    padding-top: 64px;
+    /* Slightly taller on desktop */
   }
 }
 
@@ -3344,6 +3348,7 @@ section:has(.vertical-series-card:hover) {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }

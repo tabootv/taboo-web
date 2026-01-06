@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { User, LoginCredentials, RegisterData, FirebaseLoginData } from '@/types';
-import { auth, removeToken, isAuthenticated } from '@/lib/api';
+import { authClient, removeToken, isAuthenticated } from '@/api/client';
 
 interface AuthState {
   user: User | null;
@@ -34,7 +34,7 @@ export const useAuthStore = create<AuthState>()(
       login: async (credentials: LoginCredentials) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await auth.login(credentials);
+          const response = await authClient.login(credentials);
           // subscribed is at root level in login response
           const isSubscribed = response.subscribed ?? false;
           set({
@@ -53,7 +53,7 @@ export const useAuthStore = create<AuthState>()(
       register: async (data: RegisterData) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await auth.register(data);
+          const response = await authClient.register(data);
           // subscribed is at root level in register response
           const isSubscribed = response.subscribed ?? false;
           set({
@@ -72,7 +72,7 @@ export const useAuthStore = create<AuthState>()(
       firebaseLogin: async (data: FirebaseLoginData) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await auth.firebaseLogin(data);
+          const response = await authClient.firebaseLogin(data);
           // subscribed is at root level in firebase login response
           const isSubscribed = response.subscribed ?? false;
           set({
@@ -91,7 +91,7 @@ export const useAuthStore = create<AuthState>()(
       logout: async () => {
         set({ isLoading: true });
         try {
-          await auth.logout();
+          await authClient.logout();
         } catch {
           // Continue logout even if API call fails
         } finally {
@@ -108,7 +108,7 @@ export const useAuthStore = create<AuthState>()(
 
         set({ isLoading: true });
         try {
-          const response = await auth.me();
+          const response = await authClient.me();
           // subscribed may be at root or inside user
           const isSubscribed = response.subscribed ?? response.user?.subscribed ?? false;
           set({

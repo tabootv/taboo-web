@@ -12,7 +12,6 @@ import type {
   UpdateProfileData,
 } from '../client';
 import { profileClient } from '../client';
-import type { User } from '../types';
 
 /**
  * Hook to update profile

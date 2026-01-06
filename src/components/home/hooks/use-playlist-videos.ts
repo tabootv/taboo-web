@@ -3,7 +3,7 @@
  */
 
 import { useCallback } from 'react';
-import { playlists as playlistsApi } from '@/lib/api';
+import { playlistsClient as playlistsApi } from '@/api/client';
 import type { Playlist, Video } from '@/types';
 
 interface PlaylistWithVideos extends Omit<Playlist, 'videos'> {
@@ -42,7 +42,7 @@ export function usePlaylistVideos(
             return {
               ...p,
               videos: {
-                data: page === 1 ? videosData : [...p.videos.data, ...videosData],
+                data: page === 1 ? videosData : [...(p.videos?.data || []), ...videosData],
               },
               videos_current_page: response.videos?.current_page || page,
               videos_last_page: response.videos?.last_page || null,

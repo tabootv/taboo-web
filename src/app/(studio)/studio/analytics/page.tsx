@@ -55,7 +55,7 @@ import {
   ChartTooltip,
   type ChartConfig,
 } from '@/components/ui/chart';
-import { studio, type StudioVideoListItem } from '@/lib/api/studio';
+import { studioClient as studio } from '@/api/client'; ;
 import Image from 'next/image';
 
 type DateRange = '7d' | '30d' | '90d' | '365d' | 'all';

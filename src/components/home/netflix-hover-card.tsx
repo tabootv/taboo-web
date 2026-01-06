@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSavedVideosStore, type SavedVideo } from '@/lib/stores/saved-videos-store';
-import { videos as videosApi } from '@/lib/api';
+import { videoClient as videosApi } from '@/api/client';
 import type { Video } from '@/types';
 import { Play } from 'lucide-react';
 import { HoverCardVideoPreview } from './components/HoverCardVideoPreview';

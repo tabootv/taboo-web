@@ -18,8 +18,12 @@ export const searchClient = {
    * Search for videos, series, creators
    */
   search: async (query: string, params?: { page?: number }): Promise<SearchResults> => {
-    const { data } = await apiClient.get('/search', { params: { q: query, ...params } });
-    return data.results || data;
+    const data = await apiClient.get<{ results?: SearchResults } | SearchResults>('/search', {
+      params: { q: query, ...params } as Record<string, unknown>,
+    });
+    return (typeof data === 'object' && data !== null && 'results' in data)
+      ? data.results || data
+      : (data as SearchResults);
   },
 };
 

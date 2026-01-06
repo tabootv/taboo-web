@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Send } from 'lucide-react';
-import { posts as postsApi } from '@/lib/api';
+import { postsClient as postsApi } from '@/api/client';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import type { Post, PostComment as PostCommentType } from '@/types';
 import { PostComment } from './post-comment';
@@ -99,7 +99,7 @@ export function PostCommentArea({ post, showReplySection }: PostCommentAreaProps
 
       {/* Comments List */}
       <div className="mt-4">
-        {comments.map((comment, index) => (
+        {commentsClient.map((comment, index) => (
           <PostComment key={comment.id} comment={comment} index={index} />
         ))}
       </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { home } from '@/lib/api';
+import { homeClient } from '@/api/client';
 import type { Video } from '@/types';
 import { RailRow, RailCard, MediaPreviewModal } from '@/components/home';
 
@@ -21,7 +21,7 @@ export function FeaturedSection({ initialVideos }: FeaturedSectionProps) {
 
     async function fetchVideos() {
       try {
-        const data = await home.getFeaturedVideos();
+        const data = await homeClient.getFeaturedVideos();
         setVideos(data || []);
       } catch (error) {
         console.error('Error fetching featured videos:', error);

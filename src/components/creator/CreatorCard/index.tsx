@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Video } from 'lucide-react';
-import { creators as creatorsApi } from '@/lib/api';
+import { creatorsClient as creatorsApi } from '@/api/client';
 import { usePrefetch } from '@/lib/hooks/use-prefetch';
 import type { Creator } from '@/types';
 

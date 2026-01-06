@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react';
 import Image from 'next/image';
 import { ThumbsUp, ThumbsDown, Reply, Send } from 'lucide-react';
-import { comments as commentsApi, videos as videosApi } from '@/lib/api';
+import { commentsClient as commentsApi, videoClient as videosApi } from '@/api/client';
 import type { Comment } from '@/types';
 import { formatRelativeTime } from '@/lib/utils';
 
@@ -58,7 +58,7 @@ export function SingleComment({
     setIsSubmitting(true);
     try {
       const parentId = comment.parent_id ?? comment.id;
-      const newReply = await videosApi.addComment(videoUuid, replyContent, parentId);
+      const newReply = await videoClient.addComment(videoUuid, replyContent, parentId);
       setReplies((prev) => [...prev, newReply]);
       setReplyContent('');
       setShowReplies(true);

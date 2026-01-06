@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { MoreHorizontal, Trash2 } from 'lucide-react';
-import { posts as postsApi } from '@/lib/api';
+import { postsClient as postsApi } from '@/api/client';
 import type { Post } from '@/types';
 import { PostReactions } from './post-reactions';
 import { PostCommentArea } from './post-comment-area';

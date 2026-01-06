@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { videos as videosApi } from '@/lib/api';
+import { videoClient } from '@/api/client';
 import { useAuthStore } from '@/lib/stores/auth-store';
 
 interface AutoplayButtonProps {
@@ -26,7 +26,7 @@ export function AutoplayButton({ onAutoplayChange, initialValue }: AutoplayButto
     onAutoplayChange?.(newValue);
 
     try {
-      await videosApi.toggleAutoplay();
+      await videoClient.toggleAutoplay();
     } catch (error) {
       console.error('Failed to toggle autoplay:', error);
     }

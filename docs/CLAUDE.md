@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+> **Quick Reference Guide** - For complete project documentation, architecture details, and comprehensive guides, see [`PROJECT_CONTEXT.md`](PROJECT_CONTEXT.md).
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
@@ -181,3 +183,12 @@ Common patterns:
 - Shows info panel with play button, save to list, duration
 - Uses `onLoadedData` callback for smooth video-thumbnail transition
 - Volume toggle for preview audio
+
+---
+
+## Additional Documentation
+
+- **[PROJECT_CONTEXT.md](PROJECT_CONTEXT.md)** - Complete project documentation (single source of truth)
+- **[DESIGN_SYSTEM.md](DESIGN_SYSTEM.md)** - Comprehensive design system guide (Web, iOS, Android)
+- **[MIGRATION_GUIDE.md](MIGRATION_GUIDE.md)** - API layer migration from legacy to TanStack Query
+- **[NETFLIX-HOVER-CARD-PATTERN.md](NETFLIX-HOVER-CARD-PATTERN.md)** - Detailed overflow expansion pattern implementation

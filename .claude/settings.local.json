@@ -33,7 +33,11 @@
       "Bash(npx shadcn@latest add popover:*)",
       "Bash(npx shadcn@latest add chart:*)",
       "Bash(npx shadcn@latest add select:*)",
-      "Bash(npx shadcn@latest init:*)"
+      "Bash(npx shadcn@latest init:*)",
+      "Bash(xargs:*)",
+      "Bash(test:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat: implement Next.js middleware for server-side authentication\n\nReplace client-side authentication checks with centralized server-side\nmiddleware to improve security, performance, and user experience.\n\nKey changes:\n- Add middleware.ts with route protection and creator validation\n- Remove 20+ useEffect auth checks from components and layouts\n- Validate creator status server-side via /me endpoint \\(60s cache\\)\n- Preserve redirect URLs with validated ?redirect parameter\n- Clean up studio layout - remove all client-side auth logic\n- Fix subscription hook import alias \\(subscriptionsClient\\)\n\nBenefits:\n- No auth loading flashes for users\n- Server-side validation prevents bypassing\n- Centralized auth logic in single file\n- Redirect preservation maintains user intent\n- Open redirect protection for security\n\nRoutes protected:\n- All routes by default \\(except public: /sign-in, /sign-up, /plans\\)\n- Creator routes \\(/studio/*\\) require is_creator OR channel\n- Public routes accessible without authentication\n\nFiles modified:\n- Profile pages \\(3\\): page, edit, subscription\n- Content pages \\(3\\): page, create, edit\n- Videos/Shorts pages \\(8\\): CRUD operations\n- Studio layout \\(1\\): complete auth removal\n- Other pages \\(4\\): notifications, payment, checkout\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
     ],
     "deny": [],
     "ask": []

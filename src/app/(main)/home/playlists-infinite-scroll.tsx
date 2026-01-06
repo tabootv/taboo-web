@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { fetchHomeData } from '@/lib/api/home-data';
-import { playlists as playlistsApi } from '@/lib/api';
+import { playlistsClient as playlistsApi } from '@/api/client';
 import type { Playlist, Video } from '@/types';
 import { RailRow } from '@/components/home/rail-row';
 import { RailCard } from '@/components/home/rail-card';

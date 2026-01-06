@@ -42,7 +42,7 @@ export const profileClient = {
    * Get user profile
    */
   get: async (): Promise<User> => {
-    const { data } = await apiClient.get<ApiResponse<User>>('/profile');
+    const data = await apiClient.get<ApiResponse<User>>('/profile');
     return data.data;
   },
 
@@ -50,7 +50,7 @@ export const profileClient = {
    * Update profile
    */
   updateProfile: async (profileData: UpdateProfileData): Promise<User> => {
-    const { data } = await apiClient.post<ApiResponse<User>>('/profile/update-profile', profileData);
+    const data = await apiClient.post<ApiResponse<User>>('/profile/update-profile', profileData);
     return data.data;
   },
 
@@ -60,7 +60,7 @@ export const profileClient = {
   updateDisplayPicture: async (file: File): Promise<User> => {
     const formData = new FormData();
     formData.append('dp', file);
-    const { data } = await apiClient.post<ApiResponse<User>>('/profile/update-dp', formData, {
+    const data = await apiClient.post<ApiResponse<User>>('/profile/update-dp', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
     return data.data;
@@ -70,7 +70,7 @@ export const profileClient = {
    * Update email
    */
   updateEmail: async (emailData: UpdateEmailData): Promise<User> => {
-    const { data } = await apiClient.post<ApiResponse<User>>('/profile/update-email', emailData);
+    const data = await apiClient.post<ApiResponse<User>>('/profile/update-email', emailData);
     return data.data;
   },
 
@@ -78,7 +78,7 @@ export const profileClient = {
    * Update contact info
    */
   updateContact: async (contactData: UpdateContactData): Promise<User> => {
-    const { data } = await apiClient.post<ApiResponse<User>>('/profile/update-contact', contactData);
+    const data = await apiClient.post<ApiResponse<User>>('/profile/update-contact', contactData);
     return data.data;
   },
 
@@ -86,7 +86,7 @@ export const profileClient = {
    * Update password
    */
   updatePassword: async (passwordData: UpdatePasswordData): Promise<{ message: string }> => {
-    const { data } = await apiClient.post('/profile/update-password', passwordData);
+    const data = await apiClient.post<{ message: string }>('/profile/update-password', passwordData);
     return data;
   },
 

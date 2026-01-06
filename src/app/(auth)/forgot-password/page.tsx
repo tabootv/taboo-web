@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Mail, CheckCircle } from 'lucide-react';
-import { auth } from '@/lib/api';
+import { authClient } from '@/api/client';
 import { Button } from '@/components/ui';
 import { Logo } from '@/components/ui/logo';
 import { toast } from 'sonner';

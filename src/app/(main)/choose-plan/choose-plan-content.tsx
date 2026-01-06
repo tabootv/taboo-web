@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Check, Crown, Star, X, Sparkles } from 'lucide-react';
 import { WhopCheckoutEmbed } from '@whop/checkout/react';
-import { subscriptions as subscriptionsApi } from '@/lib/api';
+import { subscriptionsClient as subscriptionsApi } from '@/api/client';
 import type { Plan } from '@/types';
 import { useAuthStore } from '@/lib/stores';
 import { toast } from 'sonner';

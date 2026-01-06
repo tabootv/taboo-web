@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { home } from '@/lib/api';
+import { homeClient } from '@/api/client';
 import type { Video } from '@/types';
 import { SectionCard } from '@/components/home';
 import { ShortCard } from './components/ShortCard';
@@ -47,7 +47,7 @@ export function HomeShortsSection({ initialShorts }: HomeShortsSectionProps) {
 
       // Fallback: fetch from API
       try {
-        const data = await home.getShortVideosV2();
+        const data = await homeClient.getShortVideosV2();
         if (!cancelled && data && data.length > 0) {
           setVideos(shuffleShorts(data));
         }

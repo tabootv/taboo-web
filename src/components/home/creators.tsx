@@ -1,7 +1,7 @@
 'use client';
 
+import { homeClient } from '@/api/client';
 import { SectionCard } from '@/components/home';
-import { home } from '@/lib/api';
 import type { Creator } from '@/types';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
@@ -13,7 +13,6 @@ interface CreatorsSectionProps {
 }
 
 export function CreatorsSection({ initialCreators }: CreatorsSectionProps) {
-  // Filter creators (remove id 8 as per Vue implementation)
   const filterCreators = (data: Creator[]) =>
     data.filter((c: Creator) => {
       const channelId = c.user?.channel?.id ?? c.id;
@@ -30,12 +29,11 @@ export function CreatorsSection({ initialCreators }: CreatorsSectionProps) {
   const [showRightGradient, setShowRightGradient] = useState(true);
 
   useEffect(() => {
-    // Skip fetch if initial data was provided and has content
     if (initialCreators && initialCreators.length > 0) return;
 
     async function fetchCreators() {
       try {
-        const data = await home.getCreators();
+        const data = await homeClient.getCreators();
         setCreators(filterCreators(data));
       } catch (error) {
         console.error('Error fetching creators:', error);
@@ -101,20 +99,17 @@ export function CreatorsSection({ initialCreators }: CreatorsSectionProps) {
   return (
     <SectionCard title="Creators">
       <div className="relative group/section">
-        {/* Left Gradient */}
         <div
           className={`absolute left-0 top-0 bottom-0 w-16 bg-linear-to-r from-background to-transparent z-10 pointer-events-none transition-opacity ${
             showLeftGradient ? 'opacity-100' : 'opacity-0'
           }`}
         />
-        {/* Right Gradient */}
         <div
           className={`absolute right-0 top-0 bottom-0 w-16 bg-linear-to-l from-background to-transparent z-10 pointer-events-none transition-opacity ${
             showRightGradient ? 'opacity-100' : 'opacity-0'
           }`}
         />
 
-        {/* Navigation Arrows - centered on circular avatars */}
         <button
           onClick={() => scroll('left')}
           className={`absolute left-2 top-1/2 -translate-y-1/2 z-20 p-2 md:p-2.5 bg-black/80 rounded-full border border-white/20 opacity-0 group-hover/section:opacity-100 transition-all hover:bg-black hover:border-white/40 ${
@@ -132,7 +127,6 @@ export function CreatorsSection({ initialCreators }: CreatorsSectionProps) {
           <ChevronRight className="w-4 h-4 md:w-5 md:h-5 text-white" />
         </button>
 
-        {/* Scrollable Content */}
         <div
           ref={scrollRef}
           className="flex gap-4 md:gap-6 overflow-x-auto hide-scrollbar scroll-smooth px-2 -mx-2 py-6 -my-2"
@@ -151,12 +145,10 @@ export function CreatorsSection({ initialCreators }: CreatorsSectionProps) {
                 className="shrink-0 text-center group"
                 style={{ width: 110 }}
               >
-                {/* Creator Avatar - Taboo Red Atmosphere */}
                 <div
                   className="relative w-[90px] h-[90px] mx-auto rounded-full border-2 border-transparent group-hover:border-red-primary/50 z-10 transition-all duration-300 ease-out group-hover:-translate-y-1 group-hover:scale-[1.02] [box-shadow:0_0_20px_rgba(171,0,19,0.3)] group-hover:[box-shadow:0_0_35px_rgba(171,0,19,0.7)]"
                   aria-hidden="true"
                 >
-                  {/* Image container with overflow-hidden to clip the image, not the glow */}
                   <div className="absolute inset-0 rounded-full overflow-hidden">
                     {displayImage ? (
                       <Image

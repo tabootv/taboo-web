@@ -274,29 +274,44 @@ export const videoClient = {
    * Get bookmarked videos
    */
   getBookmarked: async (page = 1, perPage = 12): Promise<VideoListResponse> => {
-    const { data } = await apiClient.get('/profile/bookmarked-videos', {
-      params: { page, per_page: perPage },
-    });
-    return data.videos || data;
+    const data = await apiClient.get<{ videos?: VideoListResponse } | VideoListResponse>(
+      '/profile/bookmarked-videos',
+      {
+        params: { page, per_page: perPage } as Record<string, unknown>,
+      }
+    );
+    return (typeof data === 'object' && data !== null && 'videos' in data)
+      ? data.videos || data
+      : (data as VideoListResponse);
   },
 
   /**
    * Get watch history
    */
   getHistory: async (page = 1, perPage = 12): Promise<VideoListResponse> => {
-    const { data } = await apiClient.get('/profile/watch-history', {
-      params: { page, per_page: perPage },
-    });
-    return data.videos || data;
+    const data = await apiClient.get<{ videos?: VideoListResponse } | VideoListResponse>(
+      '/profile/watch-history',
+      {
+        params: { page, per_page: perPage } as Record<string, unknown>,
+      }
+    );
+    return (typeof data === 'object' && data !== null && 'videos' in data)
+      ? data.videos || data
+      : (data as VideoListResponse);
   },
 
   /**
    * Get liked videos
    */
   getLiked: async (page = 1, perPage = 12): Promise<VideoListResponse> => {
-    const { data } = await apiClient.get('/profile/liked-videos', {
-      params: { page, per_page: perPage },
-    });
-    return data.videos || data;
+    const data = await apiClient.get<{ videos?: VideoListResponse } | VideoListResponse>(
+      '/profile/liked-videos',
+      {
+        params: { page, per_page: perPage } as Record<string, unknown>,
+      }
+    );
+    return (typeof data === 'object' && data !== null && 'videos' in data)
+      ? data.videos || data
+      : (data as VideoListResponse);
   },
 };

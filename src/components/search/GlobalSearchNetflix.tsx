@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useDebounce } from '@/lib/hooks';
-import { search as searchApi } from '@/lib/api';
+import { searchClient as searchApi } from '@/api/client';
 import type { Video, Series, Creator } from '@/types';
 import { useRecentSearches } from './hooks/use-recent-searches';
 import { RecentSearches } from './components/RecentSearches';

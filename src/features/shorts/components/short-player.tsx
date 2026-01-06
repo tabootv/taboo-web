@@ -15,7 +15,7 @@ import {
 import type { Video } from '@/types';
 import { Avatar } from '@/components/ui';
 import { formatCompactNumber } from '@/lib/utils';
-import { shorts as shortsApi } from '@/lib/api';
+import { shortsClient as shortsApi } from '@/api/client';
 import { toast } from 'sonner';
 import { usePrefersReducedMotion } from '@/lib/hooks';
 

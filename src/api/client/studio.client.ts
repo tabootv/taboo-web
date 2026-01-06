@@ -30,7 +30,7 @@ export const studioClient = {
    * Get creator studio dashboard data
    */
   getDashboard: async (): Promise<StudioDashboardResponse> => {
-    const { data } = await apiClient.get<ApiResponse<StudioDashboardResponse>>('/studio/dashboard');
+    const data = await apiClient.get<ApiResponse<StudioDashboardResponse>>('/studio/dashboard');
     return data.data;
   },
 
@@ -38,8 +38,8 @@ export const studioClient = {
    * Get list of creator's videos
    */
   getVideos: async (page = 1): Promise<StudioVideosListResponse> => {
-    const { data } = await apiClient.get<ApiResponse<StudioVideosListResponse>>('/studio/videos', {
-      params: { page },
+    const data = await apiClient.get<ApiResponse<StudioVideosListResponse>>('/studio/videos', {
+      params: { page } as Record<string, unknown>,
     });
     return data.data;
   },
@@ -48,8 +48,8 @@ export const studioClient = {
    * Get list of creator's shorts
    */
   getShorts: async (page = 1): Promise<StudioVideosListResponse> => {
-    const { data } = await apiClient.get<ApiResponse<StudioVideosListResponse>>('/studio/shorts', {
-      params: { page },
+    const data = await apiClient.get<ApiResponse<StudioVideosListResponse>>('/studio/shorts', {
+      params: { page } as Record<string, unknown>,
     });
     return data.data;
   },
@@ -84,7 +84,7 @@ export const studioClient = {
       formData.append('series_id', String(payload.series_id));
     }
 
-    const { data } = await apiClient.post<StudioUploadVideoResponse>('/studio/videos', formData, {
+    const data = await apiClient.post<StudioUploadVideoResponse>('/studio/videos', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -119,7 +119,7 @@ export const studioClient = {
       formData.append('is_nsfw', payload.is_nsfw ? '1' : '0');
     }
 
-    const { data } = await apiClient.post<StudioUploadShortResponse>('/studio/shorts', formData, {
+    const data = await apiClient.post<StudioUploadShortResponse>('/studio/shorts', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -141,7 +141,7 @@ export const studioClient = {
       formData.append('video', payload.video);
     }
 
-    const { data } = await apiClient.post<StudioCreatePostResponse>('/studio/posts', formData, {
+    const data = await apiClient.post<StudioCreatePostResponse>('/studio/posts', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -153,7 +153,7 @@ export const studioClient = {
    * Delete a video
    */
   deleteVideo: async (videoId: number): Promise<{ success: boolean }> => {
-    const { data } = await apiClient.delete<{ success: boolean }>(`/studio/videos/${videoId}`);
+    const data = await apiClient.delete<{ success: boolean }>(`/studio/videos/${videoId}`);
     return data;
   },
 
@@ -161,7 +161,7 @@ export const studioClient = {
    * Delete a short
    */
   deleteShort: async (videoId: number): Promise<{ success: boolean }> => {
-    const { data } = await apiClient.delete<{ success: boolean }>(`/studio/shorts/${videoId}`);
+    const data = await apiClient.delete<{ success: boolean }>(`/studio/shorts/${videoId}`);
     return data;
   },
 };

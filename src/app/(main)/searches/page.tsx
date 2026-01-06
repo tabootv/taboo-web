@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Search as SearchIcon, X, Film, Play, Users, BookOpen } from 'lucide-react';
-import { search as searchApi } from '@/lib/api';
+import { searchClient as searchApi } from '@/api/client';
 import type { Video, Series, Creator } from '@/types';
 import { Spinner } from '@/components/ui';
 import { formatCompactNumber, formatDuration } from '@/lib/utils';

@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { Heart } from 'lucide-react';
-import { videos as videosApi } from '@/lib/api';
+import { videoClient } from '@/api/client';
 import { toast } from 'sonner';
 import type { Video } from '@/types';
 
@@ -21,7 +21,7 @@ export function LikeButton({ video, onUpdate }: LikeButtonProps) {
 
     try {
       setIsLoading(true);
-      await videosApi.toggleLike(video.uuid);
+      await videoClient.toggleLike(video.uuid);
 
       const newIsLiked = !isLiked;
       const newLikesCount = newIsLiked ? likesCount + 1 : likesCount - 1;

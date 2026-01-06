@@ -11,7 +11,7 @@ import {
   Send,
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/stores';
-import { studio } from '@/lib/api';
+import { studioClient } from '@/api/client';
 import { Button } from '@/components/ui';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';

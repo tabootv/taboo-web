@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Flame, Trash2, MessageCircle } from 'lucide-react';
-import { posts as postsApi } from '@/lib/api';
+import { postsClient as postsApi } from '@/api/client';
 import type { Post } from '@/types';
 
 interface PostReactionsProps {
