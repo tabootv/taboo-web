@@ -560,3 +560,9 @@ export interface ToggleFollowResponse {
   following: boolean;
   followers_count?: number;
 }
+
+// ============================================
+// Earnings (FirstPromoter Integration)
+// ============================================
+
+export * from './earnings';

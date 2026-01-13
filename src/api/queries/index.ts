@@ -2,6 +2,7 @@ export * from './auth.queries';
 export * from './clips.queries';
 export * from './courses.queries';
 export * from './creators.queries';
+export * from './earnings.queries';
 export * from './home.queries';
 export * from './livechat.queries';
 export * from './notifications.queries';

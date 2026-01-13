@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import {
   DollarSign,
   MousePointer,
@@ -29,81 +29,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { FunnelAreaChart } from '@/features/creator-studio';
-
-type DateRange = '7d' | '30d' | '90d' | '365d' | 'all';
-type GroupBy = 'day' | 'week' | 'month';
-
-interface Commission {
-  id: number;
-  status: string;
-  saleAmount: number;
-  commissionAmount: number;
-  planId: string;
-  referralEmail: string;
-  rewardName: string;
-  createdAt: string;
-}
-
-interface Payout {
-  id: number;
-  status: string;
-  amount: number;
-  periodStart: string;
-  periodEnd: string;
-  paidAt: string | null;
-  payoutMethod: string;
-}
-
-interface EarningsData {
-  promoter: {
-    id: number;
-    name: string;
-    email: string;
-    refId: string;
-    referralLink: string;
-    status: string;
-    payoutMethod: string | null;
-    joinedAt: string;
-  };
-  summary: {
-    clicks: number;
-    signups: number;
-    customers: number;
-    sales: number;
-    revenue: number;
-    earnings: number;
-  };
-  allTimeStats: {
-    clicks: number;
-    signups: number;
-    customers: number;
-    sales: number;
-    revenue: number;
-    earnings: number;
-    activeCustomers: number;
-  };
-  balance: {
-    current: number;
-    pending: number;
-    paid: number;
-  };
-  conversionRates: {
-    clickToSignup: number;
-    signupToCustomer: number;
-  };
-  series: Array<{
-    period: string;
-    earnings: number;
-    revenue: number;
-    count: number;
-    clicks: number;
-    signups: number;
-    customers: number;
-  }>;
-  recentCommissions: Commission[];
-  payoutHistory: Payout[];
-  groupBy: GroupBy;
-}
+import { useEarnings } from '@/api/queries';
+import type { DateRange, GroupBy } from '@/types';
 
 interface StatCardProps {
   title: string;
@@ -198,12 +125,11 @@ function getStatusColor(status: string): string {
 
 
 export default function EarningsPage() {
-  const [data, setData] = useState<EarningsData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isRefetching, setIsRefetching] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<DateRange>('30d');
   const [groupBy, setGroupBy] = useState<GroupBy>('day');
+
+  // Use TanStack Query hook for data fetching
+  const { data, isLoading, error, refetch, isFetching } = useEarnings(dateRange, groupBy);
 
   const dateRangeOptions: { value: DateRange; label: string }[] = [
     { value: '7d', label: 'Last 7 days' },
@@ -218,84 +144,6 @@ export default function EarningsPage() {
     { value: 'week', label: 'Weekly' },
     { value: 'month', label: 'Monthly' },
   ];
-
-  const getDateParams = useCallback(() => {
-    const endDate = new Date();
-    const startDate = new Date();
-    let group: GroupBy = groupBy;
-
-    switch (dateRange) {
-      case '7d':
-        startDate.setDate(endDate.getDate() - 7);
-        if (groupBy === 'month') group = 'day';
-        break;
-      case '30d':
-        startDate.setDate(endDate.getDate() - 30);
-        break;
-      case '90d':
-        startDate.setDate(endDate.getDate() - 90);
-        if (groupBy === 'day') group = 'week';
-        break;
-      case '365d':
-        startDate.setFullYear(endDate.getFullYear() - 1);
-        if (groupBy === 'day') group = 'month';
-        break;
-      case 'all':
-        startDate.setFullYear(2020, 0, 1);
-        group = 'month';
-        break;
-    }
-
-    return {
-      start_date: startDate.toISOString(),
-      end_date: endDate.toISOString(),
-      group_by: group,
-    };
-  }, [dateRange, groupBy]);
-
-  const fetchData = useCallback(async (isInitial = false) => {
-    if (isInitial) {
-      setIsLoading(true);
-    } else {
-      setIsRefetching(true);
-    }
-    setError(null);
-
-    try {
-      const params = getDateParams();
-      const searchParams = new URLSearchParams({
-        start_date: params.start_date,
-        end_date: params.end_date,
-        group_by: params.group_by,
-      });
-
-      const response = await fetch(`/api/creator-studio/earnings?${searchParams}`);
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to fetch earnings data');
-      }
-
-      setData(result);
-    } catch (err) {
-      console.error('Failed to fetch earnings:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load earnings data');
-    } finally {
-      setIsLoading(false);
-      setIsRefetching(false);
-    }
-  }, [getDateParams]);
-
-  useEffect(() => {
-    fetchData(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (isLoading) return;
-    fetchData(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dateRange, groupBy]);
 
   if (isLoading) {
     return (
@@ -316,8 +164,8 @@ export default function EarningsPage() {
             <AlertCircle className="w-8 h-8 text-destructive" />
           </div>
           <p className="text-muted-foreground mb-2">Unable to load earnings data</p>
-          <p className="text-muted-foreground/60 text-sm mb-4">{error}</p>
-          <Button onClick={() => fetchData(true)} variant="outline">
+          <p className="text-muted-foreground/60 text-sm mb-4">{error?.message || 'An unexpected error occurred'}</p>
+          <Button onClick={() => refetch()} variant="outline">
             <RefreshCw className="w-4 h-4 mr-2" />
             Try Again
           </Button>
@@ -331,7 +179,7 @@ export default function EarningsPage() {
   return (
     <div className="p-6 max-w-7xl mx-auto relative">
       {/* Refetching Overlay */}
-      {isRefetching && (
+      {isFetching && !isLoading && (
         <div className="absolute inset-0 bg-background/50 backdrop-blur-sm z-40 flex items-center justify-center rounded-xl">
           <Card className="flex items-center gap-3 px-4 py-2">
             <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" />
@@ -377,8 +225,8 @@ export default function EarningsPage() {
             </SelectContent>
           </Select>
 
-          <Button onClick={() => fetchData(false)} variant="outline" size="sm" disabled={isRefetching}>
-            <RefreshCw className={`w-4 h-4 ${isRefetching ? 'animate-spin' : ''}`} />
+          <Button onClick={() => refetch()} variant="outline" size="sm" disabled={isFetching}>
+            <RefreshCw className={`w-4 h-4 ${isFetching ? 'animate-spin' : ''}`} />
           </Button>
         </div>
       </div>

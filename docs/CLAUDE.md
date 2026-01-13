@@ -72,12 +72,15 @@ src/
 - **Courses**: Educational series with structured lessons
 - **Posts**: Community feed content with text/images
 
-### API Layer
-- **Client** (`src/lib/api/client.ts`): Axios instance with auth token interceptor
-- **Endpoints** (`src/lib/api/endpoints.ts`): All API calls organized by domain
-- **Studio** (`src/lib/api/studio.ts`): Creator dashboard and content upload APIs
-- **Proxy**: All `/api/*` requests are proxied to the backend via Next.js rewrites to avoid CORS
+### API Layer (Modern TanStack Query Architecture)
+- **Base Client** (`src/api/client/base-client.ts`): Fetch-based client with auth token from cookies
+- **API Clients** (`src/api/client/`): Domain-specific clients (video, auth, home, series, posts, earnings, etc.)
+- **TanStack Query Hooks** (`src/api/queries/` & `src/api/mutations/`): React Query hooks for data fetching and mutations
+- **Types** (`src/types/`): Centralized TypeScript interfaces for API responses
+- **Legacy API** (`src/lib/api/`): Old Axios-based API (being gradually migrated)
+- **Proxy**: Backend requests proxied via Next.js rewrites to avoid CORS
 - **API Versions**: Some endpoints have V1 and V2 variants (e.g., `/shorts` vs `/v2/shorts`)
+- **Third-Party Integrations**: FirstPromoter earnings use Next.js API routes as secure proxies (`/api/creator-studio/earnings`)
 
 ### State Management (Zustand Stores)
 - **Auth Store**: User session, login/logout, subscription status (persisted to localStorage)
@@ -106,10 +109,15 @@ Key patterns (see `DESIGN_SYSTEM.md` for full docs):
 - Use `cn()` from `@/lib/utils` for conditional Tailwind classes
 
 ### Authentication Flow
-1. Token stored in cookies (`tabootv_token`)
-2. Auth store persisted to localStorage
-3. 401 responses redirect to `/sign-in`
-4. 403 with subscription message redirects to `/plans`
+1. **Server-Side Protection**: Next.js middleware (`src/middleware.ts`) protects all routes by default
+   - Public routes: `/sign-in`, `/sign-up`, `/plans`, `/checkout`, `/`
+   - Protected routes: Require `tabootv_token` cookie, redirect to `/sign-in?redirect=<path>` if missing
+   - Creator routes (`/studio/*`): Validate creator status via `/me` API call (cached 60s)
+   - Authenticated users on auth pages redirect to `/home`
+2. **Token Storage**: Token stored in cookies (`tabootv_token`), accessible to middleware
+3. **Client State**: Auth store (Zustand) persisted to localStorage for UI state
+4. **API Authentication**: Base client reads token from cookies for API requests
+5. **Error Handling**: 401 responses trigger sign-in redirect, 403 with subscription message redirects to `/plans`
 
 ## Environment Variables
 
@@ -123,11 +131,32 @@ Copy `.env.local.example` to `.env.local`:
 ### Path Aliases
 - `@/` maps to `src/`
 
-### API Calls
+### API Calls (Modern Pattern)
 ```tsx
-import { videos, auth, home } from '@/lib/api';
-const data = await videos.play(id);  // Returns { video, videos }
-const recommended = await home.getRecommendedVideos();
+// Use TanStack Query hooks for data fetching
+import { useVideo, useRecommendedVideos } from '@/api/queries';
+
+function VideoPage({ videoId }: { videoId: string }) {
+  const { data, isLoading, error } = useVideo(videoId);
+  // data is automatically cached and refetched as needed
+}
+
+// Use mutation hooks for state changes
+import { useToggleLike } from '@/api/mutations';
+
+function LikeButton({ videoId }: { videoId: number }) {
+  const toggleLike = useToggleLike();
+
+  const handleLike = () => {
+    toggleLike.mutate(videoId, {
+      onSuccess: () => console.log('Liked!'),
+    });
+  };
+}
+
+// Direct API client calls (for non-component code)
+import { videoClient } from '@/api/client';
+const data = await videoClient.getVideo(id);
 ```
 
 ### Zustand Store Usage
@@ -158,10 +187,25 @@ import { VideoPlayer } from '@/components/video';
 ### Creator Studio
 Located at `/studio/*`, allows creators to manage their content:
 - Dashboard: `/studio` - Stats and recent content overview
+- Analytics: `/studio/analytics` - Comprehensive analytics with glassmorphism UI and charts
+- Earnings: `/studio/earnings` - Affiliate earnings tracking (FirstPromoter integration)
 - Upload video: `/studio/upload/video` - Long-form content upload
 - Upload short: `/studio/upload/short` - Vertical video upload
 - Create post: `/studio/post` - Community post creation
-- Uses `studio` API module from `@/lib/api/studio`
+- Uses `studioClient` from `@/api/client/studio`
+
+### Earnings & FirstPromoter Integration
+Creator earnings are tracked via FirstPromoter affiliate system:
+- **UI**: Glassmorphism design with interactive charts (`FunnelAreaChart`)
+- **API Proxy**: Next.js API route at `/api/creator-studio/earnings` proxies FirstPromoter API
+  - Keeps FirstPromoter credentials server-side
+  - Transforms and caches data at the edge
+- **Data Fetching**: Uses TanStack Query hook `useEarnings(range, groupBy)`
+  - Automatically calculates date ranges (7d, 30d, 90d, 365d, all)
+  - Caches data for 5 minutes, garbage collects after 10 minutes
+- **Types**: All earnings types in `src/types/earnings.ts`
+- **Components**: Uses shadcn calendar, chart, select components for date filtering
+- **Security**: All FirstPromoter API calls happen server-side, never exposing API keys
 
 ### Horizontal Scroll Sections (Home Page)
 Home page uses multiple horizontal scrollable sections in `src/components/home/`:
