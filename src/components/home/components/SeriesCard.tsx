@@ -2,11 +2,11 @@
  * Individual series card component for the vertical list
  */
 
-import Image from 'next/image';
-import Link from 'next/link';
-import { Play, Film, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Series } from '@/types';
+import { ChevronRight, Film, Play } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
 
 interface SeriesCardProps {
   item: Series;
@@ -24,7 +24,9 @@ export function SeriesCard({ item, index, isSelected, onClick }: SeriesCardProps
       onClick={onClick}
       className={cn(
         'group flex-shrink-0 w-[140px] lg:w-full flex flex-col lg:flex-row items-start lg:items-center gap-2 lg:gap-3 p-1.5 lg:p-2 rounded-lg transition-all duration-200 text-left border border-transparent',
-        isSelected ? 'bg-white/10 border-white/15 shadow-[0_10px_40px_rgba(0,0,0,0.25)]' : 'bg-transparent hover:bg-white/5'
+        isSelected
+          ? 'bg-white/10 border-white/15 shadow-[0_10px_40px_rgba(0,0,0,0.25)]'
+          : 'bg-transparent hover:bg-white/5'
       )}
     >
       <div className="relative w-full lg:w-20 aspect-video lg:aspect-[16/10] rounded-md overflow-hidden flex-shrink-0">
@@ -93,7 +95,7 @@ export function SeriesCard({ item, index, isSelected, onClick }: SeriesCardProps
 
         <div className="hidden lg:flex items-center gap-2 mt-2">
           <Link
-            href={`/series/${item.uuid || item.id}`}
+            href={`/series/${item.id}`}
             onClick={(e) => e.stopPropagation()}
             className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/10 hover:bg-white/15 text-white/80 hover:text-white text-[11px] font-medium transition-colors"
           >
@@ -105,7 +107,7 @@ export function SeriesCard({ item, index, isSelected, onClick }: SeriesCardProps
 
       <ChevronRight
         className={cn(
-          'hidden lg:block w-4 h-4 flex-shrink-0 transition-all',
+          'hidden lg:block w-4 h-4 shrink-0 transition-all',
           isSelected
             ? 'text-white opacity-100 translate-x-0'
             : 'text-white/20 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0'
@@ -114,4 +116,3 @@ export function SeriesCard({ item, index, isSelected, onClick }: SeriesCardProps
     </button>
   );
 }
-

@@ -1,6 +1,6 @@
-import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { User } from 'lucide-react';
+import Image from 'next/image';
 
 interface AvatarProps {
   src?: string | null | undefined;
@@ -11,7 +11,7 @@ interface AvatarProps {
 }
 
 const sizes = {
-  sm: 'h-8 w-8',
+  sm: 'h-6 w-6',
   md: 'h-10 w-10',
   lg: 'h-12 w-12',
   xl: 'h-16 w-16',

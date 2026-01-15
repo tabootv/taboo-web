@@ -1,16 +1,13 @@
-/**
- * Series side panel component showing selected series details
- */
-
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { seriesClient } from '@/api/client';
+import { useFeature } from '@/lib/hooks/use-feature';
+import { useSavedVideosStore, type SavedVideo } from '@/lib/stores/saved-videos-store';
+import { cn, formatCompactNumber } from '@/lib/utils';
+import type { Series } from '@/types';
+import { Check, ChevronRight, Clock, Film, Play, Plus } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Play, Plus, Check, ChevronRight, Clock, Film } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { formatCompactNumber } from '@/lib/utils';
-import { useSavedVideosStore, type SavedVideo } from '@/lib/stores/saved-videos-store';
-import type { Series } from '@/types';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface SeriesSidePanelProps {
   series: Series | null;
@@ -20,10 +17,13 @@ export function SeriesSidePanel({ series }: SeriesSidePanelProps) {
   const [isVideoReady, setIsVideoReady] = useState(false);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [isLoadingPlay, setIsLoadingPlay] = useState(false);
+
+  const bookmarksEnabled = useFeature('BOOKMARK_SYSTEM');
   const videoRef = useRef<HTMLVideoElement>(null);
   const { isSaved, toggleSave } = useSavedVideosStore();
   const router = useRouter();
-  const seriesHref = series ? `/series/${series.uuid || series.id}` : '#';
+  const seriesDetailHref = series ? `/series/${series.id}` : '#';
 
   useEffect(() => {
     if (series?.id) {
@@ -38,9 +38,12 @@ export function SeriesSidePanel({ series }: SeriesSidePanelProps) {
     if (series?.trailer_url && videoRef.current) {
       videoRef.current.load();
       const playTimer = setTimeout(() => {
-        videoRef.current?.play().then(() => {
-          setIsVideoPlaying(true);
-        }).catch(() => {});
+        videoRef.current
+          ?.play()
+          .then(() => {
+            setIsVideoPlaying(true);
+          })
+          .catch(() => {});
       }, 300);
 
       return () => clearTimeout(playTimer);
@@ -61,11 +64,39 @@ export function SeriesSidePanel({ series }: SeriesSidePanelProps) {
     setSaved(newState);
   }, [series, toggleSave]);
 
-  const handlePlay = useCallback(() => {
-    if (seriesHref !== '#') {
-      router.push(seriesHref);
-    }
-  }, [router, seriesHref]);
+  const handlePlay = useCallback(
+    async (toHref?: string) => {
+      if (!series) return;
+
+      if (toHref === 'series') {
+        router.push(`/series/${series.id}`);
+        return;
+      }
+
+      if (toHref === 'play') {
+        if (isLoadingPlay) return;
+
+        setIsLoadingPlay(true);
+        try {
+          const seriesDetails = await seriesClient.getDetail(series.id);
+
+          const firstVideo = seriesDetails?.videos?.[0];
+
+          if (firstVideo?.uuid) {
+            router.push(`/series/${series.id}/play/${firstVideo.uuid}`);
+          } else {
+            router.push(`/series/${series.id}`);
+          }
+        } catch (error) {
+          console.error('Error loading series videos:', error);
+          router.push(`/series/${series.id}`);
+        } finally {
+          setIsLoadingPlay(false);
+        }
+      }
+    },
+    [router, series, isLoadingPlay]
+  );
 
   if (!series) {
     return (
@@ -116,8 +147,9 @@ export function SeriesSidePanel({ series }: SeriesSidePanelProps) {
 
           <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
             <button
-              onClick={handlePlay}
-              className="w-14 h-14 rounded-full bg-white/90 hover:bg-white flex items-center justify-center transition-all hover:scale-110"
+              onClick={() => handlePlay('play')}
+              disabled={isLoadingPlay}
+              className="w-14 h-14 rounded-full bg-white/90 hover:bg-white flex items-center justify-center transition-all hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
             >
               <Play className="w-6 h-6 text-black fill-black ml-0.5" />
             </button>
@@ -132,9 +164,7 @@ export function SeriesSidePanel({ series }: SeriesSidePanelProps) {
         </div>
 
         <div className="p-6 flex-1 flex flex-col">
-          <h3 className="text-2xl font-bold text-white mb-3 line-clamp-2">
-            {series.title}
-          </h3>
+          <h3 className="text-2xl font-bold text-white mb-3 line-clamp-2">{series.title}</h3>
 
           <div className="flex flex-wrap items-center gap-2 text-sm text-white/60 mb-4">
             {series.latest && (
@@ -188,44 +218,45 @@ export function SeriesSidePanel({ series }: SeriesSidePanelProps) {
           )}
 
           {description && (
-            <p className="text-sm text-white/60 leading-relaxed line-clamp-3 mb-5">
-              {description}
-            </p>
+            <p className="text-sm text-white/60 leading-relaxed line-clamp-3 mb-5">{description}</p>
           )}
 
           <div className="flex items-center gap-2 mt-auto">
             <button
-              onClick={handlePlay}
-              className="flex items-center gap-2 px-5 py-2.5 bg-white hover:bg-white/90 text-black font-medium rounded-lg transition-colors"
+              onClick={() => handlePlay('play')}
+              disabled={isLoadingPlay}
+              className="flex items-center cursor-pointer gap-2 px-5 py-2.5 bg-white hover:bg-white/90 text-black font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Play className="w-4 h-4 fill-black" />
-              Watch Now
+              {isLoadingPlay ? 'Loading...' : 'Watch Now'}
             </button>
 
-            <button
-              onClick={handleSave}
-              className={cn(
-                'flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-colors',
-                saved
-                  ? 'bg-white/15 text-white'
-                  : 'bg-white/10 text-white/80 hover:bg-white/15 hover:text-white'
-              )}
-            >
-              {saved ? (
-                <>
-                  <Check className="w-4 h-4" />
-                  Saved
-                </>
-              ) : (
-                <>
-                  <Plus className="w-4 h-4" />
-                  Save
-                </>
-              )}
-            </button>
+            {bookmarksEnabled && (
+              <button
+                onClick={handleSave}
+                className={cn(
+                  'flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-colors',
+                  saved
+                    ? 'bg-white/15 text-white'
+                    : 'bg-white/10 text-white/80 hover:bg-white/15 hover:text-white'
+                )}
+              >
+                {saved ? (
+                  <>
+                    <Check className="w-4 h-4" />
+                    Saved
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-4 h-4" />
+                    Save
+                  </>
+                )}
+              </button>
+            )}
 
             <Link
-              href={seriesHref}
+              href={seriesDetailHref}
               className="flex items-center gap-1.5 px-4 py-2.5 bg-white/10 hover:bg-white/15 text-white/80 hover:text-white font-medium rounded-lg transition-colors ml-auto"
             >
               View Series
@@ -237,4 +268,3 @@ export function SeriesSidePanel({ series }: SeriesSidePanelProps) {
     </div>
   );
 }
-
