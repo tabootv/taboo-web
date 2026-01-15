@@ -36,15 +36,27 @@ export default function ShortsPage() {
     setCurrentIndex,
     toggleMute,
     setHasLiked,
-    loadMore,
   } = useShortsStore();
+
+  // Stabilize Zustand function references to prevent infinite loops
+  const fetchVideosRef = useRef(fetchVideos);
+  const setCurrentIndexRef = useRef(setCurrentIndex);
+
+  // Keep refs updated with latest function references
+  useEffect(() => {
+    fetchVideosRef.current = fetchVideos;
+  }, [fetchVideos]);
+
+  useEffect(() => {
+    setCurrentIndexRef.current = setCurrentIndex;
+  }, [setCurrentIndex]);
 
   // Fetch videos on mount
   useEffect(() => {
     if (!hasFetched && !isLoading) {
-      fetchVideos();
+      fetchVideosRef.current();
     }
-  }, [hasFetched, isLoading, fetchVideos]);
+  }, [hasFetched, isLoading]);
 
   // Mark as ready once we have videos - no artificial delay
   useEffect(() => {
@@ -62,13 +74,6 @@ export default function ShortsPage() {
       window.history.replaceState(null, '', `/shorts/${currentVideo.uuid}`);
     }
   }, [currentIndex, videos, isReady]);
-
-  // Load more when near end
-  useEffect(() => {
-    if (currentIndex >= videos.length - 3 && !isLoadingMore) {
-      loadMore();
-    }
-  }, [currentIndex, videos.length, isLoadingMore, loadMore]);
 
   // Keyboard shortcuts
   const handleKeyDown = useCallback(
@@ -112,13 +117,10 @@ export default function ShortsPage() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
 
-  const handleSlideChange = useCallback(
-    (swiper: SwiperType) => {
-      if (!isInitializedRef.current) return;
-      setCurrentIndex(swiper.activeIndex);
-    },
-    [setCurrentIndex]
-  );
+  const handleSlideChange = useCallback((swiper: SwiperType) => {
+    if (!isInitializedRef.current) return;
+    setCurrentIndexRef.current(swiper.activeIndex);
+  }, []);
 
   const handleSwiperInit = useCallback((swiper: SwiperType) => {
     swiperRef.current = swiper;

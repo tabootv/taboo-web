@@ -37,9 +37,6 @@ export default function CommunityPage() {
         {/* Title left-aligned, tabs centered on the same line */}
         <div className="max-w-[1280px] mx-auto px-4 md:px-6 lg:px-8 pt-4 pb-3">
           <div className="relative flex items-center min-h-[44px]">
-            <h1 className="text-2xl md:text-3xl font-bold text-white absolute left-0">
-              Creators Feed
-            </h1>
             <div className="w-full flex justify-center">
               <div className="flex gap-2">
                 <Link

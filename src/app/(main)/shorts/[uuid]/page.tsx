@@ -40,12 +40,41 @@ export default function ShortPage() {
     setHasLiked,
   } = useShortsStore();
 
+  // Stabilize Zustand function references to prevent infinite loops
+  const fetchVideosRef = useRef(fetchVideos);
+  const setCurrentIndexRef = useRef(setCurrentIndex);
+
+  // Track the last fetched UUID to prevent duplicate fetches
+  const lastFetchedUuidRef = useRef<string | null>(null);
+
+  // Keep refs updated with latest function references
+  useEffect(() => {
+    fetchVideosRef.current = fetchVideos;
+  }, [fetchVideos]);
+
+  useEffect(() => {
+    setCurrentIndexRef.current = setCurrentIndex;
+  }, [setCurrentIndex]);
+
   // Fetch videos with this short as the initial one - only once
   useEffect(() => {
-    if (uuid && !isLoading) {
-      fetchVideos(uuid);
+    // Check if this UUID is already the first video in our store
+    const firstVideoUuid = videos[0]?.uuid;
+    const hasRequestedVideo = firstVideoUuid === uuid;
+
+    // Only fetch if:
+    // 1. We haven't fetched this UUID yet (ref check)
+    // 2. AND the requested UUID is not already in the store
+    if (
+      uuid &&
+      !isLoading &&
+      lastFetchedUuidRef.current !== uuid &&
+      !hasRequestedVideo
+    ) {
+      lastFetchedUuidRef.current = uuid;
+      fetchVideosRef.current(uuid);
     }
-  }, [uuid, fetchVideos, isLoading]);
+  }, [uuid, isLoading, videos]);
 
   // Mark as ready once we have videos
   useEffect(() => {
@@ -118,13 +147,10 @@ export default function ShortPage() {
   }, [handleKeyDown]);
 
   // Handle slide change - with guard
-  const handleSlideChange = useCallback(
-    (swiper: SwiperType) => {
-      if (!isInitializedRef.current) return;
-      setCurrentIndex(swiper.activeIndex);
-    },
-    [setCurrentIndex]
-  );
+  const handleSlideChange = useCallback((swiper: SwiperType) => {
+    if (!isInitializedRef.current) return;
+    setCurrentIndexRef.current(swiper.activeIndex);
+  }, []);
 
   // Store swiper instance
   const handleSwiperInit = useCallback((swiper: SwiperType) => {

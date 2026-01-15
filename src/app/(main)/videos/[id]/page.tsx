@@ -30,7 +30,16 @@ export default function VideoPage() {
   const id = params.id as string;
   const { user } = useAuthStore();
 
-  const { data: playData, isLoading: isLoadingPlay, isError: isErrorPlay, error: errorPlay } = useVideoPlay(id);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [id]);
+
+  const {
+    data: playData,
+    isLoading: isLoadingPlay,
+    isError: isErrorPlay,
+    error: errorPlay,
+  } = useVideoPlay(id);
   const videoId = playData?.video?.uuid || playData?.video?.id;
   const { data: relatedData } = useRelatedVideos(videoId, 1, 10);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
@@ -56,7 +65,7 @@ export default function VideoPage() {
       const related = relatedData.data || [];
       const videoIds = new Set(allVideos.map((v) => v.uuid || v.id));
       const currentVideoId = video?.uuid || video?.id;
-      
+
       related.forEach((v) => {
         const key = v.uuid || v.id;
         if (!key || videoIds.has(key) || key === currentVideoId) return;
@@ -76,7 +85,9 @@ export default function VideoPage() {
   const isLoading = isLoadingPlay;
   const error = useMemo(() => {
     if (isErrorPlay) {
-      const axiosError = errorPlay as { response?: { status?: number; data?: { message?: string } } };
+      const axiosError = errorPlay as {
+        response?: { status?: number; data?: { message?: string } };
+      };
       const status = axiosError?.response?.status;
       if (status === 401) return 'auth';
       if (status === 500) return 'server_error';
@@ -129,9 +140,7 @@ export default function VideoPage() {
       return relatedVideos.slice(0, limit);
     }
     const tagged = relatedVideos.filter((v) => v.tags?.some((tag) => tag.name === selectedTag));
-    const fillers = relatedVideos.filter(
-      (v) => !tagged.includes(v)
-    );
+    const fillers = relatedVideos.filter((v) => !tagged.includes(v));
     return [...tagged, ...fillers].slice(0, limit);
   }, [relatedVideos, selectedTag]);
 
@@ -287,7 +296,9 @@ export default function VideoPage() {
                     <span className="font-medium text-white group-hover:text-text-secondary transition-colors truncate">
                       {video.channel?.name}
                     </span>
-                    <span className="shrink-0"><VerifiedBadge size={14} /></span>
+                    <span className="shrink-0">
+                      <VerifiedBadge size={14} />
+                    </span>
                   </Link>
                   <p className="text-xs text-text-secondary">
                     {video.humans_publish_at || formatRelativeTime(video.published_at)}
@@ -312,10 +323,13 @@ export default function VideoPage() {
               </div>
 
               <div className="flex items-center gap-2">
-                <LikeButton video={video} onUpdate={() => {
-                  // Video state is managed by TanStack Query, mutations handle cache updates
-                  // This callback is for component compatibility only
-                }} />
+                <LikeButton
+                  video={video}
+                  onUpdate={() => {
+                    // Video state is managed by TanStack Query, mutations handle cache updates
+                    // This callback is for component compatibility only
+                  }}
+                />
                 <SaveButton video={video} />
               </div>
             </div>
@@ -436,7 +450,9 @@ export default function VideoPage() {
                       </p>
                       <p className="text-xs text-text-secondary mt-1 flex items-center gap-1">
                         {item.channel?.name}
-                        <span className="shrink-0"><VerifiedBadge size={12} /></span>
+                        <span className="shrink-0">
+                          <VerifiedBadge size={12} />
+                        </span>
                       </p>
                       <p className="text-xs text-text-secondary">
                         {formatRelativeTime(item.published_at)}

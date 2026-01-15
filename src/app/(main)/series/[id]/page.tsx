@@ -1,8 +1,6 @@
 'use client';
 
-import dynamic from 'next/dynamic';
 import { useSeriesDetail } from '@/api/queries';
-import { VideoPlayerSkeleton } from '@/components/video';
 import { cn, formatDuration } from '@/lib/utils';
 import type { Series, Video } from '@/types';
 import { ChevronDown, Clock, Info, Play } from 'lucide-react';
@@ -10,16 +8,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
-import { EpisodeCard, SeriesPageSkeleton } from '@/components/series';
+import { EpisodeCard, SeriesPageSkeleton, TrailerModal } from '@/components/series';
 import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
-
-const VideoPlayer = dynamic(
-  () => import('@/features/video').then((mod) => ({ default: mod.VideoPlayer })),
-  {
-    loading: () => <VideoPlayerSkeleton />,
-    ssr: false,
-  }
-);
 
 export default function SeriesDetailPage() {
   const params = useParams();
@@ -49,7 +39,6 @@ export default function SeriesDetailPage() {
 
   const handleWatchTrailer = () => {
     setShowTrailer(true);
-    heroRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const totalDuration = videos.reduce((acc, v) => acc + (v.duration || 0), 0);
@@ -90,19 +79,7 @@ export default function SeriesDetailPage() {
 
         <div className="relative z-10 pt-16 pb-8 min-h-[80vh] flex flex-col justify-end">
           <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 w-full">
-            {showTrailer && seriesData.trailer_url && heroImage && (
-              <div className="mb-8 max-w-4xl animate-fade-in">
-                <VideoPlayer
-                  thumbnail={heroImage}
-                  url_1080={seriesData.trailer_url}
-                  autoplay={true}
-                  onEnded={handleTrailerEnded}
-                />
-              </div>
-            )}
-
-            {!showTrailer && (
-              <div className="max-w-2xl space-y-5 animate-fade-in">
+            <div className="max-w-2xl space-y-5 animate-fade-in">
                 <div className="flex items-center gap-3 flex-wrap">
                   <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-primary text-white text-sm font-bold rounded tracking-wide">
                     <Play className="w-3.5 h-3.5 fill-white" />
@@ -175,7 +152,7 @@ export default function SeriesDetailPage() {
                     <Play className="w-5 sm:w-6 h-5 sm:h-6 fill-black" />
                     <span>Play</span>
                   </button>
-                  {seriesData.trailer_url && !showTrailer && (
+                  {seriesData.trailer_url && (
                     <button
                       onClick={handleWatchTrailer}
                       className="flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 bg-white/20 hover:bg-white/30 text-white font-semibold rounded-md backdrop-blur-sm transition-all border border-white/10"
@@ -218,7 +195,6 @@ export default function SeriesDetailPage() {
                   </div>
                 </Link>
               </div>
-            )}
           </div>
         </div>
       </div>
@@ -256,6 +232,15 @@ export default function SeriesDetailPage() {
           )}
         </div>
       </div>
+
+      <TrailerModal
+        isOpen={showTrailer}
+        onClose={() => setShowTrailer(false)}
+        trailerUrl={seriesData.trailer_url || ''}
+        thumbnail={heroImage || ''}
+        title={seriesData.title}
+        onEnded={handleTrailerEnded}
+      />
     </div>
   );
 }

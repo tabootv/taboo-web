@@ -1,25 +1,25 @@
 'use client';
 
+import { creatorsClient } from '@/api/client';
 import { LoadingScreen } from '@/components/ui';
 import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
 import { CommunityPost } from '@/features/community';
 import { useAuthStore } from '@/lib/stores';
 import { formatDuration, formatRelativeTime } from '@/lib/utils';
 import type { Creator, Post, Series, Video } from '@/types';
-import { ChevronDown, Clapperboard, Play, Globe, ChevronRight, Lock } from 'lucide-react';
+import { ChevronDown, ChevronRight, Clapperboard, Globe, Lock, Play } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { use, useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { creatorsClient } from '@/api/client';
 
 type TabIndex = 0 | 1 | 2 | 3 | 4 | 5;
-type SortBy = 'newest' | 'trending' | 'old';
+type SortBy = 'newest' | 'trending' | 'oldest';
 
 const sortingOptions = [
   { name: 'Newest', value: 'newest' as SortBy },
-  { name: 'Oldest', value: 'old' as SortBy },
+  { name: 'Oldest', value: 'oldest' as SortBy },
 ];
 
 export default function CreatorProfilePage({ params }: { params: Promise<{ channel: string }> }) {
@@ -120,7 +120,8 @@ export default function CreatorProfilePage({ params }: { params: Promise<{ chann
     setPostsNextPage(null);
     setCoursesNextPage(null);
 
-    if (activeTab === 0) getVideos(creatorId, null, sort); // Home uses videos
+    if (activeTab === 0)
+      getVideos(creatorId, null, sort); // Home uses videos
     else if (activeTab === 1) getVideos(creatorId, null, sort);
     else if (activeTab === 2) getShorts(creatorId, null, sort);
     else if (activeTab === 3) getSeries(creatorId, null, sort);
@@ -143,7 +144,10 @@ export default function CreatorProfilePage({ params }: { params: Promise<{ chann
     if (loadingStates.videos) return;
     setLoadingStates((prev) => ({ ...prev, videos: true }));
     try {
-      const response = await creatorsClient.getVideos(creatorId, { sort_by: sort || sortBy, ...(nextPage ? { page_url: nextPage } : {}) });
+      const response = await creatorsClient.getVideos(creatorId, {
+        sort_by: sort || sortBy,
+        ...(nextPage ? { page_url: nextPage } : {}),
+      });
       if (nextPage) {
         setCreatorVideos((prev) => [...prev, ...(response.data || [])]);
       } else {
@@ -161,7 +165,10 @@ export default function CreatorProfilePage({ params }: { params: Promise<{ chann
     if (loadingStates.shorts) return;
     setLoadingStates((prev) => ({ ...prev, shorts: true }));
     try {
-      const response = await creatorsClient.getShorts(creatorId, { sort_by: sort || sortBy, ...(nextPage ? { page_url: nextPage } : {}) });
+      const response = await creatorsClient.getShorts(creatorId, {
+        sort_by: sort || sortBy,
+        ...(nextPage ? { page_url: nextPage } : {}),
+      });
       if (nextPage) {
         setCreatorShorts((prev) => [...prev, ...(response.data || [])]);
       } else {
@@ -179,7 +186,10 @@ export default function CreatorProfilePage({ params }: { params: Promise<{ chann
     if (loadingStates.series) return;
     setLoadingStates((prev) => ({ ...prev, series: true }));
     try {
-      const response = await creatorsClient.getSeries(creatorId, { sort_by: sort || sortBy, ...(nextPage ? { page_url: nextPage } : {}) });
+      const response = await creatorsClient.getSeries(creatorId, {
+        sort_by: sort || sortBy,
+        ...(nextPage ? { page_url: nextPage } : {}),
+      });
       if (nextPage) {
         setCreatorSeries((prev) => [...prev, ...(response.data || [])]);
       } else {
@@ -197,7 +207,11 @@ export default function CreatorProfilePage({ params }: { params: Promise<{ chann
     if (loadingStates.posts) return;
     setLoadingStates((prev) => ({ ...prev, posts: true }));
     try {
-      const response = await creatorsClient.getPosts(creatorId, { sort_by: sort || sortBy, ...(nextPage ? { page_url: nextPage } : {}) });
+      const sortValue = sort !== undefined ? sort : sortBy;
+      const response = await creatorsClient.getPosts(creatorId, {
+        sort_by: sortValue,
+        ...(nextPage ? { page_url: nextPage } : {}),
+      });
       if (nextPage) {
         setCreatorPosts((prev) => [...prev, ...(response.data || [])]);
       } else {
@@ -215,7 +229,10 @@ export default function CreatorProfilePage({ params }: { params: Promise<{ chann
     if (loadingStates.courses) return;
     setLoadingStates((prev) => ({ ...prev, courses: true }));
     try {
-      const response = await creatorsClient.getCourses(creatorId, { sort_by: sort || sortBy, ...(nextPage ? { page_url: nextPage } : {}) });
+      const response = await creatorsClient.getCourses(creatorId, {
+        sort_by: sort || sortBy,
+        ...(nextPage ? { page_url: nextPage } : {}),
+      });
       if (nextPage) {
         setCreatorCourses((prev) => [...prev, ...(response.data || [])]);
       } else {
@@ -307,12 +324,7 @@ export default function CreatorProfilePage({ params }: { params: Promise<{ chann
             {/* Banner */}
             <div className="relative h-[100px] md:h-[150px] w-full">
               {creator.banner ? (
-                <Image
-                  src={creator.banner}
-                  alt=""
-                  fill
-                  className="object-cover object-center"
-                />
+                <Image src={creator.banner} alt="" fill className="object-cover object-center" />
               ) : (
                 <div className="w-full h-full bg-gradient-to-r from-red-dark to-red-primary" />
               )}
@@ -351,14 +363,8 @@ export default function CreatorProfilePage({ params }: { params: Promise<{ chann
                     </Link>
                   )}
                   {creator.paypal_link && (
-                    <a
-                      href={creator.paypal_link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <button className="btn btn-primary btn-sm px-6">
-                        Donate
-                      </button>
+                    <a href={creator.paypal_link} target="_blank" rel="noopener noreferrer">
+                      <button className="btn btn-primary btn-sm px-6">Donate</button>
                     </a>
                   )}
                 </div>
@@ -367,7 +373,6 @@ export default function CreatorProfilePage({ params }: { params: Promise<{ chann
                 </p>
               </div>
             </div>
-
           </div>
 
           {/* Modern Tab Navigation */}
@@ -378,15 +383,15 @@ export default function CreatorProfilePage({ params }: { params: Promise<{ chann
                   key={index}
                   onClick={() => selectTab(index as TabIndex)}
                   className={`relative px-5 py-3 text-sm font-medium whitespace-nowrap transition-colors duration-200 ${
-                    activeTab === index
-                      ? 'text-white'
-                      : 'text-white/50 hover:text-white/80'
+                    activeTab === index ? 'text-white' : 'text-white/50 hover:text-white/80'
                   }`}
                 >
                   <span className="flex items-center gap-2">
                     {tab.label}
                     {!('hideCount' in tab && tab.hideCount) && tab.count > 0 && (
-                      <span className={`text-xs ${activeTab === index ? 'text-white/70' : 'text-white/40'}`}>
+                      <span
+                        className={`text-xs ${activeTab === index ? 'text-white/70' : 'text-white/40'}`}
+                      >
                         {tab.count}
                       </span>
                     )}
@@ -413,7 +418,10 @@ export default function CreatorProfilePage({ params }: { params: Promise<{ chann
                 </button>
                 {showSortDropdown && (
                   <>
-                    <div className="fixed inset-0 z-10" onClick={() => setShowSortDropdown(false)} />
+                    <div
+                      className="fixed inset-0 z-10"
+                      onClick={() => setShowSortDropdown(false)}
+                    />
                     <div className="absolute right-0 mt-1 w-40 bg-surface border border-border rounded-lg shadow-lg z-20 overflow-hidden">
                       {sortingOptions.map((option) => (
                         <button
@@ -441,14 +449,9 @@ export default function CreatorProfilePage({ params }: { params: Promise<{ chann
                 {loadingStates.videos ? (
                   <HomeSkeleton />
                 ) : creatorVideos.length > 0 ? (
-                  <HomeTabContent
-                    videos={creatorVideos}
-                    onShowMore={() => selectTab(1)}
-                  />
+                  <HomeTabContent videos={creatorVideos} onShowMore={() => selectTab(1)} />
                 ) : (
-                  <div className="text-center py-12 text-white/40">
-                    No videos yet
-                  </div>
+                  <div className="text-center py-12 text-white/40">No videos yet</div>
                 )}
               </div>
             )}
@@ -608,7 +611,7 @@ export default function CreatorProfilePage({ params }: { params: Promise<{ chann
                     {postsNextPage && (
                       <div className="flex items-center justify-center mt-5">
                         <button
-                          onClick={() => getPosts(Number(channel), postsNextPage)}
+                          onClick={() => getPosts(Number(channel), postsNextPage, sortBy)}
                           disabled={loadingStates.posts}
                           className="px-4 py-2 bg-transparent text-white hover:text-red-primary"
                         >
@@ -698,9 +701,7 @@ function VideoCard({ video }: { video: Video }) {
         <h3 className="text-[13px] md:text-sm font-medium text-white leading-snug line-clamp-3 group-hover:text-red-primary transition-colors">
           {video.title}
         </h3>
-        {publishedLabel && (
-          <p className="text-xs text-white/40 mt-0.5">{publishedLabel}</p>
-        )}
+        {publishedLabel && <p className="text-xs text-white/40 mt-0.5">{publishedLabel}</p>}
       </div>
     </Link>
   );
@@ -858,9 +859,7 @@ function HomeTabContent({ videos, onShowMore }: { videos: Video[]; onShowMore: (
               {latestVideo.title}
             </h3>
             {latestVideo.description && (
-              <p className="mt-2 text-sm text-white/60 line-clamp-2">
-                {latestVideo.description}
-              </p>
+              <p className="mt-2 text-sm text-white/60 line-clamp-2">{latestVideo.description}</p>
             )}
             {videoLocation && (
               <div className="flex items-center gap-1.5 mt-3">
@@ -929,7 +928,9 @@ function HomeTabContent({ videos, onShowMore }: { videos: Video[]; onShowMore: (
                     {video.title}
                   </h4>
                   {video.published_at && (
-                    <p className="text-xs text-white/40 mt-0.5">{formatRelativeTime(video.published_at)}</p>
+                    <p className="text-xs text-white/40 mt-0.5">
+                      {formatRelativeTime(video.published_at)}
+                    </p>
                   )}
                 </Link>
               );

@@ -8,7 +8,7 @@ import {
   useSeriesPlayerData,
   useSeriesPlayerHandlers,
 } from '@/features/series';
-import { use, useRef } from 'react';
+import { use, useEffect, useRef } from 'react';
 
 export default function SeriesPlayerPage({
   params,
@@ -18,9 +18,18 @@ export default function SeriesPlayerPage({
   const { id: seriesId, videoUuid } = use(params);
   const episodesRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [videoUuid]);
+
   const playerData = useSeriesPlayerData(seriesId, videoUuid);
-  const handlers = useSeriesPlayerHandlers(seriesId, videoUuid, playerData.nextEpisode ?? null, playerData.autoplayEnabled);
-  
+  const handlers = useSeriesPlayerHandlers(
+    seriesId,
+    videoUuid,
+    playerData.nextEpisode ?? null,
+    playerData.autoplayEnabled
+  );
+
   useEpisodeScroll(episodesRef, playerData.currentEpisodeIndex);
 
   if (playerData.isLoading) {

@@ -25,8 +25,8 @@ function HomePageSkeleton() {
       {/* Banner skeleton */}
       <div className="relative w-full aspect-[21/9] bg-surface animate-pulse" />
 
-      {/* Content skeleton */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col w-full gap-6 md:gap-8 lg:gap-10 mt-8 md:mt-12">
+      {/* Content skeleton - Full-fluid layout */}
+      <div className="w-full px-[4%] flex flex-col gap-6 md:gap-8 lg:gap-10 mt-8 md:mt-12">
         {/* Creators skeleton */}
         <div className="flex gap-4 overflow-hidden">
           {Array.from({ length: 8 }).map((_, i) => (

@@ -1,26 +1,17 @@
 'use client';
 
+import { useCourseDetail } from '@/api/queries';
+import { CoursePageSkeleton, LessonCard } from '@/components/courses';
+import { VerifiedBadge } from '@/components/ui';
+import { VideoPlayerSkeleton } from '@/components/video';
+import { useAuthStore } from '@/lib/stores/auth-store';
+import { cn, formatDuration } from '@/lib/utils';
+import { BookOpen, ChevronDown, Clock, GraduationCap, LogIn, Play, Users } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import { useEffect, useState, useRef, use } from 'react';
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import {
-  Play,
-  Clock,
-  ChevronDown,
-  GraduationCap,
-  BookOpen,
-  Users,
-  LogIn,
-} from 'lucide-react';
-import { useCourseDetail } from '@/api/queries';
-import { useAuthStore } from '@/lib/stores/auth-store';
-import type { Series, Video, Course } from '@/types';
-import { VideoPlayerSkeleton } from '@/components/video';
-import { LessonCard, CoursePageSkeleton } from '@/components/courses';
-import { VerifiedBadge } from '@/components/ui';
-import { cn, formatDuration } from '@/lib/utils';
+import { useRouter } from 'next/navigation';
+import { use, useRef, useState } from 'react';
 
 const VideoPlayer = dynamic(
   () => import('@/features/video').then((mod) => ({ default: mod.VideoPlayer })),
@@ -107,35 +98,28 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
   }
 
   // Try multiple thumbnail sources - API might return in different fields
-  const heroImage = courseData.course_thumbnail || courseData.card_thumbnail || courseData.thumbnail || courseData.trailer_thumbnail || courseData.desktop_banner;
+  const heroImage =
+    courseData.course_thumbnail ||
+    courseData.card_thumbnail ||
+    courseData.thumbnail ||
+    courseData.trailer_thumbnail ||
+    courseData.desktop_banner;
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Netflix-style Hero Section with Educational Accent */}
       <div ref={heroRef} className="relative">
-        {/* Background Image with Gradient Overlay */}
         <div className="absolute inset-0 h-[80vh] min-h-[550px]">
           {heroImage && (
-            <Image
-              src={heroImage}
-              alt={courseData.title}
-              fill
-              className="object-cover"
-              priority
-            />
+            <Image src={heroImage} alt={courseData.title} fill className="object-cover" priority />
           )}
-          {/* Multi-layer gradient overlay for cinematic effect */}
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/50 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-background via-background/70 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-r from-background via-background/50 to-transparent" />
           <div className="absolute inset-0 bg-black/20" />
-          {/* Educational accent - subtle pattern overlay */}
           <div className="absolute inset-0 opacity-[0.03] bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJ3aGl0ZSIgZmlsbC1ydWxlPSJldmVub2RkIj48Y2lyY2xlIGN4PSIyMCIgY3k9IjIwIiByPSIyIi8+PC9nPjwvc3ZnPg==')]" />
         </div>
 
-        {/* Hero Content */}
         <div className="relative z-10 pt-16 pb-8 min-h-[80vh] flex flex-col justify-end">
           <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 w-full">
-            {/* Trailer Player (shows when clicked) */}
             {showTrailer && courseData.trailer_url && (
               <div className="mb-8 max-w-4xl animate-fade-in">
                 <VideoPlayer
@@ -147,10 +131,8 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
               </div>
             )}
 
-            {/* Course Info */}
             {!showTrailer && (
               <div className="max-w-2xl space-y-5 animate-fade-in">
-                {/* Education Badge with Taboo Styling */}
                 <div className="flex items-center gap-3 flex-wrap">
                   <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-primary to-red-dark text-white text-sm font-bold rounded-lg tracking-wide shadow-lg shadow-red-primary/20">
                     <GraduationCap className="w-4 h-4" />
@@ -166,12 +148,10 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
                   ))}
                 </div>
 
-                {/* Title */}
                 <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight">
                   {courseData.title}
                 </h1>
 
-                {/* Meta Info */}
                 <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-white/70 text-sm">
                   <span className="flex items-center gap-1.5">
                     <BookOpen className="w-4 h-4" />
@@ -191,7 +171,6 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
                   )}
                 </div>
 
-                {/* Description */}
                 {courseData.description && (
                   <div className="relative">
                     <p
@@ -219,7 +198,6 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
                   </div>
                 )}
 
-                {/* Instructor Info */}
                 {courseData.channel && (
                   <Link
                     href={`/creators/creator-profile/${courseData.channel.id}`}
@@ -251,7 +229,6 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
                   </Link>
                 )}
 
-                {/* Action Buttons */}
                 <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-2">
                   <button
                     onClick={handleStartCourse}
@@ -277,19 +254,15 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
         </div>
       </div>
 
-      {/* All Lessons Section */}
       <div className="relative z-20 mt-8 pb-16">
         <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Section Header */}
           <div className="flex items-center justify-between mb-6 pt-4 border-t border-white/5">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-red-primary/10 rounded-lg">
                 <BookOpen className="w-5 h-5 text-red-primary" />
               </div>
               <div>
-                <h2 className="text-xl sm:text-2xl font-semibold text-white">
-                  All Lessons
-                </h2>
+                <h2 className="text-xl sm:text-2xl font-semibold text-white">All Lessons</h2>
                 <p className="text-white/50 text-sm">
                   {videos.length} {videos.length === 1 ? 'lesson' : 'lessons'} •{' '}
                   {formatDuration(totalDuration)} total runtime
@@ -298,7 +271,6 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
             </div>
           </div>
 
-          {/* Lesson List */}
           <div className="space-y-3">
             {videos.map((video, index) => (
               <LessonCard
