@@ -10,12 +10,12 @@ import { cn } from '@/lib/utils';
 
 export default function StudioLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { user, isAuthenticated, isLoading } = useAuthStore();
+  const { user, isAuthenticated, isLoading, _hasHydrated } = useAuthStore();
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    // Wait for auth store to be ready
-    if (isLoading) return;
+    // Wait for auth store to be ready AND hydrated from localStorage
+    if (isLoading || !_hasHydrated) return;
 
     // Check authentication
     if (!isAuthenticated) {
@@ -30,10 +30,10 @@ export default function StudioLayout({ children }: { children: React.ReactNode }
     }
 
     setIsChecking(false);
-  }, [isAuthenticated, isLoading, user, router]);
+  }, [isAuthenticated, isLoading, _hasHydrated, user, router]);
 
-  // Show loading while checking auth
-  if (isLoading || isChecking) {
+  // Show loading while checking auth or waiting for hydration
+  if (isLoading || !_hasHydrated || isChecking) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
