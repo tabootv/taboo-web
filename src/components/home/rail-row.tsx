@@ -1,24 +1,31 @@
 'use client';
 
-import { useRef, useState, useCallback, useEffect } from 'react';
+import { cn } from '@/lib/utils';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 interface RailRowProps {
   title: string;
   href?: string;
   children: React.ReactNode;
-  cardWidth?: number; // Width of each card in pixels (desktop)
-  cardWidthMobile?: number; // Width of each card in pixels (mobile)
-  gap?: number; // Gap between cards in pixels
+  itemsPerRow?: {
+    mobile?: number;
+    tablet?: number;
+    desktop?: number;
+  };
+  gap?: number;
 }
 
 export function RailRow({
   title,
   href,
   children,
-  cardWidth = 280,
-  cardWidthMobile = 200,
-  gap = 16,
+  itemsPerRow = {
+    mobile: 2,
+    tablet: 4,
+    desktop: 6,
+  },
+  gap = 12,
 }: RailRowProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
@@ -51,9 +58,7 @@ export function RailRow({
 
   const scroll = useCallback((direction: 'left' | 'right') => {
     if (!scrollRef.current) return;
-    const containerWidth = scrollRef.current.clientWidth;
-    // Scroll by ~85% of container width for a "page" feel
-    const scrollAmount = containerWidth * 0.85;
+    const scrollAmount = scrollRef.current.clientWidth;
     scrollRef.current.scrollBy({
       left: direction === 'left' ? -scrollAmount : scrollAmount,
       behavior: 'smooth',
@@ -100,59 +105,74 @@ export function RailRow({
       <div className="relative group/rail">
         {/* Left Gradient Fade */}
         <div
-          className={`absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none transition-opacity duration-300 ${
+          className={`absolute left-0 top-0 bottom-0 w-16 bg-linear-to-r from-background to-transparent z-10 pointer-events-none transition-opacity duration-300 ${
             showLeftArrow ? 'opacity-100' : 'opacity-0'
           }`}
         />
 
         {/* Right Gradient Fade */}
         <div
-          className={`absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none transition-opacity duration-300 ${
+          className={`absolute right-0 top-0 bottom-0 w-16 bg-linear-to-l from-background to-transparent z-10 pointer-events-none transition-opacity duration-300 ${
             showRightArrow ? 'opacity-100' : 'opacity-0'
           }`}
         />
 
-        {/* Left Arrow Button */}
         <button
           onClick={() => scroll('left')}
-          className={`absolute left-2 top-1/2 -translate-y-1/2 z-20 p-2.5 bg-black/80 hover:bg-black rounded-full border border-white/20 hover:border-white/50 transition-all duration-200 ${
-            showLeftArrow && isHovering ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none'
-          }`}
+          className={cn(
+            'absolute left-0 top-0 bottom-0 z-20',
+            'w-12 lg:w-14 flex items-center justify-center',
+            'bg-black/30 hover:bg-black/60',
+            'text-white/60 hover:text-white',
+            'transition-all duration-200',
+            'hidden md:flex',
+            showLeftArrow && isHovering ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          )}
           aria-label="Scroll left"
         >
-          <ChevronLeft className="w-5 h-5 text-white" />
+          <ChevronLeft className="w-8 h-8 lg:w-10 lg:h-10" />
         </button>
 
-        {/* Right Arrow Button */}
         <button
           onClick={() => scroll('right')}
-          className={`absolute right-2 top-1/2 -translate-y-1/2 z-20 p-2.5 bg-black/80 hover:bg-black rounded-full border border-white/20 hover:border-white/50 transition-all duration-200 ${
-            showRightArrow && isHovering ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none'
-          }`}
+          className={cn(
+            'absolute right-0 top-0 bottom-0 z-20',
+            'w-12 lg:w-14 flex items-center justify-center',
+            'bg-black/30 hover:bg-black/60',
+            'text-white/60 hover:text-white',
+            'transition-all duration-200',
+            'hidden md:flex',
+            showRightArrow && isHovering ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          )}
           aria-label="Scroll right"
         >
-          <ChevronRight className="w-5 h-5 text-white" />
+          <ChevronRight className="w-8 h-8 lg:w-10 lg:h-10" />
         </button>
 
         {/* Scrollable Rail */}
         <div
           ref={scrollRef}
           onWheel={handleWheel}
-          className="flex overflow-x-auto overflow-y-visible scroll-smooth hide-scrollbar snap-x snap-mandatory"
-          style={{
-            gap: `${gap}px`,
-            scrollPaddingLeft: '0px',
-            scrollPaddingRight: '0px',
-            // CSS variables for child cards to use
-            ['--card-width' as string]: `${cardWidth}px`,
-            ['--card-width-mobile' as string]: `${cardWidthMobile}px`,
-          }}
+          className="rail-scroll flex overflow-x-auto overflow-y-visible scroll-smooth hide-scrollbar snap-x snap-mandatory"
+          style={
+            {
+              gap: `${gap}px`,
+              '--gap': `${gap}px`,
+              '--items-mobile': itemsPerRow.mobile || 2,
+              '--items-tablet': itemsPerRow.tablet || 4,
+              '--items-desktop': itemsPerRow.desktop || 6,
+            } as React.CSSProperties
+          }
         >
-          {children}
+          {React.Children.map(children, (child, index) => (
+            <div key={index} className="rail-card shrink-0 snap-start">
+              {child}
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* CSS for hiding scrollbar */}
+      {/* CSS for hiding scrollbar and responsive card widths */}
       <style jsx>{`
         .hide-scrollbar {
           -ms-overflow-style: none;
@@ -160,6 +180,19 @@ export function RailRow({
         }
         .hide-scrollbar::-webkit-scrollbar {
           display: none;
+        }
+        .rail-card {
+          flex: 0 0 calc((100% - (var(--items-mobile) - 1) * var(--gap)) / var(--items-mobile));
+        }
+        @media (min-width: 768px) {
+          .rail-card {
+            flex: 0 0 calc((100% - (var(--items-tablet) - 1) * var(--gap)) / var(--items-tablet));
+          }
+        }
+        @media (min-width: 1400px) {
+          .rail-card {
+            flex: 0 0 calc((100% - (var(--items-desktop) - 1) * var(--gap)) / var(--items-desktop));
+          }
         }
       `}</style>
     </section>

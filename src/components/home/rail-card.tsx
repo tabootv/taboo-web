@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback, memo } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { Play, Clock, Plus, Check } from 'lucide-react';
 import { useSavedVideosStore, type SavedVideo } from '@/lib/stores/saved-videos-store';
 import { formatDuration, formatRelativeTime } from '@/lib/utils';
 import type { Video } from '@/types';
+import { Check, Clock, Play, Plus } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 
 interface RailCardProps {
   video: Video;
@@ -49,17 +49,19 @@ export const RailCard = memo(function RailCard({
 
   const thumbnail = video.thumbnail_webp || video.thumbnail || video.card_thumbnail;
   const previewUrl = video.url_480 || video.url_720;
-  const isNew = video.published_at && new Date(video.published_at).getTime() > Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const isNew =
+    video.published_at &&
+    new Date(video.published_at).getTime() > Date.now() - 7 * 24 * 60 * 60 * 1000;
 
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true);
 
-    // Delayed video preview (400-600ms as per Netflix)
     if (previewUrl) {
       hoverTimeoutRef.current = setTimeout(() => {
         if (videoRef.current) {
           videoRef.current.currentTime = 0;
-          videoRef.current.play()
+          videoRef.current
+            .play()
             .then(() => setIsVideoPlaying(true))
             .catch(() => {});
         }
@@ -83,34 +85,40 @@ export const RailCard = memo(function RailCard({
     }
   }, []);
 
-  const handleSave = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!video.id) return;
+  const handleSave = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!video.id) return;
 
-    const savedVideo: SavedVideo = {
-      id: video.id,
-      title: video.title,
-      thumbnail: video.thumbnail_webp || video.thumbnail || null,
-      channelName: video.channel?.name || null,
-      savedAt: Date.now(),
-    };
-    const newState = toggleSave(savedVideo);
-    setSaved(newState);
-  }, [video, toggleSave]);
+      const savedVideo: SavedVideo = {
+        id: video.id,
+        title: video.title,
+        thumbnail: video.thumbnail_webp || video.thumbnail || null,
+        channelName: video.channel?.name || null,
+        savedAt: Date.now(),
+      };
+      const newState = toggleSave(savedVideo);
+      setSaved(newState);
+    },
+    [video, toggleSave]
+  );
 
-  const handleOpenPreview = useCallback((e: React.MouseEvent) => {
-    // Only open preview if clicking the info button, not the whole card
-    e.preventDefault();
-    e.stopPropagation();
-    onOpenPreview?.(video);
-  }, [onOpenPreview, video]);
+  const handleOpenPreview = useCallback(
+    (e: React.MouseEvent) => {
+      // Only open preview if clicking the info button, not the whole card
+      e.preventDefault();
+      e.stopPropagation();
+      onOpenPreview?.(video);
+    },
+    [onOpenPreview, video]
+  );
 
   // Card content - either link to video or opens preview modal
   const cardContent = (
     <div
       ref={cardRef}
-      className="flex-shrink-0 w-[var(--card-width-mobile)] md:w-[var(--card-width)] snap-start"
+      className="flex-shrink-0 snap-start w-full"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -125,7 +133,7 @@ export const RailCard = memo(function RailCard({
             className={`object-cover transition-all duration-300 ${
               isHovered ? 'scale-105' : 'scale-100'
             } ${isVideoPlaying && isVideoReady ? 'opacity-0' : 'opacity-100'}`}
-            sizes="(max-width: 768px) 200px, 280px"
+            sizes="(max-width: 768px) 50vw, (max-width: 1400px) 25vw, 16.66vw"
             priority={priority}
           />
         ) : (
@@ -187,9 +195,7 @@ export const RailCard = memo(function RailCard({
           <button
             onClick={handleSave}
             className={`p-1.5 rounded-full border transition-all hover:scale-110 ${
-              saved
-                ? 'bg-white/20 border-white'
-                : 'bg-black/60 border-white/40 hover:border-white'
+              saved ? 'bg-white/20 border-white' : 'bg-black/60 border-white/40 hover:border-white'
             }`}
             title={saved ? 'Remove from My List' : 'Add to My List'}
           >
@@ -226,7 +232,6 @@ export const RailCard = memo(function RailCard({
             };
             const profilePic =
               video.channel?.dp ||
-              video.channel?.small_dp ||
               videoAny.creator?.dp ||
               videoAny.creator?.channel?.dp ||
               videoAny.user?.dp ||
@@ -250,14 +255,10 @@ export const RailCard = memo(function RailCard({
             }
             return null;
           })()}
-          <p className="text-xs text-white/50 truncate">
-            {video.channel?.name}
-          </p>
+          <p className="text-xs text-white/50 truncate">{video.channel?.name}</p>
         </div>
         {showDate && video.published_at && (
-          <p className="text-xs text-white/40 mt-0.5">
-            {formatRelativeTime(video.published_at)}
-          </p>
+          <p className="text-xs text-white/40 mt-0.5">{formatRelativeTime(video.published_at)}</p>
         )}
       </div>
     </div>

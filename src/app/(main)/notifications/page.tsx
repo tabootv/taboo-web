@@ -2,8 +2,8 @@
 
 import {
   useDeleteAllNotifications,
-  useDeleteNotification,
   useMarkAllNotificationsRead,
+  useMarkNotificationRead,
 } from '@/api/mutations';
 import { useNotifications } from '@/api/queries';
 import { Button, LoadingScreen } from '@/components/ui';
@@ -12,13 +12,15 @@ import { formatDistanceToNow } from 'date-fns';
 import { Bell, Check, Film, Heart, MessageSquare, Trash2, UserPlus, X } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useState } from 'react';
 import { toast } from 'sonner';
 
 export default function NotificationsPage() {
   const { data: notificationsList = [], isLoading } = useNotifications();
   const markAllRead = useMarkAllNotificationsRead();
-  const deleteNotification = useDeleteNotification();
+  const markAsRead = useMarkNotificationRead();
   const deleteAll = useDeleteAllNotifications();
+  const [filterTab, setFilterTab] = useState<'all' | 'unread' | 'read'>('all');
 
   const handleMarkAllRead = () => {
     markAllRead.mutate(undefined, {
@@ -27,17 +29,6 @@ export default function NotificationsPage() {
       },
       onError: () => {
         toast.error('Failed to mark notifications as read');
-      },
-    });
-  };
-
-  const handleDelete = (id: string) => {
-    deleteNotification.mutate(id, {
-      onSuccess: () => {
-        toast.success('Notification deleted');
-      },
-      onError: () => {
-        toast.error('Failed to delete notification');
       },
     });
   };
@@ -53,6 +44,17 @@ export default function NotificationsPage() {
     });
   };
 
+  const handleMarkAsRead = (id: string) => {
+    markAsRead.mutate(id, {
+      onSuccess: () => {
+        toast.success('Marked as read');
+      },
+      onError: () => {
+        toast.error('Failed to mark as read');
+      },
+    });
+  };
+
   if (isLoading) {
     return <LoadingScreen message="Loading notifications..." />;
   }
@@ -64,22 +66,31 @@ export default function NotificationsPage() {
     Array.isArray(notificationsList) ? notificationsList.flat() : []
   ).filter((n) => n && n.read_at);
 
+  const getFilteredNotifications = () => {
+    const allNotifications = Array.isArray(notificationsList) ? notificationsList.flat() : [];
+
+    switch (filterTab) {
+      case 'unread':
+        return allNotifications.filter((n) => n && !n.read_at);
+      case 'read':
+        return allNotifications.filter((n) => n && n.read_at);
+      default:
+        return allNotifications;
+    }
+  };
+
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-red-primary/10 rounded-lg">
-            <Bell className="w-6 h-6 text-red-primary" />
-          </div>
+    <div className="w-full px-[4%] py-8">
+      <div className="max-w-4xl">
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-text-primary">Notifications</h1>
-            <p className="text-sm text-text-secondary">
+            <h1 className="text-2xl md:text-3xl font-bold text-text-primary">Notifications</h1>
+            <p className="text-sm text-text-secondary mt-1">
               {unreadNotifications.length > 0
                 ? `${unreadNotifications.length} unread`
                 : 'All caught up!'}
             </p>
           </div>
-        </div>
 
         {notificationsList.length > 0 && (
           <div className="flex items-center gap-2">
@@ -110,17 +121,73 @@ export default function NotificationsPage() {
         )}
       </div>
 
-      {unreadNotifications.length === 0 ? (
+      <div className="flex gap-2 mb-4">
+        <button
+          onClick={() => setFilterTab('all')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            filterTab === 'all'
+              ? 'bg-red-primary text-white'
+              : 'bg-surface text-text-secondary hover:bg-hover'
+          }`}
+        >
+          Todas
+          {notificationsList.length > 0 && (
+            <span className="ml-2 text-xs">({notificationsList.flat().length})</span>
+          )}
+        </button>
+        <button
+          onClick={() => setFilterTab('unread')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            filterTab === 'unread'
+              ? 'bg-red-primary text-white'
+              : 'bg-surface text-text-secondary hover:bg-hover'
+          }`}
+        >
+          Não Lidas
+          {unreadNotifications.length > 0 && (
+            <span
+              className={`ml-2 text-xs px-1.5 rounded ${filterTab === 'unread' ? 'bg-white/20' : 'bg-red-primary/20'}`}
+            >
+              {unreadNotifications.length}
+            </span>
+          )}
+        </button>
+        <button
+          onClick={() => setFilterTab('read')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            filterTab === 'read'
+              ? 'bg-red-primary text-white'
+              : 'bg-surface text-text-secondary hover:bg-hover'
+          }`}
+        >
+          Lidas
+          {readNotifications.length > 0 && (
+            <span className="ml-2 text-xs">({readNotifications.length})</span>
+          )}
+        </button>
+      </div>
+
+      {getFilteredNotifications().length === 0 ? (
         <div className="bg-surface rounded-xl border border-border p-12 text-center">
           <Bell className="w-16 h-16 text-text-secondary mx-auto mb-4" />
-          <h2 className="text-lg font-semibold text-text-primary mb-2">No notifications yet</h2>
+          <h2 className="text-lg font-semibold text-text-primary mb-2">
+            {filterTab === 'unread'
+              ? 'No unread notifications'
+              : filterTab === 'read'
+                ? 'No read notifications'
+                : 'No notifications yet'}
+          </h2>
           <p className="text-text-secondary">
-            When you get notifications, they&apos;ll show up here.
+            {filterTab === 'unread'
+              ? "You're all caught up!"
+              : filterTab === 'read'
+                ? 'Read notifications will appear here'
+                : "When you get notifications, they'll show up here."}
           </p>
         </div>
       ) : (
         <div className="bg-surface rounded-xl border border-border overflow-hidden">
-          {unreadNotifications.length > 0 && (
+          {(filterTab === 'all' || filterTab === 'unread') && unreadNotifications.length > 0 && (
             <div>
               <div className="px-4 py-3 bg-red-primary/5 border-b border-border">
                 <h3 className="text-sm font-semibold text-red-primary">New</h3>
@@ -130,16 +197,16 @@ export default function NotificationsPage() {
                   <NotificationCard
                     key={`${notification.id}${notification.created_at}`}
                     notification={notification}
-                    onDelete={handleDelete}
+                    onMarkRead={handleMarkAsRead}
                   />
                 ))}
               </div>
             </div>
           )}
 
-          {readNotifications.length > 0 && (
+          {(filterTab === 'all' || filterTab === 'read') && readNotifications.length > 0 && (
             <div>
-              {unreadNotifications.length > 0 && (
+              {unreadNotifications.length > 0 && filterTab === 'all' && (
                 <div className="px-4 py-3 bg-hover border-b border-border">
                   <h3 className="text-sm font-semibold text-text-secondary">Earlier</h3>
                 </div>
@@ -149,7 +216,7 @@ export default function NotificationsPage() {
                   <NotificationCard
                     key={notification.id}
                     notification={notification}
-                    onDelete={handleDelete}
+                    onMarkRead={handleMarkAsRead}
                   />
                 ))}
               </div>
@@ -157,19 +224,36 @@ export default function NotificationsPage() {
           )}
         </div>
       )}
+      </div>
     </div>
   );
 }
 
 function NotificationCard({
   notification,
-  onDelete,
+  onMarkRead,
 }: {
   notification: Notification;
-  onDelete: (id: string) => void;
+  onMarkRead: (id: string) => void;
 }) {
   const isUnread = !notification.read_at;
-  const data = notification.data as Record<string, string | number | boolean | undefined>;
+
+  let dataObj: Record<string, string | number | boolean | undefined> = {};
+  let dataString = '';
+
+  if (typeof notification.data === 'string') {
+    dataString = notification.data;
+    try {
+      dataObj = JSON.parse(notification.data);
+    } catch {}
+  } else if (typeof notification.data === 'object' && notification.data !== null) {
+    dataObj = notification.data as Record<string, string | number | boolean | undefined>;
+  }
+
+  const mobileMessage = (notification as any).mobile_message as string | undefined;
+  const createdBy = (notification as any).created_by as string | undefined;
+  const mediaUrl = (notification as any).media_url as string | undefined;
+  const modelUuid = (notification as any).model_uuid as string | undefined;
 
   const getNotificationIcon = () => {
     switch (notification.type) {
@@ -191,16 +275,67 @@ function NotificationCard({
   };
 
   const getNotificationLink = () => {
-    if (data.video_uuid) return `/videos/${data.video_uuid}`;
-    if (data.series_uuid) return `/series/${data.series_uuid}`;
-    if (data.creator_id) return `/creators/creator-profile/${data.creator_id}`;
+    if (modelUuid) {
+      if (notification.type === 'NewVideoUploaded') {
+        return `/videos/${modelUuid}`;
+      }
+    }
+
+    if (dataObj.video_uuid) return `/videos/${dataObj.video_uuid}`;
+    if (dataObj.series_uuid) return `/series/${dataObj.series_uuid}`;
+    if (dataObj.creator_id) return `/creators/creator-profile/${dataObj.creator_id}`;
     return '#';
   };
 
-  console.log(data);
+  const getNotificationMessage = () => {
+    if (dataString) {
+      return dataString;
+    }
 
-  const title = (data.title as string) || (data.message as string) || 'New notification';
-  const image = data.thumbnail as string | undefined;
+    if (mobileMessage) {
+      return mobileMessage;
+    }
+
+    const message =
+      (dataObj.message as string) ||
+      (dataObj.body as string) ||
+      (dataObj.title as string) ||
+      (dataObj.text as string) ||
+      (dataObj.content as string);
+
+    if (message) return message;
+
+    switch (notification.type) {
+      case 'NewVideoUploaded':
+        return `${createdBy || 'Someone'} uploaded a new video`;
+
+      case 'video':
+      case String.raw`App\Notifications\NewVideoNotification`:
+        return `New video: ${dataObj.video_title || 'Untitled'}`;
+
+      case 'comment':
+      case String.raw`App\Notifications\NewCommentNotification`:
+        return (
+          (dataObj.comment_text as string) || `New comment from ${dataObj.user_name || 'someone'}`
+        );
+
+      case 'like':
+      case String.raw`App\Notifications\VideoLikedNotification`:
+        return `${dataObj.user_name || 'Someone'} liked your video${
+          dataObj.video_title ? `: ${dataObj.video_title}` : ''
+        }`;
+
+      case 'follow':
+      case String.raw`App\Notifications\NewFollowerNotification`:
+        return `${dataObj.follower_name || 'Someone'} started following you`;
+
+      default:
+        return 'New notification';
+    }
+  };
+
+  const title = getNotificationMessage();
+  const image = mediaUrl || (dataObj.thumbnail as string | undefined);
 
   return (
     <div
@@ -237,12 +372,19 @@ function NotificationCard({
 
       {isUnread && <div className="w-2 h-2 rounded-full bg-red-primary shrink-0 mt-2" />}
 
-      <button
-        onClick={() => onDelete(notification.id)}
-        className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-red-primary/10 text-text-secondary hover:text-red-primary transition-all"
-      >
-        <X className="w-4 h-4" />
-      </button>
+      {isUnread && (
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onMarkRead(notification.id);
+          }}
+          className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-red-primary/10 text-text-secondary hover:text-red-primary transition-all"
+          title="Mark as read"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      )}
     </div>
   );
 }

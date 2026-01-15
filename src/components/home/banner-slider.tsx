@@ -108,8 +108,8 @@ export function BannerSlider({ initialBanners }: BannerSliderProps) {
         {/* Gradient overlays */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-        {/* Content - left aligned with padding */}
-        <div className="absolute inset-0 flex flex-col justify-end sm:justify-center items-start p-4 pb-8 sm:p-6 md:p-12 lg:p-20 lg:pl-24">
+        {/* Content - left aligned with consistent 4% safe zone padding */}
+        <div className="absolute inset-0 flex flex-col justify-end sm:justify-center items-start px-[4%] pb-16 sm:pb-20 md:pb-24">
           <div className="text-left backdrop-blur-md sm:backdrop-blur-none rounded-lg p-3 sm:p-4 md:p-0 max-w-[90%] sm:max-w-[600px]">
             {/* Channel name */}
             <h3 className="text-xs sm:text-sm md:text-base font-bold text-white/80 mb-1 sm:mb-2 drop-shadow-lg">
