@@ -25,7 +25,7 @@ function VerifyEmailContent() {
       // If we have a token, attempt verification
       if (token && (email || id)) {
         try {
-          const { data } = await apiClient.get('/email/verify', {
+          const data = await apiClient.get<{ message?: string }>('/email/verify', {
             params: { token, email, id },
           });
           setStatus('success');

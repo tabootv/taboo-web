@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -12,7 +12,7 @@ import { apiClient } from '@/api/client';
 
 export default function CreateShortPage() {
   const router = useRouter();
-  const { user, isAuthenticated } = useAuthStore();
+  const { user } = useAuthStore();
   const videoInputRef = useRef<HTMLInputElement>(null);
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
 

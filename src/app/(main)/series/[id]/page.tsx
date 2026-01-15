@@ -2,7 +2,6 @@
 
 import { useSeriesDetail } from '@/api/queries';
 import { cn, formatDuration } from '@/lib/utils';
-import type { Series, Video } from '@/types';
 import { ChevronDown, Clock, Info, Play } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';

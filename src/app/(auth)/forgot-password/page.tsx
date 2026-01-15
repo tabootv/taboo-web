@@ -24,7 +24,7 @@ export default function ForgotPasswordPage() {
     setIsSubmitting(true);
 
     try {
-      await auth.forgotPassword(email);
+      await authClient.forgotPassword(email);
       setIsSuccess(true);
       toast.success('Password reset link sent to your email');
     } catch {

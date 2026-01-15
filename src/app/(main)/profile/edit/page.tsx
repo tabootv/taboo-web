@@ -22,8 +22,7 @@ import Link from 'next/link';
 type SettingsTab = 'profile' | 'email' | 'password' | 'danger';
 
 export default function SettingsPage() {
-  const router = useRouter();
-  const { user, isAuthenticated, fetchUser } = useAuthStore();
+  const { user, fetchUser } = useAuthStore();
   const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
   const [isLoading, setIsLoading] = useState(true);
 
@@ -223,7 +222,7 @@ function EmailSettings({
     setIsSubmitting(true);
 
     try {
-      await profileApi.updateEmail(email, password);
+      await profileApi.updateEmail({ email, password });
       await onUpdate();
       setPassword('');
       toast.success('Email updated successfully');

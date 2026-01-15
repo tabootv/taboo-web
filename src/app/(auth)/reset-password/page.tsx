@@ -47,7 +47,7 @@ function ResetPasswordForm() {
     setIsSubmitting(true);
 
     try {
-      await auth.resetPassword({
+      await authClient.resetPassword({
         email,
         token,
         password,

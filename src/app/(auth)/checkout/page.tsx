@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Crown, Check, CreditCard, Lock, AlertCircle } from 'lucide-react';
 import { subscriptionsClient as subscriptionsApi } from '@/api/client';
@@ -12,9 +12,8 @@ import { Logo } from '@/components/ui/logo';
 import { toast } from 'sonner';
 
 function CheckoutForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, isAuthenticated } = useAuthStore();
+  const { user } = useAuthStore();
   const [plan, setPlan] = useState<Plan | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);

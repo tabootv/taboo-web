@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { Plus, Play, Edit, Trash2, Eye, ThumbsUp, MoreVertical } from 'lucide-react';
 import type { Video } from '@/types';
 import { Button, LoadingScreen, Spinner } from '@/components/ui';
@@ -13,8 +12,7 @@ import { toast } from 'sonner';
 import { apiClient } from '@/api/client';
 
 export default function ContentShortsPage() {
-  const router = useRouter();
-  const { user, isAuthenticated } = useAuthStore();
+  const { user } = useAuthStore();
   const [shortsList, setShortsList] = useState<Video[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -31,8 +29,14 @@ export default function ContentShortsPage() {
         setIsLoadingMore(true);
       }
 
-      const { data } = await apiClient.get('/contents/shorts', { params: { page: pageNum } });
-      const newShorts = data.videos?.data || data.data || [];
+      interface ShortsResponse {
+        videos?: { data?: Video[]; current_page?: number; last_page?: number };
+        data?: Video[];
+        current_page?: number;
+        last_page?: number;
+      }
+      const response = await apiClient.get<ShortsResponse>('/contents/shorts', { params: { page: pageNum } });
+      const newShorts = response.videos?.data || response.data || [];
 
       if (reset) {
         setShortsList(newShorts);
@@ -40,8 +44,8 @@ export default function ContentShortsPage() {
         setShortsList((prev) => [...prev, ...newShorts]);
       }
 
-      const pagination = data.videos || data;
-      setHasMore(pagination.current_page < pagination.last_page);
+      const pagination = response.videos || response;
+      setHasMore((pagination.current_page ?? 1) < (pagination.last_page ?? 1));
       setPage(pageNum);
     } catch (error) {
       console.error('Failed to fetch shorts:', error);

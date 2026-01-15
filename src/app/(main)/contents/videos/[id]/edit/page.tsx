@@ -14,7 +14,7 @@ import type { Video } from '@/types';
 export default function EditVideoPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
-  const { user, isAuthenticated } = useAuthStore();
+  const { user } = useAuthStore();
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
 
   const [video, setVideo] = useState<Video | null>(null);
@@ -35,8 +35,12 @@ export default function EditVideoPage({ params }: { params: Promise<{ id: string
     async function fetchVideo() {
       try {
         setIsLoading(true);
-        const { data } = await apiClient.get(`/contents/videos/${id}`);
-        const videoData = data.video || data.data || data;
+        const response = await apiClient.get<{ video?: Video; data?: Video } | Video>(`/contents/videos/${id}`);
+        const videoData = (response && typeof response === 'object' && 'video' in response
+          ? response.video
+          : response && typeof response === 'object' && 'data' in response
+            ? response.data
+            : response) as Video;
         setVideo(videoData);
         setFormData({
           title: videoData.title || '',

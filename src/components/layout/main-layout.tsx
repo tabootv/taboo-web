@@ -21,9 +21,6 @@ export function MainLayout({ children, showFooter = true }: MainLayoutProps) {
   const router = useRouter();
   const PIP_RETURN_URL_KEY = 'tabootv_pip_return_url';
 
-  // Check if we're on the home page (banner goes behind header)
-  const isHomePage = pathname === '/home' || pathname === '/';
-
   // Check auth state on mount
   useEffect(() => {
     checkAuth();

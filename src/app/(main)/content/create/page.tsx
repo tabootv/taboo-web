@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -17,7 +16,6 @@ import {
   Tag,
   AlertCircle,
 } from 'lucide-react';
-import { useAuthStore } from '@/lib/stores';
 import { Button, LoadingScreen } from '@/components/ui';
 import { toast } from 'sonner';
 
@@ -25,8 +23,6 @@ type ContentType = 'video' | 'short';
 type Visibility = 'public' | 'private' | 'unlisted';
 
 export default function CreateContentPage() {
-  const router = useRouter();
-  const { user, isAuthenticated } = useAuthStore();
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 

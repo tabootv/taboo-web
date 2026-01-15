@@ -16,7 +16,7 @@ import type { Video } from '@/types';
 export default function ShowShortPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
-  const { user, isAuthenticated } = useAuthStore();
+  const { user } = useAuthStore();
 
   const [short, setShort] = useState<Video | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -25,8 +25,13 @@ export default function ShowShortPage({ params }: { params: Promise<{ id: string
     async function fetchShort() {
       try {
         setIsLoading(true);
-        const { data } = await apiClient.get(`/contents/shorts/${id}`);
-        setShort(data.video || data.data || data);
+        const response = await apiClient.get<{ video?: Video; data?: Video } | Video>(`/contents/shorts/${id}`);
+        const shortData = response && typeof response === 'object' && 'video' in response
+          ? response.video
+          : response && typeof response === 'object' && 'data' in response
+            ? response.data
+            : response as Video;
+        setShort(shortData ?? null);
       } catch (err) {
         console.error('Failed to fetch short:', err);
         toast.error('Failed to load short');

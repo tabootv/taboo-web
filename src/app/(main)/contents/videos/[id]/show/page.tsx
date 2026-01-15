@@ -16,7 +16,7 @@ import type { Video } from '@/types';
 export default function ShowVideoPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
-  const { user, isAuthenticated } = useAuthStore();
+  const { user } = useAuthStore();
 
   const [video, setVideo] = useState<Video | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -25,8 +25,13 @@ export default function ShowVideoPage({ params }: { params: Promise<{ id: string
     async function fetchVideo() {
       try {
         setIsLoading(true);
-        const { data } = await apiClient.get(`/contents/videos/${id}`);
-        setVideo(data.video || data.data || data);
+        const response = await apiClient.get<{ video?: Video; data?: Video } | Video>(`/contents/videos/${id}`);
+        const videoData = response && typeof response === 'object' && 'video' in response
+          ? response.video
+          : response && typeof response === 'object' && 'data' in response
+            ? response.data
+            : response as Video;
+        setVideo(videoData ?? null);
       } catch (err) {
         console.error('Failed to fetch video:', err);
         toast.error('Failed to load video');

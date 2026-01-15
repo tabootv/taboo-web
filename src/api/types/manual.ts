@@ -663,6 +663,8 @@ export interface StudioVideoListItem {
   thumbnail_url?: string;
   views_count?: number;
   likes_count?: number;
+  comments_count?: number;
+  duration?: number;
   created_at: string;
   published_at?: string;
   status?: string;
@@ -676,6 +678,8 @@ export interface StudioVideoDetail {
   thumbnail_url?: string;
   views_count?: number;
   likes_count?: number;
+  comments_count?: number;
+  duration?: number;
   created_at: string;
   published_at?: string;
   status?: string;
@@ -689,6 +693,8 @@ export interface StudioShortListItem {
   thumbnail_url?: string;
   views_count?: number;
   likes_count?: number;
+  comments_count?: number;
+  duration?: number;
   created_at: string;
   published_at?: string;
   status?: string;
@@ -702,6 +708,8 @@ export interface StudioShortDetail {
   thumbnail_url?: string;
   views_count?: number;
   likes_count?: number;
+  comments_count?: number;
+  duration?: number;
   created_at: string;
   published_at?: string;
   status?: string;

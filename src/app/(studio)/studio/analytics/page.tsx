@@ -55,7 +55,8 @@ import {
   ChartTooltip,
   type ChartConfig,
 } from '@/components/ui/chart';
-import { studioClient as studio } from '@/api/client'; ;
+import { studioClient as studio } from '@/api/client';
+import type { StudioVideoListItem } from '@/api/types/manual';
 import Image from 'next/image';
 
 type DateRange = '7d' | '30d' | '90d' | '365d' | 'all';
@@ -1188,9 +1189,9 @@ export default function AnalyticsPage() {
                         <td className="px-5 py-3">
                           <div className="flex items-center gap-3">
                             <div className="relative w-16 h-9 rounded overflow-hidden bg-white/5 flex-shrink-0">
-                              {item.thumbnail && (
+                              {item.thumbnail_url && (
                                 <Image
-                                  src={item.thumbnail}
+                                  src={item.thumbnail_url}
                                   alt={item.title}
                                   fill
                                   className="object-cover"

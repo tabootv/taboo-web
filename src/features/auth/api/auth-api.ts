@@ -6,7 +6,7 @@ import type { AuthResponse, MeResponse, LoginCredentials, RegisterData, Firebase
  */
 export const authApi = {
   login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
-    const { data } = await apiClient.post<AuthResponse>('/login', credentials);
+    const data = await apiClient.post<AuthResponse>('/login', credentials);
     if (data.token) {
       setToken(data.token);
     }
@@ -14,7 +14,7 @@ export const authApi = {
   },
 
   register: async (userData: RegisterData): Promise<AuthResponse> => {
-    const { data } = await apiClient.post<AuthResponse>('/register', userData);
+    const data = await apiClient.post<AuthResponse>('/register', userData);
     if (data.token) {
       setToken(data.token);
     }
@@ -22,7 +22,7 @@ export const authApi = {
   },
 
   firebaseLogin: async (firebaseData: FirebaseLoginData): Promise<AuthResponse> => {
-    const { data } = await apiClient.post<AuthResponse>('/auth/firebase-login', firebaseData);
+    const data = await apiClient.post<AuthResponse>('/auth/firebase-login', firebaseData);
     if (data.token) {
       setToken(data.token);
     }
@@ -35,7 +35,7 @@ export const authApi = {
   },
 
   me: async (): Promise<MeResponse> => {
-    const { data } = await apiClient.get<MeResponse>('/me');
+    const data = await apiClient.get<MeResponse>('/me');
     return data;
   },
 };

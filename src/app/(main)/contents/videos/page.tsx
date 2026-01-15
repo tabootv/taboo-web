@@ -3,9 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { Plus, Play, Edit, Trash2, Eye, ThumbsUp, Clock, MoreVertical } from 'lucide-react';
-import { videoClient as videosApi } from '@/api/client';
 import type { Video } from '@/types';
 import { Button, LoadingScreen, Spinner } from '@/components/ui';
 import { formatCompactNumber, formatDuration, formatRelativeTime } from '@/lib/utils';
@@ -14,8 +12,7 @@ import { toast } from 'sonner';
 import { apiClient } from '@/api/client';
 
 export default function ContentVideosPage() {
-  const router = useRouter();
-  const { user, isAuthenticated } = useAuthStore();
+  const { user } = useAuthStore();
   const [videosList, setVideosList] = useState<Video[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -33,8 +30,14 @@ export default function ContentVideosPage() {
       }
 
       // Fetch creator's own videos
-      const { data } = await apiClient.get('/contents/videos', { params: { page: pageNum } });
-      const newVideos = data.videos?.data || data.data || [];
+      interface VideosResponse {
+        videos?: { data?: Video[]; current_page?: number; last_page?: number };
+        data?: Video[];
+        current_page?: number;
+        last_page?: number;
+      }
+      const response = await apiClient.get<VideosResponse>('/contents/videos', { params: { page: pageNum } });
+      const newVideos = response.videos?.data || response.data || [];
 
       if (reset) {
         setVideosList(newVideos);
@@ -42,8 +45,8 @@ export default function ContentVideosPage() {
         setVideosList((prev) => [...prev, ...newVideos]);
       }
 
-      const pagination = data.videos || data;
-      setHasMore(pagination.current_page < pagination.last_page);
+      const pagination = response.videos || response;
+      setHasMore((pagination.current_page ?? 1) < (pagination.last_page ?? 1));
       setPage(pageNum);
     } catch (error) {
       console.error('Failed to fetch videos:', error);
@@ -84,7 +87,7 @@ export default function ContentVideosPage() {
     if (!confirm('Are you sure you want to delete this video?')) return;
 
     try {
-      await videosApi.deleteComment(video.uuid); // This should be a delete video endpoint
+      await apiClient.delete(`/contents/videos/${video.uuid}`);
       setVideosList((prev) => prev.filter((v) => v.uuid !== video.uuid));
       toast.success('Video deleted');
     } catch {

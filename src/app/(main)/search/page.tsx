@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -14,7 +14,7 @@ function SearchPageContent() {
   const searchParams = useSearchParams();
   const query = searchParams.get('q') || '';
 
-  const { data, isLoading, isError, error } = useSearch(query, 1);
+  const { data, isLoading, isError } = useSearch(query, 1);
 
   const results = {
     videos: data?.videos || [],

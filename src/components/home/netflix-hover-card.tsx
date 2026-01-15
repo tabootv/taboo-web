@@ -64,7 +64,7 @@ export function NetflixHoverCard({ video, showDate, index = 0, fixedHeight: _fix
     if (!initialPreviewUrl && !fetchedPreviewUrl && !isFetchingUrl && video.id) {
       setIsFetchingUrl(true);
       try {
-        const videoDetails = await videosApi.getVideo(video.id);
+        const videoDetails = await videosApi.get(video.id);
         const url = videoDetails.url_480 || videoDetails.url_720 || videoDetails.url_1080 || videoDetails.url_hls || videoDetails.hls_url;
         if (url) {
           setFetchedPreviewUrl(url);

@@ -1,7 +1,5 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   ArrowLeft,
@@ -25,8 +23,7 @@ import { Button } from '@/components/ui';
  * via the provider's portal (Whop manage_url, Apple, or Google)
  */
 export default function SubscriptionPage() {
-  const router = useRouter();
-  const { isAuthenticated, user } = useAuthStore();
+  const { user } = useAuthStore();
   const {
     isSubscribed,
     subscriptionInfo: _subscriptionInfo,

@@ -5,7 +5,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Plus, Video, Film, Eye, Heart, MessageCircle, MoreVertical, Edit, Trash2 } from 'lucide-react';
-import { useAuthStore } from '@/lib/stores';
 import { Button, LoadingScreen } from '@/components/ui';
 import { formatDuration, formatRelativeTime } from '@/lib/utils';
 import type { Video as VideoType } from '@/types';
@@ -19,7 +18,6 @@ interface ContentItem extends VideoType {
 
 export default function ContentDashboardPage() {
   const router = useRouter();
-  const { user, isAuthenticated } = useAuthStore();
   const [content, setContent] = useState<ContentItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<ContentType>('all');

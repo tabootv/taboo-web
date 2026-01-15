@@ -76,23 +76,26 @@ export const subscriptionsClient = {
       const data = await apiClient.get<SubscriptionInfo>('/subscription-info');
       return {
         is_subscribed: data.is_subscribed ?? false,
-        provider: data.provider,
-        plan: data.plan,
-        status: data.status,
-        current_period_end: data.current_period_end,
-        manage_url: data.manage_url,
+        ...(data.provider && { provider: data.provider }),
+        ...(data.plan && { plan: data.plan }),
+        ...(data.status && { status: data.status }),
+        ...(data.current_period_end && { current_period_end: data.current_period_end }),
+        ...(data.manage_url && { manage_url: data.manage_url }),
       };
     } catch {
       try {
         const subscription = await subscriptionsClient.getSubscription();
         if (subscription) {
+          const plan = subscription.plan?.slug || subscription.plan?.name;
+          const periodEnd = subscription.current_period_end || subscription.expires_at;
+          const manageUrl = subscription.payload?.manage_url;
           return {
             is_subscribed: subscription.status === 'active',
-            provider: subscription.provider,
-            plan: subscription.plan?.slug || subscription.plan?.name,
-            status: subscription.status,
-            current_period_end: subscription.current_period_end || subscription.expires_at,
-            manage_url: subscription.payload?.manage_url,
+            ...(subscription.provider && { provider: subscription.provider }),
+            ...(plan && { plan }),
+            ...(subscription.status && { status: subscription.status }),
+            ...(periodEnd && { current_period_end: periodEnd }),
+            ...(manageUrl && { manage_url: manageUrl }),
           };
         }
       } catch {

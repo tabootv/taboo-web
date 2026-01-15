@@ -4,7 +4,7 @@ import { useEffect, useState, use, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, ExternalLink, Check, Loader2, CreditCard } from 'lucide-react';
-import { subscriptionsClient } from '@/api/client';
+import { subscriptionsClient as subscriptions } from '@/api/client';
 import type { Plan } from '@/types';
 import { useAuthStore } from '@/lib/stores';
 import { Button, LoadingScreen } from '@/components/ui';

@@ -6,7 +6,7 @@ import { Play } from 'lucide-react';
 import { useMemo } from 'react';
 
 export default function SeriesPage() {
-  const { data, isLoading, isError } = useSeriesList({
+  const { data, isLoading } = useSeriesList({
     sort_by: 'newest',
   });
 

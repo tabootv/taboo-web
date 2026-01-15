@@ -53,7 +53,7 @@ export function usePlaylistsPagination(
 
     setLoadingPlaylists(true);
     try {
-      const response = await playlistsApi.list(currentPage, 3) as PaginatedResponse<Playlist>;
+      const response = await playlistsApi.list({ page: currentPage, per_page: 3 }) as PaginatedResponse<Playlist>;
       const items = response.data || [];
 
       const enhancedItems: PlaylistWithVideos[] = items.map((p) => ({

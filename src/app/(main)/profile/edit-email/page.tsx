@@ -38,7 +38,7 @@ export default function EditEmailPage() {
 
     setIsLoading(true);
     try {
-      const updatedUser = await profileApi.updateEmail(email, password);
+      const updatedUser = await profileApi.updateEmail({ email, password });
       updateUser(updatedUser);
       toast.success('Email updated successfully! Please verify your new email address.');
       router.push('/profile');

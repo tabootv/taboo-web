@@ -25,7 +25,7 @@ export function MobileCommentSection({ video }: MobileCommentSectionProps) {
 
     setIsSubmitting(true);
     try {
-      const comment = await videoClient.postComment(video.uuid, content);
+      const comment = await videoClient.addComment(video.uuid, content);
       appendComment(comment);
       setContent('');
     } catch {

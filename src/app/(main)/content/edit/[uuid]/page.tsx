@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useRef, useEffect, use } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -15,7 +14,6 @@ import {
   Trash2,
   Save,
 } from 'lucide-react';
-import { useAuthStore } from '@/lib/stores';
 import { Button, LoadingScreen } from '@/components/ui';
 import { toast } from 'sonner';
 import type { Video } from '@/types';
@@ -24,8 +22,6 @@ type Visibility = 'public' | 'private' | 'unlisted';
 
 export default function EditContentPage({ params }: { params: Promise<{ uuid: string }> }) {
   const { uuid } = use(params);
-  const router = useRouter();
-  const { user, isAuthenticated } = useAuthStore();
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [content, _setContent] = useState<Video | null>(null);

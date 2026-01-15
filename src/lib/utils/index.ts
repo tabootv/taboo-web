@@ -1,5 +1,5 @@
-export { cn } from './cn';
 export {
+  cn,
   formatCompactNumber,
   formatDuration,
   formatNumber,

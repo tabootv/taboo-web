@@ -3,7 +3,7 @@
 import { useState, useEffect, use } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { creatorsClient } from '@/api/client';
+import { creatorsClient as creators } from '@/api/client';
 import type { Creator, Video, Series } from '@/types';
 import { formatDuration } from '@/lib/utils';
 
@@ -28,7 +28,7 @@ export default function CreatorPreviewPage({ params }: { params: Promise<{ id: s
       try {
         setIsLoading(true);
 
-        const creatorData = await creators.get(creatorId);
+        const creatorData = await creators.getProfile(creatorId);
         setCreator(creatorData);
 
         const videosData = await creators.getVideos(creatorId, { sort_by: 'newest' });
