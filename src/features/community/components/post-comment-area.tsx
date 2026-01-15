@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import Image from 'next/image';
-import { Send } from 'lucide-react';
 import { postsClient as postsApi } from '@/api/client';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import type { Post, PostComment as PostCommentType } from '@/types';
+import { Send } from 'lucide-react';
+import Image from 'next/image';
+import { useEffect, useState } from 'react';
 import { PostComment } from './post-comment';
 
 interface PostCommentAreaProps {
@@ -99,7 +99,7 @@ export function PostCommentArea({ post, showReplySection }: PostCommentAreaProps
 
       {/* Comments List */}
       <div className="mt-4">
-        {commentsClient.map((comment, index) => (
+        {comments.map((comment, index) => (
           <PostComment key={comment.id} comment={comment} index={index} />
         ))}
       </div>

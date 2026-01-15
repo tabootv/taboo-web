@@ -4,6 +4,7 @@
  * API Endpoints:
  * - GET /notifications/list → Notification[]
  * - POST /notifications/read-all → void
+ * - POST /notifications/{id}/read → void
  * - DELETE /notifications/delete-all → void
  * - DELETE /notifications/{id} → void
  * - GET /notifications/contacts → ContactPreferences
@@ -35,6 +36,13 @@ export const notificationsClient = {
    */
   readAll: async (): Promise<void> => {
     await apiClient.post('/notifications/read-all');
+  },
+
+  /**
+   * Mark a single notification as read
+   */
+  read: async (id: string): Promise<void> => {
+    await apiClient.post(`/notifications/${id}/read`);
   },
 
   /**

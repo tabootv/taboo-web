@@ -1,23 +1,24 @@
 'use client';
 
-import { useRef, useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
+import { shortsClient as shortsApi } from '@/api/client';
+import { Avatar } from '@/components/ui';
+import { usePrefersReducedMotion } from '@/lib/hooks';
+import { useFeature } from '@/lib/hooks/use-feature';
+import { formatCompactNumber } from '@/lib/utils';
+import type { Video } from '@/types';
 import {
+  Bookmark,
   Heart,
   MessageCircle,
-  Share2,
-  Bookmark,
   Music2,
+  Play,
+  Share2,
   Volume2,
   VolumeX,
-  Play,
 } from 'lucide-react';
-import type { Video } from '@/types';
-import { Avatar } from '@/components/ui';
-import { formatCompactNumber } from '@/lib/utils';
-import { shortsClient as shortsApi } from '@/api/client';
+import Link from 'next/link';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { usePrefersReducedMotion } from '@/lib/hooks';
 
 interface ShortPlayerProps {
   short: Video;
@@ -26,15 +27,21 @@ interface ShortPlayerProps {
   onPrevious?: () => void;
 }
 
-export function ShortPlayer({ short, isActive, onNext: _onNext, onPrevious: _onPrevious }: ShortPlayerProps) {
+export function ShortPlayer({
+  short,
+  isActive,
+  onNext: _onNext,
+  onPrevious: _onPrevious,
+}: ShortPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [isLiked, setIsLiked] = useState(short.is_liked ?? false);
+  const [isLiked, setIsLiked] = useState(short.has_liked ?? false);
   const [likesCount, setLikesCount] = useState(short.likes_count ?? 0);
   const [isBookmarked, setIsBookmarked] = useState(short.is_bookmarked ?? false);
   const prefersReducedMotion = usePrefersReducedMotion();
+  const bookmarksEnabled = useFeature('BOOKMARK_SYSTEM');
 
   const attemptPlay = useCallback(async () => {
     const videoEl = videoRef.current;
@@ -60,7 +67,6 @@ export function ShortPlayer({ short, isActive, onNext: _onNext, onPrevious: _onP
     }
   }, [isMuted, prefersReducedMotion]);
 
-  // Auto-play when active
   useEffect(() => {
     if (!videoRef.current) return;
 
@@ -72,7 +78,6 @@ export function ShortPlayer({ short, isActive, onNext: _onNext, onPrevious: _onP
     }
   }, [attemptPlay, isActive, prefersReducedMotion]);
 
-  // Handle play/pause events
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -83,7 +88,6 @@ export function ShortPlayer({ short, isActive, onNext: _onNext, onPrevious: _onP
       setProgress((video.currentTime / video.duration) * 100);
     };
     const handleEnded = () => {
-      // Loop the video
       video.currentTime = 0;
       video.play();
     };
@@ -127,6 +131,8 @@ export function ShortPlayer({ short, isActive, onNext: _onNext, onPrevious: _onP
   };
 
   const handleBookmark = async () => {
+    if (!bookmarksEnabled) return;
+
     try {
       await shortsApi.toggleBookmark(short.uuid);
       setIsBookmarked(!isBookmarked);
@@ -152,7 +158,6 @@ export function ShortPlayer({ short, isActive, onNext: _onNext, onPrevious: _onP
 
   return (
     <div className="relative h-full w-full max-w-[400px] bg-black">
-      {/* Video */}
       <video
         ref={videoRef}
         src={videoSrc}
@@ -164,7 +169,6 @@ export function ShortPlayer({ short, isActive, onNext: _onNext, onPrevious: _onP
         onClick={togglePlay}
       />
 
-      {/* Progress bar */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-white/20">
         <div
           className="h-full bg-white transition-all duration-100"
@@ -172,7 +176,6 @@ export function ShortPlayer({ short, isActive, onNext: _onNext, onPrevious: _onP
         />
       </div>
 
-      {/* Play/Pause overlay */}
       {!isPlaying && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/20">
           <button
@@ -184,7 +187,6 @@ export function ShortPlayer({ short, isActive, onNext: _onNext, onPrevious: _onP
         </div>
       )}
 
-      {/* Mute button */}
       <button
         onClick={toggleMute}
         className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/40 flex items-center justify-center"
@@ -196,29 +198,19 @@ export function ShortPlayer({ short, isActive, onNext: _onNext, onPrevious: _onP
         )}
       </button>
 
-      {/* Right side actions */}
       <div className="absolute right-4 bottom-24 flex flex-col items-center gap-6">
-        {/* Like */}
         <button onClick={handleLike} className="flex flex-col items-center gap-1">
           <div
             className={`w-12 h-12 rounded-full flex items-center justify-center ${
               isLiked ? 'bg-red-500' : 'bg-black/40'
             }`}
           >
-            <Heart
-              className={`w-6 h-6 ${isLiked ? 'text-white fill-white' : 'text-white'}`}
-            />
+            <Heart className={`w-6 h-6 ${isLiked ? 'text-white fill-white' : 'text-white'}`} />
           </div>
-          <span className="text-white text-xs font-medium">
-            {formatCompactNumber(likesCount)}
-          </span>
+          <span className="text-white text-xs font-medium">{formatCompactNumber(likesCount)}</span>
         </button>
 
-        {/* Comments */}
-        <Link
-          href={`/shorts/${short.uuid}`}
-          className="flex flex-col items-center gap-1"
-        >
+        <Link href={`/shorts/${short.uuid}`} className="flex flex-col items-center gap-1">
           <div className="w-12 h-12 rounded-full bg-black/40 flex items-center justify-center">
             <MessageCircle className="w-6 h-6 text-white" />
           </div>
@@ -227,21 +219,21 @@ export function ShortPlayer({ short, isActive, onNext: _onNext, onPrevious: _onP
           </span>
         </Link>
 
-        {/* Bookmark */}
-        <button onClick={handleBookmark} className="flex flex-col items-center gap-1">
-          <div
-            className={`w-12 h-12 rounded-full flex items-center justify-center ${
-              isBookmarked ? 'bg-yellow-500' : 'bg-black/40'
-            }`}
-          >
-            <Bookmark
-              className={`w-6 h-6 ${isBookmarked ? 'text-white fill-white' : 'text-white'}`}
-            />
-          </div>
-          <span className="text-white text-xs font-medium">Save</span>
-        </button>
+        {bookmarksEnabled && (
+          <button onClick={handleBookmark} className="flex flex-col items-center gap-1">
+            <div
+              className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                isBookmarked ? 'bg-yellow-500' : 'bg-black/40'
+              }`}
+            >
+              <Bookmark
+                className={`w-6 h-6 ${isBookmarked ? 'text-white fill-white' : 'text-white'}`}
+              />
+            </div>
+            <span className="text-white text-xs font-medium">Save</span>
+          </button>
+        )}
 
-        {/* Share */}
         <button onClick={handleShare} className="flex flex-col items-center gap-1">
           <div className="w-12 h-12 rounded-full bg-black/40 flex items-center justify-center">
             <Share2 className="w-6 h-6 text-white" />
@@ -249,12 +241,8 @@ export function ShortPlayer({ short, isActive, onNext: _onNext, onPrevious: _onP
           <span className="text-white text-xs font-medium">Share</span>
         </button>
 
-        {/* Channel Avatar */}
         {short.channel && (
-          <Link
-            href={`/creators/creator-profile/${short.channel.uuid}`}
-            className="relative"
-          >
+          <Link href={`/creators/creator-profile/${short.channel.uuid}`} className="relative">
             <Avatar
               src={short.channel.dp}
               alt={short.channel.name}
@@ -269,9 +257,7 @@ export function ShortPlayer({ short, isActive, onNext: _onNext, onPrevious: _onP
         )}
       </div>
 
-      {/* Bottom info */}
       <div className="absolute bottom-4 left-4 right-20">
-        {/* Channel name */}
         {short.channel && (
           <Link
             href={`/creators/creator-profile/${short.channel.uuid}`}
@@ -281,10 +267,8 @@ export function ShortPlayer({ short, isActive, onNext: _onNext, onPrevious: _onP
           </Link>
         )}
 
-        {/* Description */}
         <p className="text-white text-sm line-clamp-2">{short.title}</p>
 
-        {/* Music/Audio info */}
         <div className="flex items-center gap-2 mt-2">
           <Music2 className="w-4 h-4 text-white" />
           <span className="text-white text-xs">Original audio</span>

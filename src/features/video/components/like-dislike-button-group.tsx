@@ -18,16 +18,16 @@ export function LikeDislikeButtonGroup({ video, onUpdate }: LikeDislikeButtonGro
       await videoClient.toggleLike(localVideo.uuid);
       const updatedVideo = { ...localVideo };
 
-      if (localVideo.is_disliked) {
-        updatedVideo.is_disliked = false;
+      if (localVideo.has_disliked) {
+        updatedVideo.has_disliked = false;
         updatedVideo.dislikes_count = (updatedVideo.dislikes_count || 0) - 1;
       }
 
-      if (localVideo.is_liked) {
-        updatedVideo.is_liked = false;
+      if (localVideo.has_liked) {
+        updatedVideo.has_liked = false;
         updatedVideo.likes_count = (updatedVideo.likes_count || 0) - 1;
       } else {
-        updatedVideo.is_liked = true;
+        updatedVideo.has_liked = true;
         updatedVideo.likes_count = (updatedVideo.likes_count || 0) + 1;
       }
 
@@ -43,16 +43,16 @@ export function LikeDislikeButtonGroup({ video, onUpdate }: LikeDislikeButtonGro
       await videoClient.toggleDislike(localVideo.uuid);
       const updatedVideo = { ...localVideo };
 
-      if (localVideo.is_liked) {
-        updatedVideo.is_liked = false;
+      if (localVideo.has_liked) {
+        updatedVideo.has_liked = false;
         updatedVideo.likes_count = (updatedVideo.likes_count || 0) - 1;
       }
 
-      if (localVideo.is_disliked) {
-        updatedVideo.is_disliked = false;
+      if (localVideo.has_disliked) {
+        updatedVideo.has_disliked = false;
         updatedVideo.dislikes_count = (updatedVideo.dislikes_count || 0) - 1;
       } else {
-        updatedVideo.is_disliked = true;
+        updatedVideo.has_disliked = true;
         updatedVideo.dislikes_count = (updatedVideo.dislikes_count || 0) + 1;
       }
 
@@ -68,7 +68,7 @@ export function LikeDislikeButtonGroup({ video, onUpdate }: LikeDislikeButtonGro
       <button
         onClick={toggleLike}
         className={`h-[26px] md:h-[30px] px-3 flex items-center gap-1 text-sm md:text-base font-normal rounded-l-full border-r border-text-secondary/30 transition-colors ${
-          localVideo.is_liked
+          localVideo.has_liked
             ? 'bg-red-primary text-white'
             : 'bg-white/10 text-white hover:bg-white/15'
         }`}
@@ -79,7 +79,7 @@ export function LikeDislikeButtonGroup({ video, onUpdate }: LikeDislikeButtonGro
       <button
         onClick={toggleDislike}
         className={`h-[26px] md:h-[30px] px-3 flex items-center gap-1 text-sm md:text-base font-normal rounded-r-full transition-colors ${
-          localVideo.is_disliked
+          localVideo.has_disliked
             ? 'bg-red-primary text-white'
             : 'bg-white/10 text-white hover:bg-white/15'
         }`}

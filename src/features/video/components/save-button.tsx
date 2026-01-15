@@ -1,15 +1,18 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { Bookmark } from 'lucide-react';
+import { useFeature } from '@/lib/hooks/use-feature';
 import { useSavedVideosStore, type SavedVideo } from '@/lib/stores/saved-videos-store';
 import type { Video } from '@/types';
+import { Bookmark } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 
 interface SaveButtonProps {
   video: Video;
 }
 
 export function SaveButton({ video }: SaveButtonProps) {
+  const bookmarksEnabled = useFeature('BOOKMARK_SYSTEM');
+
   const { isSaved, toggleSave } = useSavedVideosStore();
   const [saved, setSaved] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -35,6 +38,8 @@ export function SaveButton({ video }: SaveButtonProps) {
     setSaved(newState);
   }, [video, toggleSave]);
 
+  if (!bookmarksEnabled) return null;
+
   const baseClasses =
     'inline-flex items-center justify-center w-9 h-9 md:w-10 md:h-10 rounded-full border border-white/10 bg-white/5 text-white transition-colors';
 
@@ -49,9 +54,7 @@ export function SaveButton({ video }: SaveButtonProps) {
       disabled={!mounted}
       className={`${baseClasses} ${activeClasses} disabled:opacity-60`}
     >
-      <Bookmark
-        className={`w-4 h-4 md:w-5 md:h-5 ${saved ? 'fill-current' : ''}`}
-      />
+      <Bookmark className={`w-4 h-4 md:w-5 md:h-5 ${saved ? 'fill-current' : ''}`} />
     </button>
   );
 }

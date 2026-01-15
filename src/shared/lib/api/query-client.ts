@@ -12,6 +12,7 @@ import { QueryClient } from '@tanstack/react-query';
  * - Notifications: 30 seconds (real-time feel)
  * - Home feed: 10 minutes
  * - Search results: 5 minutes
+ * - Creators: 1 hour (rarely changes)
  */
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -42,6 +43,11 @@ export const queryClient = new QueryClient({
         // User profile: medium cache
         if (key === 'auth') {
           return 1000 * 60 * 5; // 5 minutes
+        }
+
+        // Creators: long cache (rarely changes)
+        if (key === 'creators') {
+          return 1000 * 60 * 60; // 1 hour
         }
 
         // Default: 5 minutes

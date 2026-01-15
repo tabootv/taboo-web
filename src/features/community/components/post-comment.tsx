@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { ThumbsUp, ThumbsDown, Reply, Send } from 'lucide-react';
+import { ThumbsUp, Reply, Send } from 'lucide-react';
 import { postsClient as postsApi } from '@/api/client';
 import type { PostComment as PostCommentType } from '@/types';
 
@@ -13,7 +13,6 @@ interface PostCommentProps {
 
 export function PostComment({ comment, index }: PostCommentProps) {
   const [isLiked, setIsLiked] = useState(comment.has_liked);
-  const [isDisliked, setIsDisliked] = useState(comment.has_disliked);
   const [showReplyInput, setShowReplyInput] = useState(false);
   const [showReplies, setShowReplies] = useState(false);
   const [commentReplies, setCommentReplies] = useState<PostCommentType[]>([]);
@@ -29,23 +28,8 @@ export function PostComment({ comment, index }: PostCommentProps) {
     try {
       await postsApi.likeComment(comment.id);
       setIsLiked(!isLiked);
-      if (!isLiked) {
-        setIsDisliked(false);
-      }
     } catch (error) {
       console.error('Failed to like comment:', error);
-    }
-  };
-
-  const toggleDislike = async () => {
-    try {
-      await postsApi.dislikeComment(comment.id);
-      setIsDisliked(!isDisliked);
-      if (!isDisliked) {
-        setIsLiked(false);
-      }
-    } catch (error) {
-      console.error('Failed to dislike comment:', error);
     }
   };
 
@@ -120,12 +104,9 @@ export function PostComment({ comment, index }: PostCommentProps) {
         <div className="flex items-center gap-4 md:gap-8">
           <button onClick={toggleLike} className="cursor-pointer">
             <ThumbsUp
-              className={`w-5 h-5 ${isLiked ? 'text-white fill-white' : 'text-[#9F9F9F]'}`}
-            />
-          </button>
-          <button onClick={toggleDislike} className="cursor-pointer">
-            <ThumbsDown
-              className={`w-5 h-5 ${isDisliked ? 'text-white fill-white' : 'text-[#9F9F9F]'}`}
+              className={`w-5 h-5 transition-colors ${
+                isLiked ? 'text-red-primary fill-red-primary' : 'text-[#9F9F9F]'
+              }`}
             />
           </button>
           <button onClick={toggleReply} className="cursor-pointer p-2">

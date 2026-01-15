@@ -71,4 +71,27 @@ export const postsClient = {
     );
     return data.postComment || data.data || (data as PostComment);
   },
+
+  likeComment: async (commentId: number): Promise<void> => {
+    await apiClient.post(`/post-comments/${commentId}/like-toggle`);
+  },
+
+  dislikeComment: async (commentId: number): Promise<void> => {
+    await apiClient.post(`/post-comments/${commentId}/dislike`);
+  },
+
+  getCommentReplies: async (commentId: number): Promise<PostCommentListResponse> => {
+    const data = await apiClient.get<{
+      postComment?: PostCommentListResponse;
+      comments?: PostCommentListResponse;
+      data?: PostCommentListResponse;
+    }>(`/post-comments/${commentId}/replies`);
+    return (
+      data.postComment || data.comments || data.data || (data as unknown as PostCommentListResponse)
+    );
+  },
+
+  postComment: async (postId: number, content: string, parentId?: number): Promise<PostComment> => {
+    return postsClient.addComment(postId, content, parentId);
+  },
 };

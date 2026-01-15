@@ -1,13 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { getRequiredEnv } from '@/shared/lib/config/env';
+import { NextRequest, NextResponse } from 'next/server';
 
 // Force dynamic to avoid build-time env var requirement
 export const dynamic = 'force-dynamic';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const searchParams = request.nextUrl.searchParams;
   const sortBy = searchParams.get('sort_by') || 'newest';
@@ -15,16 +12,13 @@ export async function GET(
   const SERVICE_TOKEN = getRequiredEnv('SERVICE_API_TOKEN');
 
   try {
-    const response = await fetch(
-      `${API_URL}/creators/creator-videos/${id}?sort_by=${sortBy}`,
-      {
-        headers: {
-          'Accept': 'application/json',
-          Authorization: `Bearer ${SERVICE_TOKEN}`,
-        },
-        next: { revalidate: 300 },
-      }
-    );
+    const response = await fetch(`${API_URL}/creators/creator-videos/${id}?sort_by=${sortBy}`, {
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Bearer ${SERVICE_TOKEN}`,
+      },
+      next: { revalidate: 300 },
+    });
 
     if (!response.ok) {
       throw new Error(`API Error: ${response.status}`);

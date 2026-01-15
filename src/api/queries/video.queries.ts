@@ -96,22 +96,24 @@ export function useVideoComments(id: string | number | null | undefined, page = 
 /**
  * Hook to fetch bookmarked videos
  */
-export function useBookmarkedVideos(page = 1, perPage = 12) {
+export function useBookmarkedVideos(page = 1, perPage = 12, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: [...queryKeys.videos.bookmarked(), page, perPage],
     queryFn: () => videoClient.getBookmarked(page, perPage),
     staleTime: 1000 * 60 * 10, // 10 minutes
+    ...(options?.enabled !== undefined && { enabled: options.enabled }),
   });
 }
 
 /**
  * Hook to fetch watch history
  */
-export function useHistoryVideos(page = 1, perPage = 12) {
+export function useHistoryVideos(page = 1, perPage = 12, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: [...queryKeys.videos.history(), page, perPage],
     queryFn: () => videoClient.getHistory(page, perPage),
     staleTime: 1000 * 60 * 10, // 10 minutes
+    ...(options?.enabled !== undefined && { enabled: options.enabled }),
   });
 }
 

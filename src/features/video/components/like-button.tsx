@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { Heart } from 'lucide-react';
 import { videoClient } from '@/api/client';
-import { toast } from 'sonner';
 import type { Video } from '@/types';
+import { Heart } from 'lucide-react';
+import { useCallback, useState } from 'react';
+import { toast } from 'sonner';
 
 interface LikeButtonProps {
   video: Video;
@@ -12,7 +12,7 @@ interface LikeButtonProps {
 }
 
 export function LikeButton({ video, onUpdate }: LikeButtonProps) {
-  const [isLiked, setIsLiked] = useState(video.is_liked || false);
+  const [isLiked, setIsLiked] = useState(video.has_liked || false);
   const [likesCount, setLikesCount] = useState(video.likes_count || 0);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -32,7 +32,7 @@ export function LikeButton({ video, onUpdate }: LikeButtonProps) {
       if (onUpdate) {
         onUpdate({
           ...video,
-          is_liked: newIsLiked,
+          has_liked: newIsLiked,
           likes_count: newLikesCount,
         });
       }
@@ -48,9 +48,7 @@ export function LikeButton({ video, onUpdate }: LikeButtonProps) {
       onClick={handleToggleLike}
       disabled={isLoading}
       className={`h-9 px-4 flex items-center gap-2 rounded-full transition-all ${
-        isLiked
-          ? 'bg-red-primary text-white'
-          : 'bg-surface text-white hover:bg-hover'
+        isLiked ? 'bg-red-primary text-white' : 'bg-surface text-white hover:bg-hover'
       } ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
     >
       <Heart
