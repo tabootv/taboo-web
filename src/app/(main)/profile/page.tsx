@@ -1,38 +1,38 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useUpdateAvatar } from '@/api/mutations';
+import { useBookmarkedVideos, useHistoryVideos, useLikedVideos } from '@/api/queries';
+import { Avatar, Button, LoadingScreen } from '@/components/ui';
+import { useFeature } from '@/lib/hooks/use-feature';
+import { useAuthStore } from '@/lib/stores/auth-store';
+import { formatCompactNumber } from '@/lib/utils';
+import type { Video } from '@/types';
+import { Bookmark, Camera, Clock, CreditCard, Heart, Lock, LogOut, Settings } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import {
-  Settings,
-  CreditCard,
-  Bookmark,
-  Clock,
-  Heart,
-  Edit2,
-  Camera,
-  LogOut,
-} from 'lucide-react';
-import { useAuthStore } from '@/lib/stores/auth-store';
-import { useBookmarkedVideos, useHistoryVideos, useLikedVideos } from '@/api/queries';
-import { useUpdateAvatar } from '@/api/mutations';
-import type { Video } from '@/types';
-import { Button, Avatar, LoadingScreen } from '@/components/ui';
-import { formatCompactNumber } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { toast } from 'sonner';
 
 type TabType = 'bookmarks' | 'history' | 'liked';
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { user, isAuthenticated, logout, fetchUser } = useAuthStore();
-  const [activeTab, setActiveTab] = useState<TabType>('bookmarks');
+  const { user, logout, fetchUser } = useAuthStore();
+  const bookmarksEnabled = useFeature('BOOKMARK_SYSTEM');
+  const historyEnabled = useFeature('WATCH_HISTORY');
+  const [activeTab, setActiveTab] = useState<TabType>(
+    bookmarksEnabled ? 'bookmarks' : historyEnabled ? 'history' : 'liked'
+  );
   const updateAvatar = useUpdateAvatar();
   const [isUploadingDp, setIsUploadingDp] = useState(false);
 
-  const { data: bookmarksData, isLoading: isLoadingBookmarks } = useBookmarkedVideos(1, 12);
-  const { data: historyData, isLoading: isLoadingHistory } = useHistoryVideos(1, 12);
+  const { data: bookmarksData, isLoading: isLoadingBookmarks } = useBookmarkedVideos(1, 12, {
+    enabled: bookmarksEnabled,
+  });
+  const { data: historyData, isLoading: isLoadingHistory } = useHistoryVideos(1, 12, {
+    enabled: historyEnabled,
+  });
   const { data: likedData, isLoading: isLoadingLiked } = useLikedVideos(1, 12);
 
   const isLoading = isLoadingBookmarks || isLoadingHistory || isLoadingLiked;
@@ -78,8 +78,12 @@ export default function ProfilePage() {
   }
 
   const tabs = [
-    { id: 'bookmarks' as TabType, label: 'Saved', icon: Bookmark, count: bookmarks.length },
-    { id: 'history' as TabType, label: 'History', icon: Clock, count: history.length },
+    ...(bookmarksEnabled
+      ? [{ id: 'bookmarks' as TabType, label: 'Saved', icon: Bookmark, count: bookmarks.length }]
+      : []),
+    ...(historyEnabled
+      ? [{ id: 'history' as TabType, label: 'History', icon: Clock, count: history.length }]
+      : []),
     { id: 'liked' as TabType, label: 'Liked', icon: Heart, count: liked.length },
   ];
 
@@ -101,7 +105,7 @@ export default function ProfilePage() {
       {/* Profile Header */}
       <div className="bg-surface rounded-lg elevation-low border border-border overflow-hidden">
         {/* Cover */}
-        <div className="h-32 md:h-48 bg-gradient-to-r from-red-primary to-red-dark" />
+        <div className="h-32 md:h-48 bg-linear-to-r from-red-primary to-red-dark" />
 
         {/* Profile Info */}
         <div className="relative px-6 pb-6">
@@ -128,9 +132,7 @@ export default function ProfilePage() {
 
             {/* Info */}
             <div className="flex-1 sm:mb-2">
-              <h1 className="text-2xl font-bold text-text-primary">
-                {user?.display_name}
-              </h1>
+              <h1 className="text-2xl font-bold text-text-primary">{user?.display_name}</h1>
               <p className="text-text-secondary">{user?.email}</p>
             </div>
 
@@ -148,7 +150,7 @@ export default function ProfilePage() {
       {/* Quick Links */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
         <Link
-          href="/profile/settings"
+          href="/profile/edit"
           className="flex items-center gap-3 p-4 bg-surface rounded-md border border-border hover:bg-hover transition-colors"
         >
           <div className="p-2 bg-hover rounded-sm">
@@ -174,15 +176,15 @@ export default function ProfilePage() {
         </Link>
 
         <Link
-          href="/profile/edit"
+          href="/profile/edit-password"
           className="flex items-center gap-3 p-4 bg-surface rounded-md border border-border hover:bg-hover transition-colors"
         >
           <div className="p-2 bg-red-primary/10 rounded-sm">
-            <Edit2 className="w-5 h-5 text-red-primary" />
+            <Lock className="w-5 h-5 text-red-primary" />
           </div>
           <div>
-            <p className="font-medium text-text-primary">Edit Profile</p>
-            <p className="text-xs text-text-secondary">Update info</p>
+            <p className="font-medium text-text-primary">Security</p>
+            <p className="text-xs text-text-secondary">Change password</p>
           </div>
         </Link>
       </div>
@@ -202,9 +204,7 @@ export default function ProfilePage() {
             >
               <tab.icon className="w-4 h-4" />
               {tab.label}
-              <span className="ml-1 px-2 py-0.5 text-xs bg-hover rounded-full">
-                {tab.count}
-              </span>
+              <span className="ml-1 px-2 py-0.5 text-xs bg-hover rounded-full">{tab.count}</span>
             </button>
           ))}
         </div>
@@ -219,9 +219,7 @@ export default function ProfilePage() {
             </div>
           ) : (
             <div className="text-center py-12">
-              <p className="text-text-secondary">
-                No {activeTab} videos yet
-              </p>
+              <p className="text-text-secondary">No {activeTab} videos yet</p>
             </div>
           )}
         </div>
