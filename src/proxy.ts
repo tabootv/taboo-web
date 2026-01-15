@@ -184,7 +184,7 @@ async function validateCreatorStatus(token: string): Promise<boolean> {
 /**
  * Main middleware function
  */
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Debug logging in development
