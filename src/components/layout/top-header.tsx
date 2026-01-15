@@ -1,16 +1,17 @@
 'use client';
 
-import Link from 'next/link';
-import { useState, useEffect } from 'react';
-import { Menu, Bell, LogOut, Settings } from 'lucide-react';
+import { SearchInput } from '@/components/search';
 import { Avatar, Button } from '@/components/ui';
 import { Logo } from '@/components/ui/logo';
-import { SearchInput } from '@/components/search';
-import { useAuthStore, useSidebarStore } from '@/lib/stores';
+import { useSidebar } from '@/components/ui/sidebar';
+import { useAuthStore } from '@/lib/stores';
+import { Bell, LogOut, Menu, Settings } from 'lucide-react';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
 export function TopHeader() {
   const { user, isAuthenticated, logout } = useAuthStore();
-  const { toggleExpanded, toggleMobileOpen } = useSidebarStore();
+  const { toggleSidebar } = useSidebar();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   const handleLogout = async () => {
@@ -40,24 +41,20 @@ export function TopHeader() {
   }, [isUserMenuOpen]);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 h-14 bg-black border-b border-black">
-      <div className="flex items-center justify-between h-full px-4">
+    <header className="fixed top-0 left-0 right-0 z-50 h-14 bg-black backdrop-blur-xs">
+      <div className="flex items-center justify-between h-full pr-4">
         {/* Left: Hamburger + Logo */}
-        <div className="flex items-center gap-2">
-          {/* Hamburger - Desktop: toggle sidebar, Mobile: open drawer */}
-          <button
-            onClick={() => {
-              if (window.innerWidth >= 1024) {
-                toggleExpanded();
-              } else {
-                toggleMobileOpen();
-              }
-            }}
-            className="p-2 rounded-full hover:bg-hover text-text-secondary hover:text-text-primary transition-colors"
-            aria-label="Toggle menu"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
+        <div className="flex items-center">
+          {/* Hamburger - Aligned with sidebar icons (3rem = 48px width) */}
+          <div className="w-12 h-14 flex items-center justify-center shrink-0">
+            <button
+              onClick={toggleSidebar}
+              className="p-2 rounded-full hover:bg-hover text-text-secondary hover:text-text-primary transition-colors"
+              aria-label="Toggle menu"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+          </div>
 
           <Logo size="md" linkTo="/home" />
         </div>
@@ -69,7 +66,6 @@ export function TopHeader() {
 
         {/* Right: Notifications, User */}
         <div className="flex items-center gap-1">
-
           {isAuthenticated ? (
             <>
               {/* Notifications */}
@@ -110,9 +106,7 @@ export function TopHeader() {
                         fallback={user?.display_name}
                       />
                       <div className="min-w-0">
-                        <p className="font-semibold text-white truncate">
-                          {user?.display_name}
-                        </p>
+                        <p className="font-semibold text-white truncate">{user?.display_name}</p>
                         <p className="text-xs text-white/60 truncate">{user?.email}</p>
                       </div>
                     </div>

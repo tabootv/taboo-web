@@ -26,6 +26,7 @@ npm run test:ui      # Run tests with Vitest UI
 ## Architecture
 
 ### Tech Stack
+
 - **Next.js 16** with App Router
 - **React 19** with TypeScript
 - **Tailwind CSS 4** for styling
@@ -35,6 +36,7 @@ npm run test:ui      # Run tests with Vitest UI
 - **Shaka Player** for HLS/MP4 video playback
 
 ### Directory Structure
+
 ```
 src/
 ├── app/
@@ -66,6 +68,7 @@ src/
 ```
 
 ### Content Types
+
 - **Videos**: Long-form content, supports HLS streaming with quality selection
 - **Shorts**: TikTok-style vertical videos with V2 API (`/v2/shorts`)
 - **Series**: Multi-episode collections with seasons, uses Netflix-style layout
@@ -73,6 +76,7 @@ src/
 - **Posts**: Community feed content with text/images
 
 ### API Layer (Modern TanStack Query Architecture)
+
 - **Base Client** (`src/api/client/base-client.ts`): Fetch-based client with auth token from cookies
 - **API Clients** (`src/api/client/`): Domain-specific clients (video, auth, home, series, posts, earnings, etc.)
 - **TanStack Query Hooks** (`src/api/queries/` & `src/api/mutations/`): React Query hooks for data fetching and mutations
@@ -83,6 +87,7 @@ src/
 - **Third-Party Integrations**: FirstPromoter earnings use Next.js API routes as secure proxies (`/api/creator-studio/earnings`)
 
 ### State Management (Zustand Stores)
+
 - **Auth Store**: User session, login/logout, subscription status (persisted to localStorage)
 - **Shorts Store**: Infinite scroll state for shorts feed
 - **Watchlist Store**: User's saved videos
@@ -91,7 +96,9 @@ src/
 - **Live Chat Store**: Real-time chat messages
 
 ### Video Player Architecture
+
 The video player uses **Shaka Player** for HLS streaming:
+
 - **VideoPlayer** (`src/components/video/video-player.tsx`): Thin wrapper that selects best source (HLS → 1440p → 1080p → etc.)
 - **ShakaPlayer** (`src/components/video/shaka-player.tsx`): Full-featured player with:
   - Netflix-style controls with smooth animations
@@ -101,7 +108,9 @@ The video player uses **Shaka Player** for HLS streaming:
   - Keyboard shortcuts (space, arrows, f, m, etc.)
 
 ### Design System
+
 Key patterns (see `DESIGN_SYSTEM.md` for full docs):
+
 - **Colors**: Primary red `#ab0013`, Background `#000000`, Surface `#0d0d0d`
 - **Atmospheric backgrounds**: `.series-page-atmosphere` + `.series-atmosphere-bg`
 - **Typography classes**: `title-hero`, `title-page`, `title-section`, `body-large`, `body-small`
@@ -109,6 +118,7 @@ Key patterns (see `DESIGN_SYSTEM.md` for full docs):
 - Use `cn()` from `@/lib/utils` for conditional Tailwind classes
 
 ### Authentication Flow
+
 1. **Server-Side Protection**: Next.js middleware (`src/middleware.ts`) protects all routes by default
    - Public routes: `/sign-in`, `/sign-up`, `/plans`, `/checkout`, `/`
    - Protected routes: Require `tabootv_token` cookie, redirect to `/sign-in?redirect=<path>` if missing
@@ -122,6 +132,7 @@ Key patterns (see `DESIGN_SYSTEM.md` for full docs):
 ## Environment Variables
 
 Copy `.env.local.example` to `.env.local`:
+
 - `NEXT_PUBLIC_API_URL` - Backend API (default: `https://app.taboo.tv/api`, beta: `https://beta.taboo.tv/api`)
 - Firebase config for OAuth
 - Laravel Reverb config for WebSockets
@@ -129,9 +140,11 @@ Copy `.env.local.example` to `.env.local`:
 ## Key Patterns
 
 ### Path Aliases
+
 - `@/` maps to `src/`
 
 ### API Calls (Modern Pattern)
+
 ```tsx
 // Use TanStack Query hooks for data fetching
 import { useVideo, useRecommendedVideos } from '@/api/queries';
@@ -160,12 +173,14 @@ const data = await videoClient.getVideo(id);
 ```
 
 ### Zustand Store Usage
+
 ```tsx
 import { useAuthStore } from '@/lib/stores';
 const { user, isAuthenticated, login } = useAuthStore();
 ```
 
 ### Video Player Usage
+
 ```tsx
 import { VideoPlayer } from '@/components/video';
 
@@ -175,17 +190,20 @@ import { VideoPlayer } from '@/components/video';
   url_1080={video.url_1080}
   autoplay={false}
   onEnded={() => playNext()}
-/>
+/>;
 ```
 
 ### Series/Course Pages
+
 - Series detail: `/series/[id]` - Netflix-style hero with trailer + episode grid
 - Series player: `/series/[id]/play/[videoUuid]` - Video + episode sidebar
 - Course detail: `/courses/[id]` - Similar layout with lesson progress
 - Episodes can be auto-played based on user preference
 
 ### Creator Studio
+
 Located at `/studio/*`, allows creators to manage their content:
+
 - Dashboard: `/studio` - Stats and recent content overview
 - Analytics: `/studio/analytics` - Comprehensive analytics with glassmorphism UI and charts
 - Earnings: `/studio/earnings` - Affiliate earnings tracking (FirstPromoter integration)
@@ -195,7 +213,9 @@ Located at `/studio/*`, allows creators to manage their content:
 - Uses `studioClient` from `@/api/client/studio`
 
 ### Earnings & FirstPromoter Integration
+
 Creator earnings are tracked via FirstPromoter affiliate system:
+
 - **UI**: Glassmorphism design with interactive charts (`FunnelAreaChart`)
 - **API Proxy**: Next.js API route at `/api/creator-studio/earnings` proxies FirstPromoter API
   - Keeps FirstPromoter credentials server-side
@@ -208,7 +228,9 @@ Creator earnings are tracked via FirstPromoter affiliate system:
 - **Security**: All FirstPromoter API calls happen server-side, never exposing API keys
 
 ### Horizontal Scroll Sections (Home Page)
+
 Home page uses multiple horizontal scrollable sections in `src/components/home/`:
+
 - `FeaturedSection`, `RecommendedSection`: NetflixHoverCard with video previews
 - `HomeShortsSection`: Vertical shorts with video preview on hover
 - `HomeSeriesSection`: Vertical poster cards with hover expansion
@@ -216,17 +238,57 @@ Home page uses multiple horizontal scrollable sections in `src/components/home/`
 - `PlaylistsSection`: Infinite-loading playlist rows
 
 Common patterns:
+
 - Navigation arrows positioned at card center height (e.g., `top-[78px]` for aspect-video cards)
 - Edge gradients: `bg-gradient-to-r from-background to-transparent`
 - `group/section` for hover-triggered arrow visibility
 - `hide-scrollbar` utility class
 
 ### Netflix-Style Hover Cards
+
 `NetflixHoverCard` component (`src/components/home/netflix-hover-card.tsx`):
+
 - Lazy loads video preview on hover after 300ms delay
 - Shows info panel with play button, save to list, duration
 - Uses `onLoadedData` callback for smooth video-thumbnail transition
 - Volume toggle for preview audio
+
+### Feature Flags
+
+The application uses a type-safe feature flag system for enabling/disabling features during development:
+
+```tsx
+// In Client Components
+import { useFeature } from '@/lib/hooks/use-feature';
+import { Feature } from '@/components/feature';
+
+function MyComponent() {
+  const bookmarksEnabled = useFeature('BOOKMARK_SYSTEM');
+
+  return (
+    <Feature name="BOOKMARK_SYSTEM">
+      <SaveButton />
+    </Feature>
+  );
+}
+
+// In Server Components
+import { isFeatureEnabled } from '@/utils/feature-flags';
+
+export default async function ProfilePage() {
+  const bookmarksEnabled = isFeatureEnabled('BOOKMARK_SYSTEM');
+  // ...
+}
+```
+
+- **Config**: Feature definitions in `src/shared/lib/config/feature-flags.ts`
+- **Environment**: Control via `NEXT_PUBLIC_FEATURE_*` variables in `.env.local`
+- **Documentation**: See [`FEATURE_FLAGS.md`](FEATURE_FLAGS.md) for complete guide
+
+**Current Feature Status:**
+
+- `BOOKMARK_SYSTEM` 🔴 **Disabled** - Backend persistence under development
+- `WATCH_HISTORY` 🔴 **Disabled** - Backend tracking under development
 
 ---
 
