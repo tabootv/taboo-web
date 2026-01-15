@@ -16,7 +16,8 @@ import {
   Settings,
   HelpCircle,
 } from 'lucide-react';
-import { useAuthStore, useSidebarStore } from '@/lib/stores';
+import { useAuthStore } from '@/lib/stores';
+import { useSidebar } from '@/components/ui/sidebar';
 import { Logo } from '@/components/ui/logo';
 import {
   DropdownMenu,
@@ -28,7 +29,7 @@ import {
 
 export function StudioHeader() {
   const { user, logout } = useAuthStore();
-  const { toggleExpanded, toggleMobileOpen } = useSidebarStore();
+  const { toggleSidebar } = useSidebar();
 
   const handleLogout = async () => {
     await logout();
@@ -38,21 +39,17 @@ export function StudioHeader() {
     <header className="fixed top-0 left-0 right-0 z-50 h-14 bg-black border-b border-black">
       <div className="flex items-center justify-between h-full px-4">
         {/* Left: Hamburger + Logo + Studio Badge */}
-        <div className="flex items-center gap-2">
-          {/* Hamburger - Desktop: toggle sidebar, Mobile: open drawer */}
-          <button
-            onClick={() => {
-              if (window.innerWidth >= 1024) {
-                toggleExpanded();
-              } else {
-                toggleMobileOpen();
-              }
-            }}
-            className="p-2 rounded-full hover:bg-hover text-text-secondary hover:text-text-primary transition-colors"
-            aria-label="Toggle menu"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
+        <div className="flex items-center">
+          {/* Hamburger - Aligned with sidebar icons (3rem = 48px width) */}
+          <div className="w-12 h-14 flex items-center justify-center shrink-0">
+            <button
+              onClick={toggleSidebar}
+              className="p-2 rounded-full hover:bg-hover text-text-secondary hover:text-text-primary transition-colors"
+              aria-label="Toggle menu"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+          </div>
 
           <Logo size="md" linkTo="/home" />
 
