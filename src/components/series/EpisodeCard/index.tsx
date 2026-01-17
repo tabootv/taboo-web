@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Play } from 'lucide-react';
-import { formatDuration } from '@/lib/utils';
+import { formatDuration, getSeriesPlayRoute } from '@/lib/utils';
 import { usePrefetch } from '@/lib/hooks/use-prefetch';
 import type { Channel, Video } from '@/types';
 
@@ -11,6 +11,7 @@ interface EpisodeCardProps {
   video: Video;
   episodeNumber: number;
   seriesId: string;
+  seriesTitle?: string;
   channel?: Channel;
   isCourse: boolean;
 }
@@ -19,12 +20,13 @@ export function EpisodeCard({
   video,
   episodeNumber,
   seriesId,
+  seriesTitle,
   isCourse,
 }: EpisodeCardProps) {
   const { prefetchRoute } = usePrefetch();
   const href = isCourse
     ? `/courses/${seriesId}/play/${video.uuid}`
-    : `/series/${seriesId}/play/${video.uuid}`;
+    : getSeriesPlayRoute(seriesId, seriesTitle, video.uuid);
 
   return (
     <Link

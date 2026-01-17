@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/lib/stores';
-import { StudioHeader } from '@/features/creator-studio';
 import { StudioSidebar } from '@/components/sidebar';
-import { SidebarProvider, SidebarInset, useSidebar } from '@/components/ui/sidebar';
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { StudioHeader } from '@/features/creator-studio';
+import { useAuthStore } from '@/lib/stores';
 import { cn } from '@/lib/utils';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function StudioLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -14,16 +14,13 @@ export default function StudioLayout({ children }: { children: React.ReactNode }
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    // Wait for auth store to be ready AND hydrated from localStorage
     if (isLoading || !_hasHydrated) return;
 
-    // Check authentication
     if (!isAuthenticated) {
       router.push('/sign-in?redirect=/studio');
       return;
     }
 
-    // Check if user is a creator (has a channel or is_creator flag)
     if (!user?.channel && !user?.is_creator) {
       router.push('/home');
       return;
@@ -32,7 +29,6 @@ export default function StudioLayout({ children }: { children: React.ReactNode }
     setIsChecking(false);
   }, [isAuthenticated, isLoading, _hasHydrated, user, router]);
 
-  // Show loading while checking auth or waiting for hydration
   if (isLoading || !_hasHydrated || isChecking) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -44,7 +40,6 @@ export default function StudioLayout({ children }: { children: React.ReactNode }
     );
   }
 
-  // Don't render if not authorized
   if (!isAuthenticated || (!user?.channel && !user?.is_creator)) {
     return null;
   }
@@ -60,13 +55,10 @@ export default function StudioLayout({ children }: { children: React.ReactNode }
 }
 
 function StudioContent({ children }: { children: React.ReactNode }) {
-  const { state } = useSidebar();
-  const sidebarOffsetClass = state === 'expanded' ? 'md:pl-[16rem]' : 'md:pl-[3rem]';
-
   return (
-    <div className={cn('min-h-screen bg-background', sidebarOffsetClass)}>
+    <div className={cn('min-h-screen bg-background')}>
       <StudioHeader />
-      <main className={cn('pt-14', sidebarOffsetClass)}>{children}</main>
+      <main className={cn('py-14')}>{children}</main>
     </div>
   );
 }

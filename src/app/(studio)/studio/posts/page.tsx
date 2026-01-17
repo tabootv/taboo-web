@@ -1,19 +1,14 @@
 'use client';
 
-import { useState, useRef, useCallback, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
-import {
-  Image as ImageIcon,
-  Mic,
-  X,
-  Loader2,
-  Send,
-} from 'lucide-react';
-import { useAuthStore } from '@/lib/stores';
 import { studioClient as studio } from '@/api/client';
+import { ContentTypeSelector } from '@/components/studio';
 import { Button } from '@/components/ui';
 import { Card, CardContent } from '@/components/ui/card';
+import { useAuthStore } from '@/lib/stores';
+import { Image as ImageIcon, Loader2, Mic, Send, X } from 'lucide-react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 export default function CreatePostPage() {
@@ -33,36 +28,36 @@ export default function CreatePostPage() {
 
   const channel = user?.channel;
 
-  const handleImageSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
+  const handleImageSelect = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = Array.from(e.target.files || []);
+      if (files.length === 0) return;
 
-    const newImages = files.slice(0, 4 - images.length);
+      const newImages = files.slice(0, 4 - images.length);
 
-    for (const file of newImages) {
-      if (!file.type.startsWith('image/')) {
-        toast.error('Please select valid image files');
-        return;
+      for (const file of newImages) {
+        if (!file.type.startsWith('image/')) {
+          toast.error('Please select valid image files');
+          return;
+        }
+        if (file.size > 10 * 1024 * 1024) {
+          toast.error('Each image must be less than 10MB');
+          return;
+        }
       }
-      if (file.size > 10 * 1024 * 1024) {
-        toast.error('Each image must be less than 10MB');
-        return;
-      }
-    }
 
-    setImages((prev) => [...prev, ...newImages].slice(0, 4));
-    setImagePreviews((prev) => {
-      const urls = newImages.map((file) => {
-        const u = URL.createObjectURL(file);
-        imagePreviewRefs.current.push(u);
-        return u;
+      setImages((prev) => [...prev, ...newImages].slice(0, 4));
+      setImagePreviews((prev) => {
+        const urls = newImages.map((file) => {
+          const u = URL.createObjectURL(file);
+          imagePreviewRefs.current.push(u);
+          return u;
+        });
+        return [...prev, ...urls].slice(0, 4);
       });
-      return [
-        ...prev,
-        ...urls,
-      ].slice(0, 4);
-    });
-  }, [images.length]);
+    },
+    [images.length]
+  );
 
   const handleAudioSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -77,7 +72,9 @@ export default function CreatePostPage() {
       }
       setAudio(file);
       if (audioPreviewRef.current) {
-        try { URL.revokeObjectURL(audioPreviewRef.current); } catch {}
+        try {
+          URL.revokeObjectURL(audioPreviewRef.current);
+        } catch {}
         audioPreviewRef.current = null;
       }
       const u = URL.createObjectURL(file);
@@ -91,7 +88,9 @@ export default function CreatePostPage() {
     setImagePreviews((prev) => {
       const removed = prev[index];
       if (removed) {
-        try { URL.revokeObjectURL(removed); } catch {}
+        try {
+          URL.revokeObjectURL(removed);
+        } catch {}
         const idx = imagePreviewRefs.current.indexOf(removed);
         if (idx >= 0) imagePreviewRefs.current.splice(idx, 1);
       }
@@ -103,7 +102,9 @@ export default function CreatePostPage() {
     setAudio(null);
     setAudioPreview(null);
     if (audioPreviewRef.current) {
-      try { URL.revokeObjectURL(audioPreviewRef.current); } catch {}
+      try {
+        URL.revokeObjectURL(audioPreviewRef.current);
+      } catch {}
       audioPreviewRef.current = null;
     }
     if (audioInputRef.current) audioInputRef.current.value = '';
@@ -113,11 +114,15 @@ export default function CreatePostPage() {
   useEffect(() => {
     return () => {
       for (const u of imagePreviewRefs.current) {
-        try { URL.revokeObjectURL(u); } catch {}
+        try {
+          URL.revokeObjectURL(u);
+        } catch {}
       }
       imagePreviewRefs.current = [];
       if (audioPreviewRef.current) {
-        try { URL.revokeObjectURL(audioPreviewRef.current); } catch {}
+        try {
+          URL.revokeObjectURL(audioPreviewRef.current);
+        } catch {}
         audioPreviewRef.current = null;
       }
     };
@@ -157,10 +162,12 @@ export default function CreatePostPage() {
   };
 
   return (
-    <div className="p-6 lg:p-8 max-w-2xl">
+    <div className="p-6 lg:p-8 max-w-2xl mx-auto">
       <div className="mb-8">
         <h1 className="text-2xl font-semibold text-white">Create Post</h1>
         <p className="text-white/40">Share an update with your community</p>
+
+        <ContentTypeSelector />
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -191,31 +198,39 @@ export default function CreatePostPage() {
               onChange={(e) => setCaption(e.target.value)}
               placeholder="What's on your mind?"
               rows={5}
-              className="w-full bg-transparent text-white placeholder:text-white/40 resize-none focus:outline-none text-lg"
+              className="w-full bg-transparent text-white placeholder:text-white/40 resize-none focus:outline-none text-lg rounded-2xl p-4"
               maxLength={2000}
               autoFocus
             />
 
             <div className="flex justify-end mt-2">
-              <span className={`text-xs ${caption.length > 1800 ? 'text-yellow-500' : 'text-white/40'}`}>
+              <span
+                className={`text-xs ${caption.length > 1800 ? 'text-yellow-500' : 'text-white/40'}`}
+              >
                 {caption.length}/2000
               </span>
             </div>
 
             {/* Image Previews */}
             {imagePreviews.length > 0 && (
-              <div className={`mt-4 grid gap-2 ${
-                imagePreviews.length === 1 ? 'grid-cols-1' :
-                imagePreviews.length === 2 ? 'grid-cols-2' :
-                'grid-cols-2'
-              }`}>
+              <div
+                className={`mt-4 grid gap-2 ${
+                  imagePreviews.length === 1
+                    ? 'grid-cols-1'
+                    : imagePreviews.length === 2
+                      ? 'grid-cols-2'
+                      : 'grid-cols-2'
+                }`}
+              >
                 {imagePreviews.map((preview, index) => (
                   <div
                     key={index}
                     className={`relative rounded-xl overflow-hidden ${
-                      imagePreviews.length === 1 ? 'aspect-video' :
-                      imagePreviews.length === 3 && index === 0 ? 'row-span-2 aspect-[9/16]' :
-                      'aspect-square'
+                      imagePreviews.length === 1
+                        ? 'aspect-video'
+                        : imagePreviews.length === 3 && index === 0
+                          ? 'row-span-2 aspect-[9/16]'
+                          : 'aspect-square'
                     }`}
                   >
                     <Image src={preview} alt={`Image ${index + 1}`} fill className="object-cover" />
@@ -239,7 +254,11 @@ export default function CreatePostPage() {
                     <Mic className="w-5 h-5 text-[#ab0013]" />
                     <span className="text-sm text-white">{audio?.name}</span>
                   </div>
-                  <button type="button" onClick={removeAudio} className="p-1 rounded-full hover:bg-white/10 transition-colors">
+                  <button
+                    type="button"
+                    onClick={removeAudio}
+                    className="p-1 rounded-full hover:bg-white/10 transition-colors"
+                  >
                     <X className="w-4 h-4 text-white/40" />
                   </button>
                 </div>
@@ -250,9 +269,11 @@ export default function CreatePostPage() {
             {/* Media Actions */}
             <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
               <div className="flex gap-2">
-                <label className={`p-3 rounded-xl hover:bg-white/10 transition-colors cursor-pointer ${
-                  images.length >= 4 ? 'opacity-50 cursor-not-allowed' : ''
-                }`}>
+                <label
+                  className={`p-3 rounded-xl hover:bg-white/10 transition-colors cursor-pointer ${
+                    images.length >= 4 ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                >
                   <ImageIcon className="w-5 h-5 text-white/40" />
                   <input
                     ref={imageInputRef}
@@ -265,9 +286,11 @@ export default function CreatePostPage() {
                     className="hidden"
                   />
                 </label>
-                <label className={`p-3 rounded-xl hover:bg-white/10 transition-colors cursor-pointer ${
-                  audio ? 'opacity-50 cursor-not-allowed' : ''
-                }`}>
+                <label
+                  className={`p-3 rounded-xl hover:bg-white/10 transition-colors cursor-pointer ${
+                    audio ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                >
                   <Mic className="w-5 h-5 text-white/40" />
                   <input
                     ref={audioInputRef}
@@ -299,9 +322,13 @@ export default function CreatePostPage() {
             className="min-w-[120px]"
           >
             {isPosting ? (
-              <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Posting...</>
+              <>
+                <Loader2 className="w-4 h-4 animate-spin mr-2" /> Posting...
+              </>
             ) : (
-              <><Send className="w-4 h-4 mr-2" /> Post</>
+              <>
+                <Send className="w-4 h-4 mr-2" /> Post
+              </>
             )}
           </Button>
         </div>

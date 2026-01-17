@@ -5,7 +5,7 @@
 import { useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronUp, ChevronDown } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, getSeriesRoute } from '@/lib/utils';
 import { SeriesCard } from './SeriesCard';
 import type { Series } from '@/types';
 
@@ -49,7 +49,7 @@ export function VerticalSeriesList({ series, selectedIndex, onSelect }: Vertical
   const handleItemClick = useCallback(
     (index: number, item: Series) => {
       if (typeof window !== 'undefined' && window.innerWidth < 1024) {
-        router.push(`/series/${item.uuid || item.id}`);
+        router.push(getSeriesRoute(item.id, item.title));
       } else {
         onSelect(index);
       }

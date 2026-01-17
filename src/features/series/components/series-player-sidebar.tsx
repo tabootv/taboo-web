@@ -4,6 +4,7 @@ import { ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSeriesDetail } from '@/api/queries';
+import { getSeriesRoute } from '@/lib/utils';
 import type { Video } from '@/types';
 import { PlayerEpisodeCard } from './player-episode-card';
 
@@ -29,7 +30,7 @@ export function SeriesPlayerSidebar({
   return (
     <div className="w-full lg:w-[400px] shrink-0">
       <Link
-        href={`/series/${seriesId}`}
+        href={getSeriesRoute(seriesId, seriesData.title)}
         className="flex items-center gap-3 p-3 bg-surface/50 rounded-xl mb-4 group hover:bg-surface/70 transition-colors"
       >
         <div className="relative w-16 h-9 rounded-lg overflow-hidden shrink-0">
@@ -64,6 +65,7 @@ export function SeriesPlayerSidebar({
             episodeNumber={index + 1}
             isCurrent={video.uuid === currentVideo.uuid}
             seriesId={seriesId}
+            seriesTitle={seriesData.title}
             isCourse={isCourse}
           />
         ))}

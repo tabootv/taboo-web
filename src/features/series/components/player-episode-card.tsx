@@ -3,7 +3,7 @@
 import { CheckCircle, Play } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { cn, formatDuration } from '@/lib/utils';
+import { cn, formatDuration, getSeriesPlayRoute } from '@/lib/utils';
 import type { Video } from '@/types';
 
 interface PlayerEpisodeCardProps {
@@ -11,6 +11,7 @@ interface PlayerEpisodeCardProps {
   episodeNumber: number;
   isCurrent: boolean;
   seriesId: string;
+  seriesTitle?: string;
   isCourse: boolean;
 }
 
@@ -19,11 +20,12 @@ export function PlayerEpisodeCard({
   episodeNumber,
   isCurrent,
   seriesId,
+  seriesTitle,
   isCourse,
 }: PlayerEpisodeCardProps) {
   const href = isCourse
     ? `/courses/${seriesId}/play/${video.uuid}`
-    : `/series/${seriesId}/play/${video.uuid}`;
+    : getSeriesPlayRoute(seriesId, seriesTitle, video.uuid);
 
   return (
     <Link href={href}>

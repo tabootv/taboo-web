@@ -2,6 +2,7 @@
 
 import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
+import { getSeriesRoute } from '@/lib/utils';
 
 interface SeriesBreadcrumbProps {
   seriesId: string;
@@ -23,7 +24,7 @@ export function SeriesBreadcrumb({
       </Link>
       <ChevronRight className="w-4 h-4" />
       <Link
-        href={`/series/${seriesId}`}
+        href={getSeriesRoute(seriesId, seriesTitle)}
         className="hover:text-white transition-colors truncate max-w-[200px]"
       >
         {seriesTitle}

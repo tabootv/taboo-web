@@ -1,6 +1,6 @@
 'use client';
 
-import { SearchInput } from '@/components/search';
+import { SmartSearchDropdown } from '@/components/search';
 import { Avatar, Button } from '@/components/ui';
 import { Logo } from '@/components/ui/logo';
 import { useSidebar } from '@/components/ui/sidebar';
@@ -41,7 +41,7 @@ export function TopHeader() {
   }, [isUserMenuOpen]);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 h-14 bg-black backdrop-blur-xs">
+    <header className="fixed top-0 left-0 right-0 h-14 bg-black backdrop-blur-xs z-[9999]">
       <div className="flex items-center justify-between h-full pr-4">
         {/* Left: Hamburger + Logo */}
         <div className="flex items-center">
@@ -61,7 +61,7 @@ export function TopHeader() {
 
         {/* Center: Search */}
         <div className="flex-1 max-w-md mx-4 hidden sm:block">
-          <SearchInput />
+          <SmartSearchDropdown />
         </div>
 
         {/* Right: Notifications, User */}

@@ -1,7 +1,7 @@
 import { seriesClient } from '@/api/client';
 import { useFeature } from '@/lib/hooks/use-feature';
 import { useSavedVideosStore, type SavedVideo } from '@/lib/stores/saved-videos-store';
-import { cn, formatCompactNumber } from '@/lib/utils';
+import { cn, formatCompactNumber, getSeriesRoute, getSeriesPlayRoute } from '@/lib/utils';
 import type { Series } from '@/types';
 import { Check, ChevronRight, Clock, Film, Play, Plus } from 'lucide-react';
 import Image from 'next/image';
@@ -23,7 +23,7 @@ export function SeriesSidePanel({ series }: SeriesSidePanelProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const { isSaved, toggleSave } = useSavedVideosStore();
   const router = useRouter();
-  const seriesDetailHref = series ? `/series/${series.id}` : '#';
+  const seriesDetailHref = series ? getSeriesRoute(series.id, series.title) : '#';
 
   useEffect(() => {
     if (series?.id) {
@@ -69,7 +69,7 @@ export function SeriesSidePanel({ series }: SeriesSidePanelProps) {
       if (!series) return;
 
       if (toHref === 'series') {
-        router.push(`/series/${series.id}`);
+        router.push(getSeriesRoute(series.id, series.title));
         return;
       }
 
@@ -83,13 +83,13 @@ export function SeriesSidePanel({ series }: SeriesSidePanelProps) {
           const firstVideo = seriesDetails?.videos?.[0];
 
           if (firstVideo?.uuid) {
-            router.push(`/series/${series.id}/play/${firstVideo.uuid}`);
+            router.push(getSeriesPlayRoute(series.id, series.title, firstVideo.uuid));
           } else {
-            router.push(`/series/${series.id}`);
+            router.push(getSeriesRoute(series.id, series.title));
           }
         } catch (error) {
           console.error('Error loading series videos:', error);
-          router.push(`/series/${series.id}`);
+          router.push(getSeriesRoute(series.id, series.title));
         } finally {
           setIsLoadingPlay(false);
         }

@@ -64,3 +64,12 @@ export function truncateText(text: string, maxLength: number): string {
   if (text.length <= maxLength) return text;
   return text.slice(0, maxLength - 3) + '...';
 }
+
+// Re-export route utilities
+export {
+  slugify,
+  getSeriesRoute,
+  getSeriesPlayRoute,
+  extractIdFromSlug,
+  isValidId,
+} from './utils/routes';

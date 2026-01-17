@@ -4,6 +4,7 @@
 
 import Image from 'next/image';
 import { Film, Play, BookOpen, Users, ArrowUpRight, TrendingUp } from 'lucide-react';
+import { getSeriesRoute } from '@/lib/utils';
 import type { Video, Series, Creator } from '@/types';
 
 interface SearchResult {
@@ -106,7 +107,7 @@ export function MobileSearchResults({ results, query, onItemClick }: MobileSearc
           {results.series.slice(0, 3).map((s) => (
             <button
               key={s.uuid}
-              onClick={() => onItemClick(`/series/${s.uuid}`)}
+              onClick={() => onItemClick(getSeriesRoute(s.id, s.title))}
               className="w-full flex items-center gap-3 px-2 py-2.5 rounded-lg hover:bg-hover transition-colors"
             >
               <div className="relative w-20 h-12 rounded overflow-hidden bg-black flex-shrink-0">

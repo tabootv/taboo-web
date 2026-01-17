@@ -9,6 +9,7 @@ import { useNotifications } from '@/api/queries';
 import { Button, LoadingScreen } from '@/components/ui';
 import type { Notification } from '@/types';
 import { formatDistanceToNow } from 'date-fns';
+import { getSeriesRoute } from '@/lib/utils';
 import { Bell, Check, Film, Heart, MessageSquare, Trash2, UserPlus, X } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -282,7 +283,12 @@ function NotificationCard({
     }
 
     if (dataObj.video_uuid) return `/videos/${dataObj.video_uuid}`;
-    if (dataObj.series_uuid) return `/series/${dataObj.series_uuid}`;
+    if (dataObj.series_id && typeof dataObj.series_id !== 'boolean') {
+      return getSeriesRoute(dataObj.series_id, dataObj.series_title as string | undefined);
+    }
+    if (dataObj.series_uuid && typeof dataObj.series_uuid !== 'boolean') {
+      return getSeriesRoute(dataObj.series_uuid, dataObj.series_title as string | undefined);
+    }
     if (dataObj.creator_id) return `/creators/creator-profile/${dataObj.creator_id}`;
     return '#';
   };

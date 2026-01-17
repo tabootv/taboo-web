@@ -40,6 +40,7 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: '2mb',
     },
+    webpackMemoryOptimizations: true,
   },
 
   // Environment variables available at build time

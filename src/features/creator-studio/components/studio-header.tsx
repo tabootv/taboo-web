@@ -1,24 +1,5 @@
 'use client';
 
-import Link from 'next/link';
-import Image from 'next/image';
-import {
-  Menu,
-  Upload,
-  Video,
-  Film,
-  FileText,
-  Bell,
-  ChevronDown,
-  User,
-  LogOut,
-  ExternalLink,
-  Settings,
-  HelpCircle,
-} from 'lucide-react';
-import { useAuthStore } from '@/lib/stores';
-import { useSidebar } from '@/components/ui/sidebar';
-import { Logo } from '@/components/ui/logo';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,6 +7,25 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Logo } from '@/components/ui/logo';
+import { useSidebar } from '@/components/ui/sidebar';
+import { useAuthStore } from '@/lib/stores';
+import {
+  Bell,
+  ChevronDown,
+  ExternalLink,
+  FileText,
+  Film,
+  HelpCircle,
+  LogOut,
+  Menu,
+  Settings,
+  Upload,
+  User,
+  Video,
+} from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
 
 export function StudioHeader() {
   const { user, logout } = useAuthStore();
@@ -36,11 +36,9 @@ export function StudioHeader() {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 h-14 bg-black border-b border-black">
-      <div className="flex items-center justify-between h-full px-4">
-        {/* Left: Hamburger + Logo + Studio Badge */}
+    <header className="fixed top-0 left-0 right-0 h-14 bg-black border-b border-black z-[999]">
+      <div className="flex items-center justify-between h-full pr-4">
         <div className="flex items-center">
-          {/* Hamburger - Aligned with sidebar icons (3rem = 48px width) */}
           <div className="w-12 h-14 flex items-center justify-center shrink-0">
             <button
               onClick={toggleSidebar}
@@ -58,9 +56,7 @@ export function StudioHeader() {
           </span>
         </div>
 
-        {/* Right - Actions */}
         <div className="flex items-center gap-3">
-          {/* Upload/Create Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="flex items-center gap-2 px-4 py-2 bg-red-primary hover:bg-red-hover text-white rounded-lg font-medium text-sm transition-colors">
@@ -91,7 +87,6 @@ export function StudioHeader() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* View Channel */}
           {user?.channel && (
             <Link
               href={`/creators/creator-profile/${user.channel.id}`}
@@ -103,18 +98,22 @@ export function StudioHeader() {
             </Link>
           )}
 
-          {/* Notifications */}
           <button className="p-2 text-text-secondary hover:text-text-primary transition-colors">
             <Bell className="w-5 h-5" />
           </button>
 
-          {/* User Profile Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="flex items-center gap-2 focus:outline-none">
                 <div className="w-8 h-8 rounded-full overflow-hidden ring-2 ring-transparent hover:ring-red-primary/50 transition-all">
                   {user?.dp ? (
-                    <Image src={user.dp} alt={user.display_name} width={32} height={32} className="object-cover w-full h-full" />
+                    <Image
+                      src={user.dp}
+                      alt={user.display_name}
+                      width={32}
+                      height={32}
+                      className="object-cover w-full h-full"
+                    />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-red-primary to-red-dark flex items-center justify-center">
                       <span className="text-xs font-bold text-white">
@@ -126,12 +125,17 @@ export function StudioHeader() {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              {/* User Info Header */}
               <div className="px-3 py-3 border-b border-white/10">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
                     {user?.dp ? (
-                      <Image src={user.dp} alt={user.display_name} width={40} height={40} className="object-cover w-full h-full" />
+                      <Image
+                        src={user.dp}
+                        alt={user.display_name}
+                        width={40}
+                        height={40}
+                        className="object-cover w-full h-full"
+                      />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-red-primary to-red-dark flex items-center justify-center">
                         <span className="text-sm font-bold text-white">
@@ -147,7 +151,6 @@ export function StudioHeader() {
                 </div>
               </div>
 
-              {/* Menu Items */}
               <div className="py-1">
                 <DropdownMenuItem asChild>
                   <Link href="/profile" className="flex items-center gap-3">
@@ -157,7 +160,11 @@ export function StudioHeader() {
                 </DropdownMenuItem>
                 {user?.channel && (
                   <DropdownMenuItem asChild>
-                    <Link href={`/creators/creator-profile/${user.channel.id}`} target="_blank" className="flex items-center gap-3">
+                    <Link
+                      href={`/creators/creator-profile/${user.channel.id}`}
+                      target="_blank"
+                      className="flex items-center gap-3"
+                    >
                       <ExternalLink className="w-4 h-4" />
                       View Channel
                     </Link>
@@ -179,7 +186,6 @@ export function StudioHeader() {
 
               <DropdownMenuSeparator />
 
-              {/* Sign Out */}
               <DropdownMenuItem
                 onClick={handleLogout}
                 className="text-red-500 focus:text-red-500 focus:bg-red-500/10"

@@ -1,7 +1,7 @@
 'use client';
 
 import { useSeriesDetail } from '@/api/queries';
-import { cn, formatDuration } from '@/lib/utils';
+import { cn, formatDuration, extractIdFromSlug, isValidId, getSeriesPlayRoute } from '@/lib/utils';
 import { ChevronDown, Clock, Info, Play } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -13,8 +13,12 @@ import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
 export default function SeriesDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const seriesId = params.id as string;
-  const { data: seriesData, isLoading } = useSeriesDetail(seriesId);
+  const slug = params.slug as string;
+  const seriesId = extractIdFromSlug(slug);
+  const isValid = isValidId(seriesId);
+
+  // All hooks must be called unconditionally
+  const { data: seriesData, isLoading } = useSeriesDetail(isValid ? seriesId : '');
   const [showTrailer, setShowTrailer] = useState(false);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
@@ -25,14 +29,14 @@ export default function SeriesDetailPage() {
     setShowTrailer(false);
     const firstVideo = videos[0];
     if (firstVideo?.uuid) {
-      router.push(`/series/${seriesId}/play/${firstVideo.uuid}`);
+      router.push(getSeriesPlayRoute(seriesId, seriesData?.title, firstVideo.uuid));
     }
   };
 
   const handlePlaySeries = () => {
     const firstVideo = videos[0];
     if (firstVideo?.uuid) {
-      router.push(`/series/${seriesId}/play/${firstVideo.uuid}`);
+      router.push(getSeriesPlayRoute(seriesId, seriesData?.title, firstVideo.uuid));
     }
   };
 
@@ -41,6 +45,20 @@ export default function SeriesDetailPage() {
   };
 
   const totalDuration = videos.reduce((acc, v) => acc + (v.duration || 0), 0);
+
+  // Validate the extracted ID after hooks
+  if (!isValid) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-white mb-4">Invalid series ID</h1>
+          <Link href="/series" className="text-red-primary hover:underline">
+            Back to series
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return <SeriesPageSkeleton />;
@@ -216,6 +234,7 @@ export default function SeriesDetailPage() {
                 video={video}
                 episodeNumber={index + 1}
                 seriesId={seriesId}
+                seriesTitle={seriesData.title}
                 channel={seriesData.channel}
                 isCourse={isCourse}
               />

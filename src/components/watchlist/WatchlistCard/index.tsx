@@ -9,6 +9,7 @@ import {
   type WatchlistItemType,
 } from '@/lib/stores/watchlist-store';
 import { usePrefetch } from '@/lib/hooks/use-prefetch';
+import { getSeriesRoute } from '@/lib/utils';
 
 interface WatchlistCardProps {
   item: WatchlistItem;
@@ -20,7 +21,7 @@ export function WatchlistCard({ item, onRemove }: WatchlistCardProps) {
 
   const getHref = () => {
     if (item.type === 'video') return `/videos/${item.uuid || item.id}`;
-    if (item.type === 'series') return `/series/${item.uuid || item.id}`;
+    if (item.type === 'series') return getSeriesRoute(item.id, item.title);
     if (item.type === 'course') return `/courses/${item.id}`;
     return '#';
   };

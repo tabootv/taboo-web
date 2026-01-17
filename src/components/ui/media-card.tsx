@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { MediaCardThumbnail } from './components/MediaCardThumbnail';
 import { MediaCardContent } from './components/MediaCardContent';
+import { getSeriesRoute } from '@/lib/utils';
 
 export interface MediaCardProps {
   /** Unique identifier */
@@ -119,7 +120,7 @@ export function MediaCard({
   // Generate href based on type
   const href =
     type === 'series'
-      ? `/series/${uuid}`
+      ? getSeriesRoute(_id, title)
       : type === 'short'
       ? `/shorts/${uuid}`
       : `/videos/${uuid}`;

@@ -116,9 +116,6 @@ export function useToggleBookmark() {
   });
 }
 
-/**
- * Hook to add a comment to a video
- */
 export function useAddComment() {
   const queryClient = useQueryClient();
 

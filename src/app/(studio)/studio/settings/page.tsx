@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
-import Image from 'next/image';
-import { Settings, User, Bell, Shield, Camera } from 'lucide-react';
-import { useAuthStore } from '@/lib/stores';
 import { Button } from '@/components/ui';
 import { Card, CardContent } from '@/components/ui/card';
+import { useAuthStore } from '@/lib/stores';
+import { Bell, Camera, Settings, Shield, User } from 'lucide-react';
+import Image from 'next/image';
+import { useState } from 'react';
 import { toast } from 'sonner';
 
 export default function StudioSettingsPage() {
@@ -20,7 +20,7 @@ export default function StudioSettingsPage() {
   };
 
   return (
-    <div className="p-6 lg:p-8 max-w-4xl">
+    <div className="pt-6 lg:pt-8 max-w-4xl mx-auto">
       <div className="mb-8">
         <h1 className="text-2xl font-semibold text-white">Settings</h1>
         <p className="text-white/40">Manage your channel settings</p>
@@ -49,7 +49,7 @@ export default function StudioSettingsPage() {
                 )}
               </div>
               <div>
-                <Button variant="outline" size="sm" className="mb-2">
+                <Button variant="default" size="sm" className="mb-2">
                   <Camera className="w-4 h-4 mr-2" />
                   Change Avatar
                 </Button>
@@ -70,7 +70,9 @@ export default function StudioSettingsPage() {
 
             {/* Channel Description */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-white mb-2">Channel Description</label>
+              <label className="block text-sm font-medium text-white mb-2">
+                Channel Description
+              </label>
               <textarea
                 value={channelDescription}
                 onChange={(e) => setChannelDescription(e.target.value)}
@@ -184,7 +186,9 @@ function ToggleSetting({
         onClick={() => setChecked(!checked)}
         className={`relative w-12 h-6 rounded-full transition-colors ${checked ? 'bg-[#ab0013]' : 'bg-white/20'}`}
       >
-        <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${checked ? 'left-7' : 'left-1'}`} />
+        <span
+          className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${checked ? 'left-7' : 'left-1'}`}
+        />
       </button>
     </label>
   );

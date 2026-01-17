@@ -1,6 +1,9 @@
-import Link from 'next/link';
-import Image from 'next/image';
+'use client';
+
 import { Logo } from '@/components/ui/logo';
+import { useHiddenComponentByPage } from '@/lib/hooks/use-hidden-component-page';
+import Image from 'next/image';
+import Link from 'next/link';
 
 const footerLinks = [
   { name: 'Customer support', href: 'https://taboo.tv/contact-us' },
@@ -10,6 +13,10 @@ const footerLinks = [
 ];
 
 export function Footer() {
+  const isHidden = useHiddenComponentByPage(['/shorts']);
+
+  if (isHidden) return;
+
   return (
     <footer className="bg-surface safe-bottom">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
@@ -67,9 +74,7 @@ export function Footer() {
 
         {/* Address & Copyright */}
         <div className="text-center pt-8">
-          <p className="text-sm text-text-secondary mb-2">
-            Georgia, United States.
-          </p>
+          <p className="text-sm text-text-secondary mb-2">Georgia, United States.</p>
           <p className="text-sm text-text-secondary">
             &copy; {new Date().getFullYear()} Taboo Studios LLC
           </p>

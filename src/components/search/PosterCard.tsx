@@ -5,8 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Play, Plus, MoreHorizontal, Check } from 'lucide-react';
 import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
-import { cn } from '@/lib/utils';
-import { formatDuration, formatCompactNumber } from '@/lib/utils';
+import { cn, formatDuration, formatCompactNumber, getSeriesRoute } from '@/lib/utils';
 
 interface PosterCardProps {
   id: string;
@@ -49,7 +48,7 @@ export function PosterCard({
     contentType === 'short'
       ? `/shorts/${uuid || id}`
       : contentType === 'series'
-        ? `/series/${uuid || id}`
+        ? getSeriesRoute(id, title)
         : `/videos/${id}`;
 
   const aspectRatio =

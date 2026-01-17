@@ -112,9 +112,6 @@ export function useDeletePost() {
   });
 }
 
-/**
- * Hook to add a comment to a post
- */
 export function useAddPostComment() {
   const queryClient = useQueryClient();
 

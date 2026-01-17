@@ -12,6 +12,7 @@ export { SeriesSkeleton } from './components/SeriesSkeleton';
 export { ShortCard } from './components/ShortCard';
 export { VerticalSeriesList } from './components/VerticalSeriesList';
 export { CreatorsSection } from './creators';
+export { EndOfContentMessage } from './end-of-content-message';
 export { FeaturedSection } from './featured';
 export { HomeSeriesSection } from './home-series';
 export { HomeShortsSection } from './home-shorts';

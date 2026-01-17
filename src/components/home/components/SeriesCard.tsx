@@ -2,7 +2,7 @@
  * Individual series card component for the vertical list
  */
 
-import { cn } from '@/lib/utils';
+import { cn, getSeriesRoute } from '@/lib/utils';
 import type { Series } from '@/types';
 import { ChevronRight, Film, Play } from 'lucide-react';
 import Image from 'next/image';
@@ -95,7 +95,7 @@ export function SeriesCard({ item, index, isSelected, onClick }: SeriesCardProps
 
         <div className="hidden lg:flex items-center gap-2 mt-2">
           <Link
-            href={`/series/${item.id}`}
+            href={getSeriesRoute(item.id, item.title)}
             onClick={(e) => e.stopPropagation()}
             className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/10 hover:bg-white/15 text-white/80 hover:text-white text-[11px] font-medium transition-colors"
           >

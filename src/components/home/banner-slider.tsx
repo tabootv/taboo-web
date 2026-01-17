@@ -1,11 +1,14 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
-import Link from 'next/link';
-import { Play, ChevronLeft, ChevronRight } from 'lucide-react';
 import { homeClient } from '@/api/client';
-import type { Banner } from '@/types';
 import { Button } from '@/components/ui';
+import { useCreatorById } from '@/hooks/use-creator-by-id';
+import { getSeriesRoute } from '@/lib/utils';
+import type { Banner } from '@/types';
+import { ChevronLeft, ChevronRight, Play } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useEffect, useRef, useState } from 'react';
 
 interface BannerSliderProps {
   initialBanners?: Banner[];
@@ -19,7 +22,6 @@ export function BannerSlider({ initialBanners }: BannerSliderProps) {
   const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    // Skip fetch if initial data was provided and has content
     if (initialBanners && initialBanners.length > 0) return;
 
     async function fetchBanners() {
@@ -35,7 +37,6 @@ export function BannerSlider({ initialBanners }: BannerSliderProps) {
     fetchBanners();
   }, [initialBanners]);
 
-  // Auto-rotate banners every 4 seconds
   useEffect(() => {
     if (banners.length <= 1) return;
 
@@ -50,7 +51,6 @@ export function BannerSlider({ initialBanners }: BannerSliderProps) {
 
   const goToSlide = (index: number) => {
     setCurrentIndex(index);
-    // Reset autoplay timer
     if (autoPlayRef.current) {
       clearInterval(autoPlayRef.current);
       autoPlayRef.current = setInterval(() => {
@@ -67,6 +67,10 @@ export function BannerSlider({ initialBanners }: BannerSliderProps) {
     goToSlide((currentIndex + 1) % banners.length);
   };
 
+  const currentBanner = banners[currentIndex];
+  const creator = useCreatorById(currentBanner?.channel.name);
+  const creatorImage = creator?.dp;
+
   if (isLoading) {
     return (
       <div className="w-full aspect-[16/9] md:aspect-[21/9] lg:aspect-[2.35/1] bg-black animate-pulse">
@@ -80,23 +84,18 @@ export function BannerSlider({ initialBanners }: BannerSliderProps) {
     );
   }
 
-  const currentBanner = banners[currentIndex];
-
   if (banners.length === 0 || !currentBanner) {
     return null;
   }
 
-  const thumbnail = currentBanner.type === 'video'
-    ? currentBanner.thumbnail
-    : currentBanner.trailer_thumbnail;
+  const thumbnail =
+    currentBanner.type === 'video' ? currentBanner.thumbnail : currentBanner.trailer_thumbnail;
 
-  const href = currentBanner.type === 'series'
-    ? `/series/${currentBanner.id}`
-    : `/videos/${currentBanner.id}`;
+  const href =
+    currentBanner.type === 'series' ? getSeriesRoute(currentBanner.id, currentBanner.title) : `/videos/${currentBanner.id}`;
 
   return (
     <div className="relative w-full overflow-hidden group">
-      {/* Main Banner */}
       <div
         className="relative w-full aspect-[16/9] md:aspect-[21/9] lg:aspect-[2.35/1] transition-all duration-500"
         style={{
@@ -105,26 +104,39 @@ export function BannerSlider({ initialBanners }: BannerSliderProps) {
           backgroundSize: 'cover',
         }}
       >
-        {/* Gradient overlays */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-        {/* Content - left aligned with consistent 4% safe zone padding */}
+        <div className="absolute inset-0 bg-linear-to-r from-black/80 via-black/40 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
         <div className="absolute inset-0 flex flex-col justify-end sm:justify-center items-start px-[4%] pb-16 sm:pb-20 md:pb-24">
           <div className="text-left backdrop-blur-md sm:backdrop-blur-none rounded-lg p-3 sm:p-4 md:p-0 max-w-[90%] sm:max-w-[600px]">
-            {/* Channel name */}
-            <h3 className="text-xs sm:text-sm md:text-base font-bold text-white/80 mb-1 sm:mb-2 drop-shadow-lg">
-              {currentBanner.channel?.name}
-            </h3>
+            <div className="flex items-center gap-2 mb-1 sm:mb-2">
+              {creatorImage ? (
+                <div className="relative size-6 rounded-full overflow-hidden">
+                  <Image
+                    src={creatorImage}
+                    alt={currentBanner.channel?.name || 'Creator'}
+                    fill
+                    className="rounded-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="w-6 h-6 rounded-full bg-linear-to-br from-red-primary to-red-dark flex items-center justify-center">
+                  <span className="text-xs font-bold text-white">
+                    {(currentBanner.channel?.name || 'C').charAt(0).toUpperCase()}
+                  </span>
+                </div>
+              )}
+              <h3 className="text-xs sm:text-sm md:text-base font-bold text-white/80 drop-shadow-lg">
+                {currentBanner.channel?.name}
+              </h3>
+            </div>
 
-            {/* Title */}
-            <h2 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-2 sm:mb-3 drop-shadow-lg line-clamp-2">
+            <h2 className="text-[1.5vw] font-bold text-white mb-2 sm:mb-3 drop-shadow-lg line-clamp-2">
               {currentBanner.title}
             </h2>
 
-            {/* Description - truncated, hidden on very small screens */}
             {currentBanner.description && (
               <div className="hidden sm:block text-xs md:text-sm text-white/80 drop-shadow-lg mb-3 md:mb-5">
-                <p className="line-clamp-3">{currentBanner.description}</p>
+                <p className="text-[1.2vw] line-clamp-3">{currentBanner.description}</p>
                 {currentBanner.description.length > 180 && (
                   <Link
                     href={href}
@@ -137,9 +149,11 @@ export function BannerSlider({ initialBanners }: BannerSliderProps) {
               </div>
             )}
 
-            {/* CTA Button */}
             <Link href={href}>
-              <Button className="btn-premium px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base font-semibold">
+              <Button
+                size="lg"
+                className="btn-premium text-sm sm:text-base lg:text-xl font-semibold"
+              >
                 <Play className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" fill="white" />
                 Play Now
               </Button>
@@ -147,7 +161,6 @@ export function BannerSlider({ initialBanners }: BannerSliderProps) {
           </div>
         </div>
 
-        {/* Navigation Arrows - Hidden on mobile, shown on hover for desktop */}
         {banners.length > 1 && (
           <>
             <button
@@ -165,7 +178,6 @@ export function BannerSlider({ initialBanners }: BannerSliderProps) {
           </>
         )}
 
-        {/* Slide Indicators - visible on mobile, bottom aligned */}
         {banners.length > 1 && (
           <div className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5 sm:gap-2">
             {banners.map((_, idx) => (

@@ -1,11 +1,12 @@
 'use client';
 
-import Image from 'next/image';
-import Link from 'next/link';
-import { Play } from 'lucide-react';
-import type { Series } from '@/types';
 import { VerifiedBadge } from '@/components/ui';
 import { usePrefetch } from '@/lib/hooks/use-prefetch';
+import { getSeriesRoute } from '@/lib/utils';
+import type { Series } from '@/types';
+import { Play } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
 
 interface SeriesPremiumCardProps {
   series: Series;
@@ -14,7 +15,7 @@ interface SeriesPremiumCardProps {
 export function SeriesPremiumCard({ series }: SeriesPremiumCardProps) {
   const { prefetchRoute } = usePrefetch();
   const thumbnail = series.trailer_thumbnail || series.thumbnail || series.card_thumbnail;
-  const url = `/series/${series.id}`;
+  const url = getSeriesRoute(series.id, series.title);
   const videoCount = series.videos_count || 0;
 
   return (
@@ -44,9 +45,11 @@ export function SeriesPremiumCard({ series }: SeriesPremiumCardProps) {
       </div>
 
       <div className="p-4 flex flex-col">
-        <h3 className="text-base font-medium text-white line-clamp-2 min-h-12">{series.title}</h3>
+        <h3 className="text-base font-medium text-white line-clamp-2 min-h-12 mb-3">
+          {series.title}
+        </h3>
 
-        <div className="flex items-center justify-between mt-auto pt-3">
+        <div className="flex items-center justify-between mt-auto">
           <div className="flex items-center gap-2">
             <div className="relative shrink-0">
               {series.channel?.dp ? (
@@ -84,4 +87,3 @@ export function SeriesPremiumCard({ series }: SeriesPremiumCardProps) {
     </Link>
   );
 }
-

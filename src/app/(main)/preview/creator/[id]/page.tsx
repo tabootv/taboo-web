@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { creatorsClient as creators } from '@/api/client';
 import type { Creator, Video, Series } from '@/types';
-import { formatDuration } from '@/lib/utils';
+import { formatDuration, getSeriesRoute } from '@/lib/utils';
 
 export default function CreatorPreviewPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -186,7 +186,7 @@ export default function CreatorPreviewPage({ params }: { params: Promise<{ id: s
             {series.map((item) => (
               <Link
                 key={item.uuid}
-                href={`/series/${item.uuid}`}
+                href={getSeriesRoute(item.id, item.title)}
                 className="group"
               >
                 <div className="relative aspect-video rounded-xl overflow-hidden bg-surface">

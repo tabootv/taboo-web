@@ -17,7 +17,10 @@ export default function SinglePostPage({ params }: { params: Promise<{ post: str
   const { user, isAuthenticated } = useAuthStore();
   const postIdNum = Number(postId);
   const { data: post, isLoading } = usePost(Number.isNaN(postIdNum) ? null : postIdNum);
-  const { data: commentsData, isLoading: isLoadingComments } = usePostComments(Number.isNaN(postIdNum) ? null : postIdNum, 1);
+  const { data: commentsData, isLoading: isLoadingComments } = usePostComments(
+    Number.isNaN(postIdNum) ? null : postIdNum,
+    1
+  );
   const likePost = useLikePost();
   const addComment = useAddPostComment();
   const deletePost = useDeletePost();
@@ -89,7 +92,6 @@ export default function SinglePostPage({ params }: { params: Promise<{ post: str
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
-      {/* Back Button */}
       <button
         onClick={() => router.back()}
         className="flex items-center gap-2 text-text-secondary hover:text-text-primary mb-6 transition-colors"
@@ -98,9 +100,7 @@ export default function SinglePostPage({ params }: { params: Promise<{ post: str
         Back to Community
       </button>
 
-      {/* Post */}
       <div className="bg-surface rounded-xl border border-border p-6">
-        {/* Header */}
         <div className="flex items-start justify-between mb-4">
           <Link
             href={`/creators/creator-profile/${channel?.id || post.user?.id}`}
@@ -117,13 +117,10 @@ export default function SinglePostPage({ params }: { params: Promise<{ post: str
               <h3 className="font-semibold text-text-primary group-hover:text-red-primary transition-colors">
                 {channel?.name || post.user?.display_name}
               </h3>
-              <p className="text-sm text-text-secondary">
-                {post.created_at}
-              </p>
+              <p className="text-sm text-text-secondary">{post.created_at}</p>
             </div>
           </Link>
 
-          {/* Menu */}
           <div className="relative">
             <button
               onClick={() => setShowMenu(!showMenu)}
@@ -158,13 +155,11 @@ export default function SinglePostPage({ params }: { params: Promise<{ post: str
           </div>
         </div>
 
-        {/* Content */}
         <p
           className="text-text-primary whitespace-pre-wrap text-lg mb-6"
           dangerouslySetInnerHTML={{ __html: post.caption }}
         />
 
-        {/* Media */}
         {post.media && post.media.length > 0 && post.media[0] && (
           <div className="mb-6 rounded-lg overflow-hidden">
             {post.media.length === 1 ? (
@@ -180,12 +175,7 @@ export default function SinglePostPage({ params }: { params: Promise<{ post: str
               <div className="grid grid-cols-2 gap-1">
                 {post.media.slice(0, 4).map((media, index) => (
                   <div key={media.id} className="relative aspect-square">
-                    <Image
-                      src={media.original_url || ''}
-                      alt=""
-                      fill
-                      className="object-cover"
-                    />
+                    <Image src={media.original_url || ''} alt="" fill className="object-cover" />
                     {index === 3 && post.media && post.media.length > 4 && (
                       <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                         <span className="text-white text-xl font-bold">
@@ -200,7 +190,6 @@ export default function SinglePostPage({ params }: { params: Promise<{ post: str
           </div>
         )}
 
-        {/* Actions */}
         <div className="flex items-center gap-6 pt-4 border-t border-border">
           <button
             onClick={handleLike}
@@ -225,7 +214,12 @@ export default function SinglePostPage({ params }: { params: Promise<{ post: str
         {/* Add Comment */}
         {isAuthenticated && (
           <form onSubmit={handleSubmitComment} className="flex gap-3 mb-6">
-            <Avatar src={user?.dp || null} alt={user?.display_name || ''} fallback={user?.display_name || ''} size="md" />
+            <Avatar
+              src={user?.dp || null}
+              alt={user?.display_name || ''}
+              fallback={user?.display_name || ''}
+              size="md"
+            />
             <div className="flex-1 flex gap-2">
               <input
                 type="text"
@@ -272,9 +266,7 @@ export default function SinglePostPage({ params }: { params: Promise<{ post: str
                         </p>
                         <p className="text-text-primary mt-1">{comment.content}</p>
                       </div>
-                      <p className="text-xs text-text-secondary mt-1">
-                        {comment.created_at}
-                      </p>
+                      <p className="text-xs text-text-secondary mt-1">{comment.created_at}</p>
                     </div>
                   </div>
                 ))}

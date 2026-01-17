@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
-import { fetchHomeData } from '@/lib/api/home-data';
 import { playlistsClient as playlistsApi } from '@/api/client';
-import type { Playlist, Video } from '@/types';
-import { RailRow } from '@/components/home/rail-row';
-import { RailCard } from '@/components/home/rail-card';
 import { MediaPreviewModal } from '@/components/home/media-preview-modal';
+import { RailCard } from '@/components/home/rail-card';
+import { RailRow } from '@/components/home/rail-row';
+import { fetchHomeData } from '@/lib/api/home-data';
+import type { Playlist, Video } from '@/types';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 // ============================================
 // Types
@@ -24,30 +24,17 @@ interface PlaylistsInfiniteScrollProps {
   initialPlaylists: Playlist[];
   initialCursor: number | null;
   isInitialLastPage: boolean;
+  onLastPageReached?: (isLast: boolean) => void;
 }
 
-// ============================================
-// Component
-// ============================================
-
-/**
- * Playlists Infinite Scroll
- *
- * Handles infinite scroll loading for playlists section:
- * - Receives initial playlists from server (no client-side initial fetch)
- * - Uses IntersectionObserver to detect when to load more
- * - Proper observer management: only observes last sentinel
- * - Debounced to prevent double-triggers
- * - Each playlist lazy-loads its videos when scrolled into view
- */
 export function PlaylistsInfiniteScroll({
   initialPlaylists,
   initialCursor,
   isInitialLastPage,
+  onLastPageReached,
 }: PlaylistsInfiniteScrollProps) {
   const hasInitialData = initialPlaylists && initialPlaylists.length > 0;
 
-  // Initialize with server data
   const [playlistsList, setPlaylistsList] = useState<PlaylistWithVideos[]>(() =>
     initialPlaylists.map((p) => ({
       ...p,
@@ -65,10 +52,9 @@ export function PlaylistsInfiniteScroll({
   const didInitialFetch = useRef(hasInitialData);
   const [previewVideo, setPreviewVideo] = useState<Video | null>(null);
 
-  // Refs for observer management
   const sentinelRef = useRef<HTMLDivElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
-  const isLoadingRef = useRef(false); // Guard against double-triggers
+  const isLoadingRef = useRef(false);
   const playlistObserversRef = useRef<Map<number, IntersectionObserver>>(new Map());
 
   // ============================================
@@ -83,7 +69,6 @@ export function PlaylistsInfiniteScroll({
     setPreviewVideo(null);
   }, []);
 
-  // Load more playlists
   const loadMorePlaylists = useCallback(async () => {
     // Guards
     if (isLoadingRef.current) return;
@@ -121,7 +106,6 @@ export function PlaylistsInfiniteScroll({
     }
   }, [cursor, isLastPage]);
 
-  // Fetch videos for a specific playlist
   const fetchPlaylistVideos = useCallback(async (playlist: PlaylistWithVideos, page = 1) => {
     if (!playlist || playlist.videos_loading) return;
 
@@ -158,6 +142,10 @@ export function PlaylistsInfiniteScroll({
   // ============================================
   // Observers
   // ============================================
+
+  useEffect(() => {
+    onLastPageReached?.(isLastPage);
+  }, [isLastPage, onLastPageReached]);
 
   // Initial fetch if no server data was provided
   useEffect(() => {
@@ -284,9 +272,7 @@ export function PlaylistsInfiniteScroll({
 
         {/* Loading indicator */}
         {isLoading && (
-          <div className="text-center py-6 text-text-secondary">
-            Loading more playlists...
-          </div>
+          <div className="text-center py-6 text-text-secondary">Loading more playlists...</div>
         )}
 
         {/* Sentinel for infinite scroll - only rendered if not on last page */}

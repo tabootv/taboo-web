@@ -1,15 +1,15 @@
 'use client';
 
-import { useEffect, useState, useCallback, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { searchClient as searchApi } from '@/api/client';
+import { Spinner } from '@/components/ui';
+import { useDebounce } from '@/lib/hooks';
+import { formatCompactNumber, formatDuration, getSeriesRoute } from '@/lib/utils';
+import type { Creator, Series, Video } from '@/types';
+import { BookOpen, Film, Play, Search as SearchIcon, Users, X } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Search as SearchIcon, X, Film, Play, Users, BookOpen } from 'lucide-react';
-import { searchClient as searchApi } from '@/api/client';
-import type { Video, Series, Creator } from '@/types';
-import { Spinner } from '@/components/ui';
-import { formatCompactNumber, formatDuration } from '@/lib/utils';
-import { useDebounce } from '@/lib/hooks';
+import { useSearchParams } from 'next/navigation';
+import { Suspense, useCallback, useEffect, useState } from 'react';
 
 type SearchTab = 'all' | 'videos' | 'shorts' | 'series' | 'creators';
 
@@ -147,20 +147,14 @@ function SearchContent() {
       {!query && !hasResults && (
         <div className="text-center py-20">
           <SearchIcon className="w-16 h-16 mx-auto text-text-secondary mb-4" />
-          <h2 className="text-xl font-medium text-text-primary mb-2">
-            Search TabooTV
-          </h2>
-          <p className="text-text-secondary">
-            Find videos, shorts, series, and creators
-          </p>
+          <h2 className="text-xl font-medium text-text-primary mb-2">Search TabooTV</h2>
+          <p className="text-text-secondary">Find videos, shorts, series, and creators</p>
         </div>
       )}
 
       {query && !hasResults && !isSearching && (
         <div className="text-center py-20">
-          <p className="text-text-secondary">
-            No results found for &quot;{query}&quot;
-          </p>
+          <p className="text-text-secondary">No results found for &quot;{query}&quot;</p>
         </div>
       )}
 
@@ -229,11 +223,9 @@ function SearchContent() {
                 </div>
               )}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {(activeTab === 'all' ? results.series.slice(0, 3) : results.series).map(
-                  (s) => (
-                    <SeriesCard key={s.uuid} series={s} />
-                  )
-                )}
+                {(activeTab === 'all' ? results.series.slice(0, 3) : results.series).map((s) => (
+                  <SeriesCard key={s.uuid} series={s} />
+                ))}
               </div>
             </section>
           )}
@@ -290,9 +282,6 @@ function VideoCard({ video }: { video: Video }) {
           {video.title}
         </h3>
         <p className="text-sm text-text-secondary mt-1">{video.channel?.name}</p>
-        <p className="text-xs text-text-secondary">
-          {formatCompactNumber(video.views_count ?? 0)} views
-        </p>
       </div>
     </Link>
   );
@@ -318,7 +307,7 @@ function ShortCard({ video }: { video: Video }) {
 
 function SeriesCard({ series }: { series: Series }) {
   return (
-    <Link href={`/series/${series.uuid}`} className="group">
+    <Link href={getSeriesRoute(series.id, series.title)} className="group">
       <div className="relative aspect-video rounded-lg overflow-hidden bg-surface">
         {series.thumbnail && (
           <Image
@@ -345,13 +334,9 @@ function CreatorCard({ creator }: { creator: Creator }) {
       className="flex flex-col items-center p-4 bg-surface border border-border rounded-xl hover:border-red-primary/50 transition-all"
     >
       <div className="relative w-20 h-20 rounded-full overflow-hidden bg-surface mb-3">
-        {creator.dp && (
-          <Image src={creator.dp} alt={creator.name} fill className="object-cover" />
-        )}
+        {creator.dp && <Image src={creator.dp} alt={creator.name} fill className="object-cover" />}
       </div>
-      <h3 className="font-medium text-text-primary text-center line-clamp-1">
-        {creator.name}
-      </h3>
+      <h3 className="font-medium text-text-primary text-center line-clamp-1">{creator.name}</h3>
       <p className="text-xs text-text-secondary">
         {formatCompactNumber(creator.subscribers_count ?? 0)} subscribers
       </p>
@@ -361,7 +346,13 @@ function CreatorCard({ creator }: { creator: Creator }) {
 
 export default function SearchesPage() {
   return (
-    <Suspense fallback={<div className="flex justify-center py-20"><Spinner size="lg" /></div>}>
+    <Suspense
+      fallback={
+        <div className="flex justify-center py-20">
+          <Spinner size="lg" />
+        </div>
+      }
+    >
       <SearchContent />
     </Suspense>
   );

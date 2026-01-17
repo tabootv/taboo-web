@@ -5,7 +5,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Play } from 'lucide-react';
-import { formatDuration } from '@/lib/utils';
+import { formatDuration, getSeriesRoute } from '@/lib/utils';
 import type { Video, Series } from '@/types';
 
 interface TopResultPreviewProps {
@@ -15,7 +15,7 @@ interface TopResultPreviewProps {
 
 export function TopResultPreview({ result, onClose }: TopResultPreviewProps) {
   const href = 'videos_count' in result
-    ? `/series/${result.uuid}`
+    ? getSeriesRoute(result.id, result.title)
     : `/videos/${result.id}`;
 
   const thumbnail = ('thumbnail_webp' in result && result.thumbnail_webp) ||

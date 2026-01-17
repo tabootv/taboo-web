@@ -9,7 +9,7 @@ import {
   type WatchlistItem,
   type WatchlistItemType,
 } from '@/lib/stores/watchlist-store';
-import { formatDuration } from '@/lib/utils';
+import { formatDuration, getSeriesRoute } from '@/lib/utils';
 
 type FilterType = WatchlistItemType | 'all';
 
@@ -158,7 +158,7 @@ function WatchlistCard({
     item.type === 'video'
       ? `/videos/${item.id}`
       : item.type === 'series'
-        ? `/series/${item.id}`
+        ? getSeriesRoute(item.id, item.title)
         : `/courses/${item.id}`;
 
   return (

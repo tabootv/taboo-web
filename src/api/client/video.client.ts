@@ -252,9 +252,6 @@ export const videoClient = {
     return data.comments || (data as CommentListResponse);
   },
 
-  /**
-   * Add a comment to a video
-   */
   addComment: async (id: string | number, content: string, parentId?: number): Promise<Comment> => {
     const data = await apiClient.post<ApiResponse<Comment>>(`/videos/${id}/comment`, {
       content,
@@ -280,7 +277,7 @@ export const videoClient = {
         params: { page, per_page: perPage } as Record<string, unknown>,
       }
     );
-    return (typeof data === 'object' && data !== null && 'videos' in data)
+    return typeof data === 'object' && data !== null && 'videos' in data
       ? data.videos || data
       : (data as VideoListResponse);
   },
@@ -295,7 +292,7 @@ export const videoClient = {
         params: { page, per_page: perPage } as Record<string, unknown>,
       }
     );
-    return (typeof data === 'object' && data !== null && 'videos' in data)
+    return typeof data === 'object' && data !== null && 'videos' in data
       ? data.videos || data
       : (data as VideoListResponse);
   },
@@ -310,7 +307,7 @@ export const videoClient = {
         params: { page, per_page: perPage } as Record<string, unknown>,
       }
     );
-    return (typeof data === 'object' && data !== null && 'videos' in data)
+    return typeof data === 'object' && data !== null && 'videos' in data
       ? data.videos || data
       : (data as VideoListResponse);
   },

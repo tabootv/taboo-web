@@ -86,7 +86,7 @@ export function PostCommentArea({ post, showReplySection }: PostCommentAreaProps
           <textarea
             placeholder="Add Comment"
             rows={1}
-            className="flex-1 bg-transparent border-b border-white/30 focus:border-white/60 outline-none resize-none py-2 text-white placeholder:text-white/50"
+            className="flex-1 bg-transparent border-b border-white/30 focus:border-white/60 outline-none resize-none p-2 rounded text-white placeholder:text-white/50"
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             onKeyDown={handleKeyDown}

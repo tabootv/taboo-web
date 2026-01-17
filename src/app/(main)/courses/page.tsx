@@ -25,21 +25,18 @@ export default function CoursesPage() {
       <div className="max-w-[1920px] mx-auto px-4 md:px-8 lg:px-12 py-6">
         <PageHeader title="Education" />
 
-      {/* Courses Grid */}
-      <ContentGrid columns={{ default: 1, sm: 2, lg: 3 }} gap="lg" className="mt-6">
-        {coursesList.map((course) => (
-          <CourseCard key={course.uuid || course.id} course={course} />
-        ))}
-      </ContentGrid>
+        <ContentGrid columns={{ default: 1, sm: 2, lg: 3 }} gap="lg" className="mt-6">
+          {coursesList.map((course) => (
+            <CourseCard key={course.uuid || course.id} course={course} />
+          ))}
+        </ContentGrid>
 
-      {/* Load More */}
-      <div ref={loadMoreRef} className="mt-8 flex justify-center">
-        {data && data.current_page >= data.last_page && coursesList.length > 0 && (
-          <p className="text-text-secondary">No more courses to load</p>
-        )}
-      </div>
+        <div ref={loadMoreRef} className="mt-8 flex justify-center">
+          {data && data.current_page >= data.last_page && coursesList.length > 0 && (
+            <p className="text-text-secondary">No more courses to load</p>
+          )}
+        </div>
 
-        {/* Empty State */}
         {!isLoading && coursesList.length === 0 && (
           <div className="text-center py-12">
             <GraduationCap className="w-16 h-16 text-text-secondary mx-auto mb-4" />

@@ -9,3 +9,10 @@ export {
   truncateText,
 } from '../utils';
 export { normalizeTags, getTagKey, hashStringToNumber, type RawTagInput, type RawTagsInput } from './tags';
+export {
+  slugify,
+  getSeriesRoute,
+  getSeriesPlayRoute,
+  extractIdFromSlug,
+  isValidId,
+} from './routes';

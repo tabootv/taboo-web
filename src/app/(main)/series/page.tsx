@@ -1,7 +1,7 @@
 'use client';
 
-import { SeriesPremiumCard, SeriesCardSkeleton } from '@/components/series';
 import { useSeriesList } from '@/api/queries';
+import { SeriesCardSkeleton, SeriesPremiumCard } from '@/components/series';
 import { Play } from 'lucide-react';
 import { useMemo } from 'react';
 
@@ -23,14 +23,11 @@ export default function SeriesPage() {
 
   return (
     <div className="series-page-atmosphere min-h-screen">
-      {/* Red Atmosphere Background */}
       <div className="series-atmosphere-bg" />
 
       <div className="relative z-10 max-w-[1920px] mx-auto px-4 md:px-8 lg:px-12 py-6">
-        {/* Page Title */}
         <h1 className="text-2xl md:text-3xl font-bold text-white mb-8">Series</h1>
 
-        {/* Loading State */}
         {isLoading ? (
           <div className="grid-series">
             {skeletonKeys.map((key: string) => (
@@ -38,7 +35,6 @@ export default function SeriesPage() {
             ))}
           </div>
         ) : (
-          /* Series Grid */
           <div className="grid-series">
             {seriesList.map((series) => (
               <SeriesPremiumCard key={series.uuid} series={series} />

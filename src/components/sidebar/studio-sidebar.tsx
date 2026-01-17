@@ -1,6 +1,5 @@
 'use client';
 
-import { Logo } from '@/components/ui/logo';
 import {
   Sidebar,
   SidebarContent,
@@ -63,7 +62,6 @@ export function StudioSidebar({ ...props }: React.ComponentProps<typeof Sidebar>
                 className="data-[slot=sidebar-menu-button]:p-1.5!"
               >
                 <div>
-                  <Logo size="sm" linkTo="/home" />
                   <div className="flex items-center gap-2">
                     <span className="text-base font-semibold text-red-primary">TabooTV</span>
                     <span className="text-[10px] font-medium text-red-primary px-1.5 py-0.5 bg-red-primary/10 rounded">

@@ -8,29 +8,38 @@ import {
   useSeriesPlayerData,
   useSeriesPlayerHandlers,
 } from '@/features/series';
+import { extractIdFromSlug, isValidId } from '@/lib/utils';
 import { use, useEffect, useRef } from 'react';
 
 export default function SeriesPlayerPage({
   params,
 }: {
-  params: Promise<{ id: string; videoUuid: string }>;
+  params: Promise<{ slug: string; videoUuid: string }>;
 }) {
-  const { id: seriesId, videoUuid } = use(params);
+  const { slug, videoUuid } = use(params);
+  const seriesId = extractIdFromSlug(slug);
+  const isValid = isValidId(seriesId);
   const episodesRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [videoUuid]);
 
-  const playerData = useSeriesPlayerData(seriesId, videoUuid);
+  const playerData = useSeriesPlayerData(isValid ? seriesId : '', videoUuid);
   const handlers = useSeriesPlayerHandlers(
     seriesId,
     videoUuid,
     playerData.nextEpisode ?? null,
-    playerData.autoplayEnabled
+    playerData.autoplayEnabled,
+    playerData.seriesData?.title
   );
 
   useEpisodeScroll(episodesRef, playerData.currentEpisodeIndex);
+
+  // Validate the extracted ID after hooks
+  if (!isValid) {
+    return <SeriesPlayerErrorState />;
+  }
 
   if (playerData.isLoading) {
     return <PlayerPageSkeleton />;

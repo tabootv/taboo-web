@@ -5,7 +5,7 @@ import { LoadingScreen } from '@/components/ui';
 import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
 import { CommunityPost } from '@/features/community';
 import { useAuthStore } from '@/lib/stores';
-import { formatDuration, formatRelativeTime } from '@/lib/utils';
+import { formatDuration, formatRelativeTime, getSeriesRoute } from '@/lib/utils';
 import type { Creator, Post, Series, Video } from '@/types';
 import { ChevronDown, ChevronRight, Clapperboard, Globe, Lock, Play } from 'lucide-react';
 import Image from 'next/image';
@@ -149,7 +149,11 @@ export default function CreatorProfilePage({ params }: { params: Promise<{ chann
         ...(nextPage ? { page_url: nextPage } : {}),
       });
       if (nextPage) {
-        setCreatorVideos((prev) => [...prev, ...(response.data || [])]);
+        setCreatorVideos((prev) => {
+          const existingIds = new Set(prev.map((v) => v.id || v.uuid));
+          const newVideos = (response.data || []).filter((v) => !existingIds.has(v.id || v.uuid));
+          return [...prev, ...newVideos];
+        });
       } else {
         setCreatorVideos(response.data || []);
       }
@@ -170,7 +174,11 @@ export default function CreatorProfilePage({ params }: { params: Promise<{ chann
         ...(nextPage ? { page_url: nextPage } : {}),
       });
       if (nextPage) {
-        setCreatorShorts((prev) => [...prev, ...(response.data || [])]);
+        setCreatorShorts((prev) => {
+          const existingIds = new Set(prev.map((v) => v.id || v.uuid));
+          const newShorts = (response.data || []).filter((v) => !existingIds.has(v.id || v.uuid));
+          return [...prev, ...newShorts];
+        });
       } else {
         setCreatorShorts(response.data || []);
       }
@@ -191,7 +199,11 @@ export default function CreatorProfilePage({ params }: { params: Promise<{ chann
         ...(nextPage ? { page_url: nextPage } : {}),
       });
       if (nextPage) {
-        setCreatorSeries((prev) => [...prev, ...(response.data || [])]);
+        setCreatorSeries((prev) => {
+          const existingIds = new Set(prev.map((s) => s.id || s.uuid));
+          const newSeries = (response.data || []).filter((s) => !existingIds.has(s.id || s.uuid));
+          return [...prev, ...newSeries];
+        });
       } else {
         setCreatorSeries(response.data || []);
       }
@@ -213,7 +225,11 @@ export default function CreatorProfilePage({ params }: { params: Promise<{ chann
         ...(nextPage ? { page_url: nextPage } : {}),
       });
       if (nextPage) {
-        setCreatorPosts((prev) => [...prev, ...(response.data || [])]);
+        setCreatorPosts((prev) => {
+          const existingIds = new Set(prev.map((p) => p.id || p.uuid));
+          const newPosts = (response.data || []).filter((p) => !existingIds.has(p.id || p.uuid));
+          return [...prev, ...newPosts];
+        });
       } else {
         setCreatorPosts(response.data || []);
       }
@@ -234,7 +250,11 @@ export default function CreatorProfilePage({ params }: { params: Promise<{ chann
         ...(nextPage ? { page_url: nextPage } : {}),
       });
       if (nextPage) {
-        setCreatorCourses((prev) => [...prev, ...(response.data || [])]);
+        setCreatorCourses((prev) => {
+          const existingIds = new Set(prev.map((c) => c.id || c.uuid));
+          const newCourses = (response.data || []).filter((c) => !existingIds.has(c.id || c.uuid));
+          return [...prev, ...newCourses];
+        });
       } else {
         setCreatorCourses(response.data || []);
       }
@@ -466,8 +486,8 @@ export default function CreatorProfilePage({ params }: { params: Promise<{ chann
                 ) : (
                   <>
                     <div className="grid grid-cols-2 gap-2 mt-4 xl:grid-cols-3 md:gap-4">
-                      {creatorVideos.map((video) => (
-                        <VideoCard key={video.uuid} video={video} />
+                      {creatorVideos.map((video, index) => (
+                        <VideoCard key={`video-${video.id || video.uuid || index}`} video={video} />
                       ))}
                     </div>
                     {/* Infinite scroll trigger */}
@@ -504,8 +524,8 @@ export default function CreatorProfilePage({ params }: { params: Promise<{ chann
                 ) : (
                   <>
                     <div className="grid grid-cols-2 gap-2 mt-4 xl:grid-cols-3 md:gap-4">
-                      {creatorShorts.map((video) => (
-                        <ShortCard key={video.uuid} video={video} />
+                      {creatorShorts.map((video, index) => (
+                        <ShortCard key={`short-${video.id || video.uuid || index}`} video={video} />
                       ))}
                     </div>
                     {/* Infinite scroll trigger */}
@@ -548,8 +568,11 @@ export default function CreatorProfilePage({ params }: { params: Promise<{ chann
                 ) : (
                   <>
                     <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-x-2 md:gap-x-4 gap-y-3 md:gap-y-10 md:mt-4">
-                      {creatorSeries.map((series) => (
-                        <SeriesCard key={series.uuid} series={series} />
+                      {creatorSeries.map((series, index) => (
+                        <SeriesCard
+                          key={`series-${series.id || series.uuid || index}`}
+                          series={series}
+                        />
                       ))}
                     </div>
                     {seriesNextPage && (
@@ -639,8 +662,12 @@ export default function CreatorProfilePage({ params }: { params: Promise<{ chann
                   </div>
                 ) : (
                   <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-x-2 md:gap-x-4 gap-y-3 md:gap-y-10 md:mt-4">
-                    {creatorCourses.map((course) => (
-                      <SeriesCard key={course.uuid} series={course} isCourse />
+                    {creatorCourses.map((course, index) => (
+                      <SeriesCard
+                        key={`course-${course.id || course.uuid || index}`}
+                        series={course}
+                        isCourse
+                      />
                     ))}
                   </div>
                 )}
@@ -740,7 +767,7 @@ function SeriesCard({ series, isCourse }: { series: Series; isCourse?: boolean }
 
   return (
     <Link
-      href={isCourse ? `/courses/${series.id}` : `/series/${series.uuid}`}
+      href={isCourse ? `/courses/${series.id}` : getSeriesRoute(series.id, series.title)}
       className="series-card-clean group"
     >
       <div className="relative aspect-video w-full overflow-hidden">
@@ -887,12 +914,12 @@ function HomeTabContent({ videos, onShowMore }: { videos: Video[]; onShowMore: (
             </button>
           </div>
           <div className="flex gap-3 overflow-x-auto hide-scrollbar pb-2">
-            {remainingVideos.map((video) => {
+            {remainingVideos.map((video, index) => {
               const location = (video as Video & { location?: string }).location;
               const isPremium = (video as Video & { is_premium?: boolean }).is_premium;
               return (
                 <Link
-                  key={video.uuid}
+                  key={`home-video-${video.id || video.uuid || index}`}
                   href={`/videos/${video.id}`}
                   className="group flex-shrink-0 w-[200px]"
                 >

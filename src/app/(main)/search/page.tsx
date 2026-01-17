@@ -8,7 +8,7 @@ import { Search as SearchIcon } from 'lucide-react';
 import { useSearch } from '@/api/queries';
 import type { Video, Series, Creator } from '@/types';
 import { Spinner } from '@/components/ui';
-import { formatCompactNumber, formatDuration } from '@/lib/utils';
+import { formatCompactNumber, formatDuration, getSeriesRoute } from '@/lib/utils';
 
 function SearchPageContent() {
   const searchParams = useSearchParams();
@@ -208,7 +208,7 @@ function VideoCard({ video }: { video: Video }) {
 // Series Card Component
 function SeriesCard({ series }: { series: Series }) {
   return (
-    <Link href={`/series/${series.uuid}`} className="group">
+    <Link href={getSeriesRoute(series.id, series.title)} className="group">
       <div className="relative aspect-video rounded-lg overflow-hidden bg-surface">
         {series.thumbnail && (
           <Image

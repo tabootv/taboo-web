@@ -1,6 +1,7 @@
 'use client';
 
 import { useToggleAutoplay, useToggleDislike, useToggleLike } from '@/api/mutations';
+import { getSeriesPlayRoute } from '@/lib/utils';
 import type { Video } from '@/types';
 import { useRouter } from 'next/navigation';
 import { useCallback } from 'react';
@@ -9,7 +10,8 @@ export function useSeriesPlayerHandlers(
   seriesId: string,
   videoUuid: string,
   nextEpisode: Video | null,
-  autoplayEnabled: boolean
+  autoplayEnabled: boolean,
+  seriesTitle?: string
 ) {
   const router = useRouter();
   const toggleLike = useToggleLike();
@@ -18,15 +20,15 @@ export function useSeriesPlayerHandlers(
 
   const handleVideoEnded = useCallback(() => {
     if (autoplayEnabled && nextEpisode) {
-      router.push(`/series/${seriesId}/play/${nextEpisode.uuid}`);
+      router.push(getSeriesPlayRoute(seriesId, seriesTitle, nextEpisode.uuid));
     }
-  }, [autoplayEnabled, nextEpisode, seriesId, router]);
+  }, [autoplayEnabled, nextEpisode, seriesId, seriesTitle, router]);
 
   const playNextVideo = useCallback(() => {
     if (nextEpisode) {
-      router.push(`/series/${seriesId}/play/${nextEpisode.uuid}`);
+      router.push(getSeriesPlayRoute(seriesId, seriesTitle, nextEpisode.uuid));
     }
-  }, [nextEpisode, seriesId, router]);
+  }, [nextEpisode, seriesId, seriesTitle, router]);
 
   const handleToggleAutoplay = useCallback(() => {
     toggleAutoplay.mutate();

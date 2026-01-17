@@ -45,7 +45,9 @@
       "Bash(head:*)",
       "Bash(git ls-tree:*)",
       "Bash(npm run type-check:*)",
-      "Bash(npm run lint:*)"
+      "Bash(npm run lint:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(tree:*)"
     ],
     "deny": [],
     "ask": []

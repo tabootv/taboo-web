@@ -1,7 +1,7 @@
+import { authClient, isAuthenticated, removeToken } from '@/api/client';
+import type { FirebaseLoginData, LoginCredentials, RegisterData, User } from '@/types';
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
-import type { User, LoginCredentials, RegisterData, FirebaseLoginData } from '@/types';
-import { authClient, removeToken, isAuthenticated } from '@/api/client';
+import { createJSONStorage, persist } from 'zustand/middleware';
 
 interface AuthState {
   user: User | null;
@@ -11,7 +11,6 @@ interface AuthState {
   error: string | null;
   _hasHydrated: boolean;
 
-  // Actions
   login: (credentials: LoginCredentials) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
   firebaseLogin: (data: FirebaseLoginData) => Promise<void>;
@@ -40,7 +39,6 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true, error: null });
         try {
           const response = await authClient.login(credentials);
-          // subscribed is at root level in login response
           const isSubscribed = response.subscribed ?? false;
           set({
             user: response.user,
@@ -59,7 +57,6 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true, error: null });
         try {
           const response = await authClient.register(data);
-          // subscribed is at root level in register response
           const isSubscribed = response.subscribed ?? false;
           set({
             user: response.user,
@@ -78,7 +75,6 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true, error: null });
         try {
           const response = await authClient.firebaseLogin(data);
-          // subscribed is at root level in firebase login response
           const isSubscribed = response.subscribed ?? false;
           set({
             user: response.user,
@@ -98,7 +94,6 @@ export const useAuthStore = create<AuthState>()(
         try {
           await authClient.logout();
         } catch {
-          // Continue logout even if API call fails
         } finally {
           removeToken();
           set({ user: null, isSubscribed: false, isAuthenticated: false, isLoading: false });
@@ -114,7 +109,6 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true });
         try {
           const response = await authClient.me();
-          // subscribed may be at root or inside user
           const isSubscribed = response.subscribed ?? response.user?.subscribed ?? false;
           set({
             user: response.user,
