@@ -1562,12 +1562,16 @@ import Image from 'next/image';
 
 ### Documentation Files
 
-- **`docs/CLAUDE.md`** - Quick reference for AI assistants
+- **`AGENTS.md`** - AI assistant context (Claude Code, Cursor, Copilot)
 - **`docs/DESIGN_SYSTEM.md`** - Design system guide
-- **`docs/MIGRATION_GUIDE.md`** - API migration guide
-- **`docs/NETFLIX-HOVER-CARD-PATTERN.md`** - Hover card implementation
-- **`docs/TABOOTV_DESIGN_SYSTEM_REFERENCE.md`** - Complete design reference
 - **`docs/PROJECT_CONTEXT.md`** - This document (complete project context)
+
+### Claude Skills (`.claude/skills/`)
+
+- **`migrate-api`** - Guide for migrating to TanStack Query
+- **`create-component`** - Design system component patterns
+- **`implement-hover-card`** - Netflix-style hover card implementation
+- **`add-feature-flag`** - Feature flag system usage
 
 ### Key Files
 

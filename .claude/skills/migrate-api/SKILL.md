@@ -1,38 +1,26 @@
-# API Layer Migration Guide
+---
+name: migrate-api
+description: Migrate legacy API calls to TanStack Query
+triggers:
+  - migrate API
+  - convert to TanStack Query
+  - update API layer
+  - migrate to query hooks
+---
 
-## Overview
+# Migrate API to TanStack Query
 
-This guide explains how to migrate from the old API structure (`src/lib/api/endpoints.ts`) to the new type-safe API layer (`src/api/`).
+This skill guides migration from the legacy API structure (`src/lib/api/endpoints.ts`) to the modern TanStack Query layer (`src/api/`).
 
-## New Structure
+## New API Structure
 
 ```
 src/api/
-├── types/
-│   ├── manual.ts          # Manual TypeScript types (OpenAPI-ready)
-│   └── index.ts           # Type exports (swappable for generated types)
-├── client/
-│   ├── base-client.ts     # Base HTTP client
-│   ├── auth.client.ts     # Auth domain client
-│   ├── video.client.ts    # Video domain client
-│   ├── home.client.ts     # Home feed client
-│   ├── series.client.ts   # Series client
-│   ├── posts.client.ts    # Community posts client
-│   └── index.ts           # Client exports
-├── queries/
-│   ├── auth.queries.ts    # Auth query hooks
-│   ├── video.queries.ts    # Video query hooks
-│   ├── home.queries.ts    # Home feed query hooks
-│   ├── series.queries.ts  # Series query hooks
-│   ├── posts.queries.ts   # Posts query hooks
-│   └── index.ts           # Query exports
-├── mutations/
-│   ├── auth.mutations.ts  # Auth mutation hooks
-│   ├── video.mutations.ts # Video mutation hooks
-│   ├── posts.mutations.ts # Posts mutation hooks
-│   └── index.ts           # Mutation exports
-├── query-keys.ts          # Centralized query key factory
-└── index.ts               # Main API exports
+├── client/           # Domain-specific HTTP clients
+├── queries/          # Query hooks (useVideo, useSeriesList, etc.)
+├── mutations/        # Mutation hooks (useToggleLike, useLogin, etc.)
+├── query-keys.ts     # Centralized query key factories
+└── types/            # API response types
 ```
 
 ## Migration Steps
@@ -40,7 +28,6 @@ src/api/
 ### 1. Replace Direct API Calls with Query Hooks
 
 **Before:**
-
 ```typescript
 import { videos as videosApi } from '@/lib/api';
 
@@ -51,7 +38,6 @@ const fetchVideos = async () => {
 ```
 
 **After:**
-
 ```typescript
 import { useLongFormVideos } from '@/api/queries';
 
@@ -59,10 +45,9 @@ const { data, isLoading } = useLongFormVideos(1, 24);
 const videos = data?.data || [];
 ```
 
-### 2. Replace Custom Infinite Scroll with TanStack Query Infinite Queries
+### 2. Replace Custom Infinite Scroll
 
 **Before:**
-
 ```typescript
 import { useInfiniteScrollPagination } from '@/lib/hooks/use-infinite-scroll-pagination';
 import { videos as videosApi } from '@/lib/api';
@@ -80,7 +65,6 @@ const { items, isLoading, loadMoreRef } = useInfiniteScrollPagination({
 ```
 
 **After:**
-
 ```typescript
 import { useVideoList } from '@/api/queries';
 import { useMemo } from 'react';
@@ -95,22 +79,19 @@ const videos = useMemo(() => {
 }, [data]);
 ```
 
-### 3. Replace Mutations with Mutation Hooks
+### 3. Replace Mutations
 
 **Before:**
-
 ```typescript
 import { videos as videosApi } from '@/lib/api';
 
 const handleLike = async (videoId: string) => {
   const response = await videosApi.toggleLike(videoId);
-  // Manual cache update
   updateVideoInCache(videoId, response);
 };
 ```
 
 **After:**
-
 ```typescript
 import { useToggleLike } from '@/api/mutations';
 
@@ -124,24 +105,19 @@ const handleLike = (videoId: string) => {
 
 ### 4. Update Query Keys Imports
 
-**Before:**
-
 ```typescript
+// Before
 import { queryKeys } from '@/shared/lib/api/query-keys';
-```
 
-**After:**
-
-```typescript
+// After
 import { queryKeys } from '@/api/query-keys';
 ```
 
-## Domain-Specific Examples
+## Available Hooks by Domain
 
 ### Videos
 
 **Queries:**
-
 - `useVideo(id)` - Get single video
 - `useVideoList(filters)` - Get video list with infinite scroll
 - `useLongFormVideos(page, perPage)` - Get long-form videos only
@@ -149,32 +125,26 @@ import { queryKeys } from '@/api/query-keys';
 - `useVideoComments(id, page)` - Get video comments
 
 **Mutations:**
-
-- `useToggleLike()` - Toggle like (with optimistic update)
-- `useToggleDislike()` - Toggle dislike (with optimistic update)
-- `useToggleBookmark()` - Toggle bookmark (with optimistic update)
+- `useToggleLike()` - Toggle like (optimistic update)
+- `useToggleDislike()` - Toggle dislike (optimistic update)
+- `useToggleBookmark()` - Toggle bookmark (optimistic update)
 - `useAddComment()` - Add comment
 - `useToggleAutoplay()` - Toggle autoplay preference
 
 ### Authentication
 
 **Queries:**
-
 - `useMe()` - Get current user
 
 **Mutations:**
-
 - `useLogin()` - Login
 - `useRegister()` - Register
-- `useFirebaseLogin()` - Firebase login (Google/Apple)
+- `useFirebaseLogin()` - Firebase login
 - `useLogout()` - Logout
-- `useForgotPassword()` - Forgot password
-- `useResetPassword()` - Reset password
 
 ### Home Feed
 
 **Queries:**
-
 - `useBanners()` - Get banners
 - `useFeaturedVideos()` - Get featured videos
 - `useRecommendedVideos()` - Get recommended videos
@@ -186,48 +156,23 @@ import { queryKeys } from '@/api/query-keys';
 ### Series
 
 **Queries:**
-
 - `useSeriesList(params)` - Get series list
-- `useSeriesListPaginated(page, perPage)` - Get paginated series
 - `useSeriesDetail(id)` - Get series detail
 - `useSeriesTrailer(id)` - Get series trailer
 - `useSeriesPlay(uuid)` - Get series play data
 
-### Community Posts
+### Posts
 
 **Queries:**
-
 - `usePostsList()` - Get posts list with infinite scroll
 - `usePost(id)` - Get single post
 - `usePostComments(postId, page)` - Get post comments
 
 **Mutations:**
-
 - `useCreatePost()` - Create post
-- `useLikePost()` - Like post (with optimistic update)
-- `useDislikePost()` - Dislike post (with optimistic update)
+- `useLikePost()` - Like post (optimistic update)
+- `useDislikePost()` - Dislike post (optimistic update)
 - `useDeletePost()` - Delete post
-- `useAddPostComment()` - Add comment to post
-
-## Benefits
-
-1. **Type Safety**: All API calls are fully typed
-2. **Automatic Caching**: TanStack Query handles caching automatically
-3. **Optimistic Updates**: Mutations update UI immediately
-4. **Loading States**: Built-in loading and error states
-5. **Refetching**: Automatic refetching on window focus (configurable)
-6. **Infinite Queries**: Built-in infinite scroll support
-7. **Future-Proof**: Easy migration to OpenAPI-generated types
-
-## Performance Optimizations
-
-The new query client is configured with domain-specific stale times:
-
-- **Video metadata**: 30 minutes (rarely changes)
-- **User profile**: 5 minutes
-- **Notifications**: 30 seconds (real-time feel)
-- **Home feed**: 10 minutes
-- **Search results**: 5 minutes
 
 ## Migration Checklist
 
@@ -238,10 +183,3 @@ The new query client is configured with domain-specific stale times:
 - [ ] Remove old API imports
 - [ ] Test all functionality
 - [ ] Remove unused code
-
-## Need Help?
-
-See example migrations:
-
-- `src/app/(main)/videos/page.new.tsx.example`
-- `src/app/(main)/community/page.new.tsx.example`

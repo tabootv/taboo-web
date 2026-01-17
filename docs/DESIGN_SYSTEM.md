@@ -1286,7 +1286,7 @@ src/
 
 ## Additional Resources
 
-- **Netflix Hover Card Pattern**: See `NETFLIX-HOVER-CARD-PATTERN.md` for detailed implementation
+- **Netflix Hover Card Pattern**: See `.claude/skills/implement-hover-card/SKILL.md` for detailed implementation
 - **Source Files**: `src/lib/design-tokens.ts`, `src/app/globals.css`
 - **UI Components**: `src/components/ui/`
 

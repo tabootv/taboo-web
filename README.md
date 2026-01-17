@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TabooTV Web
+
+Premium video streaming platform frontend built with Next.js 16, React 19, and Tailwind CSS 4.
+
+## Features
+
+- **Video Streaming** - HLS/MP4 playback with Shaka Player, quality selection, playback speed control
+- **Shorts Feed** - TikTok-style vertical video feed with swipe navigation
+- **Series & Courses** - Netflix-style episode layouts with auto-play
+- **Creator Studio** - Content management dashboard for creators
+- **Community** - Social feed with posts, comments, likes
+
+## Tech Stack
+
+- **Next.js 16** - App Router with Server/Client Components
+- **React 19** - UI library
+- **TypeScript** - Type safety
+- **Tailwind CSS 4** - Utility-first styling
+- **TanStack Query** - Server state management
+- **Zustand** - Client state management
+- **Shaka Player** - HLS video playback
 
 ## Getting Started
 
-First, run the development server:
+1. Clone the repository
+2. Copy environment variables:
+   ```bash
+   cp .env.local.example .env.local
+   ```
+3. Install dependencies:
+   ```bash
+   npm install
+   ```
+4. Start development server:
+   ```bash
+   npm run dev
+   ```
+5. Open [http://localhost:3000](http://localhost:3000)
+
+## Commands
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run dev          # Development server (port 3000)
+npm run build        # Production build
+npm run start        # Start production server
+npm run lint         # ESLint (--max-warnings=0)
+npm run lint:fix     # ESLint with auto-fix
+npm run format       # Prettier formatting
+npm run type-check   # TypeScript check
+npm run test         # Unit tests (Vitest)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Documentation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Document | Purpose |
+|----------|---------|
+| [AGENTS.md](./AGENTS.md) | AI assistant context (Claude Code, Cursor, Copilot) |
+| [docs/PROJECT_CONTEXT.md](./docs/PROJECT_CONTEXT.md) | Comprehensive project documentation |
+| [docs/DESIGN_SYSTEM.md](./docs/DESIGN_SYSTEM.md) | Design tokens, typography, components |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Project Structure
 
-## Learn More
+```
+src/
+├── app/              # Next.js App Router pages
+├── api/              # TanStack Query API layer
+├── components/       # React components
+│   ├── ui/           # Design system components
+│   ├── layout/       # Navbar, Footer, Sidebar
+│   └── video/        # Video player components
+├── lib/              # Utilities, stores, hooks
+└── types/            # TypeScript interfaces
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Environment Variables
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+NEXT_PUBLIC_API_URL=https://app.taboo.tv/api  # Backend API URL
+# Firebase config for OAuth
+# Laravel Reverb config for WebSockets
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## License
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Proprietary - All rights reserved.
