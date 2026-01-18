@@ -1,11 +1,12 @@
 'use client';
 
-import { publicClient } from '@/api/client/public.client';
-import { useCreators, useFeaturedVideos } from '@/api/queries/home.queries';
 import { Popover, PopoverAnchor, PopoverContent } from '@/components/ui/popover';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useHiddenComponentByPage } from '@/hooks';
+import { useDebounce } from '@/hooks/use-debounce';
+import { useMixedSearch } from '@/hooks/useMixedSearch';
 import { cn, formatCompactNumber } from '@/lib/utils';
-import { calculateSimilarity, detectCountry } from '@/lib/utils/search-utils';
+import { detectCountry } from '@/lib/utils/search-utils';
 import type { Creator, Video } from '@/types';
 import { Film, Search } from 'lucide-react';
 import Image from 'next/image';
@@ -16,7 +17,6 @@ interface SmartSearchDropdownProps {
   className?: string;
 }
 
-// Loading skeleton for video results
 function VideoSkeleton() {
   return (
     <div className="flex items-center gap-3 px-3 py-2">
@@ -29,7 +29,6 @@ function VideoSkeleton() {
   );
 }
 
-// Loading skeleton for creator results
 function CreatorSkeleton() {
   return (
     <div className="flex items-center gap-3 px-3 py-2">
@@ -42,7 +41,6 @@ function CreatorSkeleton() {
   );
 }
 
-// Get initials from name for avatar fallback
 function getInitials(name: string): string {
   return name
     .split(' ')
@@ -52,7 +50,6 @@ function getInitials(name: string): string {
     .slice(0, 2);
 }
 
-// Video result item
 function VideoResultItem({ video, isSelected }: { video: Video; isSelected: boolean }) {
   return (
     <div
@@ -83,7 +80,6 @@ function VideoResultItem({ video, isSelected }: { video: Video; isSelected: bool
   );
 }
 
-// Creator result item with avatar fallback
 function CreatorResultItem({
   creator,
   isSelected,
@@ -122,14 +118,6 @@ function CreatorResultItem({
   );
 }
 
-type MapVideo = {
-  id?: string | number | undefined;
-  uuid?: string | undefined;
-  country?: string | undefined;
-  country_name?: string | undefined;
-  channel?: { id: number } | undefined;
-  creator?: { channel?: { id: number } | undefined } | undefined;
-} & Partial<Video>;
 
 export function SmartSearchDropdown({ className }: SmartSearchDropdownProps) {
   const router = useRouter();
@@ -139,128 +127,31 @@ export function SmartSearchDropdown({ className }: SmartSearchDropdownProps) {
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
-  const [countryCreators, setCountryCreators] = useState<Creator[]>([]);
-  const [isLoadingCountryData, setIsLoadingCountryData] = useState(false);
-  const [detectedCountry, setDetectedCountry] = useState<string | null>(null);
-  const mapVideosCacheRef = useRef<MapVideo[]>([]);
-
-  const { data: allVideos = [], isLoading: videosLoading } = useFeaturedVideos();
-  const { data: allCreators = [], isLoading: creatorsLoading } = useCreators();
-
-  const isDataLoading = videosLoading || creatorsLoading;
 
   const normalizedQuery = query.toLowerCase().trim();
+  const debouncedQuery = useDebounce(normalizedQuery, 300);
+
+  const {
+    filteredVideos: allFilteredVideos,
+    filteredCreators,
+    isLoading: isDataLoading,
+    isLoadingCountryData,
+    countryHeader,
+    hasResults,
+  } = useMixedSearch(query);
 
   const filteredVideos = useMemo(() => {
-    if (!normalizedQuery) return [];
-    return allVideos
-      .filter((v) => {
-        const isShort = v.short || v.is_short || v.type === 'short';
-        if (isShort) return false;
-        return v.title.toLowerCase().includes(normalizedQuery);
-      })
-      .slice(0, 3);
-  }, [allVideos, normalizedQuery]);
+    return allFilteredVideos.slice(0, 6);
+  }, [allFilteredVideos]);
+  const totalItems = filteredVideos.length + filteredCreators.length;
 
-  const allCreatorsRef = useRef(allCreators);
-  allCreatorsRef.current = allCreators;
-
-  useEffect(() => {
-    const country = detectCountry(normalizedQuery);
-
-    if (!country) {
-      setDetectedCountry(null);
-      setCountryCreators([]);
-      return;
-    }
-
-    setDetectedCountry(country);
-    setIsLoadingCountryData(true);
-
-    const fetchCreators = async () => {
-      try {
-        let videos = mapVideosCacheRef.current;
-
-        if (videos.length === 0) {
-          const allMapVideos = await publicClient.getMapVideos();
-          videos = (allMapVideos as unknown as MapVideo[]).map((v) => ({
-            ...v,
-            country: (v as Record<string, unknown>).country as string | undefined,
-            country_name: (v as Record<string, unknown>).country_name as string | undefined,
-            channel: v.channel ?? (v as Video).channel,
-          }));
-          mapVideosCacheRef.current = videos;
-        }
-
-        const normalizedCountryName = country.toLowerCase();
-        const matchingVideos = videos.filter((v) => {
-          const videoCountry = ((v.country || v.country_name || '') as string).toLowerCase();
-          return (
-            videoCountry === normalizedCountryName ||
-            videoCountry.includes(normalizedCountryName) ||
-            normalizedCountryName.includes(videoCountry)
-          );
-        });
-
-        const creatorIds = new Set<number>();
-        matchingVideos.forEach((v) => {
-          const channelId = v.channel?.id || (v as Video).channel?.id;
-          if (channelId) {
-            creatorIds.add(channelId);
-          }
-        });
-
-        const matchedCreators = allCreatorsRef.current.filter((c) => creatorIds.has(c.id));
-        setCountryCreators(matchedCreators);
-      } catch (error) {
-        console.error('Failed to fetch creators by country:', error);
-        setCountryCreators([]);
-      } finally {
-        setIsLoadingCountryData(false);
-      }
-    };
-
-    fetchCreators();
-  }, [normalizedQuery]);
-
-  const filteredCreators = useMemo(() => {
-    if (!normalizedQuery) return [];
-
-    const exactMatches: Array<{ creator: Creator; score: number }> = [];
-    const fuzzyMatches: Array<{ creator: Creator; score: number }> = [];
-
-    allCreators.forEach((creator) => {
-      const similarity = calculateSimilarity(normalizedQuery, creator.name);
-
-      if (creator.name.toLowerCase().includes(normalizedQuery)) {
-        exactMatches.push({ creator, score: similarity });
-      } else if (similarity >= 70) {
-        fuzzyMatches.push({ creator, score: similarity });
-      }
-    });
-
-    exactMatches.sort((a, b) => b.score - a.score);
-    fuzzyMatches.sort((a, b) => b.score - a.score);
-
-    const combined = [...exactMatches, ...fuzzyMatches].slice(0, 2).map((item) => item.creator);
-
-    return combined;
-  }, [allCreators, normalizedQuery]);
-
-  const hasResults =
-    filteredVideos.length > 0 || filteredCreators.length > 0 || countryCreators.length > 0;
-  const totalItems = filteredVideos.length + filteredCreators.length + countryCreators.length;
-
-  // Show dropdown when typing and query is not empty
   const shouldShowDropdown = isOpen && normalizedQuery.length > 0;
 
-  // Close dropdown and reset state
   const closeDropdown = () => {
     setIsOpen(false);
     setQuery('');
   };
 
-  // Handle click outside to close
   useEffect(() => {
     if (!isOpen) return;
 
@@ -274,12 +165,10 @@ export function SmartSearchDropdown({ className }: SmartSearchDropdownProps) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen]);
 
-  // Reset selected index when query changes
   useEffect(() => {
     setSelectedIndex(-1);
   }, [normalizedQuery]);
 
-  // Handle form submit - navigate to search page
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
@@ -288,7 +177,6 @@ export function SmartSearchDropdown({ className }: SmartSearchDropdownProps) {
     }
   };
 
-  // Handle keyboard navigation
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!shouldShowDropdown) return;
 
@@ -316,19 +204,10 @@ export function SmartSearchDropdown({ className }: SmartSearchDropdownProps) {
             }
           } else {
             const creatorIndex = selectedIndex - filteredVideos.length;
-            if (creatorIndex < filteredCreators.length) {
-              const creator = filteredCreators[creatorIndex];
-              if (creator) {
-                router.push(`/creators/creator-profile/${creator.id}`);
-                closeDropdown();
-              }
-            } else {
-              const countryCreatorIndex = creatorIndex - filteredCreators.length;
-              const creator = countryCreators[countryCreatorIndex];
-              if (creator) {
-                router.push(`/creators/creator-profile/${creator.id}`);
-                closeDropdown();
-              }
+            const creator = filteredCreators[creatorIndex];
+            if (creator) {
+              router.push(`/creators/creator-profile/${creator.id}`);
+              closeDropdown();
             }
           }
         } else if (query.trim()) {
@@ -343,6 +222,9 @@ export function SmartSearchDropdown({ className }: SmartSearchDropdownProps) {
         break;
     }
   };
+
+  const isToHidden = useHiddenComponentByPage(['/searches']);
+  if (isToHidden) return null;
 
   return (
     <div ref={containerRef} className={cn('relative', className)}>
@@ -381,7 +263,6 @@ export function SmartSearchDropdown({ className }: SmartSearchDropdownProps) {
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
           <div className="max-h-[400px] overflow-y-auto">
-            {/* Loading state */}
             {isDataLoading && (
               <div className="p-2">
                 <div className="px-3 py-1.5">
@@ -403,10 +284,8 @@ export function SmartSearchDropdown({ className }: SmartSearchDropdownProps) {
               </div>
             )}
 
-            {/* Results */}
             {!isDataLoading && hasResults && (
               <div className="p-2">
-                {/* Videos section */}
                 {filteredVideos.length > 0 && (
                   <>
                     <div className="px-3 py-1.5">
@@ -429,21 +308,46 @@ export function SmartSearchDropdown({ className }: SmartSearchDropdownProps) {
                         <VideoResultItem video={video} isSelected={selectedIndex === index} />
                       </div>
                     ))}
+                    {filteredVideos.length > 0 && (
+                      <div
+                        role="button"
+                        tabIndex={0}
+                        className="px-3 py-2 cursor-pointer hover:bg-white/5 transition-colors rounded-lg text-text-secondary hover:text-primary"
+                        onPointerDown={(e) => e.preventDefault()}
+                        onClick={() => {
+                          router.push(`/searches?q=${encodeURIComponent(query.trim())}`);
+                          closeDropdown();
+                        }}
+                      >
+                        <span className="text-sm">
+                          See all videos →
+                        </span>
+                      </div>
+                    )}
                   </>
                 )}
 
-                {/* Divider */}
-                {filteredVideos.length > 0 &&
-                  (filteredCreators.length > 0 || countryCreators.length > 0) && (
-                    <div className="my-2 border-t border-white/5" />
-                  )}
+                {filteredVideos.length > 0 && filteredCreators.length > 0 && (
+                  <div className="my-2 border-t border-white/5" />
+                )}
 
-                {/* Creators section */}
-                {filteredCreators.length > 0 && (
+                {isLoadingCountryData && detectCountry(debouncedQuery) && (
                   <>
                     <div className="px-3 py-1.5">
                       <span className="text-xs font-medium text-text-secondary uppercase tracking-wider">
-                        Creators
+                        {`Creators in ${detectCountry(debouncedQuery) || ''}`}
+                      </span>
+                    </div>
+                    <CreatorSkeleton />
+                    <CreatorSkeleton />
+                  </>
+                )}
+
+                {!isLoadingCountryData && filteredCreators.length > 0 && (
+                  <>
+                    <div className="px-3 py-1.5">
+                      <span className="text-xs font-medium text-text-secondary uppercase tracking-wider">
+                        {countryHeader}
                       </span>
                     </div>
                     {filteredCreators.map((creator, index) => (
@@ -466,59 +370,9 @@ export function SmartSearchDropdown({ className }: SmartSearchDropdownProps) {
                     ))}
                   </>
                 )}
-
-                {/* Divider between name matches and country matches */}
-                {filteredCreators.length > 0 && countryCreators.length > 0 && (
-                  <div className="my-2 border-t border-white/5" />
-                )}
-
-                {/* Country-based creators section */}
-                {isLoadingCountryData && (
-                  <>
-                    <div className="px-3 py-1.5">
-                      <span className="text-xs font-medium text-text-secondary uppercase tracking-wider">
-                        {detectedCountry ? `Creators in ${detectedCountry}` : 'Creators'}
-                      </span>
-                    </div>
-                    <CreatorSkeleton />
-                    <CreatorSkeleton />
-                  </>
-                )}
-
-                {!isLoadingCountryData && countryCreators.length > 0 && (
-                  <>
-                    <div className="px-3 py-1.5">
-                      <span className="text-xs font-medium text-text-secondary uppercase tracking-wider">
-                        Creators in {detectedCountry}
-                      </span>
-                    </div>
-                    {countryCreators.map((creator, index) => (
-                      <div
-                        key={creator.id}
-                        role="button"
-                        tabIndex={0}
-                        className="block cursor-pointer"
-                        onPointerDown={(e) => e.preventDefault()}
-                        onClick={() => {
-                          router.push(`/creators/creator-profile/${creator.id}`);
-                          closeDropdown();
-                        }}
-                      >
-                        <CreatorResultItem
-                          creator={creator}
-                          isSelected={
-                            selectedIndex ===
-                            filteredVideos.length + filteredCreators.length + index
-                          }
-                        />
-                      </div>
-                    ))}
-                  </>
-                )}
               </div>
             )}
 
-            {/* Empty state */}
             {!isDataLoading && !hasResults && normalizedQuery && (
               <div className="p-6 text-center">
                 <Search className="w-8 h-8 mx-auto text-text-secondary opacity-50 mb-2" />
