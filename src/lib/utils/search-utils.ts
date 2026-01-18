@@ -299,9 +299,10 @@ function getRegionNames(): Intl.DisplayNames {
 }
 
 export function detectCountry(query: string): string | null {
-  if (!query || query.trim().length < 2) return null;
+  if (!query || query.trim().length < 3) return null;
 
   const normalized = query.trim().toLowerCase();
+
 
   if (ALT_COUNTRY_CODES[normalized]) {
     const code = ALT_COUNTRY_CODES[normalized];
@@ -309,10 +310,49 @@ export function detectCountry(query: string): string | null {
   }
 
   const regionNames = getRegionNames();
+
   for (const code of ISO_CODES) {
     const displayName = regionNames.of(code);
     if (displayName && displayName.toLowerCase() === normalized) {
       return displayName;
+    }
+  }
+
+  for (const code of ISO_CODES) {
+    const displayName = regionNames.of(code);
+    if (displayName && displayName.toLowerCase().startsWith(normalized)) {
+      return displayName;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Get the country code (ISO 3166-1 alpha-2) for a given country name
+ * Returns null if the country name is not found
+ */
+export function getCountryCode(countryName: string): string | null {
+  if (!countryName) return null;
+
+  const normalized = countryName.trim().toLowerCase();
+  const regionNames = getRegionNames();
+
+  // Check if it's already a country code
+  if (ISO_CODES.includes(normalized.toUpperCase())) {
+    return normalized.toUpperCase();
+  }
+
+  // Check alternative names first
+  if (ALT_COUNTRY_CODES[normalized]) {
+    return ALT_COUNTRY_CODES[normalized];
+  }
+
+  // Search through ISO codes to find matching country name
+  for (const code of ISO_CODES) {
+    const displayName = regionNames.of(code);
+    if (displayName && displayName.toLowerCase() === normalized) {
+      return code;
     }
   }
 
