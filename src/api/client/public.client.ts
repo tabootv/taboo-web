@@ -13,6 +13,16 @@ export interface PublicVideosFilters extends Record<string, unknown> {
   page?: number;
 }
 
+export interface MapVideosFilters extends Record<string, unknown> {
+  per_page?: number | undefined;
+  types?: string | undefined;
+  search?: string | undefined;
+  creators?: number[] | undefined;
+  countries?: string[] | undefined;
+  auth?: boolean | undefined;
+  compact?: boolean | undefined;
+}
+
 export const publicClient = {
   /**
    * Get public videos
@@ -29,11 +39,11 @@ export const publicClient = {
   /**
    * Get videos for map display
    */
-  getMapVideos: async (): Promise<Video[]> => {
+  getMapVideos: async (filters?: MapVideosFilters): Promise<Video[]> => {
     const data = await apiClient.get<{
       videos?: Video[];
       data?: Video[];
-    }>('/public/map-videos');
+    }>('/public/map-videos', { params: filters });
     return data.videos || data.data || [];
   },
 };

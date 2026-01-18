@@ -5,7 +5,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import type { PublicVideosFilters } from '../client/public.client';
+import type { MapVideosFilters, PublicVideosFilters } from '../client/public.client';
 import { publicClient } from '../client/public.client';
 
 /**
@@ -25,11 +25,13 @@ export function usePublicVideos(filters?: PublicVideosFilters) {
  * Hook to fetch map videos
  *
  * Stale time: 10 minutes
+ * Search requires minimum 3 characters (server-side accent-insensitive)
  */
-export function useMapVideos() {
+export function useMapVideos(filters?: MapVideosFilters) {
   return useQuery({
-    queryKey: ['public', 'map-videos'],
-    queryFn: () => publicClient.getMapVideos(),
+    queryKey: ['public', 'map-videos', filters],
+    queryFn: () => publicClient.getMapVideos(filters),
     staleTime: 1000 * 60 * 10, // 10 minutes
+    enabled: !filters?.search || filters.search.length >= 3,
   });
 }
