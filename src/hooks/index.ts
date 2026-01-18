@@ -21,3 +21,5 @@ export { useHiddenComponentByPage } from './use-hidden-component-page';
 // Data
 export { useCreatorById } from './use-creator-by-id';
 export { useNormalizedTags } from './use-tags';
+export { useMixedSearch } from './useMixedSearch';
+export type { UseMixedSearchResult } from './useMixedSearch';
