@@ -92,6 +92,26 @@ import { videoClient } from '@/api/client';
 const data = await videoClient.getVideo(id);
 ```
 
+### Public API: Map Videos
+
+**Endpoint:** `GET /api/public/map-videos`
+
+Returns paginated public videos optimized for maps/listings.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `per_page` | int | Videos per page (default: 20) |
+| `types` | string | `videos`, `series`, `courses`, `shorts` |
+| `search` | string | Smart search (min 3 chars, accent-insensitive) |
+| `creators` | array | Filter by channel IDs |
+| `countries` | array | Filter by country names/IDs |
+| `auth` | bool | Include user progress/watchlist/likes |
+| `compact` | bool | Return `channel_id` only (performance) |
+
+**Search fields:** title, description, channel, country, tags (relevance-ordered)
+
+**Related:** `app/Actions/Public/PublicMapVideoList.php`
+
 ### Zustand Store Usage
 
 ```tsx
