@@ -1,14 +1,15 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Search } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 interface SearchInputProps {
   className?: string;
 }
 
 export function SearchInput({ className }: SearchInputProps) {
+  
   const router = useRouter();
   const [query, setQuery] = useState('');
 
