@@ -4,7 +4,7 @@ import { useRef, useState, useEffect, useCallback, ReactNode } from 'react';
 import { Volume2, VolumeX } from 'lucide-react';
 import { useShortsStore } from '@/lib/stores/shorts-store';
 import type { Video } from '@/types';
-import { usePrefersReducedMotion } from '@/lib/hooks';
+import { usePrefersReducedMotion } from '@/hooks';
 
 interface ShortVideoPlayerProps {
   video: Video;

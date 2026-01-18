@@ -37,7 +37,7 @@ npm run test         # Unit tests (Vitest)
 
 ```
 src/
-├── app/              # Next.js App Router
+├── app/              # Next.js App Router (routes only)
 │   ├── (main)/       # Main app pages with navbar
 │   ├── (auth)/       # Auth pages (sign-in, sign-up, plans)
 │   └── (studio)/     # Creator studio pages
@@ -45,18 +45,26 @@ src/
 │   ├── client/       # Domain-specific HTTP clients
 │   ├── queries/      # Query hooks (useVideo, useSeriesList, etc.)
 │   ├── mutations/    # Mutation hooks (useToggleLike, useLogin, etc.)
+│   ├── types/        # Re-exports from @/types
 │   └── query-keys.ts # Centralized query key factories
 ├── components/
-│   ├── ui/           # Design system (PageHeader, MediaCard, FilterChips)
+│   ├── ui/           # Shadcn primitives + custom components
 │   ├── layout/       # Navbar, Footer, Sidebar
 │   ├── home/         # Homepage sections (NetflixHoverCard, etc.)
-│   └── video/        # Video player (ShakaPlayer)
+│   └── [domain]/     # Domain-specific components
+├── features/         # Feature modules (auth, video, shorts, etc.)
+│   └── [feature]/
+│       ├── components/
+│       ├── hooks/
+│       └── stores/
+├── hooks/            # ALL shared custom hooks (centralized)
 ├── lib/
 │   ├── stores/       # Zustand stores (auth, shorts, sidebar)
-│   ├── hooks/        # Custom React hooks
-│   ├── utils.ts      # Utilities (cn, formatDuration, formatNumber)
+│   ├── utils/        # Utility functions
+│   ├── utils.ts      # Main utils (cn, formatDuration, formatNumber)
 │   └── design-tokens.ts
-└── types/            # TypeScript interfaces
+├── types/            # ALL TypeScript interfaces (centralized)
+└── shared/           # Providers, error boundary
 ```
 
 ### Content Types
@@ -89,6 +97,13 @@ const data = await videoClient.getVideo(id);
 ```tsx
 import { useAuthStore } from '@/lib/stores';
 const { user, isAuthenticated, login } = useAuthStore();
+```
+
+### Hooks Usage
+
+```tsx
+// All shared hooks from centralized location
+import { useDebounce, useFeature, useIsMobile } from '@/hooks';
 ```
 
 ## Design System

@@ -1,5 +1,5 @@
 import { seriesClient } from '@/api/client';
-import { useFeature } from '@/lib/hooks/use-feature';
+import { useFeature } from '@/hooks/use-feature';
 import { useSavedVideosStore, type SavedVideo } from '@/lib/stores/saved-videos-store';
 import { cn, formatCompactNumber, getSeriesRoute, getSeriesPlayRoute } from '@/lib/utils';
 import type { Series } from '@/types';

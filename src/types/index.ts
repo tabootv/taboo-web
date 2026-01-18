@@ -142,6 +142,8 @@ export interface Video {
   title: string;
   description?: string;
   short?: boolean;
+  is_short?: boolean;
+  type?: string;
   featured?: boolean;
   banner?: boolean;
   is_adult_content?: boolean;
@@ -215,6 +217,7 @@ export interface Series {
   desktop_banner?: string;
   mobile_banner?: string;
   trailer_url?: string;
+  trailer?: string;
   channel: Channel;
   user_id: number;
   videos?: Video[];
@@ -566,6 +569,251 @@ export interface ToggleFollowResponse {
   message: string;
   following: boolean;
   followers_count?: number;
+}
+
+// ============================================
+// Response Type Aliases
+// ============================================
+
+export type VideoListResponse = PaginatedResponse<Video>;
+export type CommentListResponse = PaginatedResponse<Comment>;
+export type PostListResponse = PaginatedResponse<Post>;
+export type PostCommentListResponse = PaginatedResponse<PostComment>;
+
+export interface LikeResponse {
+  has_liked: boolean;
+  likes_count: number;
+}
+
+export interface DislikeResponse {
+  has_disliked: boolean;
+  dislikes_count: number;
+}
+
+export interface BookmarkResponse {
+  is_bookmarked: boolean;
+}
+
+// ============================================
+// Search UI Types
+// ============================================
+
+export interface SearchTitle {
+  type: 'title';
+  id: string;
+  uuid: string;
+  title: string;
+  thumb: string;
+  thumbWebp?: string;
+  creatorName: string;
+  creatorId: string;
+  year: number;
+  description: string;
+  duration?: number;
+  views?: number;
+  contentType: 'video' | 'short' | 'series';
+}
+
+export interface SearchCreator {
+  type: 'creator';
+  id: string;
+  uuid: string;
+  name: string;
+  avatar: string;
+  subscriberCount: number;
+  videoCount: number;
+  verified?: boolean;
+}
+
+export interface SearchTag {
+  type: 'tag';
+  id: string;
+  name: string;
+  count: number;
+}
+
+export type SearchItem = SearchTitle | SearchCreator | SearchTag;
+
+export interface SearchRail {
+  label: string;
+  type: 'titles' | 'creators' | 'tags';
+  items: SearchItem[];
+}
+
+export interface TopResult {
+  type: 'title' | 'creator';
+  id: string;
+  uuid?: string;
+  title: string;
+  thumb: string;
+  thumbLarge?: string;
+  creatorName?: string;
+  year?: number;
+  description: string;
+  duration?: number;
+  contentType?: 'video' | 'short' | 'series';
+}
+
+export interface SuggestResponse {
+  query: string;
+  suggestions: SearchItem[];
+  recentSearches?: string[];
+}
+
+export interface TrendingResponse {
+  trending: SearchItem[];
+  popular: string[];
+}
+
+// ============================================
+// Studio Types (Creator Dashboard)
+// ============================================
+
+export interface StudioCreator {
+  id: number;
+  name: string;
+  channel_slug: string;
+  avatar_url: string;
+}
+
+export interface StudioStats {
+  totalVideos: number;
+  totalShorts: number;
+  totalPosts: number;
+  totalViews?: number;
+  totalWatchTimeSeconds?: number;
+}
+
+export interface StudioContentItem {
+  id: number;
+  uuid: string;
+  title: string;
+  thumbnail_url: string;
+  created_at: string;
+  views_count?: number;
+  likes_count?: number;
+}
+
+export interface StudioDashboardResponse {
+  creator: StudioCreator;
+  stats: StudioStats;
+  latestVideos: StudioContentItem[];
+  latestShorts: StudioContentItem[];
+}
+
+export interface StudioUploadVideoPayload {
+  file: File;
+  thumbnail?: File | null;
+  title: string;
+  description?: string;
+  tags?: string[];
+  country_id?: number | null;
+  is_nsfw?: boolean;
+  series_id?: number | null;
+}
+
+export interface StudioUploadVideoResponse {
+  success: boolean;
+  video?: {
+    id: number;
+    uuid: string;
+    title: string;
+    thumbnail_url: string;
+  };
+  errors?: Record<string, string[]>;
+}
+
+export interface StudioUploadShortPayload {
+  file: File;
+  thumbnail?: File | null;
+  title: string;
+  description?: string;
+  tags?: string[];
+  country_id?: number | null;
+  is_nsfw?: boolean;
+}
+
+export interface StudioUploadShortResponse {
+  success: boolean;
+  video?: {
+    id: number;
+    uuid: string;
+    title: string;
+    thumbnail_url: string;
+  };
+  errors?: Record<string, string[]>;
+}
+
+export interface StudioCreatePostPayload {
+  body: string;
+  image?: File | null;
+  video?: File | null;
+}
+
+export interface StudioCreatePostResponse {
+  success: boolean;
+  post?: {
+    id: number;
+    body: string;
+    created_at: string;
+  };
+  errors?: Record<string, string[]>;
+}
+
+export interface StudioVideoListItem {
+  id: number;
+  uuid: string;
+  title: string;
+  description?: string;
+  thumbnail_url?: string;
+  views_count?: number;
+  likes_count?: number;
+  comments_count?: number;
+  duration?: number;
+  created_at: string;
+  published_at?: string;
+  status?: string;
+}
+
+export type StudioVideoDetail = StudioVideoListItem;
+export type StudioShortListItem = StudioVideoListItem;
+export type StudioShortDetail = StudioVideoListItem;
+
+export interface StudioPostListItem {
+  id: number;
+  uuid: string;
+  body: string;
+  created_at: string;
+  published_at?: string;
+  likes_count?: number;
+  comments_count?: number;
+}
+
+export type StudioPostDetail = StudioPostListItem;
+
+export interface StudioSeriesListItem {
+  id: number;
+  uuid: string;
+  title: string;
+  description?: string;
+  thumbnail_url?: string;
+  videos_count?: number;
+  created_at: string;
+  published_at?: string;
+}
+
+export type StudioSeriesDetail = StudioSeriesListItem;
+export type StudioCourseListItem = StudioSeriesListItem;
+export type StudioCourseDetail = StudioSeriesListItem;
+
+export interface StudioVideosListResponse {
+  videos: StudioVideoListItem[];
+  pagination: {
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+  };
 }
 
 // ============================================

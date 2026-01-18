@@ -1,6 +1,6 @@
 'use client';
 
-import { useFeature } from '@/lib/hooks/use-feature';
+import { useFeature } from '@/hooks/use-feature';
 import { useSavedVideosStore, type SavedVideo } from '@/lib/stores/saved-videos-store';
 import type { Video } from '@/types';
 import { Bookmark } from 'lucide-react';

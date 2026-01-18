@@ -1,7 +1,7 @@
 'use client';
 
 import { type ReactNode } from 'react';
-import { useFeature } from '@/lib/hooks/use-feature';
+import { useFeature } from '@/hooks/use-feature';
 import { type FeatureName } from '@/shared/lib/config/feature-flags';
 
 export interface FeatureProps {

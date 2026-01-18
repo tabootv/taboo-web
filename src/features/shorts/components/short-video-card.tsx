@@ -14,7 +14,7 @@ import { videoClient } from '@/api/client';
 import { formatCompactNumber } from '@/lib/utils';
 import { toast } from 'sonner';
 import type { Video } from '@/types';
-import { usePrefersReducedMotion } from '@/lib/hooks';
+import { usePrefersReducedMotion } from '@/hooks';
 
 interface ShortVideoCardProps {
   video: Video;

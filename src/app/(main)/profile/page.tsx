@@ -3,7 +3,7 @@
 import { useUpdateAvatar } from '@/api/mutations';
 import { useBookmarkedVideos, useHistoryVideos, useLikedVideos } from '@/api/queries';
 import { Avatar, Button, LoadingScreen } from '@/components/ui';
-import { useFeature } from '@/lib/hooks/use-feature';
+import { useFeature } from '@/hooks/use-feature';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { formatCompactNumber } from '@/lib/utils';
 import type { Video } from '@/types';

@@ -11,8 +11,7 @@
  * this layer coordinates the existing endpoints and provides a cursor-based interface.
  */
 
-import { home, playlists as playlistsApi } from './endpoints';
-import type { AxiosError } from 'axios';
+import { homeClient, playlistsClient } from '@/api/client';
 import type { Banner, Creator, Video, Series, Playlist } from '@/types';
 
 // ============================================
@@ -66,12 +65,12 @@ export async function fetchHomeData(options: FetchHomeOptions = {}): Promise<Hom
   // Fetch static data on initial load
   if (includeStatic) {
     const [banners, creators, featured, shorts, recommended, series] = await Promise.allSettled([
-      home.getBanners(),
-      home.getCreators(),
-      home.getFeaturedVideos(),
-      home.getShortVideos(),
-      home.getRecommendedVideos(),
-      home.getSeries(),
+      homeClient.getBanners(),
+      homeClient.getCreators(),
+      homeClient.getFeaturedVideos(),
+      homeClient.getShortVideos(),
+      homeClient.getRecommendedVideos(),
+      homeClient.getSeries(),
     ]);
 
     result.static = {
@@ -86,7 +85,7 @@ export async function fetchHomeData(options: FetchHomeOptions = {}): Promise<Hom
 
   // Fetch playlists with pagination
   try {
-    const playlistResponse = await playlistsApi.list(playlistPage, 3);
+    const playlistResponse = await playlistsClient.list({ page: playlistPage, per_page: 3 });
     result.playlists = playlistResponse.data || [];
 
     // Determine next cursor
@@ -101,16 +100,10 @@ export async function fetchHomeData(options: FetchHomeOptions = {}): Promise<Hom
       result.isLastPage = true;
     }
   } catch (error) {
-    const axiosError = error as AxiosError;
-    // If unauthenticated, degrade gracefully by returning no playlists
-    if (axiosError?.response?.status === 401) {
-      result.playlists = [];
-      result.isLastPage = true;
-    } else {
-      console.error('Error fetching playlists:', error);
-      result.playlists = [];
-      result.isLastPage = true;
-    }
+    // Degrade gracefully by returning no playlists
+    console.error('Error fetching playlists:', error);
+    result.playlists = [];
+    result.isLastPage = true;
   }
 
   return result;
@@ -130,7 +123,7 @@ export async function fetchPlaylistVideos(
   hasMore: boolean;
 }> {
   try {
-    const response = await playlistsApi.get(playlistId, page);
+    const response = await playlistsClient.get(playlistId, page);
     const videos = response.videos?.data || [];
     const currentPage = response.videos?.current_page || page;
     const lastPage = response.videos?.last_page || 1;

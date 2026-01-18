@@ -13,7 +13,7 @@ import {
   Smartphone,
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/stores';
-import { useSubscription } from '@/lib/hooks';
+import { useSubscription } from '@/hooks';
 import { Button } from '@/components/ui';
 
 /**

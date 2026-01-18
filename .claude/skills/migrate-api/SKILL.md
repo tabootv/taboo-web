@@ -49,7 +49,7 @@ const videos = data?.data || [];
 
 **Before:**
 ```typescript
-import { useInfiniteScrollPagination } from '@/lib/hooks/use-infinite-scroll-pagination';
+import { useInfiniteScrollPagination } from '@/hooks/use-infinite-scroll-pagination';
 import { videos as videosApi } from '@/lib/api';
 
 const { items, isLoading, loadMoreRef } = useInfiniteScrollPagination({

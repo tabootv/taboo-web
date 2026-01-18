@@ -38,3 +38,35 @@ export const FEATURES = {
 
 export type FeatureName = keyof typeof FEATURES;
 export type FeatureConfig = (typeof FEATURES)[FeatureName];
+
+/**
+ * isFeatureEnabled
+ *
+ * Check if a feature is enabled in Server Components or API routes.
+ * Use this instead of useFeature() in server-side code.
+ */
+export function isFeatureEnabled(featureName: FeatureName): boolean {
+  return FEATURES[featureName].enabled;
+}
+
+/**
+ * getFeatureConfig
+ *
+ * Get the full feature configuration in server-side code.
+ */
+export function getFeatureConfig(featureName: FeatureName) {
+  return FEATURES[featureName];
+}
+
+/**
+ * getAllFeatures
+ *
+ * Get all feature flags and their status.
+ * Useful for debugging or admin dashboards.
+ */
+export function getAllFeatures() {
+  return Object.entries(FEATURES).map(([key, config]) => ({
+    key,
+    ...config,
+  }));
+}

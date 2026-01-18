@@ -9,7 +9,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { useFeature } from '@/lib/hooks/use-feature';
+import { useFeature } from '@/hooks/use-feature';
 import { useAuthStore } from '@/lib/stores';
 import { ChevronRight, Clapperboard } from 'lucide-react';
 import Link from 'next/link';

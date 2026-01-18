@@ -25,7 +25,7 @@ This skill guides adding and using feature flags to enable/disable features duri
 ### In Client Components
 
 ```tsx
-import { useFeature } from '@/lib/hooks/use-feature';
+import { useFeature } from '@/hooks/use-feature';
 import { Feature } from '@/components/feature';
 
 function MyComponent() {
@@ -50,7 +50,7 @@ function MyOtherComponent() {
 ### In Server Components
 
 ```tsx
-import { isFeatureEnabled } from '@/utils/feature-flags';
+import { isFeatureEnabled } from '@/shared/lib/config/feature-flags';
 
 export default async function Page() {
   const myFeatureEnabled = isFeatureEnabled('MY_FEATURE');
@@ -62,7 +62,7 @@ export default async function Page() {
 ### Guarding Mutations/API Calls
 
 ```tsx
-import { useFeature } from '@/lib/hooks/use-feature';
+import { useFeature } from '@/hooks/use-feature';
 import { useMyMutation } from '@/api/mutations';
 
 function FeatureButton() {

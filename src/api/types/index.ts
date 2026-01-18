@@ -1,13 +1,7 @@
 /**
- * Type exports - abstraction layer
+ * API Types
  *
- * Current: Manual types from manual.ts
- * Future: When OpenAPI is ready, change this to:
- *   export * from './generated';
+ * Re-export from centralized types directory.
+ * When OpenAPI schema is available, change this to export from './generated'.
  */
-
-// Current implementation
-export * from './manual';
-
-// Future: Uncomment when OpenAPI types are generated
-// export * from './generated';
+export * from '@/types';

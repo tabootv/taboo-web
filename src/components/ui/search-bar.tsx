@@ -1,7 +1,7 @@
 'use client';
 
 import { searchClient as searchApi } from '@/api/client';
-import { useDebounce } from '@/lib/hooks';
+import { useDebounce } from '@/hooks';
 import { cn, getSeriesRoute } from '@/lib/utils';
 import type { Creator, Series, Video } from '@/types';
 import { useRouter } from 'next/navigation';

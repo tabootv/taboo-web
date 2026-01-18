@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Play } from 'lucide-react';
 import { formatDuration, getSeriesPlayRoute } from '@/lib/utils';
-import { usePrefetch } from '@/lib/hooks/use-prefetch';
+import { usePrefetch } from '@/hooks/use-prefetch';
 import type { Channel, Video } from '@/types';
 
 interface EpisodeCardProps {

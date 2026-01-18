@@ -2,7 +2,7 @@
 
 import { creatorsClient as creatorsApi } from '@/api/client';
 import { queryKeys } from '@/api/query-keys';
-import { usePrefetch } from '@/lib/hooks/use-prefetch';
+import { usePrefetch } from '@/hooks/use-prefetch';
 import type { Creator } from '@/types';
 import { useQueryClient } from '@tanstack/react-query';
 import { Check, Video } from 'lucide-react';

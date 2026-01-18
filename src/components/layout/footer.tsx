@@ -1,7 +1,7 @@
 'use client';
 
 import { Logo } from '@/components/ui/logo';
-import { useHiddenComponentByPage } from '@/lib/hooks/use-hidden-component-page';
+import { useHiddenComponentByPage } from '@/hooks/use-hidden-component-page';
 import Image from 'next/image';
 import Link from 'next/link';
 

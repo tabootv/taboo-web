@@ -1,7 +1,7 @@
 'use client';
 
 import { formatDuration, formatRelativeTime } from '@/lib/utils';
-import { usePrefetch } from '@/lib/hooks/use-prefetch';
+import { usePrefetch } from '@/hooks/use-prefetch';
 import type { Video } from '@/types';
 import { Clock, Film } from 'lucide-react';
 import Image from 'next/image';

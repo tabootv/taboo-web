@@ -1,7 +1,7 @@
 'use client';
 
 import { VerifiedBadge } from '@/components/ui';
-import { usePrefetch } from '@/lib/hooks/use-prefetch';
+import { usePrefetch } from '@/hooks/use-prefetch';
 import { getSeriesRoute } from '@/lib/utils';
 import type { Series } from '@/types';
 import { Play } from 'lucide-react';

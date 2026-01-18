@@ -2,8 +2,8 @@
 
 import { shortsClient as shortsApi } from '@/api/client';
 import { Avatar } from '@/components/ui';
-import { usePrefersReducedMotion } from '@/lib/hooks';
-import { useFeature } from '@/lib/hooks/use-feature';
+import { usePrefersReducedMotion } from '@/hooks';
+import { useFeature } from '@/hooks/use-feature';
 import { formatCompactNumber } from '@/lib/utils';
 import type { Video } from '@/types';
 import {

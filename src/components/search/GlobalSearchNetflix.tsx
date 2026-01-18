@@ -15,7 +15,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { cn, getSeriesRoute } from '@/lib/utils';
-import { useDebounce } from '@/lib/hooks';
+import { useDebounce } from '@/hooks';
 import { searchClient as searchApi } from '@/api/client';
 import type { Video, Series, Creator } from '@/types';
 import { useRecentSearches } from './hooks/use-recent-searches';

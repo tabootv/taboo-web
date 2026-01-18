@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Mail, Lock, User, Loader2 } from 'lucide-react';
-import { useGuestOnly } from '@/lib/hooks';
+import { useGuestOnly } from '@/hooks';
 import { AxiosError } from 'axios';
 
 export default function RegisterPage() {

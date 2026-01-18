@@ -2,7 +2,7 @@
 
 import { searchClient as searchApi } from '@/api/client';
 import { Spinner } from '@/components/ui';
-import { useDebounce } from '@/lib/hooks';
+import { useDebounce } from '@/hooks';
 import { formatCompactNumber, formatDuration, getSeriesRoute } from '@/lib/utils';
 import type { Creator, Series, Video } from '@/types';
 import { BookOpen, Film, Play, Search as SearchIcon, Users, X } from 'lucide-react';
