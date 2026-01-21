@@ -51,14 +51,12 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
     heroRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Calculate total duration
   const totalDuration = videos.reduce((acc, v) => acc + (v.duration || 0), 0);
 
   if (isLoading) {
     return <CoursePageSkeleton />;
   }
 
-  // Error or auth required state
   if (error || !courseData) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -97,7 +95,6 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
     );
   }
 
-  // Try multiple thumbnail sources - API might return in different fields
   const heroImage =
     courseData.course_thumbnail ||
     courseData.card_thumbnail ||

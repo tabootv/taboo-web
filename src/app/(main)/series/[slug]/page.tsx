@@ -1,14 +1,15 @@
 'use client';
 
 import { useSeriesDetail } from '@/api/queries';
-import { cn, formatDuration, extractIdFromSlug, isValidId, getSeriesPlayRoute } from '@/lib/utils';
+import { EpisodeCard, SeriesPageSkeleton, TrailerModal } from '@/components/series';
+import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
+import { useSidebar } from '@/components/ui/sidebar';
+import { cn, extractIdFromSlug, formatDuration, getSeriesPlayRoute, isValidId } from '@/lib/utils';
 import { ChevronDown, Clock, Info, Play } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
-import { EpisodeCard, SeriesPageSkeleton, TrailerModal } from '@/components/series';
-import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
 
 export default function SeriesDetailPage() {
   const params = useParams();
@@ -16,6 +17,7 @@ export default function SeriesDetailPage() {
   const slug = params.slug as string;
   const seriesId = extractIdFromSlug(slug);
   const isValid = isValidId(seriesId);
+  const { toggleSidebar, setOpen } = useSidebar();
 
   // All hooks must be called unconditionally
   const { data: seriesData, isLoading } = useSeriesDetail(isValid ? seriesId : '');
@@ -41,6 +43,7 @@ export default function SeriesDetailPage() {
   };
 
   const handleWatchTrailer = () => {
+    setOpen(false);
     setShowTrailer(true);
   };
 
@@ -97,121 +100,121 @@ export default function SeriesDetailPage() {
         <div className="relative z-10 pt-16 pb-8 min-h-[80vh] flex flex-col justify-end">
           <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 w-full">
             <div className="max-w-2xl space-y-5 animate-fade-in">
-                <div className="flex items-center gap-3 flex-wrap">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-primary text-white text-sm font-bold rounded tracking-wide">
-                    <Play className="w-3.5 h-3.5 fill-white" />
-                    {isCourse ? 'COURSE' : 'SERIES'}
-                  </span>
-                  {seriesData.categories?.map((cat) => (
-                    <span
-                      key={cat.id}
-                      className="px-3 py-1.5 bg-white/10 backdrop-blur-sm text-white/90 text-sm rounded border border-white/10"
-                    >
-                      {cat.name}
-                    </span>
-                  ))}
-                </div>
-
-                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight">
-                  {seriesData.title}
-                </h1>
-
-                <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-white/70 text-sm">
-                  <span className="text-green-400 font-semibold px-2 py-0.5 bg-green-400/10 rounded">
-                    New
-                  </span>
-                  <span>{seriesData.humans_publish_at}</span>
-                  <span className="flex items-center gap-1.5">
-                    <Play className="w-4 h-4" />
-                    {videos.length} {videos.length === 1 ? 'Episode' : 'Episodes'}
-                  </span>
-                  {totalDuration > 0 && (
-                    <span className="flex items-center gap-1.5">
-                      <Clock className="w-4 h-4" />
-                      {formatDuration(totalDuration)} total
-                    </span>
-                  )}
-                </div>
-
-                {seriesData.description && (
-                  <div className="relative">
-                    <p
-                      className={cn(
-                        'text-base sm:text-lg text-white/80 leading-relaxed transition-all duration-300',
-                        !isDescriptionExpanded && 'line-clamp-3'
-                      )}
-                    >
-                      {seriesData.description}
-                    </p>
-                    {seriesData.description.length > 150 && (
-                      <button
-                        onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
-                        className="mt-2 text-white/60 hover:text-white text-sm flex items-center gap-1 transition-colors"
-                      >
-                        {isDescriptionExpanded ? 'Show less' : 'Show more'}
-                        <ChevronDown
-                          className={cn(
-                            'w-4 h-4 transition-transform duration-200',
-                            isDescriptionExpanded && 'rotate-180'
-                          )}
-                        />
-                      </button>
-                    )}
-                  </div>
-                )}
-
-                <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-2">
-                  <button
-                    onClick={handlePlaySeries}
-                    disabled={videos.length === 0}
-                    className="flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 bg-white hover:bg-white/90 text-black font-semibold rounded-md transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              <div className="flex items-center gap-3 flex-wrap">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-primary text-white text-sm font-bold rounded tracking-wide">
+                  <Play className="w-3.5 h-3.5 fill-white" />
+                  {isCourse ? 'COURSE' : 'SERIES'}
+                </span>
+                {seriesData.categories?.map((cat) => (
+                  <span
+                    key={cat.id}
+                    className="px-3 py-1.5 bg-white/10 backdrop-blur-sm text-white/90 text-sm rounded border border-white/10"
                   >
-                    <Play className="w-5 sm:w-6 h-5 sm:h-6 fill-black" />
-                    <span>Play</span>
-                  </button>
-                  {seriesData.trailer_url && (
+                    {cat.name}
+                  </span>
+                ))}
+              </div>
+
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight">
+                {seriesData.title}
+              </h1>
+
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-white/70 text-sm">
+                <span className="text-green-400 font-semibold px-2 py-0.5 bg-green-400/10 rounded">
+                  New
+                </span>
+                <span>{seriesData.humans_publish_at}</span>
+                <span className="flex items-center gap-1.5">
+                  <Play className="w-4 h-4" />
+                  {videos.length} {videos.length === 1 ? 'Episode' : 'Episodes'}
+                </span>
+                {totalDuration > 0 && (
+                  <span className="flex items-center gap-1.5">
+                    <Clock className="w-4 h-4" />
+                    {formatDuration(totalDuration)} total
+                  </span>
+                )}
+              </div>
+
+              {seriesData.description && (
+                <div className="relative">
+                  <p
+                    className={cn(
+                      'text-base sm:text-lg text-white/80 leading-relaxed transition-all duration-300',
+                      !isDescriptionExpanded && 'line-clamp-3'
+                    )}
+                  >
+                    {seriesData.description}
+                  </p>
+                  {seriesData.description.length > 150 && (
                     <button
-                      onClick={handleWatchTrailer}
-                      className="flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 bg-white/20 hover:bg-white/30 text-white font-semibold rounded-md backdrop-blur-sm transition-all border border-white/10"
+                      onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                      className="mt-2 text-white/60 hover:text-white text-sm flex items-center gap-1 transition-colors"
                     >
-                      <Info className="w-5 h-5" />
-                      <span>Trailer</span>
+                      {isDescriptionExpanded ? 'Show less' : 'Show more'}
+                      <ChevronDown
+                        className={cn(
+                          'w-4 h-4 transition-transform duration-200',
+                          isDescriptionExpanded && 'rotate-180'
+                        )}
+                      />
                     </button>
                   )}
                 </div>
+              )}
 
-                <Link
-                  href={`/creators/creator-profile/${seriesData.channel?.id}`}
-                  className="inline-flex items-center gap-3 pt-2 group"
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-2">
+                <button
+                  onClick={handlePlaySeries}
+                  disabled={videos.length === 0}
+                  className="flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 bg-white hover:bg-white/90 text-black font-semibold rounded-md transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                 >
-                  <div className="relative">
-                    {seriesData.channel?.dp ? (
-                      <Image
-                        src={seriesData.channel.dp}
-                        alt={seriesData.channel.name || 'Creator'}
-                        width={44}
-                        height={44}
-                        className="rounded-full object-cover ring-2 ring-white/20 group-hover:ring-red-primary/50 transition-all"
-                      />
-                    ) : (
-                      <div className="w-11 h-11 rounded-full bg-linear-to-br from-red-primary to-red-dark flex items-center justify-center ring-2 ring-white/20">
-                        <span className="text-base font-bold text-white">
-                          {(seriesData.channel?.name || 'C').charAt(0).toUpperCase()}
-                        </span>
-                      </div>
-                    )}
-                    <div className="absolute -bottom-0.5 -right-0.5">
-                      <VerifiedBadge size={14} />
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-white font-medium group-hover:text-red-primary transition-colors">
-                      {seriesData.channel?.name}
-                    </p>
-                    <p className="text-white/50 text-xs">Creator</p>
-                  </div>
-                </Link>
+                  <Play className="w-5 sm:w-6 h-5 sm:h-6 fill-black" />
+                  <span>Play</span>
+                </button>
+                {seriesData.trailer_url && (
+                  <button
+                    onClick={handleWatchTrailer}
+                    className="flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 bg-white/20 hover:bg-white/30 text-white font-semibold rounded-md backdrop-blur-sm transition-all border border-white/10"
+                  >
+                    <Info className="w-5 h-5" />
+                    <span>Trailer</span>
+                  </button>
+                )}
               </div>
+
+              <Link
+                href={`/creators/creator-profile/${seriesData.channel?.id}`}
+                className="inline-flex items-center gap-3 pt-2 group"
+              >
+                <div className="relative">
+                  {seriesData.channel?.dp ? (
+                    <Image
+                      src={seriesData.channel.dp}
+                      alt={seriesData.channel.name || 'Creator'}
+                      width={44}
+                      height={44}
+                      className="rounded-full object-cover ring-2 ring-white/20 group-hover:ring-red-primary/50 transition-all"
+                    />
+                  ) : (
+                    <div className="w-11 h-11 rounded-full bg-linear-to-br from-red-primary to-red-dark flex items-center justify-center ring-2 ring-white/20">
+                      <span className="text-base font-bold text-white">
+                        {(seriesData.channel?.name || 'C').charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                  )}
+                  <div className="absolute -bottom-0.5 -right-0.5">
+                    <VerifiedBadge size={14} />
+                  </div>
+                </div>
+                <div>
+                  <p className="text-white font-medium group-hover:text-red-primary transition-colors">
+                    {seriesData.channel?.name}
+                  </p>
+                  <p className="text-white/50 text-xs">Creator</p>
+                </div>
+              </Link>
+            </div>
           </div>
         </div>
       </div>

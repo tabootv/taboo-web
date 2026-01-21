@@ -19,6 +19,7 @@ export const queryKeys = {
     all: ['videos'] as const,
     lists: () => [...queryKeys.videos.all, 'list'] as const,
     list: (filters?: Record<string, unknown>) => [...queryKeys.videos.lists(), filters] as const,
+    mapList: (filters?: Record<string, unknown>) => [...queryKeys.videos.all, 'map', filters] as const,
     detail: (id: string | number) => [...queryKeys.videos.all, 'detail', String(id)] as const,
     related: (id: string | number) => [...queryKeys.videos.detail(id), 'related'] as const,
     comments: (id: string | number) => [...queryKeys.videos.detail(id), 'comments'] as const,

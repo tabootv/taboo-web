@@ -1,14 +1,11 @@
 'use client';
 
-import { creatorsClient as creatorsApi } from '@/api/client';
-import { queryKeys } from '@/api/query-keys';
+import { useToggleFollowCreator } from '@/api/mutations';
 import { usePrefetch } from '@/hooks/use-prefetch';
 import type { Creator } from '@/types';
-import { useQueryClient } from '@tanstack/react-query';
-import { Check, Video } from 'lucide-react';
+import { Check, Loader2, Video } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
 
 interface CreatorCardProps {
   creator: Creator;
@@ -16,100 +13,45 @@ interface CreatorCardProps {
 
 export function CreatorCard({ creator }: CreatorCardProps) {
   const { prefetchRoute } = usePrefetch();
-  const queryClient = useQueryClient();
-  const [isFollowing, setIsFollowing] = useState(creator.following ?? false);
-  const isUserActionRef = useRef(false);
-  const lastActionTimeRef = useRef<number>(0);
-  const lastConfirmedValueRef = useRef<boolean | null>(creator.following ?? null);
+  const toggleFollowMutation = useToggleFollowCreator();
   const href = `/creators/creator-profile/${creator.id}`;
 
-  useEffect(() => {
-    // Só sincronizar se:
-    // 1. Não houve ação do usuário recente (últimos 5 segundos)
-    // 2. O valor do prop é diferente do último valor confirmado
-    // 3. O valor do prop não é null/undefined
-    const timeSinceLastAction = Date.now() - lastActionTimeRef.current;
-    const followingValue = creator.following;
-    const shouldSync =
-      !isUserActionRef.current &&
-      timeSinceLastAction > 5000 &&
-      followingValue !== undefined &&
-      followingValue !== null &&
-      followingValue !== lastConfirmedValueRef.current;
+  // Derive state directly from prop - no local state
+  const isFollowing = creator.following ?? false;
+  const isPending = toggleFollowMutation.isPending;
 
-    if (shouldSync) {
-      setIsFollowing(followingValue);
-      lastConfirmedValueRef.current = followingValue;
-    }
-  }, [creator.following]);
-
-  const handleFollow = async (e: React.MouseEvent) => {
+  const handleFollow = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
-    const newFollowingState = !isFollowing;
-    setIsFollowing(newFollowingState);
-    isUserActionRef.current = true;
-    lastActionTimeRef.current = Date.now();
+    if (isPending) return;
 
-    try {
-      const response = await creatorsApi.toggleFollow(creator.id);
-      if (response) {
-        const newFollowingValue = response.is_following;
-        setIsFollowing(newFollowingValue);
-        lastConfirmedValueRef.current = newFollowingValue;
-
-        // Atualizar TODAS as queries de lista de creators (com qualquer filtro)
-        queryClient.setQueriesData(
-          { queryKey: queryKeys.creators.lists(), exact: false },
-          (oldData: any) => {
-            if (!oldData?.data) return oldData;
-            return {
-              ...oldData,
-              data: oldData.data.map((c: Creator) =>
-                c.id === creator.id ? { ...c, following: newFollowingValue } : c
-              ),
-            };
-          }
-        );
-
-        // Atualizar também a query de detail do creator (caso esteja aberta)
-        queryClient.setQueryData(
-          queryKeys.creators.detail(creator.id),
-          (oldData: Creator | undefined) => {
-            if (!oldData) return oldData;
-            return { ...oldData, following: newFollowingValue };
-          }
-        );
-
-        // Fazer refetch silencioso em background após um delay
-        // Isso garante que o servidor tenha processado a mudança
-        setTimeout(async () => {
-          try {
-            await queryClient.refetchQueries({
-              queryKey: queryKeys.creators.all,
-              exact: false,
-              type: 'active', // Só refazer queries ativas (em uso)
-            });
-          } catch (error) {
-            console.error('Error refetching creators:', error);
-          } finally {
-            // Só permitir sincronização automática após o refetch completar
-            isUserActionRef.current = false;
-          }
-        }, 1000);
-      } else {
-        setIsFollowing(!newFollowingState);
-        isUserActionRef.current = false;
-        lastActionTimeRef.current = 0;
-      }
-    } catch (error) {
-      console.error('Error toggling follow:', error);
-      setIsFollowing(!newFollowingState);
-      isUserActionRef.current = false;
-      lastActionTimeRef.current = 0;
-    }
+    toggleFollowMutation.mutate({
+      creatorId: creator.id,
+      currentFollowing: isFollowing,
+    });
   };
+
+  const buttonContent = isPending ? (
+    <Loader2 className="w-4 h-4 animate-spin" />
+  ) : isFollowing ? (
+    <>
+      <Check className="w-4 h-4 mr-1" />
+      Following
+    </>
+  ) : (
+    'Follow'
+  );
+
+  const buttonClassName = `btn btn-sm min-w-24 justify-center transition-all ${isFollowing
+    ? 'bg-transparent border border-white/30 text-white/80 hover:border-white/50 hover:text-white hover:bg-white/5'
+    : 'btn-primary'
+    }`;
+
+  const mobileButtonClassName = `btn btn-sm w-[93%] mx-auto my-[15px] min-w-[120px] justify-center transition-all ${isFollowing
+    ? 'bg-transparent border border-white/30 text-white/80 hover:border-white/50 hover:text-white hover:bg-white/5'
+    : 'btn-primary'
+    }`;
 
   return (
     <div className="creator-card-bg h-full">
@@ -163,20 +105,10 @@ export function CreatorCard({ creator }: CreatorCardProps) {
                 <button
                   onClick={handleFollow}
                   aria-pressed={isFollowing}
-                  className={`btn btn-sm min-w-24 justify-center transition-all ${
-                    isFollowing
-                      ? 'bg-transparent border border-white/30 text-white/80 hover:border-white/50 hover:text-white hover:bg-white/5'
-                      : 'btn-primary'
-                  }`}
+                  disabled={isPending}
+                  className={buttonClassName}
                 >
-                  {isFollowing ? (
-                    <>
-                      <Check className="w-4 h-4 mr-1" />
-                      Following
-                    </>
-                  ) : (
-                    'Follow'
-                  )}
+                  {buttonContent}
                 </button>
               </div>
             </div>
@@ -191,20 +123,10 @@ export function CreatorCard({ creator }: CreatorCardProps) {
           <button
             onClick={handleFollow}
             aria-pressed={isFollowing}
-            className={`btn btn-sm w-[93%] mx-auto my-[15px] min-w-[120px] justify-center transition-all ${
-              isFollowing
-                ? 'bg-transparent border border-white/30 text-white/80 hover:border-white/50 hover:text-white hover:bg-white/5'
-                : 'btn-primary'
-            }`}
+            disabled={isPending}
+            className={mobileButtonClassName}
           >
-            {isFollowing ? (
-              <>
-                <Check className="w-4 h-4 mr-1" />
-                Following
-              </>
-            ) : (
-              'Follow'
-            )}
+            {buttonContent}
           </button>
         </div>
       </Link>

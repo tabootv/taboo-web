@@ -10,7 +10,11 @@ import { useMemo } from 'react';
 export default function CreatorsPage() {
   const { data, isLoading } = useCreatorsList({ page: 1 });
 
-  const creatorsList = data?.data || [];
+  // Stable sorting by id prevents list reshuffling when following creators
+  const creatorsList = useMemo(() => {
+    const creators = data?.data || [];
+    return [...creators].sort((a, b) => a.id - b.id);
+  }, [data?.data]);
 
   const skeletonKeys = useMemo(
     () =>
@@ -28,6 +32,7 @@ export default function CreatorsPage() {
       <div className="relative z-10 max-w-[1280px] mx-auto px-4 md:px-6 lg:px-8 pt-6">
         <PageHeader
           title="Creators"
+          classNameActions="mx-auto"
           actions={
             <div className="flex gap-2">
               <Link

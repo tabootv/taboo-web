@@ -3,7 +3,7 @@
  *
  * API Endpoints:
  * - GET /videos/{id}/play → Video
- * - GET /public/videos → VideoListResponse
+ * - GET /videos → VideoListResponse
  * - GET /public/videos/related → VideoListResponse
  * - POST /videos/{id}/toggle-like → LikeResponse
  * - POST /videos/{id}/toggle-dislike → DislikeResponse
@@ -32,8 +32,11 @@ export interface VideoListFilters {
   is_short?: boolean;
   type?: string;
   published?: boolean;
-  sort_by?: string;
   order?: 'asc' | 'desc';
+  channel_id?: number;
+  tag_ids?: number[];
+  country_id?: string[];
+  sort_by?: 'trending' | 'newest' | 'oldest' | 'longest' | 'shortest';
 }
 
 export interface RelatedVideoFilters {
@@ -107,16 +110,34 @@ export const videoClient = {
    * Get list of videos with filters
    */
   list: async (filters?: VideoListFilters): Promise<VideoListResponse> => {
-    const params = {
+    const params: Record<string, unknown> = {
       page: filters?.page,
       limit: filters?.limit || filters?.per_page || 24,
       short: filters?.short ?? false,
       is_short: filters?.is_short ?? false,
       type: filters?.type || 'video',
       published: filters?.published ?? true,
-      sort_by: filters?.sort_by || 'published_at',
-      order: filters?.order || 'desc',
     };
+
+    params.sort_by = filters?.sort_by || 'published_at';
+    if (!filters?.sort_by) {
+      params.order = filters?.order || 'desc';
+    }
+
+    // Add creator filter by channel_id
+    if (filters?.channel_id !== undefined) {
+      params.channel_id = filters.channel_id;
+    }
+
+    // Add tag filter - send as array
+    if (filters?.tag_ids && filters.tag_ids.length > 0) {
+      params.tag_ids = filters.tag_ids;
+    }
+
+    // Add country filter - send as array
+    if (filters?.country_id && filters.country_id.length > 0) {
+      params.country_id = filters.country_id;
+    }
 
     const data = await apiClient.get<{
       videos?: Video[];
@@ -126,7 +147,7 @@ export const videoClient = {
         per_page?: number;
         total?: number;
       };
-    }>('/public/videos', { params });
+    }>('/videos', { params });
 
     return transformVideoResponse(data);
   },

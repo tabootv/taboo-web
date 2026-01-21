@@ -2,8 +2,8 @@
 
 import { useState, useCallback } from 'react';
 import Image from 'next/image';
-import { ThumbsUp, ThumbsDown, Reply, Send } from 'lucide-react';
-import { commentsClient as commentsApi, videoClient } from '@/api/client';
+import { Reply, Send } from 'lucide-react';
+import { videoClient } from '@/api/client';
 import type { Comment } from '@/types';
 import { formatRelativeTime } from '@/lib/utils';
 
@@ -20,37 +20,11 @@ export function SingleComment({
   isReply = false,
   onReplyAdded,
 }: SingleCommentProps) {
-  const [liked, setLiked] = useState(comment.has_liked);
-  const [disliked, setDisliked] = useState(comment.has_disliked);
   const [showReplies, setShowReplies] = useState(false);
   const [showReplyInput, setShowReplyInput] = useState(false);
   const [replyContent, setReplyContent] = useState('');
   const [replies, setReplies] = useState<Comment[]>(comment.replies || []);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const toggleLike = useCallback(async () => {
-    try {
-      await commentsApi.toggleLike(comment.uuid);
-      if (disliked) {
-        setDisliked(false);
-      }
-      setLiked(!liked);
-    } catch (error) {
-      console.error('Failed to toggle like:', error);
-    }
-  }, [comment.uuid, liked, disliked]);
-
-  const toggleDislike = useCallback(async () => {
-    try {
-      await commentsApi.toggleDislike(comment.uuid);
-      if (liked) {
-        setLiked(false);
-      }
-      setDisliked(!disliked);
-    } catch (error) {
-      console.error('Failed to toggle dislike:', error);
-    }
-  }, [comment.uuid, liked, disliked]);
 
   const postReply = useCallback(async () => {
     if (!replyContent.trim() || isSubmitting) return;
@@ -115,30 +89,12 @@ export function SingleComment({
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            onClick={toggleLike}
-            className="cursor-pointer p-1.5 hover:bg-white/10 rounded-full transition-colors"
-          >
-            <ThumbsUp
-              className={`w-4 h-4 ${liked ? 'text-red-primary fill-red-primary' : 'text-white'}`}
-            />
-          </button>
-          <button
-            onClick={toggleDislike}
-            className="cursor-pointer p-1.5 hover:bg-white/10 rounded-full transition-colors"
-          >
-            <ThumbsDown
-              className={`w-4 h-4 ${disliked ? 'text-red-primary fill-red-primary' : 'text-white'}`}
-            />
-          </button>
-          <button
-            onClick={() => setShowReplyInput(!showReplyInput)}
-            className="min-h-[38px] p-1 flex items-center hover:bg-white/10 rounded-full transition-colors"
-          >
-            <Reply className="w-4 h-4 text-white" style={{ transform: 'scaleX(-1)' }} />
-          </button>
-        </div>
+        <button
+          onClick={() => setShowReplyInput(!showReplyInput)}
+          className="min-h-[38px] p-1.5 flex items-center hover:bg-white/10 rounded-full transition-colors"
+        >
+          <Reply className="w-4 h-4 text-white" style={{ transform: 'scaleX(-1)' }} />
+        </button>
       </div>
 
       <p className="text-[14px] md:text-[15px] font-normal whitespace-pre-wrap break-words mt-2 leading-[20px] md:leading-[22px]">

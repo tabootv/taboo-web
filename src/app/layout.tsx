@@ -1,8 +1,8 @@
+import { ErrorBoundary } from '@/shared/components/error-boundary';
+import { QueryProvider } from '@/shared/components/providers';
 import type { Metadata, Viewport } from 'next';
 import { Figtree } from 'next/font/google';
 import './globals.css';
-import { QueryProvider } from '@/shared/components/providers';
-import { ErrorBoundary } from '@/shared/components/error-boundary';
 
 const figtree = Figtree({
   variable: '--font-figtree',
@@ -18,6 +18,15 @@ export const metadata: Metadata = {
   description: 'Your destination for premium video content, courses, and community.',
   keywords: ['video', 'streaming', 'courses', 'community', 'creators'],
   authors: [{ name: 'TabooTV' }],
+  icons: {
+    icon: [
+      { url: '/icon-32x.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icon-16x.png', sizes: '16x16', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
   openGraph: {
     type: 'website',
     locale: 'en_US',

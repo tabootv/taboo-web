@@ -17,7 +17,37 @@ export function useMarkAllNotificationsRead() {
 
   return useMutation({
     mutationFn: () => notificationsClient.readAll(),
-    onSuccess: () => {
+
+    onMutate: async () => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: queryKeys.notifications.list() });
+
+      // Snapshot previous value
+      const previousData = queryClient.getQueryData<Notification[]>(
+        queryKeys.notifications.list()
+      );
+
+      // Optimistically mark all as read
+      if (previousData) {
+        const now = new Date().toISOString();
+        queryClient.setQueryData<Notification[]>(
+          queryKeys.notifications.list(),
+          previousData.map((n) => (n.read_at ? n : { ...n, read_at: now }))
+        );
+      }
+
+      return { previousData };
+    },
+
+    onError: (_error, _variables, context) => {
+      // Rollback on error
+      if (context?.previousData) {
+        queryClient.setQueryData(queryKeys.notifications.list(), context.previousData);
+      }
+    },
+
+    onSettled: () => {
+      // Refetch to sync with server
       queryClient.invalidateQueries({ queryKey: queryKeys.notifications.list() });
     },
   });

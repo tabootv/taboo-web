@@ -1,14 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { postsClient as postsApi } from '@/api/client';
+import { ImageLightbox } from '@/components/ui/image-lightbox';
+import type { Post } from '@/types';
+import { MoreHorizontal, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { MoreHorizontal, Trash2 } from 'lucide-react';
-import { postsClient as postsApi } from '@/api/client';
-import type { Post } from '@/types';
-import { PostReactions } from './post-reactions';
-import { PostCommentArea } from './post-comment-area';
+import { useState } from 'react';
 import { toast } from 'sonner';
+import { PostCommentArea } from './post-comment-area';
+import { PostReactions } from './post-reactions';
 
 interface CommunityPostProps {
   post: Post;
@@ -20,6 +21,14 @@ export function CommunityPost({ post, currentUserId, onDelete }: CommunityPostPr
   const [showReplySection, setShowReplySection] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+
+  const handleImageClick = (index: number) => {
+    setLightboxIndex(index);
+    setLightboxOpen(true);
+  };
 
   const isOwner = currentUserId === post.user_id;
 
@@ -120,20 +129,24 @@ export function CommunityPost({ post, currentUserId, onDelete }: CommunityPostPr
           {post.post_image && post.post_image.length > 0 && (
             <div className="mt-4">
               {post.post_image.length === 1 ? (
-                <div className="relative aspect-video rounded-lg overflow-hidden">
+                <button
+                  onClick={() => handleImageClick(0)}
+                  className="relative aspect-video w-full rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
+                >
                   <Image
                     src={post.post_image[0]!}
                     alt="Post image"
                     fill
                     className="object-cover"
                   />
-                </div>
+                </button>
               ) : (
                 <div className="grid grid-cols-2 gap-2">
                   {post.post_image.map((image, index) => (
-                    <div
+                    <button
                       key={index}
-                      className="relative aspect-square rounded-lg overflow-hidden"
+                      onClick={() => handleImageClick(index)}
+                      className="relative aspect-square rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
                     >
                       <Image
                         src={image}
@@ -141,11 +154,23 @@ export function CommunityPost({ post, currentUserId, onDelete }: CommunityPostPr
                         fill
                         className="object-cover"
                       />
-                    </div>
+                    </button>
                   ))}
                 </div>
               )}
             </div>
+          )}
+
+          {/* ImageLightbox */}
+          {post.post_image && post.post_image.length > 0 && (
+            <ImageLightbox
+              images={post.post_image
+                .filter((url) => url && url.trim() !== '')
+                .map((url, index) => ({ id: index, url }))}
+              initialIndex={lightboxIndex}
+              open={lightboxOpen}
+              onOpenChange={setLightboxOpen}
+            />
           )}
 
           {/* Audio Players */}

@@ -1,6 +1,7 @@
 export * from './auth.mutations';
 export * from './clips.mutations';
 export * from './comments.mutations';
+export * from './creators.mutations';
 export * from './livechat.mutations';
 export * from './moderation.mutations';
 export * from './notifications.mutations';

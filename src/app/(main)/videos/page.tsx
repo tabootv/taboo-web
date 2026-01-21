@@ -1,37 +1,58 @@
 'use client';
 
-import { useVideoList } from '@/api/queries';
+import { VideoListFilters } from '@/api';
+import { useCreatorsListPublic, useVideoList } from '@/api/queries';
+import { useCountries, useTags } from '@/api/queries/public.queries';
 import { MediaPreviewModal } from '@/components/home/media-preview-modal';
-import { LoadingScreen } from '@/components/ui';
 import type { Video } from '@/types';
 import { Film } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { SelectFilter } from './components/select-filter';
 import { VideoCardEnhanced } from './components/video-card-enhanced';
+import { VideoGridSkeleton } from './components/video-grid-skeleton';
 import { INFINITE_SCROLL_ROOT_MARGIN, INFINITE_SCROLL_THRESHOLD, PAGE_SIZE } from './constants';
-import type { SortOption } from './types';
+
+type SortOption = 'trending' | 'newest' | 'oldest' | 'longest' | 'shortest';
 
 export default function VideosPage() {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const lastCardRef = useRef<HTMLDivElement>(null);
 
+  // Filter state
+  const [creatorFilter, setCreatorFilter] = useState<number | null>(null);
+  const [countryFilter, setCountryFilter] = useState<string | null>(null);
+  const [tagFilter, setTagFilter] = useState<number | null>(null);
   const [sort, setSort] = useState<SortOption>('newest');
-  const [creatorFilter, setCreatorFilter] = useState<string>('all');
-  const [tagFilter, setTagFilter] = useState<string>('all');
   const [previewVideo, setPreviewVideo] = useState<Video | null>(null);
 
-  const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage, isError, error } =
-    useVideoList({
-      short: false,
-      is_short: false,
-      type: 'video',
-      published: true,
-      sort_by: 'published_at',
-      order: 'desc',
-      per_page: PAGE_SIZE,
-    });
+  // Independent filter option sources (stable, don't change with video filters)
+  const { data: creatorsData } = useCreatorsListPublic();
+  const { data: countriesData } = useCountries();
+  const { data: tagsData } = useTags();
 
-  const videosList = useMemo(() => {
+  console.log(countriesData);
+
+  // Build filter object, omitting undefined values for exactOptionalPropertyTypes compliance
+  const videoFilters = useMemo(() => {
+    const filters: VideoListFilters = {
+      sort_by: sort,
+      per_page: PAGE_SIZE,
+      short: false,
+    };
+    if (creatorFilter !== null) filters.channel_id = creatorFilter;
+    if (countryFilter !== null) filters.country_id = [countryFilter];
+    if (tagFilter !== null) filters.tag_ids = [tagFilter];
+    return filters;
+  }, [creatorFilter, countryFilter, tagFilter, sort]);
+
+  // Server-side filtered video list with infinite scroll via /api/videos endpoint
+  const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage, isError, error } =
+    useVideoList(videoFilters);
+
+  // const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage, isError, error } = useMapVideosInfinite(videoFilters)
+
+  // Server-filtered videos from API (deduplicated)
+  const serverFilteredVideos = useMemo(() => {
     const allVideos = data?.pages.flatMap((page) => page.data) || [];
 
     // Deduplicate by uuid (primary) or id (fallback) to prevent duplicate key errors
@@ -45,6 +66,31 @@ export default function VideosPage() {
 
     return Array.from(uniqueVideosMap.values());
   }, [data]);
+
+  // Country options from dedicated countries API (simple string array)
+  const countryOptions = useMemo(() => {
+    return (countriesData?.data || []).map((country) => ({ label: country.name, value: String(country.id) }));
+  }, [countriesData]);
+
+  // Tag options from dedicated tags API (with id, name, count)
+  const tagOptions = useMemo(() => {
+    return (tagsData || [])
+      .map((tag) => ({
+        label: `${tag.name}`,
+        value: tag.id.toString(),
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }, [tagsData]);
+
+  // Display videos (server handles sorting via sort param)
+  const displayVideos = serverFilteredVideos;
+
+  // Creator options from dedicated creators API (always complete list)
+  const creatorOptions = useMemo(() => {
+    return (creatorsData?.data || [])
+      .map((c) => ({ label: c.name, value: c.id }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }, [creatorsData]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -68,99 +114,56 @@ export default function VideosPage() {
     };
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  const creatorOptions = useMemo(() => {
-    const names = new Set<string>();
-    videosList.forEach((v) => {
-      if (v.channel?.name) names.add(v.channel.name);
-    });
-    return Array.from(names).sort((a, b) => a.localeCompare(b));
-  }, [videosList]);
-
-  const tagOptions = useMemo(() => {
-    const tags = new Set<string>();
-    videosList.forEach((v) => {
-      v.tags?.forEach((t) => {
-        if (t?.name) tags.add(t.name);
-        else if (t?.slug) tags.add(t.slug);
-      });
-    });
-    return Array.from(tags).sort((a, b) => a.localeCompare(b));
-  }, [videosList]);
-
-  const filteredVideos = useMemo(() => {
-    let list = [...videosList];
-
-    if (creatorFilter !== 'all') {
-      list = list.filter((v) => v.channel?.name === creatorFilter);
-    }
-
-    if (tagFilter !== 'all') {
-      list = list.filter((v) =>
-        v.tags?.some((t) => t?.name === tagFilter || t?.slug === tagFilter)
-      );
-    }
-
-    list.sort((a, b) => {
-      if (sort === 'newest') {
-        return new Date(b.published_at).getTime() - new Date(a.published_at).getTime();
-      }
-      if (sort === 'oldest') {
-        return new Date(a.published_at).getTime() - new Date(b.published_at).getTime();
-      }
-      const ad = a.duration || 0;
-      const bd = b.duration || 0;
-      if (sort === 'longest') return bd - ad;
-      if (sort === 'shortest') return ad - bd;
-      return 0;
-    });
-
-    return list;
-  }, [videosList, creatorFilter, tagFilter, sort]);
-
-  if (isLoading) {
-    return <LoadingScreen variant="feed" />;
-  }
-
   return (
     <div className="min-h-screen bg-background">
       <div className="w-full px-[4%] py-8">
         {/* Page Title */}
         <h1 className="text-2xl md:text-3xl font-bold text-white mb-6">Videos</h1>
 
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-5">
-          <div className="flex flex-wrap items-center gap-2">
-            <SelectFilter
-              label="Creator"
-              value={creatorFilter}
-              onChange={setCreatorFilter}
-              options={[
-                { label: 'All creators', value: 'all' },
-                ...creatorOptions.map((c) => ({ label: c, value: c })),
-              ]}
-            />
+        {/* Filters - always visible */}
+        <div className="flex flex-wrap items-center gap-2 mb-5">
+          <SelectFilter
+            label="Creator"
+            value={creatorFilter?.toString() || 'all'}
+            onChange={(val) => setCreatorFilter(val === 'all' ? null : Number(val))}
+            options={[
+              { label: 'All creators', value: 'all' },
+              ...creatorOptions.map((c) => ({ label: c.label, value: c.value.toString() })),
+            ]}
+          />
 
-            <SelectFilter
-              label="Tags"
-              value={tagFilter}
-              onChange={setTagFilter}
-              options={[
-                { label: 'All tags', value: 'all' },
-                ...tagOptions.map((t) => ({ label: t, value: t })),
-              ]}
-            />
+          <SelectFilter
+            label="Country"
+            value={countryFilter || 'all'}
+            onChange={(val) => setCountryFilter(val === 'all' ? null : val)}
+            options={[
+              { label: 'All countries', value: 'all' },
+              ...countryOptions
+            ]}
+          />
 
-            <SelectFilter
-              label="Sort"
-              value={sort}
-              onChange={(val) => setSort(val as SortOption)}
-              options={[
-                { label: 'Newest', value: 'newest' },
-                { label: 'Oldest', value: 'oldest' },
-                { label: 'Longest', value: 'longest' },
-                { label: 'Shortest', value: 'shortest' },
-              ]}
-            />
-          </div>
+          <SelectFilter
+            label="Tag"
+            value={tagFilter?.toString() || 'all'}
+            onChange={(val) => setTagFilter(val === 'all' ? null : Number(val))}
+            options={[
+              { label: 'All tags', value: 'all' },
+              ...tagOptions,
+            ]}
+          />
+
+          <SelectFilter
+            label="Sort"
+            value={sort}
+            onChange={(val) => setSort(val as SortOption)}
+            options={[
+              // { label: 'Trending', value: 'trending' },
+              { label: 'Newest', value: 'latest' },
+              { label: 'Oldest', value: 'oldest' },
+              // { label: 'Longest', value: 'longest' },
+              // { label: 'Shortest', value: 'shortest' },
+            ]}
+          />
         </div>
 
         {isError && (
@@ -169,10 +172,13 @@ export default function VideosPage() {
           </div>
         )}
 
-        {filteredVideos.length > 0 ? (
+        {/* Video grid - only this section shows skeleton during loading */}
+        {isLoading ? (
+          <VideoGridSkeleton count={PAGE_SIZE} />
+        ) : displayVideos.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-5">
-            {filteredVideos.map((video, idx) => {
-              const isLast = idx === filteredVideos.length - 1;
+            {displayVideos.map((video, idx) => {
+              const isLast = idx === displayVideos.length - 1;
               return (
                 <div
                   key={`video-${video.uuid || video.id || `idx-${idx}`}`}
@@ -196,7 +202,7 @@ export default function VideosPage() {
           </div>
         )}
 
-        {!hasNextPage && filteredVideos.length > 0 && (
+        {!hasNextPage && displayVideos.length > 0 && (
           <div className="flex justify-center mt-8 text-white/40 text-sm">You've seen it all</div>
         )}
 

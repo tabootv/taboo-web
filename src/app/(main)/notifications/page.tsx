@@ -7,9 +7,9 @@ import {
 } from '@/api/mutations';
 import { useNotifications } from '@/api/queries';
 import { Button, LoadingScreen } from '@/components/ui';
+import { getSeriesRoute } from '@/lib/utils';
 import type { Notification } from '@/types';
 import { formatDistanceToNow } from 'date-fns';
-import { getSeriesRoute } from '@/lib/utils';
 import { Bell, Check, Film, Heart, MessageSquare, Trash2, UserPlus, X } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -82,7 +82,7 @@ export default function NotificationsPage() {
 
   return (
     <div className="w-full px-[4%] py-8">
-      <div className="max-w-4xl">
+      <div className="max-w-full">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-text-primary">Notifications</h1>
@@ -93,138 +93,135 @@ export default function NotificationsPage() {
             </p>
           </div>
 
-        {notificationsList.length > 0 && (
-          <div className="flex items-center gap-2">
-            {unreadNotifications.length > 0 && (
-              <>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleMarkAllRead}
-                  className="text-text-secondary hover:text-text-primary"
-                >
-                  <Check className="w-4 h-4 mr-2" />
-                  Mark all read
-                </Button>
+          {notificationsList.length > 0 && (
+            <div className="flex items-center gap-2">
+              {unreadNotifications.length > 0 && (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleMarkAllRead}
+                    className="text-text-secondary hover:text-text-primary"
+                  >
+                    <Check className="w-4 h-4 mr-2" />
+                    Mark all read
+                  </Button>
 
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleDeleteAll}
-                  className="text-red-500 hover:text-red-400"
-                >
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Clear all
-                </Button>
-              </>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleDeleteAll}
+                    className="text-red-500 hover:text-red-400"
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Clear all
+                  </Button>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className="flex gap-2 mb-4">
+          <button
+            onClick={() => setFilterTab('all')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filterTab === 'all'
+                ? 'bg-red-primary text-white'
+                : 'bg-surface text-text-secondary hover:bg-hover'
+              }`}
+          >
+            Todas
+            {notificationsList.length > 0 && (
+              <span className="ml-2 text-xs">({notificationsList.flat().length})</span>
+            )}
+          </button>
+          <button
+            onClick={() => setFilterTab('unread')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filterTab === 'unread'
+                ? 'bg-red-primary text-white'
+                : 'bg-surface text-text-secondary hover:bg-hover'
+              }`}
+          >
+            Não Lidas
+            {unreadNotifications.length > 0 && (
+              <span
+                className={`ml-2 text-xs px-1.5 rounded ${filterTab === 'unread' ? 'bg-white/20' : 'bg-red-primary/20'}`}
+              >
+                {unreadNotifications.length}
+              </span>
+            )}
+          </button>
+          <button
+            onClick={() => setFilterTab('read')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filterTab === 'read'
+                ? 'bg-red-primary text-white'
+                : 'bg-surface text-text-secondary hover:bg-hover'
+              }`}
+          >
+            Lidas
+            {readNotifications.length > 0 && (
+              <span className="ml-2 text-xs">({readNotifications.length})</span>
+            )}
+          </button>
+        </div>
+
+        {getFilteredNotifications().length === 0 ? (
+          <div className="bg-surface rounded-xl border border-border p-12 text-center">
+            <Bell className="w-16 h-16 text-text-secondary mx-auto mb-4" />
+            <h2 className="text-lg font-semibold text-text-primary mb-2">
+              {filterTab === 'unread'
+                ? 'No unread notifications'
+                : filterTab === 'read'
+                  ? 'No read notifications'
+                  : 'No notifications yet'}
+            </h2>
+            <p className="text-text-secondary">
+              {filterTab === 'unread'
+                ? "You're all caught up!"
+                : filterTab === 'read'
+                  ? 'Read notifications will appear here'
+                  : "When you get notifications, they'll show up here."}
+            </p>
+          </div>
+        ) : (
+          <div className="bg-surface rounded-xl border border-border overflow-hidden">
+            {(filterTab === 'all' || filterTab === 'unread') && unreadNotifications.length > 0 && (
+              <div>
+                <div className="px-4 py-3 bg-red-primary/5 border-b border-border">
+                  <h3 className="text-sm font-semibold text-red-primary">New</h3>
+                </div>
+                <div className="divide-y divide-border">
+                  {unreadNotifications.map((notification) => (
+                    <NotificationCard
+                      key={`${notification.id}${notification.created_at}`}
+                      notification={notification}
+                      onMarkRead={handleMarkAsRead}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {(filterTab === 'all' || filterTab === 'read') && readNotifications.length > 0 && (
+              <div>
+                {unreadNotifications.length > 0 && filterTab === 'all' && (
+                  <div className="px-4 py-3 bg-hover border-b border-border">
+                    <h3 className="text-sm font-semibold text-text-secondary">Earlier</h3>
+                  </div>
+                )}
+                <div className="divide-y divide-border">
+                  {readNotifications.map((notification) => (
+                    <NotificationCard
+                      key={notification.id}
+                      notification={notification}
+                      onMarkRead={handleMarkAsRead}
+                    />
+                  ))}
+                </div>
+              </div>
             )}
           </div>
         )}
-      </div>
-
-      <div className="flex gap-2 mb-4">
-        <button
-          onClick={() => setFilterTab('all')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            filterTab === 'all'
-              ? 'bg-red-primary text-white'
-              : 'bg-surface text-text-secondary hover:bg-hover'
-          }`}
-        >
-          Todas
-          {notificationsList.length > 0 && (
-            <span className="ml-2 text-xs">({notificationsList.flat().length})</span>
-          )}
-        </button>
-        <button
-          onClick={() => setFilterTab('unread')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            filterTab === 'unread'
-              ? 'bg-red-primary text-white'
-              : 'bg-surface text-text-secondary hover:bg-hover'
-          }`}
-        >
-          Não Lidas
-          {unreadNotifications.length > 0 && (
-            <span
-              className={`ml-2 text-xs px-1.5 rounded ${filterTab === 'unread' ? 'bg-white/20' : 'bg-red-primary/20'}`}
-            >
-              {unreadNotifications.length}
-            </span>
-          )}
-        </button>
-        <button
-          onClick={() => setFilterTab('read')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            filterTab === 'read'
-              ? 'bg-red-primary text-white'
-              : 'bg-surface text-text-secondary hover:bg-hover'
-          }`}
-        >
-          Lidas
-          {readNotifications.length > 0 && (
-            <span className="ml-2 text-xs">({readNotifications.length})</span>
-          )}
-        </button>
-      </div>
-
-      {getFilteredNotifications().length === 0 ? (
-        <div className="bg-surface rounded-xl border border-border p-12 text-center">
-          <Bell className="w-16 h-16 text-text-secondary mx-auto mb-4" />
-          <h2 className="text-lg font-semibold text-text-primary mb-2">
-            {filterTab === 'unread'
-              ? 'No unread notifications'
-              : filterTab === 'read'
-                ? 'No read notifications'
-                : 'No notifications yet'}
-          </h2>
-          <p className="text-text-secondary">
-            {filterTab === 'unread'
-              ? "You're all caught up!"
-              : filterTab === 'read'
-                ? 'Read notifications will appear here'
-                : "When you get notifications, they'll show up here."}
-          </p>
-        </div>
-      ) : (
-        <div className="bg-surface rounded-xl border border-border overflow-hidden">
-          {(filterTab === 'all' || filterTab === 'unread') && unreadNotifications.length > 0 && (
-            <div>
-              <div className="px-4 py-3 bg-red-primary/5 border-b border-border">
-                <h3 className="text-sm font-semibold text-red-primary">New</h3>
-              </div>
-              <div className="divide-y divide-border">
-                {unreadNotifications.map((notification) => (
-                  <NotificationCard
-                    key={`${notification.id}${notification.created_at}`}
-                    notification={notification}
-                    onMarkRead={handleMarkAsRead}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {(filterTab === 'all' || filterTab === 'read') && readNotifications.length > 0 && (
-            <div>
-              {unreadNotifications.length > 0 && filterTab === 'all' && (
-                <div className="px-4 py-3 bg-hover border-b border-border">
-                  <h3 className="text-sm font-semibold text-text-secondary">Earlier</h3>
-                </div>
-              )}
-              <div className="divide-y divide-border">
-                {readNotifications.map((notification) => (
-                  <NotificationCard
-                    key={notification.id}
-                    notification={notification}
-                    onMarkRead={handleMarkAsRead}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
       </div>
     </div>
   );
@@ -246,7 +243,7 @@ function NotificationCard({
     dataString = notification.data;
     try {
       dataObj = JSON.parse(notification.data);
-    } catch {}
+    } catch { }
   } else if (typeof notification.data === 'object' && notification.data !== null) {
     dataObj = notification.data as Record<string, string | number | boolean | undefined>;
   }
@@ -275,13 +272,46 @@ function NotificationCard({
     }
   };
 
-  const getNotificationLink = () => {
+  const getNotificationLink = (): string => {
+    // Video notifications
     if (modelUuid) {
       if (notification.type === 'NewVideoUploaded') {
         return `/videos/${modelUuid}`;
       }
     }
 
+    // Type-based routing for better accuracy
+    const type = notification.type;
+
+    // Follow notifications - link to follower's profile
+    if (type === 'follow' || type === String.raw`App\Notifications\NewFollowerNotification`) {
+      const profileId = dataObj.follower_id || dataObj.user_id || dataObj.creator_id;
+      const handle = dataObj.follower_handle || dataObj.handle;
+      if (handle) return `/creator/${handle}`;
+      if (profileId) return `/creators/creator-profile/${profileId}`;
+    }
+
+    // Like/Comment notifications - link to the video
+    if (
+      type === 'like' ||
+      type === 'comment' ||
+      type === String.raw`App\Notifications\VideoLikedNotification` ||
+      type === String.raw`App\Notifications\NewCommentNotification`
+    ) {
+      if (dataObj.video_uuid) return `/videos/${dataObj.video_uuid}`;
+      if (modelUuid) return `/videos/${modelUuid}`;
+    }
+
+    // Video notifications
+    if (
+      type === 'video' ||
+      type === String.raw`App\Notifications\NewVideoNotification`
+    ) {
+      if (dataObj.video_uuid) return `/videos/${dataObj.video_uuid}`;
+      if (modelUuid) return `/videos/${modelUuid}`;
+    }
+
+    // Fallback to generic field checks (current behavior)
     if (dataObj.video_uuid) return `/videos/${dataObj.video_uuid}`;
     if (dataObj.series_id && typeof dataObj.series_id !== 'boolean') {
       return getSeriesRoute(dataObj.series_id, dataObj.series_title as string | undefined);
@@ -290,6 +320,7 @@ function NotificationCard({
       return getSeriesRoute(dataObj.series_uuid, dataObj.series_title as string | undefined);
     }
     if (dataObj.creator_id) return `/creators/creator-profile/${dataObj.creator_id}`;
+
     return '#';
   };
 
@@ -327,9 +358,8 @@ function NotificationCard({
 
       case 'like':
       case String.raw`App\Notifications\VideoLikedNotification`:
-        return `${dataObj.user_name || 'Someone'} liked your video${
-          dataObj.video_title ? `: ${dataObj.video_title}` : ''
-        }`;
+        return `${dataObj.user_name || 'Someone'} liked your video${dataObj.video_title ? `: ${dataObj.video_title}` : ''
+          }`;
 
       case 'follow':
       case String.raw`App\Notifications\NewFollowerNotification`:
@@ -345,9 +375,8 @@ function NotificationCard({
 
   return (
     <div
-      className={`flex items-start gap-4 p-4 transition-colors hover:bg-hover group ${
-        isUnread ? 'bg-red-primary/5' : ''
-      }`}
+      className={`flex items-start gap-4 p-4 transition-colors hover:bg-hover group ${isUnread ? 'bg-red-primary/5' : ''
+        }`}
     >
       <div className="shrink-0">
         {image ? (
@@ -364,9 +393,8 @@ function NotificationCard({
       <div className="flex-1 min-w-0">
         <Link href={getNotificationLink()} className="block">
           <p
-            className={`text-sm ${
-              isUnread ? 'text-text-primary font-medium' : 'text-text-secondary'
-            }`}
+            className={`text-sm ${isUnread ? 'text-text-primary font-medium' : 'text-text-secondary'
+              }`}
           >
             {title}
           </p>

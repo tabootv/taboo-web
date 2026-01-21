@@ -4,7 +4,8 @@ import { useToggleAutoplay, useToggleDislike, useToggleLike } from '@/api/mutati
 import { getSeriesPlayRoute } from '@/lib/utils';
 import type { Video } from '@/types';
 import { useRouter } from 'next/navigation';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
+import { useUpNextCountdown } from './use-up-next-countdown';
 
 export function useSeriesPlayerHandlers(
   seriesId: string,
@@ -17,12 +18,36 @@ export function useSeriesPlayerHandlers(
   const toggleLike = useToggleLike();
   const toggleDislike = useToggleDislike();
   const toggleAutoplay = useToggleAutoplay();
+  const [showUpNext, setShowUpNext] = useState(false);
+
+  const navigateToNextEpisode = useCallback(() => {
+    if (nextEpisode) {
+      setShowUpNext(false);
+      const route = getSeriesPlayRoute(seriesId, seriesTitle, nextEpisode.uuid);
+      router.push(`${route}?autoplay=true`);
+    }
+  }, [nextEpisode, seriesId, seriesTitle, router]);
+
+  const upNextCountdown = useUpNextCountdown({
+    initialSeconds: 5,
+    onComplete: navigateToNextEpisode,
+  });
 
   const handleVideoEnded = useCallback(() => {
     if (autoplayEnabled && nextEpisode) {
-      router.push(getSeriesPlayRoute(seriesId, seriesTitle, nextEpisode.uuid));
+      setShowUpNext(true);
+      upNextCountdown.start();
     }
-  }, [autoplayEnabled, nextEpisode, seriesId, seriesTitle, router]);
+  }, [autoplayEnabled, nextEpisode, upNextCountdown]);
+
+  const handleCancelUpNext = useCallback(() => {
+    upNextCountdown.cancel();
+    setShowUpNext(false);
+  }, [upNextCountdown]);
+
+  const handlePlayNow = useCallback(() => {
+    upNextCountdown.playNow();
+  }, [upNextCountdown]);
 
   const playNextVideo = useCallback(() => {
     if (nextEpisode) {
@@ -48,6 +73,10 @@ export function useSeriesPlayerHandlers(
     handleToggleAutoplay,
     handleLike,
     handleDislike,
+    showUpNext,
+    upNextCountdown: upNextCountdown.countdown,
+    handleCancelUpNext,
+    handlePlayNow,
   };
 }
 

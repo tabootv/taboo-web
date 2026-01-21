@@ -35,8 +35,7 @@ export interface CreatorListFilters extends Record<string, unknown> {
 export interface CreatorListResponse extends PaginatedResponse<Creator> {}
 
 export interface FollowResponse {
-  is_following: boolean;
-  followers_count: number;
+  creator: Creator;
 }
 
 export const creatorsClient = {

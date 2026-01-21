@@ -18,7 +18,6 @@ export function LessonCard({ video, lessonNumber, courseId, channel }: LessonCar
   const { prefetchRoute } = usePrefetch();
   const href = `/courses/${courseId}/play/${video.uuid}`;
 
-  // Try multiple thumbnail sources - API might return in different fields
   const thumbnail = video.thumbnail_webp || video.thumbnail || video.card_thumbnail;
 
   return (
@@ -55,12 +54,6 @@ export function LessonCard({ video, lessonNumber, courseId, channel }: LessonCar
                 <Play className="w-4 h-4 text-white fill-white ml-0.5" />
               </div>
             </div>
-
-            {video.duration && (
-              <div className="absolute bottom-2 right-2 px-2 py-0.5 bg-black/80 backdrop-blur-sm rounded text-xs font-medium text-white">
-                {formatDuration(video.duration)}
-              </div>
-            )}
 
             <div className="sm:hidden absolute top-2 left-2 px-2 py-1 bg-red-primary/90 backdrop-blur-sm rounded text-xs font-bold text-white">
               LESSON {lessonNumber}

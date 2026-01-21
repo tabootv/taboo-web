@@ -42,6 +42,11 @@ export function SeriesPlayerMainContent({
         currentVideo={currentVideo}
         autoplayEnabled={autoplayEnabled}
         onEnded={handlers.handleVideoEnded}
+        nextVideo={nextEpisode}
+        showUpNext={handlers.showUpNext}
+        countdown={handlers.upNextCountdown}
+        onCancelUpNext={handlers.handleCancelUpNext}
+        onPlayNow={handlers.handlePlayNow}
       />
 
       <h1 className="text-lg md:text-xl font-semibold text-white mt-4 leading-snug">

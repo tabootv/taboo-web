@@ -3,6 +3,7 @@
 import { useAddPostComment, useDeletePost, useLikePost } from '@/api/mutations';
 import { usePost, usePostComments } from '@/api/queries';
 import { Avatar, Button, LoadingScreen, Spinner } from '@/components/ui';
+import { ImageLightbox } from '@/components/ui/image-lightbox';
 import { useAuthStore } from '@/lib/stores';
 import { ArrowLeft, Flag, Heart, MessageCircle, MoreHorizontal, Send, Trash2 } from 'lucide-react';
 import Image from 'next/image';
@@ -26,8 +27,15 @@ export default function SinglePostPage({ params }: { params: Promise<{ post: str
   const deletePost = useDeletePost();
   const [showMenu, setShowMenu] = useState(false);
   const [newComment, setNewComment] = useState('');
-
   const comments = commentsData?.data || [];
+
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+
+  const handleImageClick = (index: number) => {
+    setLightboxIndex(index);
+    setLightboxOpen(true);
+  };
 
   useEffect(() => {
     if (!postId || Number.isNaN(postIdNum)) {
@@ -161,41 +169,59 @@ export default function SinglePostPage({ params }: { params: Promise<{ post: str
         />
 
         {post.media && post.media.length > 0 && post.media[0] && (
-          <div className="mb-6 rounded-lg overflow-hidden">
-            {post.media.length === 1 ? (
-              <div className="relative aspect-video">
-                <Image
-                  src={post.media[0]?.original_url || ''}
-                  alt=""
-                  fill
-                  className="object-cover"
-                />
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-1">
-                {post.media.slice(0, 4).map((media, index) => (
-                  <div key={media.id} className="relative aspect-square">
-                    <Image src={media.original_url || ''} alt="" fill className="object-cover" />
-                    {index === 3 && post.media && post.media.length > 4 && (
-                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                        <span className="text-white text-xl font-bold">
-                          +{post.media.length - 4}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <>
+            <div className="mb-6 rounded-lg overflow-hidden">
+              {post.media.length === 1 ? (
+                <button
+                  onClick={() => handleImageClick(0)}
+                  className="relative aspect-video w-full cursor-pointer hover:opacity-90 transition-opacity"
+                >
+                  <Image
+                    src={post.media[0]?.original_url || ''}
+                    alt=""
+                    fill
+                    className="object-cover"
+                  />
+                </button>
+              ) : (
+                <div className="grid grid-cols-2 gap-1">
+                  {post.media.slice(0, 4).map((media, index) => (
+                    <button
+                      key={media.id}
+                      onClick={() => handleImageClick(index)}
+                      className="relative aspect-square cursor-pointer hover:opacity-90 transition-opacity"
+                    >
+                      <Image src={media.original_url || ''} alt="" fill className="object-cover" />
+                      {index === 3 && post.media && post.media.length > 4 && (
+                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                          <span className="text-white text-xl font-bold">
+                            +{post.media.length - 4}
+                          </span>
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <ImageLightbox
+              images={post.media
+                .filter((m) => m.original_url) // Filtra apenas mídias com URL válida
+                .map((m) => ({ id: m.id, url: m.original_url! }))} // Non-null assertion após filter
+              initialIndex={lightboxIndex}
+              open={lightboxOpen}
+              onOpenChange={setLightboxOpen}
+            />
+          </>
         )}
+
 
         <div className="flex items-center gap-6 pt-4 border-t border-border">
           <button
             onClick={handleLike}
-            className={`flex items-center gap-2 transition-colors ${
-              post.has_liked ? 'text-red-primary' : 'text-text-secondary hover:text-red-primary'
-            }`}
+            className={`flex items-center gap-2 transition-colors ${post.has_liked ? 'text-red-primary' : 'text-text-secondary hover:text-red-primary'
+              }`}
           >
             <Heart className={`w-6 h-6 ${post.has_liked ? 'fill-current' : ''}`} />
             <span className="font-medium">{post.likes_count || 0}</span>

@@ -97,7 +97,7 @@ export function ShakaPlayer({
   const isPiPRef = useRef(false);
   const [showControls, setShowControls] = useState(true);
   const [isBuffering, setIsBuffering] = useState(false);
-  const [showThumbnail, setShowThumbnail] = useState(!!thumbnail);
+  const [showThumbnail, setShowThumbnail] = useState(!!thumbnail && !autoplay);
   const [isLoading, setIsLoading] = useState(true);
   const [isSeeking, setIsSeeking] = useState(false);
   const [seekPreview, setSeekPreview] = useState<{ time: number; position: number } | null>(null);

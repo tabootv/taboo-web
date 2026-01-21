@@ -1,8 +1,9 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { cn } from '@/lib/utils';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { ReactNode } from 'react';
 
 export interface PageHeaderProps {
   /** Main title of the page */
@@ -19,7 +20,7 @@ export interface PageHeaderProps {
   actions?: ReactNode;
   /** Additional className for customization */
   className?: string;
-  /** Title size variant */
+  classNameActions?: string;
   variant?: 'default' | 'large' | 'hero';
 }
 
@@ -50,6 +51,7 @@ export function PageHeader({
   icon,
   actions,
   className = '',
+  classNameActions = '',
   variant = 'default',
 }: PageHeaderProps) {
   const titleClasses = {
@@ -85,7 +87,7 @@ export function PageHeader({
         <BackButton />
 
         {icon && (
-          <div className="p-3 rounded-xl bg-white/5 flex-shrink-0">{icon}</div>
+          <div className="p-3 rounded-xl bg-white/5 shrink-0">{icon}</div>
         )}
 
         <div className="flex-1 min-w-0">
@@ -96,7 +98,7 @@ export function PageHeader({
             </div>
 
             {actions && (
-              <div className="flex-shrink-0">{actions}</div>
+              <div className={cn('shrink-0', classNameActions)}>{actions}</div>
             )}
           </div>
         </div>
