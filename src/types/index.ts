@@ -3,6 +3,12 @@
 // Based on actual Laravel backend API responses
 // ============================================
 
+// UI Component Types
+export type ButtonVariant = 'primary' | 'secondary' | 'outline';
+export type ButtonSize = 'sm' | 'md' | 'lg';
+export type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
+export type TextVariant = 'body' | 'small' | 'large' | 'lead';
+
 // Generic API Response wrapper
 export interface ApiResponse<T> {
   message?: string;
@@ -100,6 +106,7 @@ export interface Channel {
   id: number;
   uuid: string;
   name: string;
+  handler?: string;
   user_id: number;
   description?: string;
   paypal_link?: string | null;
@@ -121,10 +128,19 @@ export interface Creator extends Channel {
   followers_count?: number;
   videos_count?: number;
   shorts_count?: number;
-  short_videos_count?: number; // Vue uses this name
+  short_videos_count?: number;
   series_count?: number;
   posts_count?: number;
   course_count?: number;
+  x?: string | null;
+  tiktok?: string | null;
+  instagram?: string | null;
+  facebook?: string | null;
+  youtube?: string | null;
+  country?: string;
+  countries_recorded?: number;
+  total_videos?: number;
+  total_shorts?: number;
 }
 
 export interface CreatorsResponse {
@@ -173,6 +189,14 @@ export interface Video {
   series_id?: number;
   tags?: Tag[];
   comments?: Comment[];
+  country?: string | {
+    id?: number;
+    name?: string;
+    emoji?: string;
+    iso?: string;
+    name_with_flag?: string;
+    emoji_code?: string;
+  } | null;
 }
 
 export interface ShortVideo extends Video {
@@ -618,6 +642,7 @@ export interface SearchCreator {
   type: 'creator';
   id: string;
   uuid: string;
+  handler?: string;
   name: string;
   avatar: string;
   subscriberCount: number;
