@@ -64,12 +64,14 @@ const nextConfig: NextConfig = {
   // Redirects
   async redirects() {
     return [
-      // Add any redirects here
-      // {
-      //   source: '/old-path',
-      //   destination: '/new-path',
-      //   permanent: true,
-      // },
+      // Redirect old creator profile routes to new handler-based routes
+      // Note: This catches the old pattern but can't convert ID to handler automatically
+      // For a complete solution, the API would need to support lookup by ID and redirect to handler
+      {
+        source: '/creators/creator-profile/:channel',
+        destination: '/creators/:channel',
+        permanent: true,
+      },
     ];
   },
 
