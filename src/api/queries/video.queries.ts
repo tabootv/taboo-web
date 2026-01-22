@@ -8,6 +8,7 @@ import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import type { VideoListFilters } from '../client';
 import { videoClient } from '../client';
 import { queryKeys } from '../query-keys';
+import type { Video } from '../types';
 
 /**
  * Hook to fetch a single video by ID or UUID
@@ -125,5 +126,43 @@ export function useLikedVideos(page = 1, perPage = 12) {
     queryKey: [...queryKeys.videos.liked(), page, perPage],
     queryFn: () => videoClient.getLiked(page, perPage),
     staleTime: 1000 * 60 * 10, // 10 minutes
+  });
+}
+
+/**
+ * Hook to fetch videos with filters (simplified for creator pages)
+ * Returns videos array directly instead of paginated response
+ */
+export function useVideos(
+  filters?: { creators?: string; short?: boolean; sort_by?: string; per_page?: number },
+  options?: { enabled?: boolean; staleTime?: number; refetchOnWindowFocus?: boolean }
+) {
+  return useQuery<{ videos: Video[] }>({
+    queryKey: queryKeys.videos.list({
+      ...filters,
+      channel_id: filters?.creators ? Number(filters.creators) : undefined,
+    }),
+    queryFn: async () => {
+      const listFilters: Parameters<typeof videoClient.list>[0] = {
+        short: filters?.short ?? false,
+        per_page: filters?.per_page ?? 60,
+      };
+
+      if (filters?.creators) {
+        listFilters.channel_id = Number(filters.creators);
+      }
+
+      if (filters?.sort_by) {
+        listFilters.sort_by = filters.sort_by === 'latest'
+          ? 'newest'
+          : (filters.sort_by as 'trending' | 'newest' | 'oldest' | 'longest' | 'shortest');
+      }
+
+      const response = await videoClient.list(listFilters);
+      return { videos: response.data || [] };
+    },
+    enabled: options?.enabled !== undefined ? options.enabled : true,
+    staleTime: options?.staleTime ?? 1000 * 60 * 5, // 5 minutes default
+    refetchOnWindowFocus: options?.refetchOnWindowFocus ?? false,
   });
 }
