@@ -14,7 +14,7 @@ import {
   X,
   Loader2,
 } from 'lucide-react';
-import { cn, getSeriesRoute } from '@/lib/utils';
+import { cn, getCreatorRoute, getSeriesRoute } from '@/lib/utils';
 import { useDebounce } from '@/hooks';
 import { searchClient as searchApi } from '@/api/client';
 import type { Video, Series, Creator } from '@/types';
@@ -226,7 +226,7 @@ export const GlobalSearchNetflix = forwardRef<GlobalSearchHandle, GlobalSearchNe
           href = getSeriesRoute(item.data.id, item.data.title);
           break;
         case 'creator':
-          href = `/creators/creator-profile/${item.data.id}`;
+          href = getCreatorRoute((item.data as Creator).handler);
           break;
       }
 

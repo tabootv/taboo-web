@@ -28,7 +28,7 @@ export const mainNavigation: NavigationItem[] = [
   { name: 'Series', href: '/series', icon: Layers },
   { name: 'Edu', href: '/courses', icon: GraduationCap },
   { name: 'Feed', href: '/community', icon: Rss },
-  { name: 'Creators', href: '/creator', icon: Users },
+  { name: 'Creators', href: '/creators', icon: Users },
   { name: 'Globe', href: '/globe', icon: Globe2 },
 ];
 

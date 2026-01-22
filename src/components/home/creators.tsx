@@ -2,6 +2,7 @@
 
 import { homeClient } from '@/api/client';
 import { SectionCard } from '@/components/home';
+import { getCreatorRoute } from '@/lib/utils';
 import type { Creator } from '@/types';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
@@ -136,12 +137,13 @@ export function CreatorsSection({ initialCreators }: CreatorsSectionProps) {
             const channel = creator.user?.channel;
             const displayName = channel?.name || creator.name || 'Creator';
             const displayImage = channel?.dp || creator.dp;
+            const creatorHandler = channel?.handler || creator.handler;
             const creatorId = channel?.id || creator.id;
 
             return (
               <Link
                 key={creatorId}
-                href={`/creators/creator-profile/${creatorId}`}
+                href={getCreatorRoute(creatorHandler)}
                 className="shrink-0 text-center group"
                 style={{ width: 110 }}
               >

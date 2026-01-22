@@ -18,7 +18,7 @@ export function SeriesChannelAndActions({
   nextEpisode,
   handlers,
 }: SeriesChannelAndActionsProps) {
-  const channelId = currentVideo.channel?.uuid || currentVideo.channel?.id;
+  const channelHandler = currentVideo.channel?.handler;
   const channelName = currentVideo.channel?.name;
   const channelDp = currentVideo.channel?.dp;
   const publishedAt = currentVideo.humans_publish_at || currentVideo.published_at;
@@ -26,7 +26,7 @@ export function SeriesChannelAndActions({
   return (
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-4 pb-4 border-b border-white/10">
       <SeriesChannelInfo
-        {...(channelId && { channelId })}
+        {...(channelHandler && { channelHandler })}
         {...(channelName && { channelName })}
         {...(channelDp && { channelDp })}
         {...(publishedAt && { publishedAt })}

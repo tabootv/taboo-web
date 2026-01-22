@@ -3,7 +3,7 @@
  */
 
 import { Spinner } from '@/components/ui/spinner';
-import { cn, getSeriesRoute } from '@/lib/utils';
+import { cn, getCreatorRoute, getSeriesRoute } from '@/lib/utils';
 import type { Creator, Series, Video } from '@/types';
 import { ArrowUpRight, BookOpen, Clock, Film, Play, TrendingUp, Users, X } from 'lucide-react';
 import Image from 'next/image';
@@ -224,7 +224,7 @@ export function SearchDropdown({
                 return (
                   <button
                     key={creator.uuid || creator.id}
-                    onClick={() => onItemClick(`/creators/creator-profile/${creator.id}`)}
+                    onClick={() => onItemClick(getCreatorRoute(creator.handler))}
                     className={cn(
                       'w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors',
                       selectedIndex === itemIndex ? 'bg-hover' : 'hover:bg-hover'

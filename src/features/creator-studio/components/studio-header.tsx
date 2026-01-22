@@ -10,6 +10,7 @@ import {
 import { Logo } from '@/components/ui/logo';
 import { useSidebar } from '@/components/ui/sidebar';
 import { useAuthStore } from '@/lib/stores';
+import { getCreatorRoute } from '@/lib/utils';
 import {
   Bell,
   ChevronDown,
@@ -89,7 +90,7 @@ export function StudioHeader() {
 
           {user?.channel && (
             <Link
-              href={`/creators/creator-profile/${user.channel.id}`}
+              href={getCreatorRoute(user.channel.handler)}
               target="_blank"
               className="hidden md:flex items-center gap-2 px-3 py-2 text-sm text-text-secondary hover:text-text-primary transition-colors"
             >
@@ -161,7 +162,7 @@ export function StudioHeader() {
                 {user?.channel && (
                   <DropdownMenuItem asChild>
                     <Link
-                      href={`/creators/creator-profile/${user.channel.id}`}
+                      href={getCreatorRoute(user.channel.handler)}
                       target="_blank"
                       className="flex items-center gap-3"
                     >

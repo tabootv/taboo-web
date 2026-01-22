@@ -13,6 +13,10 @@ export { MediaCard, type MediaCardProps } from './media-card';
 export { ContentGrid, type ContentGridProps, type GridVariant } from './content-grid';
 export { OptimizedImage, ThumbnailImage } from './optimized-image';
 export { VerifiedBadge } from './VerifiedBadge';
+export { Button as ButtonFlexible } from './Button/Button';
+export { Heading } from './Heading/Heading';
+export { Text } from './Text/Text';
+export { ContentGlobe } from './ContentGlobe/ContentGlobe';
 
 // Re-export types for convenience
 export type * from './types';

@@ -2,6 +2,7 @@
 
 import { postsClient as postsApi } from '@/api/client';
 import { ImageLightbox } from '@/components/ui/image-lightbox';
+import { getCreatorRoute } from '@/lib/utils';
 import type { Post } from '@/types';
 import { MoreHorizontal, Trash2 } from 'lucide-react';
 import Image from 'next/image';
@@ -55,9 +56,8 @@ export function CommunityPost({ post, currentUserId, onDelete }: CommunityPostPr
 
   return (
     <>
-      <div className="comment-div">
-        {/* User Avatar */}
-        <Link href={`/creators/creator-profile/${post.user.id}`}>
+      <div className="community-post-card">
+        <Link href={getCreatorRoute(post.user.channel?.handler)}>
           <div className="relative size-[48px] rounded-full overflow-hidden bg-surface flex-shrink-0">
             {post.user.small_dp || post.user.dp ? (
               <Image
@@ -75,11 +75,10 @@ export function CommunityPost({ post, currentUserId, onDelete }: CommunityPostPr
         </Link>
 
         <div className="w-full">
-          {/* Header */}
           <div className="flex items-center justify-between w-full gap-1">
             <div className="flex items-center gap-1 mb-1">
               <Link
-                href={`/creators/creator-profile/${post.user.id}`}
+                href={getCreatorRoute(post.user.channel?.handler)}
                 className="text-[15px] text-white hover:underline"
               >
                 {post.user.display_name}
@@ -88,7 +87,6 @@ export function CommunityPost({ post, currentUserId, onDelete }: CommunityPostPr
               <p className="text-[15px] font-normal text-[#9F9F9F]">{post.created_at}</p>
             </div>
 
-            {/* Menu Button (only for owner) */}
             {isOwner && (
               <div className="relative">
                 <button
@@ -119,13 +117,11 @@ export function CommunityPost({ post, currentUserId, onDelete }: CommunityPostPr
             )}
           </div>
 
-          {/* Caption */}
           <p
             className="text-[15px] font-normal text-white mt-1 break-words"
             dangerouslySetInnerHTML={{ __html: post.caption }}
           />
 
-          {/* Image Carousel */}
           {post.post_image && post.post_image.length > 0 && (
             <div className="mt-4">
               {post.post_image.length === 1 ? (
@@ -161,7 +157,6 @@ export function CommunityPost({ post, currentUserId, onDelete }: CommunityPostPr
             </div>
           )}
 
-          {/* ImageLightbox */}
           {post.post_image && post.post_image.length > 0 && (
             <ImageLightbox
               images={post.post_image
@@ -173,7 +168,6 @@ export function CommunityPost({ post, currentUserId, onDelete }: CommunityPostPr
             />
           )}
 
-          {/* Audio Players */}
           {post.post_audio && post.post_audio.length > 0 && (
             <div className="flex flex-col gap-4 mt-4">
               {post.post_audio.map((audio, index) => (
@@ -189,7 +183,6 @@ export function CommunityPost({ post, currentUserId, onDelete }: CommunityPostPr
         </div>
       </div>
 
-      {/* Delete Confirmation Dialog */}
       {showDeleteDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div

@@ -2,6 +2,7 @@
 
 import { useToggleFollowCreator } from '@/api/mutations';
 import { usePrefetch } from '@/hooks/use-prefetch';
+import { getCreatorRoute } from '@/lib/utils';
 import type { Creator } from '@/types';
 import { Check, Loader2, Video } from 'lucide-react';
 import Image from 'next/image';
@@ -14,7 +15,7 @@ interface CreatorCardProps {
 export function CreatorCard({ creator }: CreatorCardProps) {
   const { prefetchRoute } = usePrefetch();
   const toggleFollowMutation = useToggleFollowCreator();
-  const href = `/creators/creator-profile/${creator.id}`;
+  const href = getCreatorRoute(creator.handler);
 
   // Derive state directly from prop - no local state
   const isFollowing = creator.following ?? false;

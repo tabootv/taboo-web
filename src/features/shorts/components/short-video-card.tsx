@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { useShortsStore } from '@/lib/stores/shorts-store';
 import { videoClient } from '@/api/client';
-import { formatCompactNumber } from '@/lib/utils';
+import { formatCompactNumber, getCreatorRoute } from '@/lib/utils';
 import { toast } from 'sonner';
 import type { Video } from '@/types';
 import { usePrefersReducedMotion } from '@/hooks';
@@ -318,7 +318,7 @@ function ShortVideoCardComponent({ video, index: _index, isActive, isNearActive 
         <div className="absolute bottom-6 left-4 right-20 z-10 shorts-info-animated">
           {/* Channel info with avatar */}
           <Link
-            href={`/creators/creator-profile/${video.channel?.id}`}
+            href={getCreatorRoute(video.channel?.handler)}
             className="inline-flex items-center gap-2 group"
           >
             <div className="w-8 h-8 rounded-full overflow-hidden border border-white/50 flex-shrink-0">

@@ -4,7 +4,7 @@
 
 import Image from 'next/image';
 import { Film, Play, BookOpen, Users, ArrowUpRight, TrendingUp } from 'lucide-react';
-import { getSeriesRoute } from '@/lib/utils';
+import { getCreatorRoute, getSeriesRoute } from '@/lib/utils';
 import type { Video, Series, Creator } from '@/types';
 
 interface SearchResult {
@@ -137,7 +137,7 @@ export function MobileSearchResults({ results, query, onItemClick }: MobileSearc
           {results.creators.slice(0, 3).map((creator) => (
             <button
               key={creator.uuid || creator.id}
-              onClick={() => onItemClick(`/creators/creator-profile/${creator.id}`)}
+              onClick={() => onItemClick(getCreatorRoute(creator.handler))}
               className="w-full flex items-center gap-3 px-2 py-2.5 rounded-lg hover:bg-hover transition-colors"
             >
               <div className="relative w-12 h-12 rounded-full overflow-hidden bg-surface flex-shrink-0">

@@ -1,8 +1,8 @@
 'use client';
 
+import { Rss, Star } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Rss, Star } from 'lucide-react';
 
 export function CommunitySidebar() {
   const pathname = usePathname();
@@ -30,8 +30,8 @@ export function CommunitySidebar() {
 
         {/* Creators */}
         <Link
-          href="/creator"
-          className={`left-tabs mb-2 ${isActive('/creator') || isActive('/creators/creator-profile') ? 'active' : ''}`}
+          href="/creators"
+          className={`left-tabs mb-2 ${isActive('/creator') || isActive('/creators/') ? 'active' : ''}`}
         >
           <span>
             <Star className="w-[25px] h-[24px]" strokeWidth={2} />

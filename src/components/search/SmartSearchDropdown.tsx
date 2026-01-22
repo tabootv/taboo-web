@@ -5,7 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useHiddenComponentByPage } from '@/hooks';
 import { useDebounce } from '@/hooks/use-debounce';
 import { useMixedSearch } from '@/hooks/useMixedSearch';
-import { cn, formatCompactNumber } from '@/lib/utils';
+import { cn, formatCompactNumber, getCreatorRoute } from '@/lib/utils';
 import { detectCountry } from '@/lib/utils/search-utils';
 import type { Creator, Video } from '@/types';
 import { Film, Search } from 'lucide-react';
@@ -206,7 +206,7 @@ export function SmartSearchDropdown({ className }: SmartSearchDropdownProps) {
             const creatorIndex = selectedIndex - filteredVideos.length;
             const creator = filteredCreators[creatorIndex];
             if (creator) {
-              router.push(`/creators/creator-profile/${creator.id}`);
+              router.push(getCreatorRoute(creator.handler));
               closeDropdown();
             }
           }
@@ -358,7 +358,7 @@ export function SmartSearchDropdown({ className }: SmartSearchDropdownProps) {
                         className="block cursor-pointer"
                         onPointerDown={(e) => e.preventDefault()}
                         onClick={() => {
-                          router.push(`/creators/creator-profile/${creator.id}`);
+                          router.push(getCreatorRoute(creator.handler));
                           closeDropdown();
                         }}
                       >

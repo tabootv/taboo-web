@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Play, Plus, MoreHorizontal, Check } from 'lucide-react';
 import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
-import { cn, formatDuration, formatCompactNumber, getSeriesRoute } from '@/lib/utils';
+import { cn, formatDuration, formatCompactNumber, getCreatorRoute, getSeriesRoute } from '@/lib/utils';
 
 interface PosterCardProps {
   id: string;
@@ -180,7 +180,7 @@ export function PosterCard({
 
 // Creator avatar card for "Creators" rail
 interface CreatorAvatarCardProps {
-  id: string;
+  handler?: string | undefined;
   name: string;
   avatar: string;
   subscriberCount?: number | undefined;
@@ -191,7 +191,7 @@ interface CreatorAvatarCardProps {
 }
 
 export function CreatorAvatarCard({
-  id,
+  handler,
   name,
   avatar,
   subscriberCount,
@@ -202,7 +202,7 @@ export function CreatorAvatarCard({
 }: CreatorAvatarCardProps) {
   return (
     <Link
-      href={`/creators/creator-profile/${id}`}
+      href={getCreatorRoute(handler)}
       {...(onClick ? { onClick } : {})}
       className={cn('flex flex-col items-center group flex-shrink-0', className)}
     >

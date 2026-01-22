@@ -4,7 +4,7 @@ import { shortsClient as shortsApi } from '@/api/client';
 import { Avatar } from '@/components/ui';
 import { usePrefersReducedMotion } from '@/hooks';
 import { useFeature } from '@/hooks/use-feature';
-import { formatCompactNumber } from '@/lib/utils';
+import { formatCompactNumber, getCreatorRoute } from '@/lib/utils';
 import type { Video } from '@/types';
 import {
   Bookmark,
@@ -242,7 +242,7 @@ export function ShortPlayer({
         </button>
 
         {short.channel && (
-          <Link href={`/creators/creator-profile/${short.channel.uuid}`} className="relative">
+          <Link href={getCreatorRoute(short.channel.handler)} className="relative">
             <Avatar
               src={short.channel.dp}
               alt={short.channel.name}
@@ -260,7 +260,7 @@ export function ShortPlayer({
       <div className="absolute bottom-4 left-4 right-20">
         {short.channel && (
           <Link
-            href={`/creators/creator-profile/${short.channel.uuid}`}
+            href={getCreatorRoute(short.channel.handler)}
             className="font-semibold text-white mb-2 block"
           >
             @{short.channel.name}

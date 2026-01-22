@@ -1,7 +1,7 @@
 import { seriesClient } from '@/api/client';
 import { useFeature } from '@/hooks/use-feature';
 import { useSavedVideosStore, type SavedVideo } from '@/lib/stores/saved-videos-store';
-import { cn, formatCompactNumber, getSeriesRoute, getSeriesPlayRoute } from '@/lib/utils';
+import { cn, formatCompactNumber, getCreatorRoute, getSeriesRoute, getSeriesPlayRoute } from '@/lib/utils';
 import type { Series } from '@/types';
 import { Check, ChevronRight, Clock, Film, Play, Plus } from 'lucide-react';
 import Image from 'next/image';
@@ -185,7 +185,7 @@ export function SeriesSidePanel({ series }: SeriesSidePanelProps) {
 
           {series.channel && (
             <Link
-              href={`/creators/creator-profile/${series.channel.uuid || series.channel.id}`}
+              href={getCreatorRoute(series.channel.handler)}
               className="inline-flex items-center gap-3 mb-4 group"
             >
               {series.channel.dp ? (

@@ -107,7 +107,7 @@ export function Rail({ label, items, type: _type = 'titles', onItemClick, classN
               return (
                 <CreatorAvatarCard
                   key={`${creatorItem.id}-${index}`}
-                  id={creatorItem.id}
+                  handler={creatorItem.handler}
                   name={creatorItem.name}
                   avatar={creatorItem.avatar}
                   subscriberCount={creatorItem.subscriberCount}

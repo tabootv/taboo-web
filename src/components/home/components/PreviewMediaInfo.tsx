@@ -5,7 +5,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Plus, Check, Clock, Eye, Heart, ChevronDown } from 'lucide-react';
-import { formatDuration, formatCompactNumber, formatRelativeTime } from '@/lib/utils';
+import { formatDuration, formatCompactNumber, formatRelativeTime, getCreatorRoute } from '@/lib/utils';
 import type { Video } from '@/types';
 
 interface PreviewMediaInfoProps {
@@ -77,7 +77,7 @@ export function PreviewMediaInfo({
       {/* Channel Info */}
       {video.channel && (
         <Link
-          href={`/creators/creator-profile/${video.channel.uuid || video.channel.id}`}
+          href={getCreatorRoute(video.channel.handler)}
           className="inline-flex items-center gap-3 mb-4 group"
         >
           {video.channel.dp ? (

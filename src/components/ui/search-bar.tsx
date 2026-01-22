@@ -2,7 +2,7 @@
 
 import { searchClient as searchApi } from '@/api/client';
 import { useDebounce } from '@/hooks';
-import { cn, getSeriesRoute } from '@/lib/utils';
+import { cn, getCreatorRoute, getSeriesRoute } from '@/lib/utils';
 import type { Creator, Series, Video } from '@/types';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -142,7 +142,7 @@ export function SearchBar({ className }: { className?: string }) {
         items.push({ type: 'series', data: s, href: getSeriesRoute(s.id, s.title) });
       });
       results.creators.slice(0, 2).forEach((c) => {
-        items.push({ type: 'creator', data: c, href: `/creators/creator-profile/${c.id}` });
+        items.push({ type: 'creator', data: c, href: getCreatorRoute(c.handler) });
       });
     }
 
