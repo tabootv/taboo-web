@@ -13,6 +13,7 @@ export {
   slugify,
   getSeriesRoute,
   getSeriesPlayRoute,
+  getCreatorRoute,
   extractIdFromSlug,
   isValidId,
 } from './routes';

@@ -67,3 +67,15 @@ export function isValidId(id: string): boolean {
   const num = parseInt(id, 10);
   return !isNaN(num) && num > 0;
 }
+
+/**
+ * Generate creator profile route using handler
+ * @param handler - Creator's handler/username (e.g., "arab", "johndoe")
+ * @returns Route string for creator profile
+ */
+export function getCreatorRoute(handler: string | undefined | null): string {
+  if (!handler) {
+    return '/creators';
+  }
+  return `/creators/${handler}`;
+}
