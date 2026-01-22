@@ -5,6 +5,7 @@ import { usePost, usePostComments } from '@/api/queries';
 import { Avatar, Button, LoadingScreen, Spinner } from '@/components/ui';
 import { ImageLightbox } from '@/components/ui/image-lightbox';
 import { useAuthStore } from '@/lib/stores';
+import { getCreatorRoute } from '@/lib/utils';
 import { ArrowLeft, Flag, Heart, MessageCircle, MoreHorizontal, Send, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -111,7 +112,7 @@ export default function SinglePostPage({ params }: { params: Promise<{ post: str
       <div className="bg-surface rounded-xl border border-border p-6">
         <div className="flex items-start justify-between mb-4">
           <Link
-            href={`/creators/creator-profile/${channel?.id || post.user?.id}`}
+            href={getCreatorRoute(channel?.handler)}
             className="flex items-center gap-3 group"
           >
             <Avatar

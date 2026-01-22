@@ -2,7 +2,7 @@
 
 import { Spinner } from '@/components/ui';
 import { useMixedSearch } from '@/hooks/useMixedSearch';
-import { formatDuration } from '@/lib/utils';
+import { formatDuration, getCreatorRoute } from '@/lib/utils';
 import type { Creator, Video } from '@/types';
 import { Search as SearchIcon, X } from 'lucide-react';
 import Image from 'next/image';
@@ -183,7 +183,7 @@ function VideoCard({ video }: { video: Video }) {
 function CreatorCard({ creator }: { creator: Creator }) {
   return (
     <Link
-      href={`/creators/creator-profile/${creator.id}`}
+      href={getCreatorRoute(creator.handler)}
       className="flex flex-col items-center p-4 bg-surface border border-border rounded-xl hover:border-red-primary/50 transition-all"
     >
       <div className="relative w-20 h-20 rounded-full overflow-hidden bg-surface mb-3">

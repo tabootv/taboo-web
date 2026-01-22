@@ -8,7 +8,7 @@ import { Search as SearchIcon } from 'lucide-react';
 import { useSearch } from '@/api/queries';
 import type { Video, Series, Creator } from '@/types';
 import { Spinner } from '@/components/ui';
-import { formatCompactNumber, formatDuration, getSeriesRoute } from '@/lib/utils';
+import { formatCompactNumber, formatDuration, getCreatorRoute, getSeriesRoute } from '@/lib/utils';
 
 function SearchPageContent() {
   const searchParams = useSearchParams();
@@ -232,7 +232,7 @@ function SeriesCard({ series }: { series: Series }) {
 function CreatorCard({ creator }: { creator: Creator }) {
   return (
     <Link
-      href={`/creators/creator-profile/${creator.id}`}
+      href={getCreatorRoute(creator.handler)}
       className="flex flex-col items-center p-4 bg-surface border border-border rounded-xl hover:border-red-primary/50 transition-all"
     >
       <div className="relative w-20 h-20 rounded-full overflow-hidden bg-surface mb-3">

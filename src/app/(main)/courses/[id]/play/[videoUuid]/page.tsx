@@ -5,7 +5,7 @@ import { useCourseDetail, useCoursePlay, useMe } from '@/api/queries';
 import { CoursePlayerPageSkeleton, LessonCardPlayer } from '@/components/courses';
 import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
 import { VideoPlayerSkeleton } from '@/components/video';
-import { cn, formatDuration, formatRelativeTime } from '@/lib/utils';
+import { cn, formatDuration, formatRelativeTime, getCreatorRoute } from '@/lib/utils';
 import { ChevronRight, Clock, Play, SkipForward } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
@@ -165,9 +165,7 @@ export default function CoursePlayerPage({
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-4 pb-4 border-b border-white/10">
               <div className="flex items-center gap-3">
                 <Link
-                  href={`/creators/creator-profile/${
-                    currentVideo.channel?.uuid || currentVideo.channel?.id
-                  }`}
+                  href={getCreatorRoute(currentVideo.channel?.handler)}
                   className="shrink-0"
                 >
                   <div className="relative w-10 h-10 rounded-full overflow-hidden">
@@ -187,9 +185,7 @@ export default function CoursePlayerPage({
                 </Link>
                 <div className="min-w-0">
                   <Link
-                    href={`/creators/creator-profile/${
-                      currentVideo.channel?.uuid || currentVideo.channel?.id
-                    }`}
+                    href={getCreatorRoute(currentVideo.channel?.handler)}
                     className="flex items-center gap-1.5 group"
                   >
                     <span className="font-medium text-white group-hover:text-red-primary transition-colors truncate">

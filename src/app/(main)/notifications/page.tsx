@@ -7,7 +7,7 @@ import {
 } from '@/api/mutations';
 import { useNotifications } from '@/api/queries';
 import { Button, LoadingScreen } from '@/components/ui';
-import { getSeriesRoute } from '@/lib/utils';
+import { getCreatorRoute, getSeriesRoute } from '@/lib/utils';
 import type { Notification } from '@/types';
 import { formatDistanceToNow } from 'date-fns';
 import { Bell, Check, Film, Heart, MessageSquare, Trash2, UserPlus, X } from 'lucide-react';
@@ -285,10 +285,8 @@ function NotificationCard({
 
     // Follow notifications - link to follower's profile
     if (type === 'follow' || type === String.raw`App\Notifications\NewFollowerNotification`) {
-      const profileId = dataObj.follower_id || dataObj.user_id || dataObj.creator_id;
-      const handle = dataObj.follower_handle || dataObj.handle;
-      if (handle) return `/creator/${handle}`;
-      if (profileId) return `/creators/creator-profile/${profileId}`;
+      const handle = dataObj.follower_handle || dataObj.handle || dataObj.handler;
+      if (handle) return getCreatorRoute(handle as string);
     }
 
     // Like/Comment notifications - link to the video
@@ -319,7 +317,9 @@ function NotificationCard({
     if (dataObj.series_uuid && typeof dataObj.series_uuid !== 'boolean') {
       return getSeriesRoute(dataObj.series_uuid, dataObj.series_title as string | undefined);
     }
-    if (dataObj.creator_id) return `/creators/creator-profile/${dataObj.creator_id}`;
+    if (dataObj.creator_handler || dataObj.handler) {
+      return getCreatorRoute((dataObj.creator_handler || dataObj.handler) as string);
+    }
 
     return '#';
   };

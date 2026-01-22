@@ -6,7 +6,7 @@ import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
 import { VideoPlayerSkeleton } from '@/components/video';
 import { LikeButton, SaveButton, VideoComments } from '@/features/video';
 import { useAuthStore } from '@/lib/stores/auth-store';
-import { formatRelativeTime } from '@/lib/utils';
+import { formatRelativeTime, getCreatorRoute } from '@/lib/utils';
 import { getTagKey, normalizeTags } from '@/lib/utils/tags';
 import type { Tag, Video } from '@/types';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -270,7 +270,7 @@ export default function VideoPage() {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-3 pb-4">
               <div className="flex items-center gap-3">
                 <Link
-                  href={`/creators/creator-profile/${video.channel?.uuid || video.channel?.id}`}
+                  href={getCreatorRoute(video.channel?.handler)}
                   className="shrink-0"
                 >
                   <div className="relative size-10 rounded-full overflow-hidden">
@@ -290,7 +290,7 @@ export default function VideoPage() {
                 </Link>
                 <div className="min-w-0">
                   <Link
-                    href={`/creators/creator-profile/${video.channel?.uuid || video.channel?.id}`}
+                    href={getCreatorRoute(video.channel?.handler)}
                     className="flex items-center gap-1 group"
                   >
                     <span className="font-medium text-white group-hover:text-text-secondary transition-colors truncate">

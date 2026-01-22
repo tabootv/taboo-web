@@ -4,7 +4,7 @@ import { useSeriesDetail } from '@/api/queries';
 import { EpisodeCard, SeriesPageSkeleton, TrailerModal } from '@/components/series';
 import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
 import { useSidebar } from '@/components/ui/sidebar';
-import { cn, extractIdFromSlug, formatDuration, getSeriesPlayRoute, isValidId } from '@/lib/utils';
+import { cn, extractIdFromSlug, formatDuration, getCreatorRoute, getSeriesPlayRoute, isValidId } from '@/lib/utils';
 import { ChevronDown, Clock, Info, Play } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -17,7 +17,7 @@ export default function SeriesDetailPage() {
   const slug = params.slug as string;
   const seriesId = extractIdFromSlug(slug);
   const isValid = isValidId(seriesId);
-  const { toggleSidebar, setOpen } = useSidebar();
+  const { setOpen } = useSidebar();
 
   // All hooks must be called unconditionally
   const { data: seriesData, isLoading } = useSeriesDetail(isValid ? seriesId : '');
@@ -184,7 +184,7 @@ export default function SeriesDetailPage() {
               </div>
 
               <Link
-                href={`/creators/creator-profile/${seriesData.channel?.id}`}
+                href={getCreatorRoute(seriesData.channel?.handler)}
                 className="inline-flex items-center gap-3 pt-2 group"
               >
                 <div className="relative">

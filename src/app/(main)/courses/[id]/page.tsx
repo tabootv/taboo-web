@@ -5,7 +5,7 @@ import { CoursePageSkeleton, LessonCard } from '@/components/courses';
 import { VerifiedBadge } from '@/components/ui';
 import { VideoPlayerSkeleton } from '@/components/video';
 import { useAuthStore } from '@/lib/stores/auth-store';
-import { cn, formatDuration } from '@/lib/utils';
+import { cn, formatDuration, getCreatorRoute } from '@/lib/utils';
 import { BookOpen, ChevronDown, Clock, GraduationCap, LogIn, Play, Users } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
@@ -197,7 +197,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
 
                 {courseData.channel && (
                   <Link
-                    href={`/creators/creator-profile/${courseData.channel.id}`}
+                    href={getCreatorRoute(courseData.channel.handler)}
                     className="inline-flex items-center gap-3 pt-2 group"
                   >
                     <div className="relative">

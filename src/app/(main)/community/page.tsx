@@ -47,7 +47,7 @@ export default function CommunityPage() {
                   Posts
                 </Link>
                 <Link
-                  href="/creator"
+                  href="/creators"
                   className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/5 text-text-secondary border border-white/10 font-medium text-sm transition-all hover:bg-white/10 hover:text-white"
                 >
                   <Star className="w-4 h-4" />

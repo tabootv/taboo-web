@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { creatorsClient as creators } from '@/api/client';
 import type { Creator, Video, Series } from '@/types';
-import { formatDuration, getSeriesRoute } from '@/lib/utils';
+import { formatDuration, getCreatorRoute, getSeriesRoute } from '@/lib/utils';
 
 export default function CreatorPreviewPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -135,7 +135,7 @@ export default function CreatorPreviewPage({ params }: { params: Promise<{ id: s
 
           {/* CTA Button */}
           <Link
-            href={`/creators/creator-profile/${creatorId}`}
+            href={getCreatorRoute(creator?.handler)}
             className="inline-block px-12 py-4 bg-red-primary hover:bg-red-hover text-white text-lg font-semibold rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(171,0,19,0.4)]"
           >
             View Full Profile on TabooTV
