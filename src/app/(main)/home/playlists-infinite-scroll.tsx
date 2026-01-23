@@ -4,7 +4,7 @@ import { playlistsClient as playlistsApi } from '@/api/client';
 import { MediaPreviewModal } from '@/components/home/media-preview-modal';
 import { RailCard } from '@/components/home/rail-card';
 import { RailRow } from '@/components/home/rail-row';
-import { fetchHomeData } from '@/lib/api/home-data';
+import { HomePageData } from '@/lib/api';
 import type { Playlist, Video } from '@/types';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -79,7 +79,11 @@ export function PlaylistsInfiniteScroll({
     setIsLoading(true);
 
     try {
-      const result = await fetchHomeData({ cursor, includeStatic: false });
+      const response = await fetch(`/api/home/playlists?cursor=${cursor ?? ''}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch playlists');
+      }
+      const result: HomePageData = await response.json();
 
       const newPlaylists: PlaylistWithVideos[] = result.playlists.map((p) => ({
         ...p,
