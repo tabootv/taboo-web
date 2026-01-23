@@ -12,7 +12,8 @@
  */
 
 import { homeClient, playlistsClient } from '@/api/client';
-import type { Banner, Creator, Video, Series, Playlist } from '@/types';
+import type { Banner, Creator, Playlist, Series, Video } from '@/types';
+import { cookies } from 'next/headers';
 
 // ============================================
 // Types
@@ -51,10 +52,12 @@ export interface FetchHomeOptions {
  * @returns Home page data with static sections, playlists, and next cursor
  */
 export async function fetchHomeData(options: FetchHomeOptions = {}): Promise<HomePageData> {
+  const cookieStore = await cookies()
+  const serverToken = cookieStore.get('tabootv_token')?.value
+
   const { cursor = null, includeStatic = cursor === null } = options;
   const playlistPage = cursor ?? 1;
 
-  // Results container
   const result: HomePageData = {
     static: null,
     playlists: [],
@@ -62,15 +65,14 @@ export async function fetchHomeData(options: FetchHomeOptions = {}): Promise<Hom
     isLastPage: false,
   };
 
-  // Fetch static data on initial load
   if (includeStatic) {
     const [banners, creators, featured, shorts, recommended, series] = await Promise.allSettled([
-      homeClient.getBanners(),
-      homeClient.getCreators(),
-      homeClient.getFeaturedVideos(),
-      homeClient.getShortVideos(),
-      homeClient.getRecommendedVideos(),
-      homeClient.getSeries(),
+      homeClient.getBanners(serverToken),
+      homeClient.getCreators(serverToken),
+      homeClient.getFeaturedVideos(serverToken),
+      homeClient.getShortVideos(serverToken),
+      homeClient.getRecommendedVideos(serverToken),
+      homeClient.getSeries(serverToken),
     ]);
 
     result.static = {
@@ -83,12 +85,13 @@ export async function fetchHomeData(options: FetchHomeOptions = {}): Promise<Hom
     };
   }
 
-  // Fetch playlists with pagination
   try {
-    const playlistResponse = await playlistsClient.list({ page: playlistPage, per_page: 3 });
+    const playlistResponse = await playlistsClient.list(
+      { page: playlistPage, per_page: 3 },
+      serverToken
+    );
     result.playlists = playlistResponse.data || [];
 
-    // Determine next cursor
     const currentPage = playlistResponse.current_page ?? playlistPage;
     const lastPage = playlistResponse.last_page ?? 1;
 
@@ -100,7 +103,6 @@ export async function fetchHomeData(options: FetchHomeOptions = {}): Promise<Hom
       result.isLastPage = true;
     }
   } catch (error) {
-    // Degrade gracefully by returning no playlists
     console.error('Error fetching playlists:', error);
     result.playlists = [];
     result.isLastPage = true;
