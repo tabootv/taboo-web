@@ -11,7 +11,6 @@ export function CreatorHeader({
   stats,
   socialLinks
 }: CreatorHeaderProps) {
-  console.log('stats', stats)
 
   return (
     <section className="relative min-h-[60vh] flex items-end pb-12 pt-[130px]">
