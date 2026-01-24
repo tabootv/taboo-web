@@ -68,7 +68,8 @@
       "Skill(vercel-react-best-practices:*)",
       "Bash(node scripts/measure-bundle.js:*)",
       "Bash(node scripts/measure-build-time.js:*)",
-      "Bash(node scripts/measure-hmr.js:*)"
+      "Bash(node scripts/measure-hmr.js:*)",
+      "Bash(npx jscodeshift:*)"
     ],
     "deny": [],
     "ask": []
