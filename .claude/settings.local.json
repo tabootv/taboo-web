@@ -55,7 +55,13 @@
       "Bash(brew install:*)",
       "Bash(magick:*)",
       "Bash(git restore:*)",
-      "Bash(git show:*)"
+      "Bash(git show:*)",
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm build:*)",
+      "Bash(pnpm tsc:*)",
+      "Skill(clean-code)",
+      "Skill(clean-code:*)",
+      "Bash(pnpm eslint:*)"
     ],
     "deny": [],
     "ask": []
