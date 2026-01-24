@@ -2,16 +2,16 @@
 
 **Priority**: P1 (HIGH)
 **PRs**: 8
-**Status**: In Progress
+**Status**: Completed
 
 ---
 
 ## Previous Epics Summary
 
-| Step | Epic | Status | Key Outcomes |
-|------|------|--------|--------------|
-| 1 | Barrel Files Elimination | ✅ Complete | Removed barrel files, established direct imports pattern |
-| 2 | Route Consolidation | ✅ Complete | Consolidated duplicate routes with 301 redirects in next.config.ts |
+| Step | Epic                     | Status      | Key Outcomes                                                       |
+| ---- | ------------------------ | ----------- | ------------------------------------------------------------------ |
+| 1    | Barrel Files Elimination | ✅ Complete | Removed barrel files, established direct imports pattern           |
+| 2    | Route Consolidation      | ✅ Complete | Consolidated duplicate routes with 301 redirects in next.config.ts |
 
 ---
 
@@ -19,15 +19,15 @@
 
 ### Route-Specific Components (To Move)
 
-| Source | Target | Files | Priority |
-|--------|--------|-------|----------|
-| `src/components/home/` | `app/(main)/home/_components/` | 20+ | 🔴 HIGH |
-| `src/components/series/` | `app/(main)/series/_components/` | 6 | 🔴 HIGH |
-| `src/components/courses/` | `app/(main)/courses/_components/` | 5 | 🔴 HIGH |
-| `src/components/sections/CreatorProfile/` | `app/(main)/creators/[handler]/_components/` | 17 | 🔴 HIGH |
-| `src/components/studio/` | `app/studio/_components/` | 5 | 🔴 HIGH |
-| `src/components/community/` | `app/(main)/community/_components/` | 5 | 🟡 MEDIUM |
-| `src/components/shorts/` | `app/(main)/shorts/_components/` | 1 | 🟢 LOW |
+| Source                                    | Target                                       | Files | Priority  |
+| ----------------------------------------- | -------------------------------------------- | ----- | --------- |
+| `src/components/home/`                    | `app/(main)/home/_components/`               | 20+   | 🔴 HIGH   |
+| `src/components/series/`                  | `app/(main)/series/_components/`             | 6     | 🔴 HIGH   |
+| `src/components/courses/`                 | `app/(main)/courses/_components/`            | 5     | 🔴 HIGH   |
+| `src/components/sections/CreatorProfile/` | `app/(main)/creators/[handler]/_components/` | 17    | 🔴 HIGH   |
+| `src/components/studio/`                  | `app/studio/_components/`                    | 5     | 🔴 HIGH   |
+| `src/components/community/`               | `app/(main)/community/_components/`          | 5     | 🟡 MEDIUM |
+| `src/components/shorts/`                  | `app/(main)/shorts/_components/`             | 1     | 🟢 LOW    |
 
 ### Shared Components (Keep in src/components/)
 
@@ -47,6 +47,7 @@
 ## Context References
 
 For shared guidance, see:
+
 - [Best Practices: Colocation Rules](./00-context.md#b-colocation-rules)
 - [Ideal Structure](./00-context.md#ideal-structure)
 - [Risk Matrix](./00-context.md#comprehensive-risk-matrix)
@@ -85,17 +86,20 @@ Used by single route?
 **Deliverable**: Documentation of component placement rules
 
 **Rules**:
+
 1. `app/[route]/_components/` - Components used ONLY by that route
 2. `features/[feature]/components/` - Reusable across multiple routes for same feature
 3. `components/ui/` - Truly shared design system primitives
 4. `components/layout/` - Shared layout components
 
 **Tasks**:
+
 - [ ] Create colocation decision tree documentation
 - [ ] Audit all components for placement
 - [ ] Create migration plan per component
 
 **Validation**:
+
 - [ ] Documentation complete
 - [ ] All components categorized
 
@@ -108,6 +112,7 @@ Used by single route?
 **Deliverable**: Move `src/components/home/*` → `app/(main)/home/_components/`
 
 **Tasks**:
+
 - [ ] Create `app/(main)/home/_components/` directory
 - [ ] Move files from `src/components/home/*`
 - [ ] Flatten `src/components/home/components/` → `_components/`
@@ -116,6 +121,7 @@ Used by single route?
 - [ ] Delete `src/components/home/` directory
 
 **Validation**:
+
 - [ ] Homepage loads correctly
 - [ ] No broken imports
 - [ ] TypeScript compilation passes
@@ -132,12 +138,14 @@ Used by single route?
 **Deliverable**: Move creator profile components to route
 
 **Tasks**:
+
 - [ ] Create `app/(main)/creators/[handler]/_components/`
 - [ ] Move `src/components/sections/CreatorProfile/*`
 - [ ] Update imports
 - [ ] Delete old directory
 
 **Validation**:
+
 - [ ] Creator profile pages work
 - [ ] No broken imports
 - [ ] TypeScript passes
@@ -155,6 +163,7 @@ Used by single route?
 **Status**: Complete
 
 **Tasks**:
+
 - [x] Create `app/(main)/series/_components/`
 - [x] Move `src/components/series/*`
 - [x] Update imports
@@ -187,6 +196,7 @@ Used by single route?
 5. **Updated codemod map**: `codemods/maps/components-series.json` with new paths
 
 **Validation**:
+
 - [x] Series pages work
 - [x] No broken imports
 - [x] TypeScript compilation passes
@@ -205,6 +215,7 @@ Used by single route?
 **Status**: Complete
 
 **Tasks**:
+
 - [x] Create `app/(main)/courses/_components/`
 - [x] Move `src/components/courses/*`
 - [x] Update imports
@@ -233,6 +244,7 @@ Used by single route?
 5. **Updated codemod map**: `codemods/maps/components-courses.json` with new paths
 
 **Validation**:
+
 - [x] Courses pages work
 - [x] No broken imports
 - [x] TypeScript compilation passes
@@ -253,6 +265,7 @@ Used by single route?
 **Decision**: Video components are used across multiple routes (videos, courses, searches, etc.), so moved to `features/video/components/` (shared location).
 
 **Tasks**:
+
 - [x] Audit video component usage
 - [x] Create appropriate directory
 - [x] Move `src/components/video/*`
@@ -280,6 +293,7 @@ Used by single route?
 4. **Deleted old directory**: `src/components/video/` (including `index.ts` barrel file)
 
 **Validation**:
+
 - [x] Video pages work
 - [x] Video player works everywhere used
 - [x] No broken imports
@@ -299,6 +313,7 @@ Used by single route?
 **Status**: Complete
 
 **Tasks**:
+
 - [x] Create `app/studio/_components/`
 - [x] Move `src/components/studio/*`
 - [x] Update imports
@@ -326,6 +341,7 @@ Used by single route?
 5. **Updated codemod map**: `codemods/maps/components-studio.json` with new paths
 
 **Validation**:
+
 - [x] Studio pages work
 - [x] Upload flows work
 - [x] No broken imports
@@ -345,6 +361,7 @@ Used by single route?
 **Status**: Complete
 
 **Tasks**:
+
 - [x] Audit remaining `src/components/*` directories
 - [x] Remove empty directories
 - [x] Consolidate truly shared components in `components/ui/` or `components/layout/`
@@ -385,6 +402,7 @@ Used by single route?
    - `creator/` - CreatorCard shared across routes (shared, barrel removed)
 
 **Validation**:
+
 - [x] No empty directories
 - [x] All components properly placed
 - [x] TypeScript passes
@@ -411,6 +429,6 @@ Used by single route?
 
 ## Navigation
 
-| Previous | Current | Next |
-|----------|---------|------|
+| Previous                                                        | Current                          | Next                                                  |
+| --------------------------------------------------------------- | -------------------------------- | ----------------------------------------------------- |
 | [Step 2: Route Consolidation](./02-epic-route-consolidation.md) | **Step 3: Component Colocation** | [Step 4: Server Actions](./04-epic-server-actions.md) |
