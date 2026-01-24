@@ -1,6 +1,6 @@
 'use client';
 
-import { studioClient as studio } from '@/api/client/studio.client';
+import { uploadVideoAction } from './_actions';
 import { ContentTypeSelector } from '../../_components/ContentTypeSelector';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -188,7 +188,7 @@ export default function UploadVideoPage() {
             .filter(Boolean)
         : [];
 
-      const response = await studio.uploadVideo({
+      const response = await uploadVideoAction({
         file: videoFile,
         thumbnail: thumbnail || null,
         title: data.title,

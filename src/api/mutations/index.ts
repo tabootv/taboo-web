@@ -1,4 +1,3 @@
-export * from './auth.mutations';
 export * from './clips.mutations';
 export * from './comments.mutations';
 export * from './creators.mutations';

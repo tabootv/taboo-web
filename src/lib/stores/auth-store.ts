@@ -1,5 +1,7 @@
+import { isAuthenticated, removeToken, setToken } from '@/api/client/base-client';
 import { authClient } from '@/api/client/auth.client';
-import { isAuthenticated, removeToken } from '@/api/client/base-client';
+import { loginAction, logoutAction } from '@/app/(auth)/sign-in/_actions';
+import { registerAction } from '@/app/(auth)/register/_actions';
 import type { FirebaseLoginData, LoginCredentials, RegisterData, User } from '@/types';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
@@ -39,7 +41,10 @@ export const useAuthStore = create<AuthState>()(
       login: async (credentials: LoginCredentials) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await authClient.login(credentials);
+          const response = await loginAction(credentials);
+          if (response.token) {
+            setToken(response.token);
+          }
           const isSubscribed = response.subscribed ?? false;
           set({
             user: response.user,
@@ -57,7 +62,10 @@ export const useAuthStore = create<AuthState>()(
       register: async (data: RegisterData) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await authClient.register(data);
+          const response = await registerAction(data);
+          if (response.token) {
+            setToken(response.token);
+          }
           const isSubscribed = response.subscribed ?? false;
           set({
             user: response.user,
@@ -93,7 +101,7 @@ export const useAuthStore = create<AuthState>()(
       logout: async () => {
         set({ isLoading: true });
         try {
-          await authClient.logout();
+          await logoutAction();
         } catch {
         } finally {
           removeToken();

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCreatePost, useDeletePost } from '@/api/mutations';
+import { useCreatePost } from '@/api/mutations';
 import { usePostsList } from '@/api/queries/posts.queries';
 import { CreatePostCard } from './_components/CreatePostCard';
 import { FeedPost } from './_components/FeedPost';
@@ -8,15 +8,18 @@ import { PostSkeleton } from './_components/PostSkeleton';
 import { useAuthStore } from '@/lib/stores';
 import { MessageCircle, Rss, Star } from 'lucide-react';
 import Link from 'next/link';
-import { useMemo } from 'react';
+import { useMemo, useTransition } from 'react';
+import { deletePostAction } from './_actions';
+import { toast } from 'sonner';
 
 export default function CommunityPage() {
   const { user } = useAuthStore();
+  const [, startTransition] = useTransition();
 
-  const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } = usePostsList();
+  const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage, refetch } =
+    usePostsList();
 
   const createPost = useCreatePost();
-  const deletePost = useDeletePost();
 
   const postsList = useMemo(() => {
     return data?.pages.flatMap((page) => page.data) || [];
@@ -27,7 +30,15 @@ export default function CommunityPage() {
   };
 
   const handleDeletePost = (id: number) => {
-    deletePost.mutate(id);
+    startTransition(async () => {
+      const result = await deletePostAction(id);
+      if (result.success) {
+        toast.success('Post deleted');
+        refetch();
+      } else {
+        toast.error('Failed to delete post');
+      }
+    });
   };
 
   return (

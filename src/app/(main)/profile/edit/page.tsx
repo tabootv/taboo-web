@@ -1,4 +1,5 @@
-'use client';;
+'use client';
+
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
@@ -13,7 +14,13 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import type { User } from '@/types';
-import { profileClient as profileApi } from '@/api/client/profile.client';
+import {
+  updateProfileAction,
+  updateContactAction,
+  updateEmailAction,
+  updatePasswordAction,
+  deleteAccountAction,
+} from './_actions';
 import { Button } from '@/components/ui/button';
 import { LoadingScreen } from '@/components/ui/spinner';
 import { toast } from 'sonner';
@@ -118,14 +125,14 @@ function ProfileSettings({
     setIsSubmitting(true);
 
     try {
-      await profileApi.updateProfile({
+      await updateProfileAction({
         first_name: firstName,
         last_name: lastName,
         display_name: displayName,
       });
 
       if (phone !== user?.phone_number) {
-        await profileApi.updateContact({ phone });
+        await updateContactAction({ phone });
       }
 
       await onUpdate();
@@ -222,7 +229,7 @@ function EmailSettings({
     setIsSubmitting(true);
 
     try {
-      await profileApi.updateEmail({ email, password });
+      await updateEmailAction({ email, password });
       await onUpdate();
       setPassword('');
       toast.success('Email updated successfully');
@@ -301,7 +308,7 @@ function PasswordSettings() {
     setIsSubmitting(true);
 
     try {
-      await profileApi.updatePassword({
+      await updatePasswordAction({
         current_password: currentPassword,
         password: newPassword,
         password_confirmation: confirmPassword,
@@ -384,7 +391,7 @@ function DangerZone() {
     setIsDeleting(true);
 
     try {
-      await profileApi.deleteAccount();
+      await deleteAccountAction();
       await logout();
       toast.success('Account deleted successfully');
       router.push('/');
