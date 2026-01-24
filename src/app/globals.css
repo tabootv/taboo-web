@@ -3353,7 +3353,8 @@ section:has(.vertical-series-card:hover) {
 
   body {
     @apply bg-background text-foreground;
-    overflow-x: hidden; /* prevent horizontal drift from full-bleed rails */
+    overflow-x: hidden;
+    /* prevent horizontal drift from full-bleed rails */
   }
 }
 

@@ -1,6 +1,29 @@
 import { fetchHomeData } from '@/lib/api/home-data';
 import { Suspense } from 'react';
+import type { Metadata } from 'next';
 import { HomeContent } from './home-content';
+
+export const metadata: Metadata = {
+  title: 'Home',
+  description:
+    'Discover premium video content, educational courses, and connect with creators on TabooTV. Browse trending videos, explore series, and find your next favorite creator.',
+  alternates: {
+    canonical: '/home',
+  },
+  openGraph: {
+    title: 'Home | TabooTV',
+    description:
+      'Discover premium video content, educational courses, and connect with creators on TabooTV.',
+    type: 'website',
+    url: '/home',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Home | TabooTV',
+    description:
+      'Discover premium video content, educational courses, and connect with creators on TabooTV.',
+  },
+};
 
 export default async function HomePage() {
   const initialData = await fetchHomeData({ cursor: null, includeStatic: true });
