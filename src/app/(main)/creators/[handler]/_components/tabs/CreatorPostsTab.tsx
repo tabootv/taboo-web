@@ -4,7 +4,8 @@ import { useCreatorPostsInfinite } from '@/api/queries/creators.queries';
 import { CommunityPost } from '@/features/community/components/community-post';
 import type { Creator, Post } from '@/types';
 import { useMemo } from 'react';
-import { EmptyState, InfiniteScrollLoader, PostsListSkeleton } from './shared';
+import { InfiniteScrollLoader } from './shared/InfiniteScrollLoader';
+import { EmptyState, PostsListSkeleton } from './shared/TabSkeletons';
 
 interface CreatorPostsTabProps {
   creator: Creator;

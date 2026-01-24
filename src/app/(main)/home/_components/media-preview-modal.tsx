@@ -6,8 +6,8 @@ import { useRouter } from 'next/navigation';
 import { X } from 'lucide-react';
 import { useSavedVideosStore, type SavedVideo } from '@/lib/stores/saved-videos-store';
 import type { Video } from '@/types';
-import { PreviewVideoPlayer } from './components/PreviewVideoPlayer';
-import { PreviewMediaInfo } from './components/PreviewMediaInfo';
+import { PreviewVideoPlayer } from './PreviewVideoPlayer';
+import { PreviewMediaInfo } from './PreviewMediaInfo';
 
 interface MediaPreviewModalProps {
   video: Video | null;

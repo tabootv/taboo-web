@@ -3,10 +3,10 @@
 import { homeClient } from '@/api/client/home.client';
 import type { Series } from '@/types';
 import { useEffect, useState } from 'react';
-import { SeriesSection } from './components/SeriesSection';
-import { SeriesSidePanel } from './components/SeriesSidePanel';
-import { SeriesSkeleton } from './components/SeriesSkeleton';
-import { VerticalSeriesList } from './components/VerticalSeriesList';
+import { SeriesSection } from './SeriesSection';
+import { SeriesSidePanel } from './SeriesSidePanel';
+import { SeriesSkeleton } from './SeriesSkeleton';
+import { VerticalSeriesList } from './VerticalSeriesList';
 
 interface HomeSeriesSectionProps {
   initialSeries?: Series[];

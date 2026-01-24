@@ -3,7 +3,7 @@
  */
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { HOVER_DELAY } from '@/components/home/constants/home-constants';
+import { HOVER_DELAY } from '../constants/home-constants';
 
 interface UseHoverCardOptions {
   onExpand?: () => void;

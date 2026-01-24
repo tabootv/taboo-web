@@ -2,8 +2,8 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import type { Video } from '@/types';
-import { MediaPreviewModal } from '@/components/home/media-preview-modal';
-import { PlaylistRail } from './components/PlaylistRail';
+import { MediaPreviewModal } from './media-preview-modal';
+import { PlaylistRail } from './PlaylistRail';
 import { usePlaylistsPagination } from './hooks/use-playlists-pagination';
 import { usePlaylistVideos } from './hooks/use-playlist-videos';
 

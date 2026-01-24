@@ -1,7 +1,7 @@
 'use client';
 
 import { homeClient } from '@/api/client/home.client';
-import { SectionCard } from '@/components/home/section-card';
+import { SectionCard } from './section-card';
 import { getCreatorRoute } from '@/lib/utils';
 import type { Creator } from '@/types';
 import { ChevronLeft, ChevronRight } from 'lucide-react';

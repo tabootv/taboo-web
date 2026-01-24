@@ -4,7 +4,8 @@ import { useCreatorCoursesInfinite } from '@/api/queries/creators.queries';
 import { SeriesPremiumCard } from '@/components/series/SeriesPremiumCard';
 import type { Course, Creator } from '@/types';
 import { useMemo } from 'react';
-import { EmptyState, InfiniteScrollLoader, SeriesGridSkeleton } from './shared';
+import { InfiniteScrollLoader } from './shared/InfiniteScrollLoader';
+import { EmptyState, SeriesGridSkeleton } from './shared/TabSkeletons';
 
 interface CreatorEducationTabProps {
   creator: Creator;

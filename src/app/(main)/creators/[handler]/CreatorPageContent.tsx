@@ -2,18 +2,15 @@
 
 import { useCreatorByHandler, useCreatorProfile } from '@/api/queries/creators.queries';
 import { useVideos } from '@/api/queries/video.queries';
-import {
-  CreatorEducationTab,
-  CreatorHeader,
-  CreatorHomeTab,
-  CreatorPostsTab,
-  CreatorSeriesTab,
-  CreatorShortsTab,
-  CreatorTabs,
-  CreatorVideosTab,
-  type TabConfig,
-  type TabType,
-} from '@/components/sections/CreatorProfile';
+import { CreatorHeader } from './_components/CreatorHeader';
+import { CreatorTabs } from './_components/CreatorTabs';
+import { CreatorHomeTab } from './_components/tabs/CreatorHomeTab';
+import { CreatorVideosTab } from './_components/tabs/CreatorVideosTab';
+import { CreatorShortsTab } from './_components/tabs/CreatorShortsTab';
+import { CreatorSeriesTab } from './_components/tabs/CreatorSeriesTab';
+import { CreatorPostsTab } from './_components/tabs/CreatorPostsTab';
+import { CreatorEducationTab } from './_components/tabs/CreatorEducationTab';
+import type { TabConfig, TabType } from './_components/types';
 import { Button } from '@/components/ui/button';
 import { buildSocialUrl } from '@/lib/utils/social';
 import { Globe, Play, PlaySquare } from 'lucide-react';

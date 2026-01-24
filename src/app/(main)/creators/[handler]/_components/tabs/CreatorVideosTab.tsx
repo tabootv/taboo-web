@@ -4,7 +4,8 @@ import { useCreatorVideosInfinite } from '@/api/queries/creators.queries';
 import type { Creator, Video } from '@/types';
 import { useMemo } from 'react';
 import { CreatorVideoGrid } from '../CreatorVideoGrid';
-import { EmptyState, InfiniteScrollLoader, VideoGridSkeleton } from './shared';
+import { InfiniteScrollLoader } from './shared/InfiniteScrollLoader';
+import { EmptyState, VideoGridSkeleton } from './shared/TabSkeletons';
 
 interface CreatorVideosTabProps {
   creator: Creator;

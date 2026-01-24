@@ -1,11 +1,12 @@
-'use client';;
-import { BannerSlider } from '@/components/home/banner-slider';
-import { CreatorsSection } from '@/components/home/creators';
-import { EndOfContentMessage } from '@/components/home/end-of-content-message';
-import { FeaturedSection } from '@/components/home/featured';
-import { HomeSeriesSection } from '@/components/home/home-series';
-import { HomeShortsSection } from '@/components/home/home-shorts';
-import { RecommendedSection } from '@/components/home/recommended';
+'use client';
+
+import { BannerSlider } from './_components/banner-slider';
+import { CreatorsSection } from './_components/creators';
+import { EndOfContentMessage } from './_components/end-of-content-message';
+import { FeaturedSection } from './_components/featured';
+import { HomeSeriesSection } from './_components/home-series';
+import { HomeShortsSection } from './_components/home-shorts';
+import { RecommendedSection } from './_components/recommended';
 import { useCallback } from 'react';
 import type { HomePageData } from '@/lib/api/home-data';
 import { useEffect, useState } from 'react';

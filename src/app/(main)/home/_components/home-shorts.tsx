@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { homeClient } from '@/api/client/home.client';
 import type { Video } from '@/types';
-import { SectionCard } from '@/components/home/section-card';
-import { ShortCard } from './components/ShortCard';
+import { SectionCard } from './section-card';
+import { ShortCard } from './ShortCard';
 import { useHorizontalScroll } from './hooks/use-horizontal-scroll';
 
 interface HomeShortsSectionProps {

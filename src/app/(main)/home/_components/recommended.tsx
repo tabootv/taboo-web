@@ -2,9 +2,9 @@
 import { useEffect, useState, useCallback } from 'react';
 import { homeClient } from '@/api/client/home.client';
 import type { Video } from '@/types';
-import { RailRow } from '@/components/home/rail-row';
-import { RailCard } from '@/components/home/rail-card';
-import { MediaPreviewModal } from '@/components/home/media-preview-modal';
+import { RailRow } from './rail-row';
+import { RailCard } from './rail-card';
+import { MediaPreviewModal } from './media-preview-modal';
 
 interface RecommendedSectionProps {
   initialVideos?: Video[];

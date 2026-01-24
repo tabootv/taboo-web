@@ -2,7 +2,7 @@
 
 **Priority**: P1 (HIGH)
 **PRs**: 8
-**Status**: Not Started
+**Status**: In Progress
 
 ---
 
@@ -10,10 +10,37 @@
 
 | Step | Epic | Status | Key Outcomes |
 |------|------|--------|--------------|
-| 1 | Barrel Files Elimination | Not Started | Pending: Remove barrel files, establish direct imports |
-| 2 | Route Consolidation | Not Started | Pending: Consolidate duplicate routes with 301 redirects |
+| 1 | Barrel Files Elimination | ✅ Complete | Removed barrel files, established direct imports pattern |
+| 2 | Route Consolidation | ✅ Complete | Consolidated duplicate routes with 301 redirects in next.config.ts |
 
-> **Update this section** after Steps 1-2 are complete with actual outcomes.
+---
+
+## Component Audit Results
+
+### Route-Specific Components (To Move)
+
+| Source | Target | Files | Priority |
+|--------|--------|-------|----------|
+| `src/components/home/` | `app/(main)/home/_components/` | 20+ | 🔴 HIGH |
+| `src/components/series/` | `app/(main)/series/_components/` | 6 | 🔴 HIGH |
+| `src/components/courses/` | `app/(main)/courses/_components/` | 5 | 🔴 HIGH |
+| `src/components/sections/CreatorProfile/` | `app/(main)/creators/[handler]/_components/` | 17 | 🔴 HIGH |
+| `src/components/studio/` | `app/studio/_components/` | 5 | 🔴 HIGH |
+| `src/components/community/` | `app/(main)/community/_components/` | 5 | 🟡 MEDIUM |
+| `src/components/shorts/` | `app/(main)/shorts/_components/` | 1 | 🟢 LOW |
+
+### Shared Components (Keep in src/components/)
+
+- `ui/` - Core design system (43 files)
+- `layout/` - Global layouts (13 files)
+- `search/` - Global search UI (13 files)
+- `sidebar/` - Navigation sidebars (5 files)
+- `navigation/` - Navigation helpers (1 file)
+- `providers/` - App-wide providers (1 file)
+- `feature/` - Feature flags (2 files)
+- `watchlist/` - Watchlist components (3 files)
+- `creator/` - CreatorCard shared across routes (4 files)
+- `video/` - VideoCard shared across routes (5 files)
 
 ---
 

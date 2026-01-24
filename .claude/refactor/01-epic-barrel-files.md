@@ -2,7 +2,7 @@
 
 **Priority**: P0 (CRITICAL)
 **PRs**: 8
-**Status**: Not Started
+**Status**: Completed
 
 ---
 
@@ -15,6 +15,7 @@
 ## Context References
 
 For shared guidance, see:
+
 - [Best Practices: Barrel Files Exceptions](./00-context.md#a-barrel-files---acceptable-exceptions)
 - [Risk Matrix](./00-context.md#comprehensive-risk-matrix)
 - [CI/CD Integration](./00-context.md#cicd-integration)
@@ -39,6 +40,7 @@ Barrel files (`index.ts`) that re-export multiple modules cause 200-800ms import
 **Deliverable**: Metrics baseline, automation tools setup
 
 **Tasks**:
+
 - [ ] Create `scripts/measure-bundle.js`
 - [ ] Create `scripts/measure-build-time.js`
 - [ ] Create `scripts/measure-hmr.js`
@@ -47,6 +49,7 @@ Barrel files (`index.ts`) that re-export multiple modules cause 200-800ms import
 - [ ] Create `.vscode/settings.json` for auto-import
 
 **Validation**:
+
 - [ ] Baseline metrics committed
 - [ ] Build time: `<current>` seconds
 - [ ] Bundle size: `<current>` KB
@@ -63,6 +66,7 @@ Barrel files (`index.ts`) that re-export multiple modules cause 200-800ms import
 **Deliverable**: `src/types/index.ts` split into domain files
 
 **Tasks**:
+
 - [ ] Audit `src/types/index.ts` (849 lines) - categorize types
 - [ ] Create `src/types/user.ts` - User, Auth, Profile types
 - [ ] Create `src/types/api.ts` - ApiResponse, PaginatedResponse
@@ -74,11 +78,13 @@ Barrel files (`index.ts`) that re-export multiple modules cause 200-800ms import
 - [ ] Run codemod: `from '@/types'` → specific paths
 
 **Decision Criteria**:
+
 - **Colocate**: Types used exclusively by one API client
 - **Keep in `types/`**: Types used by 3+ modules or truly global
 - **Exception**: Types used by 2 modules - evaluate case-by-case
 
 **Validation**:
+
 - [ ] `npm run type-check` passes
 - [ ] `npm run build` succeeds
 - [ ] Bundle size: `<baseline>` KB (should decrease slightly)
@@ -94,12 +100,14 @@ Barrel files (`index.ts`) that re-export multiple modules cause 200-800ms import
 **Deliverable**: Delete `src/api/client/index.ts`, update imports
 
 **Tasks**:
+
 - [ ] Create codemod: `@/api/client` → `@/api/client/{specific}.client`
 - [ ] Run codemod across codebase
 - [ ] Delete `src/api/client/index.ts`
 - [ ] Verify no broken imports
 
 **Validation**:
+
 - [ ] `npm run type-check` passes
 - [ ] `npm run build` succeeds
 - [ ] Bundle size: `<baseline - 50KB>` (estimated)
@@ -115,12 +123,14 @@ Barrel files (`index.ts`) that re-export multiple modules cause 200-800ms import
 **Deliverable**: Delete `src/api/queries/index.ts`, update imports
 
 **Tasks**:
+
 - [ ] Create codemod: `@/api/queries` → `@/api/queries/{specific}.queries`
 - [ ] Run codemod across codebase
 - [ ] Delete `src/api/queries/index.ts`
 - [ ] Verify no broken imports
 
 **Validation**:
+
 - [ ] `npm run type-check` passes
 - [ ] `npm run build` succeeds
 
@@ -135,16 +145,19 @@ Barrel files (`index.ts`) that re-export multiple modules cause 200-800ms import
 **Deliverable**: Delete `src/components/ui/index.ts`, update imports
 
 **Tasks**:
+
 - [ ] Create codemod: `@/components/ui` → `@/components/ui/{component}`
 - [ ] Run codemod (most critical, used everywhere)
 - [ ] Delete `src/components/ui/index.ts`
 
 **Exception Rule**: Small, stable re-exports (<5 items) can remain if:
+
 - Used in 20+ files
 - Rarely changes
 - Documented as "stable API"
 
 **Validation**:
+
 - [ ] `npm run type-check` passes
 - [ ] `npm run build` succeeds
 - [ ] All UI components render correctly
@@ -162,11 +175,13 @@ Barrel files (`index.ts`) that re-export multiple modules cause 200-800ms import
 **Note**: This barrel will be removed as part of colocation in Step 3.
 
 **Tasks**:
+
 - [ ] Create codemod: `@/components/home` → direct component imports
 - [ ] Run codemod
 - [ ] Delete `src/components/home/index.ts`
 
 **Validation**:
+
 - [ ] `npm run type-check` passes
 - [ ] `npm run build` succeeds
 - [ ] Homepage renders correctly
@@ -182,12 +197,14 @@ Barrel files (`index.ts`) that re-export multiple modules cause 200-800ms import
 **Deliverable**: Delete remaining component barrel files
 
 **Tasks**:
+
 - [ ] Remove `src/components/series/index.ts`
 - [ ] Remove `src/components/courses/index.ts`
 - [ ] Remove `src/components/studio/index.ts`
 - [ ] Update all imports to direct paths
 
 **Validation**:
+
 - [ ] `npm run type-check` passes
 - [ ] `npm run build` succeeds
 - [ ] Affected pages render correctly
@@ -203,11 +220,13 @@ Barrel files (`index.ts`) that re-export multiple modules cause 200-800ms import
 **Deliverable**: Delete `src/features/*/index.ts` files
 
 **Tasks**:
+
 - [ ] Remove `src/features/video/index.ts`
 - [ ] Remove `src/features/shorts/index.ts`
 - [ ] Update all imports to direct paths
 
 **Validation**:
+
 - [ ] `npm run type-check` passes
 - [ ] `npm run build` succeeds
 - [ ] Video and shorts features work correctly
@@ -232,6 +251,6 @@ Barrel files (`index.ts`) that re-export multiple modules cause 200-800ms import
 
 ## Navigation
 
-| Previous | Current | Next |
-|----------|---------|------|
+| Previous               | Current                  | Next                                                            |
+| ---------------------- | ------------------------ | --------------------------------------------------------------- |
 | [Index](./00-index.md) | **Step 1: Barrel Files** | [Step 2: Route Consolidation](./02-epic-route-consolidation.md) |

@@ -8,9 +8,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { HoverCardActions } from './components/HoverCardActions';
-import { HoverCardInfo } from './components/HoverCardInfo';
-import { HoverCardVideoPreview } from './components/HoverCardVideoPreview';
+import { HoverCardActions } from './HoverCardActions';
+import { HoverCardInfo } from './HoverCardInfo';
+import { HoverCardVideoPreview } from './HoverCardVideoPreview';
 
 interface NetflixHoverCardProps {
   video: Video;

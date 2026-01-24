@@ -3,7 +3,7 @@ import type { VideoListFilters } from '@/api/client/video.client';
 import { useCreatorsListPublic } from '@/api/queries/creators.queries';
 import { useVideoList } from '@/api/queries/video.queries';
 import { useCountries, useTags } from '@/api/queries/public.queries';
-import { MediaPreviewModal } from '@/components/home/media-preview-modal';
+import { MediaPreviewModal } from '../home/_components/media-preview-modal';
 import type { Video } from '@/types';
 import { Film } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';

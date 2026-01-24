@@ -4,7 +4,8 @@ import { useCreatorShortsInfinite } from '@/api/queries/creators.queries';
 import type { Creator, Video } from '@/types';
 import { useMemo } from 'react';
 import { CreatorShortsGrid } from '../CreatorShortsGrid';
-import { EmptyState, InfiniteScrollLoader, ShortsGridSkeleton } from './shared';
+import { InfiniteScrollLoader } from './shared/InfiniteScrollLoader';
+import { EmptyState, ShortsGridSkeleton } from './shared/TabSkeletons';
 
 interface CreatorShortsTabProps {
   creator: Creator;
