@@ -18,6 +18,8 @@
  */
 
 import type { Transform, FileInfo, API, Options } from 'jscodeshift';
+import * as path from 'path';
+import * as fs from 'fs';
 
 interface ExportMap {
   [exportName: string]: string; // exportName -> relative module path
@@ -40,8 +42,10 @@ const transform: Transform = (fileInfo: FileInfo, api: API, options: Options) =>
   let exportMap: ExportMap = {};
   if (exportMapFile) {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      exportMap = require(exportMapFile);
+      // Resolve path relative to current working directory
+      const absolutePath = path.resolve(process.cwd(), exportMapFile);
+      const content = fs.readFileSync(absolutePath, 'utf-8');
+      exportMap = JSON.parse(content);
     } catch (err) {
       console.warn(`Could not load export map from ${exportMapFile}:`, err);
     }
