@@ -45,6 +45,8 @@
     "vitest.config.ts",
     "src/app/(studio)/__tests__/**",
     "src/**/__tests__/**",
-    "depreciated/**"
+    "depreciated/**",
+    "codemods/**",
+    "scripts/**"
   ]
 }
