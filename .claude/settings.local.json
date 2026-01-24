@@ -61,7 +61,14 @@
       "Bash(pnpm tsc:*)",
       "Skill(clean-code)",
       "Skill(clean-code:*)",
-      "Bash(pnpm eslint:*)"
+      "Bash(pnpm eslint:*)",
+      "Skill(frontend-design)",
+      "Skill(frontend-design:*)",
+      "Skill(vercel-react-best-practices)",
+      "Skill(vercel-react-best-practices:*)",
+      "Bash(node scripts/measure-bundle.js:*)",
+      "Bash(node scripts/measure-build-time.js:*)",
+      "Bash(node scripts/measure-hmr.js:*)"
     ],
     "deny": [],
     "ask": []
