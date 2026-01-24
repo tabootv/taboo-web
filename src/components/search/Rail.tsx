@@ -31,7 +31,7 @@ export function Rail({ label, items, type: _type = 'titles', onItemClick, classN
     checkArrows();
     const el = scrollRef.current;
     if (el) {
-      el.addEventListener('scroll', checkArrows);
+      el.addEventListener('scroll', checkArrows, { passive: true });
       window.addEventListener('resize', checkArrows);
       return () => {
         el.removeEventListener('scroll', checkArrows);

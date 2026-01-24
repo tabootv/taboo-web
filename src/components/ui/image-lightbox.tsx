@@ -154,7 +154,7 @@ export function ImageLightbox({ images, initialIndex = 0, open, onOpenChange }: 
                         >
                             <Image
                                 src={currentImage.url}
-                                alt=""
+                                alt={`Image ${currentIndex + 1} of ${images.length}`}
                                 fill
                                 className="object-contain cursor-default"
                                 onClick={handleImageClick}

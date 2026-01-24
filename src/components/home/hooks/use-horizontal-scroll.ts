@@ -20,7 +20,7 @@ export function useHorizontalScroll() {
   useEffect(() => {
     const el = scrollRef.current;
     if (el) {
-      el.addEventListener('scroll', handleScroll);
+      el.addEventListener('scroll', handleScroll, { passive: true });
       handleScroll();
       return () => el.removeEventListener('scroll', handleScroll);
     }

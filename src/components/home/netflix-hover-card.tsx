@@ -1,16 +1,16 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { videoClient as videosApi } from '@/api/client';
+import { useSavedVideosStore, type SavedVideo } from '@/lib/stores/saved-videos-store';
+import type { Video } from '@/types';
+import { Play } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useSavedVideosStore, type SavedVideo } from '@/lib/stores/saved-videos-store';
-import { videoClient as videosApi } from '@/api/client';
-import type { Video } from '@/types';
-import { Play } from 'lucide-react';
-import { HoverCardVideoPreview } from './components/HoverCardVideoPreview';
-import { HoverCardInfo } from './components/HoverCardInfo';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { HoverCardActions } from './components/HoverCardActions';
+import { HoverCardInfo } from './components/HoverCardInfo';
+import { HoverCardVideoPreview } from './components/HoverCardVideoPreview';
 
 interface NetflixHoverCardProps {
   video: Video;
@@ -118,11 +118,14 @@ export function NetflixHoverCard({ video, showDate, index = 0, fixedHeight: _fix
   const toggleMute = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsMuted(!isMuted);
-    if (videoRef.current) {
-      videoRef.current.muted = !isMuted;
-    }
-  }, [isMuted]);
+
+    setIsMuted(prev => {
+      if (videoRef.current) {
+        videoRef.current.muted = !prev;
+      }
+      return !prev;
+    });
+  }, []);
 
   const handleSave = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -144,8 +147,9 @@ export function NetflixHoverCard({ video, showDate, index = 0, fixedHeight: _fix
   const toggleDescription = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setShowFullDescription(!showFullDescription);
-  }, [showFullDescription]);
+
+    setShowFullDescription(prev => !prev);
+  }, []);
 
   const handlePlay = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -206,9 +210,8 @@ export function NetflixHoverCard({ video, showDate, index = 0, fixedHeight: _fix
       style={{ zIndex: showExpanded ? 100 : 1 }}
     >
       <div
-        className={`netflix-card relative transition-all duration-300 ease-out ${
-          showExpanded ? 'netflix-card-expanded' : ''
-        }`}
+        className={`netflix-card relative transition-all duration-300 ease-out ${showExpanded ? 'netflix-card-expanded' : ''
+          }`}
         style={{
           transformOrigin: getTransformOrigin(),
           transform: showExpanded ? 'scale(1.4)' : 'scale(1)',
@@ -223,9 +226,8 @@ export function NetflixHoverCard({ video, showDate, index = 0, fixedHeight: _fix
                   src={thumbnail}
                   alt={video.title}
                   fill
-                  className={`object-cover transition-opacity duration-300 ${
-                    isVideoPlaying && isVideoReady ? 'opacity-0' : 'opacity-100'
-                  }`}
+                  className={`object-cover transition-opacity duration-300 ${isVideoPlaying && isVideoReady ? 'opacity-0' : 'opacity-100'
+                    }`}
                   sizes="(max-width: 768px) 200px, 280px"
                   priority={index < 4}
                   onError={() => setImageError(true)}
