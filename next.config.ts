@@ -41,6 +41,8 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '2mb',
     },
     webpackMemoryOptimizations: true,
+    // Optimize barrel imports for better tree-shaking (bundle-barrel-imports rule)
+    optimizePackageImports: ['lucide-react'],
   },
 
   // Environment variables available at build time
@@ -92,6 +94,10 @@ const nextConfig: NextConfig = {
           {
             key: 'Referrer-Policy',
             value: 'strict-origin-when-cross-origin',
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=()',
           },
         ],
       },
