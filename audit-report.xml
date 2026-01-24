@@ -1,0 +1,4 @@
+No audit found for domain: https://69ba8cc5
+Run 'squirrel audit https://69ba8cc5' first to create an audit
+
+Alternatively, use an audit ID: 'squirrel report <uuid>'
