@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { AlertCircle, RefreshCw, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui';
+import { Button } from '@/components/ui/button';
 
 const FIRSTPROMOTER_DOMAIN = 'payouts.taboo.tv';
 

@@ -1,5 +1,4 @@
-'use client';
-
+'use client';;
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -7,7 +6,8 @@ import { ArrowLeft, Crown, Check, CreditCard, Lock, AlertCircle } from 'lucide-r
 import { subscriptionsClient as subscriptionsApi } from '@/api/client/subscriptions.client';
 import type { Plan } from '@/types';
 import { useAuthStore } from '@/lib/stores';
-import { Button, LoadingScreen } from '@/components/ui';
+import { Button } from '@/components/ui/button';
+import { LoadingScreen } from '@/components/ui/spinner';
 import { Logo } from '@/components/ui/logo';
 import { toast } from 'sonner';
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useCreatePost, useDeletePost } from '@/api/mutations';
-import { usePostsList } from '@/api/queries';
+import { usePostsList } from '@/api/queries/posts.queries';
 import { CreatePostCard, FeedPost, PostSkeleton } from '@/components/community';
 import { useAuthStore } from '@/lib/stores';
 import { MessageCircle, Rss, Star } from 'lucide-react';
@@ -32,7 +32,6 @@ export default function CommunityPage() {
     <div className="series-page-atmosphere min-h-screen">
       {/* Atmospheric Background */}
       <div className="series-atmosphere-bg" />
-
       <div className="relative z-10">
         {/* Title left-aligned, tabs centered on the same line */}
         <div className="max-w-[1280px] mx-auto px-4 md:px-6 lg:px-8 pt-4 pb-3">
@@ -67,7 +66,7 @@ export default function CommunityPage() {
           <div className="space-y-4">
             {isLoading ? (
               // Skeleton Loading
-              Array.from({ length: 3 }).map((_, i) => <PostSkeleton key={`skeleton-${i}`} />)
+              (Array.from({ length: 3 }).map((_, i) => <PostSkeleton key={`skeleton-${i}`} />))
             ) : postsList.length > 0 ? (
               <>
                 {postsList.map((post) => (
@@ -99,7 +98,7 @@ export default function CommunityPage() {
               </>
             ) : (
               // Empty State
-              <div className="flex flex-col items-center justify-center py-16 text-center">
+              (<div className="flex flex-col items-center justify-center py-16 text-center">
                 <div className="w-20 h-20 rounded-full bg-[#131315] flex items-center justify-center mb-6">
                   <MessageCircle className="w-8 h-8 text-red-primary" />
                 </div>
@@ -107,7 +106,7 @@ export default function CommunityPage() {
                 <p className="text-text-secondary max-w-sm">
                   Be the first to share something with the community!
                 </p>
-              </div>
+              </div>)
             )}
           </div>
         </div>

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Phone, AlertCircle, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui';
+import { Button } from '@/components/ui/button';
 import { profileClient as profileApi } from '@/api/client/profile.client';
 import { useAuthStore } from '@/lib/stores';
 import { toast } from 'sonner';

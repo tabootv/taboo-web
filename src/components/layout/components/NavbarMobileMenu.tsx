@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui';
+import { Button } from '@/components/ui/button';
 import { mainNavigation } from '../constants/navigation-constants';
 import { useAuthStore } from '@/lib/stores';
 

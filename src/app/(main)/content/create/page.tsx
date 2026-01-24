@@ -1,5 +1,4 @@
-'use client';
-
+'use client';;
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -16,7 +15,8 @@ import {
   Tag,
   AlertCircle,
 } from 'lucide-react';
-import { Button, LoadingScreen } from '@/components/ui';
+import { Button } from '@/components/ui/button';
+import { LoadingScreen } from '@/components/ui/spinner';
 import { toast } from 'sonner';
 
 type ContentType = 'video' | 'short';

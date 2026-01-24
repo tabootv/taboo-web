@@ -1,12 +1,12 @@
-'use client';
-
+'use client';;
 import {
   useDeleteAllNotifications,
   useMarkAllNotificationsRead,
   useMarkNotificationRead,
 } from '@/api/mutations';
-import { useNotifications } from '@/api/queries';
-import { Button, LoadingScreen } from '@/components/ui';
+import { useNotifications } from '@/api/queries/notifications.queries';
+import { Button } from '@/components/ui/button';
+import { LoadingScreen } from '@/components/ui/spinner';
 import { getCreatorRoute, getSeriesRoute } from '@/lib/utils';
 import type { Notification } from '@/types';
 import { formatDistanceToNow } from 'date-fns';

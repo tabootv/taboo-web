@@ -2,7 +2,7 @@
 
 import { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { LoadingScreen } from '@/components/ui';
+import { LoadingScreen } from '@/components/ui/spinner';
 
 function VideoPlayerContent() {
   const router = useRouter();

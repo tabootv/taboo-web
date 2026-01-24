@@ -1,8 +1,10 @@
-'use client';
-
-import { useCoursesList } from '@/api/queries';
-import { CourseCard } from '@/components/courses';
-import { Button, ContentGrid, LoadingScreen, PageHeader } from '@/components/ui';
+'use client';;
+import { useCoursesList } from '@/api/queries/courses.queries';
+import { CourseCard } from '@/components/courses/CourseCard';
+import { Button } from '@/components/ui/button';
+import { ContentGrid } from '@/components/ui/content-grid';
+import { LoadingScreen } from '@/components/ui/spinner';
+import { PageHeader } from '@/components/ui/page-header';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { GraduationCap, LogIn } from 'lucide-react';
 import Link from 'next/link';

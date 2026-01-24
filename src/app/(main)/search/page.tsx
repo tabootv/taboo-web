@@ -5,9 +5,9 @@ import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Search as SearchIcon } from 'lucide-react';
-import { useSearch } from '@/api/queries';
+import { useSearch } from '@/api/queries/search.queries';
 import type { Video, Series, Creator } from '@/types';
-import { Spinner } from '@/components/ui';
+import { Spinner } from '@/components/ui/spinner';
 import { formatCompactNumber, formatDuration, getCreatorRoute, getSeriesRoute } from '@/lib/utils';
 
 function SearchPageContent() {

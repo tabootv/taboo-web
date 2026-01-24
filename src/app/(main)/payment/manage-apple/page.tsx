@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { ArrowLeft, Apple, ExternalLink, Settings, CreditCard } from 'lucide-react';
-import { Button } from '@/components/ui';
+import { Button } from '@/components/ui/button';
 
 export default function ManageApplePage() {
   const openAppStoreSubscriptions = () => {

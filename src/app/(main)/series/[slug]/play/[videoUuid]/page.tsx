@@ -1,6 +1,6 @@
 'use client';
 
-import { PlayerPageSkeleton } from '@/components/series';
+import { PlayerPageSkeleton } from '@/components/series/PlayerPageSkeleton';
 import {
   SeriesPlayerContent,
   SeriesPlayerErrorState,

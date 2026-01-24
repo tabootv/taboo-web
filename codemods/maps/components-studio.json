@@ -1,0 +1,7 @@
+{
+  "ActionCard": "@/components/studio/ActionCard",
+  "ComingSoonItem": "@/components/studio/ComingSoonItem",
+  "ContentTypeSelector": "@/components/studio/ContentTypeSelector",
+  "QuickLinkCard": "@/components/studio/QuickLinkCard",
+  "StatCard": "@/components/studio/StatCard"
+}

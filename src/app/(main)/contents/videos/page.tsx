@@ -1,11 +1,11 @@
-'use client';
-
+'use client';;
 import { useEffect, useState, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Plus, Play, Edit, Trash2, Eye, ThumbsUp, Clock, MoreVertical } from 'lucide-react';
 import type { Video } from '@/types';
-import { Button, LoadingScreen, Spinner } from '@/components/ui';
+import { Button } from '@/components/ui/button';
+import { LoadingScreen, Spinner } from '@/components/ui/spinner';
 import { formatCompactNumber, formatDuration, formatRelativeTime } from '@/lib/utils';
 import { useAuthStore } from '@/lib/stores';
 import { toast } from 'sonner';

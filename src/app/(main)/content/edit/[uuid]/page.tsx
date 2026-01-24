@@ -1,5 +1,4 @@
-'use client';
-
+'use client';;
 import { useState, useRef, useEffect, use } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -14,7 +13,8 @@ import {
   Trash2,
   Save,
 } from 'lucide-react';
-import { Button, LoadingScreen } from '@/components/ui';
+import { Button } from '@/components/ui/button';
+import { LoadingScreen } from '@/components/ui/spinner';
 import { toast } from 'sonner';
 import type { Video } from '@/types';
 

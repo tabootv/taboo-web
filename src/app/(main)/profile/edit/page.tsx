@@ -1,5 +1,4 @@
-'use client';
-
+'use client';;
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
@@ -15,7 +14,8 @@ import {
 import { useAuthStore } from '@/lib/stores/auth-store';
 import type { User } from '@/types';
 import { profileClient as profileApi } from '@/api/client/profile.client';
-import { Button, LoadingScreen } from '@/components/ui';
+import { Button } from '@/components/ui/button';
+import { LoadingScreen } from '@/components/ui/spinner';
 import { toast } from 'sonner';
 import Link from 'next/link';
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { Spinner } from '@/components/ui';
+import { Spinner } from '@/components/ui/spinner';
 import { useMixedSearch } from '@/hooks/useMixedSearch';
 import { formatDuration, getCreatorRoute } from '@/lib/utils';
 import type { Creator, Video } from '@/types';

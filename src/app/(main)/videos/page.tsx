@@ -1,7 +1,7 @@
-'use client';
-
+'use client';;
 import type { VideoListFilters } from '@/api/client/video.client';
-import { useCreatorsListPublic, useVideoList } from '@/api/queries';
+import { useCreatorsListPublic } from '@/api/queries/creators.queries';
+import { useVideoList } from '@/api/queries/video.queries';
 import { useCountries, useTags } from '@/api/queries/public.queries';
 import { MediaPreviewModal } from '@/components/home/media-preview-modal';
 import type { Video } from '@/types';

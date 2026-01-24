@@ -1,8 +1,9 @@
-'use client';
-
+'use client';;
 import { useUpdateAvatar } from '@/api/mutations';
-import { useBookmarkedVideos, useHistoryVideos, useLikedVideos } from '@/api/queries';
-import { Avatar, Button, LoadingScreen } from '@/components/ui';
+import { useBookmarkedVideos, useHistoryVideos, useLikedVideos } from '@/api/queries/video.queries';
+import { Avatar } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { LoadingScreen } from '@/components/ui/spinner';
 import { useFeature } from '@/hooks/use-feature';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { formatCompactNumber } from '@/lib/utils';

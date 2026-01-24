@@ -4,7 +4,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Mail, CheckCircle, XCircle, Loader2, RefreshCw } from 'lucide-react';
-import { Button } from '@/components/ui';
+import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/ui/logo';
 import { toast } from 'sonner';
 import { apiClient } from '@/api/client/base-client';

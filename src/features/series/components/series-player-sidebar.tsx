@@ -3,7 +3,7 @@
 import { ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useSeriesDetail } from '@/api/queries';
+import { useSeriesDetail } from '@/api/queries/series.queries';
 import { getSeriesRoute } from '@/lib/utils';
 import type { Video } from '@/types';
 import { PlayerEpisodeCard } from './player-episode-card';

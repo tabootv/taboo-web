@@ -1,6 +1,6 @@
 'use client';
 
-import { VideoPlayer } from '@/features/video';
+import { VideoPlayer } from '@/features/video/components/video-player';
 import { X } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';

@@ -1,7 +1,8 @@
-'use client';
-
+'use client';;
 import { useToggleShortLike } from '@/api/mutations/shorts.mutations';
-import { ShortVideoCard, useShortsFeed, useShortsUrlSync } from '@/features/shorts';
+import { ShortVideoCard } from '@/features/shorts/components/short-video-card';
+import { useShortsFeed } from '@/features/shorts/hooks/use-shorts-feed';
+import { useShortsUrlSync } from '@/features/shorts/hooks/use-shorts-url-sync';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { useShortsStore } from '@/lib/stores/shorts-store';
 import { ChevronDown, ChevronUp, Loader2, LogIn, Video } from 'lucide-react';

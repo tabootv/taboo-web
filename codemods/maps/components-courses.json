@@ -1,0 +1,8 @@
+{
+  "CoursePageSkeleton": "@/components/courses/CoursePageSkeleton",
+  "CoursePlayerPageSkeleton": "@/components/courses/CoursePlayerPageSkeleton",
+  "CourseCard": "@/components/courses/CourseCard",
+  "CourseCardProps": "@/components/courses/CourseCard",
+  "LessonCard": "@/components/courses/LessonCard",
+  "LessonCardPlayer": "@/components/courses/LessonCardPlayer"
+}

@@ -4,8 +4,9 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { X, Loader2 } from 'lucide-react';
 import { seriesClient as seriesApi } from '@/api/client/series.client';
 import { coursesClient as coursesApi } from '@/api/client/courses.client';
-import { VideoPlayer } from '@/features/video';
-import { Button, LoadingScreen } from '@/components/ui';
+import { VideoPlayer } from '@/features/video/components/video-player';
+import { Button } from '@/components/ui/button';
+import { LoadingScreen } from '@/components/ui/spinner';
 
 function TrailerContent() {
   const searchParams = useSearchParams();

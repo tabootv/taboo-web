@@ -1,8 +1,8 @@
-'use client';
-
-import { useCourseDetail } from '@/api/queries';
-import { CoursePageSkeleton, LessonCard } from '@/components/courses';
-import { VerifiedBadge } from '@/components/ui';
+'use client';;
+import { useCourseDetail } from '@/api/queries/courses.queries';
+import { CoursePageSkeleton } from '@/components/courses/CoursePageSkeleton';
+import { LessonCard } from '@/components/courses/LessonCard';
+import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
 import { VideoPlayerSkeleton } from '@/components/video';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { cn, formatDuration, getCreatorRoute } from '@/lib/utils';
@@ -14,7 +14,7 @@ import { useRouter } from 'next/navigation';
 import { use, useRef, useState } from 'react';
 
 const VideoPlayer = dynamic(
-  () => import('@/features/video').then((mod) => ({ default: mod.VideoPlayer })),
+  () => import('@/features/video/components/video-player').then((mod) => ({ default: mod.VideoPlayer })),
   {
     loading: () => <VideoPlayerSkeleton />,
     ssr: false,

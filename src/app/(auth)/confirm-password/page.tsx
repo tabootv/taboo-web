@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Lock, AlertCircle, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui';
+import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/ui/logo';
 import { apiClient } from '@/api/client/base-client';
 import { toast } from 'sonner';

@@ -14,7 +14,7 @@ import {
   type TabConfig,
   type TabType,
 } from '@/components/sections/CreatorProfile';
-import { Button } from '@/components/ui';
+import { Button } from '@/components/ui/button';
 import { buildSocialUrl } from '@/lib/utils/social';
 import { Globe, Play, PlaySquare } from 'lucide-react';
 import { useMemo, useState } from 'react';

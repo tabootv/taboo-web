@@ -1,11 +1,11 @@
-'use client';
-
+'use client';;
 import { useState, useRef, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, X, Film, AlertCircle, Loader2 } from 'lucide-react';
-import { Button, LoadingScreen } from '@/components/ui';
+import { Button } from '@/components/ui/button';
+import { LoadingScreen } from '@/components/ui/spinner';
 import { useAuthStore } from '@/lib/stores';
 import { toast } from 'sonner';
 import { apiClient } from '@/api/client/base-client';

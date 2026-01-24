@@ -1,14 +1,11 @@
-'use client';
-
-import {
-  BannerSlider,
-  CreatorsSection,
-  EndOfContentMessage,
-  FeaturedSection,
-  HomeSeriesSection,
-  HomeShortsSection,
-  RecommendedSection,
-} from '@/components/home';
+'use client';;
+import { BannerSlider } from '@/components/home/banner-slider';
+import { CreatorsSection } from '@/components/home/creators';
+import { EndOfContentMessage } from '@/components/home/end-of-content-message';
+import { FeaturedSection } from '@/components/home/featured';
+import { HomeSeriesSection } from '@/components/home/home-series';
+import { HomeShortsSection } from '@/components/home/home-shorts';
+import { RecommendedSection } from '@/components/home/recommended';
 import { useCallback } from 'react';
 import type { HomePageData } from '@/lib/api/home-data';
 import { useEffect, useState } from 'react';

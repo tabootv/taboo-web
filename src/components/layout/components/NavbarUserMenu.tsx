@@ -5,7 +5,8 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Bell, User, LogOut, Settings, Bookmark, Clapperboard } from 'lucide-react';
-import { Avatar, Button } from '@/components/ui';
+import { Avatar } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/lib/stores';
 import { useUserMenu } from '../hooks/use-user-menu';

@@ -1,12 +1,12 @@
-'use client';
-
+'use client';;
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, Edit, Eye, ThumbsUp, MessageCircle, Clock, ExternalLink } from 'lucide-react';
-import { Button, LoadingScreen } from '@/components/ui';
-import { VideoPlayer } from '@/features/video';
+import { Button } from '@/components/ui/button';
+import { LoadingScreen } from '@/components/ui/spinner';
+import { VideoPlayer } from '@/features/video/components/video-player';
 import { useAuthStore } from '@/lib/stores';
 import { formatCompactNumber, formatDuration, formatRelativeTime } from '@/lib/utils';
 import { toast } from 'sonner';

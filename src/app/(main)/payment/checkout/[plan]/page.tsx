@@ -1,5 +1,4 @@
-'use client';
-
+'use client';;
 import { useEffect, useState, use, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -7,7 +6,8 @@ import { ArrowLeft, ExternalLink, Check, Loader2, CreditCard } from 'lucide-reac
 import { subscriptionsClient as subscriptions } from '@/api/client/subscriptions.client';
 import type { Plan } from '@/types';
 import { useAuthStore } from '@/lib/stores';
-import { Button, LoadingScreen } from '@/components/ui';
+import { Button } from '@/components/ui/button';
+import { LoadingScreen } from '@/components/ui/spinner';
 import { toast } from 'sonner';
 
 /**

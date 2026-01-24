@@ -4,7 +4,7 @@ import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Camera, User, ChevronRight, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui';
+import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/ui/logo';
 import { profileClient as profileApi } from '@/api/client/profile.client';
 import { useAuthStore } from '@/lib/stores';

@@ -1,7 +1,7 @@
 'use client';
 
 import { homeClient } from '@/api/client/home.client';
-import { Button } from '@/components/ui';
+import { Button } from '@/components/ui/button';
 import { useCreatorById } from '@/hooks/use-creator-by-id';
 import { getSeriesRoute } from '@/lib/utils';
 import type { Banner } from '@/types';

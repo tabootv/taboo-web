@@ -1,8 +1,8 @@
 'use client';
 
-import { useCreatorsList } from '@/api/queries';
+import { useCreatorsList } from '@/api/queries/creators.queries';
 import { CreatorCard, CreatorCardSkeleton } from '@/components/creator';
-import { PageHeader } from '@/components/ui';
+import { PageHeader } from '@/components/ui/page-header';
 import { Rss, Star, Users } from 'lucide-react';
 import Link from 'next/link';
 import { useMemo } from 'react';

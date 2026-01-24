@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/stores';
 import { useSubscription } from '@/hooks';
-import { Button } from '@/components/ui';
+import { Button } from '@/components/ui/button';
 
 /**
  * Subscription management page
@@ -128,9 +128,7 @@ export default function SubscriptionPage() {
         <ArrowLeft className="w-5 h-5" />
         Back to Profile
       </Link>
-
       <h1 className="text-2xl font-bold text-text-primary mb-6">Subscription</h1>
-
       {error && (
         <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
           <p className="text-red-500 text-sm">{error}</p>
@@ -142,10 +140,9 @@ export default function SubscriptionPage() {
           </button>
         </div>
       )}
-
       {isSubscribed ? (
         /* Active Subscription View */
-        <div className="space-y-6">
+        (<div className="space-y-6">
           {/* Status Card */}
           <div className="bg-surface rounded-xl border border-border p-6">
             <div className="flex items-center justify-between mb-6">
@@ -193,14 +190,13 @@ export default function SubscriptionPage() {
               </div>
             </div>
           </div>
-
           {/* Manage Subscription */}
           <div className="bg-surface rounded-xl border border-border p-6">
             <h2 className="text-lg font-semibold text-text-primary mb-4">Manage Subscription</h2>
 
             {provider === 'apple' ? (
               /* Apple subscription management */
-              <div className="space-y-4">
+              (<div className="space-y-4">
                 <p className="text-text-secondary text-sm">
                   Your subscription is managed through the Apple App Store.
                   To update your payment method, cancel, or change your plan,
@@ -222,10 +218,10 @@ export default function SubscriptionPage() {
                   View detailed instructions
                   <ExternalLink className="w-4 h-4" />
                 </Link>
-              </div>
+              </div>)
             ) : provider === 'google' ? (
               /* Google Play subscription management */
-              <div className="space-y-4">
+              (<div className="space-y-4">
                 <p className="text-text-secondary text-sm">
                   Your subscription is managed through Google Play.
                   To update your payment method, cancel, or change your plan,
@@ -239,10 +235,10 @@ export default function SubscriptionPage() {
                   Open Google Play Subscriptions
                   <ExternalLink className="w-4 h-4" />
                 </Button>
-              </div>
+              </div>)
             ) : manageUrl ? (
               /* Whop/other provider with manage URL */
-              <div className="space-y-4">
+              (<div className="space-y-4">
                 <p className="text-text-secondary text-sm">
                   Manage your subscription, update payment methods, or cancel
                   anytime through our billing portal.
@@ -254,10 +250,10 @@ export default function SubscriptionPage() {
                   Manage Subscription
                   <ExternalLink className="w-4 h-4" />
                 </Button>
-              </div>
+              </div>)
             ) : (
               /* No management URL available */
-              <div className="space-y-4">
+              (<div className="space-y-4">
                 <p className="text-text-secondary text-sm">
                   To manage your subscription, please contact our support team.
                 </p>
@@ -268,13 +264,13 @@ export default function SubscriptionPage() {
                   Contact Support
                   <ExternalLink className="w-4 h-4" />
                 </a>
-              </div>
+              </div>)
             )}
           </div>
-        </div>
+        </div>)
       ) : (
         /* No Active Subscription View */
-        <div className="bg-surface rounded-xl border border-border p-8 text-center">
+        (<div className="bg-surface rounded-xl border border-border p-8 text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-surface-hover flex items-center justify-center">
             <CreditCard className="w-8 h-8 text-text-secondary" />
           </div>
@@ -289,7 +285,7 @@ export default function SubscriptionPage() {
               View Plans
             </Button>
           </Link>
-        </div>
+        </div>)
       )}
     </div>
   );

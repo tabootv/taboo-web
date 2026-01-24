@@ -1,0 +1,17 @@
+{
+  "AutoplayButton": "@/features/video/components/autoplay-button",
+  "CustomVideoPlayer": "@/features/video/components/custom-video-player",
+  "CustomVideoPlayerProps": "@/features/video/components/custom-video-player",
+  "QualityOption": "@/features/video/components/custom-video-player",
+  "LikeButton": "@/features/video/components/like-button",
+  "LikeDislikeButtonGroup": "@/features/video/components/like-dislike-button-group",
+  "SaveButton": "@/features/video/components/save-button",
+  "ShakaPlayer": "@/features/video/components/shaka-player",
+  "SingleComment": "@/features/video/components/single-comment",
+  "VideoComments": "@/features/video/components/video-comments",
+  "VideoPlayer": "@/features/video/components/video-player",
+  "VideoPlayerWrapper": "@/features/video/components/video-player-wrapper",
+  "VideoRightSidebarCard": "@/features/video/components/video-right-sidebar-card",
+  "WatchlistButton": "@/features/video/components/watchlist-button",
+  "useVideoAnalytics": "@/features/video/hooks/use-video-analytics"
+}

@@ -3,7 +3,8 @@
  */
 
 import { useRef, useEffect, useCallback } from 'react';
-import { RailRow, RailCard } from '@/components/home';
+import { RailRow } from '@/components/home/rail-row';
+import { RailCard } from '@/components/home/rail-card';
 import type { Video } from '@/types';
 
 interface PlaylistWithVideos {

@@ -1,8 +1,9 @@
-'use client';
-
+'use client';;
 import { useAddPostComment, useDeletePost, useLikePost } from '@/api/mutations';
-import { usePost, usePostComments } from '@/api/queries';
-import { Avatar, Button, LoadingScreen, Spinner } from '@/components/ui';
+import { usePost, usePostComments } from '@/api/queries/posts.queries';
+import { Avatar } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { LoadingScreen, Spinner } from '@/components/ui/spinner';
 import { ImageLightbox } from '@/components/ui/image-lightbox';
 import { useAuthStore } from '@/lib/stores';
 import { getCreatorRoute } from '@/lib/utils';

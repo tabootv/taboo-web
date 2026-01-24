@@ -19,7 +19,7 @@ import {
   CreditCard,
   ArrowUpRight,
 } from 'lucide-react';
-import { Button } from '@/components/ui';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   Select,
@@ -29,7 +29,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { FunnelAreaChart } from '@/features/creator-studio';
-import { useEarnings } from '@/api/queries';
+import { useEarnings } from '@/api/queries/earnings.queries';
 import type { DateRange, GroupBy } from '@/types';
 
 interface StatCardProps {

@@ -1,11 +1,11 @@
-'use client';
-
+'use client';;
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Plus, Video, Film, Eye, Heart, MessageCircle, MoreVertical, Edit, Trash2 } from 'lucide-react';
-import { Button, LoadingScreen } from '@/components/ui';
+import { Button } from '@/components/ui/button';
+import { LoadingScreen } from '@/components/ui/spinner';
 import { formatDuration, formatRelativeTime } from '@/lib/utils';
 import type { Video as VideoType } from '@/types';
 

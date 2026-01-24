@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, Upload, X, Film, AlertCircle, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui';
+import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/lib/stores';
 import { toast } from 'sonner';
 import { apiClient } from '@/api/client/base-client';

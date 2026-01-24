@@ -1,0 +1,12 @@
+{
+  "ShortVideoCard": "@/features/shorts/components/short-video-card",
+  "DesktopCommentSection": "@/features/shorts/components/desktop-comment-section",
+  "MobileCommentSection": "@/features/shorts/components/mobile-comment-section",
+  "ShortHeader": "@/features/shorts/components/short-header",
+  "ShortPlayer": "@/features/shorts/components/short-player",
+  "ShortVideoPlayer": "@/features/shorts/components/short-video-player",
+  "DesktopActionButtons": "@/features/shorts/components/desktop-action-buttons",
+  "MobileActionButtons": "@/features/shorts/components/mobile-action-buttons",
+  "useShortsFeed": "@/features/shorts/hooks/use-shorts-feed",
+  "useShortsUrlSync": "@/features/shorts/hooks/use-shorts-url-sync"
+}

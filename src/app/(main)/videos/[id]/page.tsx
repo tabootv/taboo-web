@@ -1,10 +1,12 @@
-'use client';
-
-import { useRelatedVideos, useVideoPlay } from '@/api/queries';
-import { Button, LoadingScreen } from '@/components/ui';
+'use client';;
+import { useRelatedVideos, useVideoPlay } from '@/api/queries/video.queries';
+import { Button } from '@/components/ui/button';
+import { LoadingScreen } from '@/components/ui/spinner';
 import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
 import { VideoPlayerSkeleton } from '@/components/video';
-import { LikeButton, SaveButton, VideoComments } from '@/features/video';
+import { LikeButton } from '@/features/video/components/like-button';
+import { SaveButton } from '@/features/video/components/save-button';
+import { VideoComments } from '@/features/video/components/video-comments';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { formatRelativeTime, getCreatorRoute } from '@/lib/utils';
 import { getTagKey, normalizeTags } from '@/lib/utils/tags';
@@ -17,7 +19,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 const VideoPlayer = dynamic(
-  () => import('@/features/video').then((mod) => ({ default: mod.VideoPlayer })),
+  () => import('@/features/video/components/video-player').then((mod) => ({ default: mod.VideoPlayer })),
   {
     loading: () => <VideoPlayerSkeleton />,
     ssr: false,

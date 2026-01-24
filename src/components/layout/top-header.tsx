@@ -1,7 +1,7 @@
-'use client';
-
+'use client';;
 import { SmartSearchDropdown } from '@/components/search';
-import { Avatar, Button } from '@/components/ui';
+import { Avatar } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/ui/logo';
 import { useSidebar } from '@/components/ui/sidebar';
 import { useAuthStore } from '@/lib/stores';

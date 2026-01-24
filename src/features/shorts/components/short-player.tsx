@@ -1,7 +1,7 @@
 'use client';
 
 import { useToggleShortLike, useToggleShortBookmark } from '@/api/mutations/shorts.mutations';
-import { Avatar } from '@/components/ui';
+import { Avatar } from '@/components/ui/avatar';
 import { usePrefersReducedMotion } from '@/hooks';
 import { useFeature } from '@/hooks/use-feature';
 import { formatCompactNumber, getCreatorRoute } from '@/lib/utils';
