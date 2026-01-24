@@ -19,6 +19,8 @@
     "measure:hmr": "node scripts/measure-hmr.js",
     "measure:baseline": "npm run build && node scripts/measure-bundle.js --save-baseline && node scripts/measure-build-time.js --save-baseline && node scripts/measure-hmr.js --startup --save-baseline",
     "analyze-component": "node scripts/analyze-components.js",
+    "verify-redirects": "node scripts/verify-redirects.js",
+    "verify-redirects:live": "node scripts/verify-redirects.js --test-live",
     "codemod:api-client": "npx jscodeshift -t codemods/barrel-to-direct-imports.ts src/ --parser=tsx --extensions=ts,tsx --barrelPath='@/api/client' --exportMapFile='./codemods/maps/api-client.json'",
     "codemod:api-queries": "npx jscodeshift -t codemods/barrel-to-direct-imports.ts src/ --parser=tsx --extensions=ts,tsx --barrelPath='@/api/queries' --exportMapFile='./codemods/maps/api-queries.json'",
     "codemod:ui": "npx jscodeshift -t codemods/barrel-to-direct-imports.ts src/ --parser=tsx --extensions=ts,tsx --barrelPath='@/components/ui' --exportMapFile='./codemods/maps/components-ui.json'",

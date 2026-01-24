@@ -1,4 +1,49 @@
 import type { NextConfig } from 'next';
+import type { Redirect } from 'next/dist/lib/load-custom-routes';
+
+/**
+ * Route Redirect Configuration
+ *
+ * All redirects use HTTP 301 (permanent) to signal search engines
+ * that the old URL has permanently moved. This preserves SEO value.
+ *
+ * Guidelines:
+ * - Maximum 1 redirect hop (no chains)
+ * - Source routes should be deprecated routes
+ * - Destination routes are the canonical routes
+ */
+const routeRedirects: Redirect[] = [
+  // ============================================
+  // Legacy Route Redirects
+  // ============================================
+  {
+    source: '/creators/creator-profile/:channel',
+    destination: '/creators/:channel',
+    permanent: true,
+  },
+
+  // ============================================
+  // Auth Route Consolidation (PR 2.2)
+  // Canonical: /sign-in, /register
+  // ============================================
+  { source: '/login', destination: '/sign-in', permanent: true },
+  { source: '/signup', destination: '/register', permanent: true },
+  { source: '/sign-up', destination: '/register', permanent: true },
+
+  // ============================================
+  // Content Route Consolidation (PR 2.3)
+  // Canonical: /contents/videos, /contents/shorts
+  // ============================================
+  { source: '/content', destination: '/contents/videos', permanent: true },
+  { source: '/content/create', destination: '/contents/videos/create', permanent: true },
+  { source: '/content/edit/:path*', destination: '/contents/videos', permanent: true },
+
+  // ============================================
+  // Search Route Consolidation (PR 2.4)
+  // Canonical: /searches
+  // ============================================
+  { source: '/search', destination: '/searches', permanent: true },
+];
 
 const nextConfig: NextConfig = {
   // Image optimization configuration
@@ -63,18 +108,9 @@ const nextConfig: NextConfig = {
     ];
   },
 
-  // Redirects
+  // Redirects - see routeRedirects configuration at top of file
   async redirects() {
-    return [
-      // Redirect old creator profile routes to new handler-based routes
-      // Note: This catches the old pattern but can't convert ID to handler automatically
-      // For a complete solution, the API would need to support lookup by ID and redirect to handler
-      {
-        source: '/creators/creator-profile/:channel',
-        destination: '/creators/:channel',
-        permanent: true,
-      },
-    ];
+    return routeRedirects;
   },
 
   // Headers for security
