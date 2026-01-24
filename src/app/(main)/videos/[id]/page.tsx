@@ -155,7 +155,7 @@ export default function VideoPage() {
   useEffect(() => {
     const el = tagsScrollRef.current;
     if (el) {
-      el.addEventListener('scroll', handleTagsScroll);
+      el.addEventListener('scroll', handleTagsScroll, { passive: true });
       handleTagsScroll();
       return () => el.removeEventListener('scroll', handleTagsScroll);
     }

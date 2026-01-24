@@ -11,6 +11,7 @@
  * this layer coordinates the existing endpoints and provides a cursor-based interface.
  */
 
+import { cache } from 'react';
 import { homeClient, playlistsClient } from '@/api/client';
 import type { Banner, Creator, Playlist, Series, Video } from '@/types';
 import { cookies } from 'next/headers';
@@ -46,12 +47,13 @@ export interface FetchHomeOptions {
 
 /**
  * Fetch home page data with cursor-based pagination.
+ * Wrapped with React.cache() for per-request deduplication (server-cache-react rule).
  *
  * @param options.cursor - Page cursor for playlists (null for initial load)
  * @param options.includeStatic - Whether to fetch static sections (true for initial load)
  * @returns Home page data with static sections, playlists, and next cursor
  */
-export async function fetchHomeData(options: FetchHomeOptions = {}): Promise<HomePageData> {
+export const fetchHomeData = cache(async (options: FetchHomeOptions = {}): Promise<HomePageData> => {
   const cookieStore = await cookies()
   const serverToken = cookieStore.get('tabootv_token')?.value
 
@@ -109,13 +111,14 @@ export async function fetchHomeData(options: FetchHomeOptions = {}): Promise<Hom
   }
 
   return result;
-}
+});
 
 /**
  * Fetch a single playlist's videos with pagination.
  * Used for loading more videos within a playlist rail.
+ * Wrapped with React.cache() for per-request deduplication (server-cache-react rule).
  */
-export async function fetchPlaylistVideos(
+export const fetchPlaylistVideos = cache(async (
   playlistId: number,
   page: number = 1
 ): Promise<{
@@ -123,7 +126,7 @@ export async function fetchPlaylistVideos(
   currentPage: number;
   lastPage: number;
   hasMore: boolean;
-}> {
+}> => {
   try {
     const response = await playlistsClient.get(playlistId, page);
     const videos = response.videos?.data || [];
@@ -145,4 +148,4 @@ export async function fetchPlaylistVideos(
       hasMore: false,
     };
   }
-}
+});
