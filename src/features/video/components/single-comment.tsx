@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import Image from 'next/image';
-import { Reply, Send } from 'lucide-react';
 import { videoClient } from '@/api/client/video.client';
 import type { Comment } from '@/types';
-import { formatRelativeTime } from '@/lib/utils';
+import { Reply, Send } from 'lucide-react';
+import Image from 'next/image';
+import { useCallback, useState } from 'react';
 
 interface SingleCommentProps {
   comment: Comment;
@@ -85,7 +84,7 @@ export function SingleComment({
             )}
           </div>
           <span className="text-[12px] md:text-[13px] text-[#807E81]">
-            {formatRelativeTime(comment.created_at)}
+            {comment.created_at}
           </span>
         </div>
 
