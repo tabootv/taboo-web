@@ -7,9 +7,11 @@
  * State managed here:
  * - Audio preferences (muted, volume) - persists user preference
  * - Comment panel visibility - UI state
+ * - Comment list for current video - UI state (loaded from API)
  */
 
 import { create } from 'zustand';
+import type { Comment } from '@/types';
 
 interface ShortsUIState {
   // Audio state
@@ -18,12 +20,15 @@ interface ShortsUIState {
 
   // Comment panel state
   showComments: boolean;
+  commentList: Comment[];
 
   // Actions
   toggleMute: () => void;
   setVolume: (volume: number) => void;
   toggleComments: () => void;
   setShowComments: (show: boolean) => void;
+  setCommentList: (comments: Comment[]) => void;
+  appendComment: (comment: Comment) => void;
 }
 
 export const useShortsStore = create<ShortsUIState>((set) => ({
@@ -33,6 +38,7 @@ export const useShortsStore = create<ShortsUIState>((set) => ({
 
   // Comment panel - closed by default
   showComments: false,
+  commentList: [],
 
   // Audio actions
   toggleMute: () => {
@@ -50,5 +56,13 @@ export const useShortsStore = create<ShortsUIState>((set) => ({
 
   setShowComments: (show: boolean) => {
     set({ showComments: show });
+  },
+
+  setCommentList: (comments: Comment[]) => {
+    set({ commentList: comments });
+  },
+
+  appendComment: (comment: Comment) => {
+    set((state) => ({ commentList: [comment, ...state.commentList] }));
   },
 }));
