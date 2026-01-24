@@ -9,17 +9,16 @@ import { usePrefersReducedMotion } from '@/hooks';
 interface ShortVideoPlayerProps {
   video: Video;
   index: number;
+  isActive: boolean;
   children?: ReactNode; // For overlay slot
 }
 
-export function ShortVideoPlayer({ video, index, children }: ShortVideoPlayerProps) {
+export function ShortVideoPlayer({ video, index: _index, isActive, children }: ShortVideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isBuffering, setIsBuffering] = useState(true);
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
 
-  const { currentIndex, isMuted, volume, toggleMute, setVolume } = useShortsStore();
-
-  const isActive = currentIndex === index;
+  const { isMuted, volume, toggleMute, setVolume } = useShortsStore();
   const prefersReducedMotion = usePrefersReducedMotion();
 
   // Get video URL (prefer lower quality for shorts)

@@ -8,3 +8,6 @@ export { ShortVideoPlayer } from './components/short-video-player';
 export { DesktopActionButtons } from './components/desktop-action-buttons';
 export { MobileActionButtons } from './components/mobile-action-buttons';
 
+// Shorts hooks
+export { useShortsFeed, useShortsUrlSync } from './hooks';
+

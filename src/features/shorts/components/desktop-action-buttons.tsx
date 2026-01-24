@@ -2,24 +2,24 @@
 
 import { Flame, MessageCircle } from 'lucide-react';
 import { useShortsStore } from '@/lib/stores/shorts-store';
-import { useToggleLike } from '@/api/mutations';
+import { useToggleShortLike } from '@/api/mutations/shorts.mutations';
 import { toast } from 'sonner';
 
 interface DesktopActionButtonsProps {
   videoUuid: string;
+  hasLiked: boolean;
 }
 
-export function DesktopActionButtons({ videoUuid }: DesktopActionButtonsProps) {
-  const { hasLiked, setHasLiked, toggleComments } = useShortsStore();
-  const toggleLike = useToggleLike();
+export function DesktopActionButtons({ videoUuid, hasLiked }: DesktopActionButtonsProps) {
+  const { toggleComments } = useShortsStore();
+  const toggleLike = useToggleShortLike();
 
-  const handleToggleLike = async () => {
-    try {
-      await toggleLike.mutateAsync(videoUuid);
-      setHasLiked(!hasLiked);
-    } catch {
-      toast.error('Please login to like');
-    }
+  const handleToggleLike = () => {
+    toggleLike.mutate(videoUuid, {
+      onError: () => {
+        toast.error('Please login to like');
+      },
+    });
   };
 
   return (

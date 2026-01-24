@@ -1,20 +1,20 @@
 'use client';
 
-import { useRef, useState, useEffect, useCallback, memo } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
+import { useToggleShortLike } from '@/api/mutations/shorts.mutations';
+import { usePrefersReducedMotion } from '@/hooks';
+import { useShortsStore } from '@/lib/stores/shorts-store';
+import { formatCompactNumber, getCreatorRoute } from '@/lib/utils';
+import type { Video } from '@/types';
 import {
   Heart,
+  Play,
   Volume2,
   VolumeX,
-  Play,
 } from 'lucide-react';
-import { useShortsStore } from '@/lib/stores/shorts-store';
-import { videoClient } from '@/api/client';
-import { formatCompactNumber, getCreatorRoute } from '@/lib/utils';
+import Image from 'next/image';
+import Link from 'next/link';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import type { Video } from '@/types';
-import { usePrefersReducedMotion } from '@/hooks';
 
 interface ShortVideoCardProps {
   video: Video;
@@ -41,13 +41,12 @@ function ShortVideoCardComponent({ video, index: _index, isActive, isNearActive 
   const [heartPosition, setHeartPosition] = useState({ x: 0, y: 0 });
   const lastProgressUpdate = useRef<number>(0);
 
-  const {
-    isMuted,
-    toggleMute,
-    hasLiked,
-    setHasLiked,
-  } = useShortsStore();
+  const { isMuted, toggleMute } = useShortsStore();
   const prefersReducedMotion = usePrefersReducedMotion();
+  const toggleLike = useToggleShortLike();
+
+  // Get like state from video prop (managed by React Query)
+  const hasLiked = video.has_liked ?? false;
 
   // Keep ref in sync with store value
   useEffect(() => {
@@ -176,6 +175,15 @@ function ShortVideoCardComponent({ video, index: _index, isActive, isNearActive 
     }
   }, []);
 
+  // Toggle like using mutation
+  const handleToggleLike = useCallback(() => {
+    toggleLike.mutate(video.uuid, {
+      onError: () => {
+        toast.error('Please login to like');
+      },
+    });
+  }, [toggleLike, video.uuid]);
+
   // Double tap to like
   const handleVideoTap = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const now = Date.now();
@@ -202,7 +210,7 @@ function ShortVideoCardComponent({ video, index: _index, isActive, isNearActive 
     }
 
     lastTapRef.current = now;
-  }, [hasLiked, togglePlay]);
+  }, [hasLiked, togglePlay, prefersReducedMotion, handleToggleLike]);
 
   // Seek on progress bar click
   const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -210,15 +218,6 @@ function ShortVideoCardComponent({ video, index: _index, isActive, isNearActive 
     const percent = (e.clientX - rect.left) / rect.width;
     if (videoRef.current) {
       videoRef.current.currentTime = percent * videoRef.current.duration;
-    }
-  };
-
-  const handleToggleLike = async () => {
-    try {
-      await videoClient.toggleLike(video.uuid);
-      setHasLiked(!hasLiked);
-    } catch {
-      toast.error('Please login to like');
     }
   };
 
@@ -416,6 +415,7 @@ export const ShortVideoCard = memo(ShortVideoCardComponent, (prevProps, nextProp
     prevProps.isActive === nextProps.isActive &&
     prevProps.isNearActive === nextProps.isNearActive &&
     prevProps.video.uuid === nextProps.video.uuid &&
-    prevProps.video.likes_count === nextProps.video.likes_count
+    prevProps.video.likes_count === nextProps.video.likes_count &&
+    prevProps.video.has_liked === nextProps.video.has_liked
   );
 });

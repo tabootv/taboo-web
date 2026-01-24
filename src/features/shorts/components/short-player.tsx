@@ -1,6 +1,6 @@
 'use client';
 
-import { shortsClient as shortsApi } from '@/api/client';
+import { useToggleShortLike, useToggleShortBookmark } from '@/api/mutations/shorts.mutations';
 import { Avatar } from '@/components/ui';
 import { usePrefersReducedMotion } from '@/hooks';
 import { useFeature } from '@/hooks/use-feature';
@@ -37,11 +37,15 @@ export function ShortPlayer({
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [isLiked, setIsLiked] = useState(short.has_liked ?? false);
-  const [likesCount, setLikesCount] = useState(short.likes_count ?? 0);
-  const [isBookmarked, setIsBookmarked] = useState(short.is_bookmarked ?? false);
   const prefersReducedMotion = usePrefersReducedMotion();
   const bookmarksEnabled = useFeature('BOOKMARK_SYSTEM');
+  const toggleLike = useToggleShortLike();
+  const toggleBookmark = useToggleShortBookmark();
+
+  // Get like/bookmark state from video prop (managed by React Query)
+  const isLiked = short.has_liked ?? false;
+  const likesCount = short.likes_count ?? 0;
+  const isBookmarked = short.is_bookmarked ?? false;
 
   const attemptPlay = useCallback(async () => {
     const videoEl = videoRef.current;
@@ -120,26 +124,25 @@ export function ShortPlayer({
     setIsMuted(!isMuted);
   };
 
-  const handleLike = async () => {
-    try {
-      await shortsApi.toggleLike(short.uuid);
-      setIsLiked(!isLiked);
-      setLikesCount(isLiked ? likesCount - 1 : likesCount + 1);
-    } catch {
-      toast.error('Please login to like');
-    }
+  const handleLike = () => {
+    toggleLike.mutate(short.uuid, {
+      onError: () => {
+        toast.error('Please login to like');
+      },
+    });
   };
 
-  const handleBookmark = async () => {
+  const handleBookmark = () => {
     if (!bookmarksEnabled) return;
 
-    try {
-      await shortsApi.toggleBookmark(short.uuid);
-      setIsBookmarked(!isBookmarked);
-      toast.success(isBookmarked ? 'Removed from saved' : 'Saved');
-    } catch {
-      toast.error('Please login to save');
-    }
+    toggleBookmark.mutate(short.uuid, {
+      onSuccess: () => {
+        toast.success(isBookmarked ? 'Removed from saved' : 'Saved');
+      },
+      onError: () => {
+        toast.error('Please login to save');
+      },
+    });
   };
 
   const handleShare = async () => {

@@ -3,11 +3,12 @@
 import Image from 'next/image';
 import { MessageCircle } from 'lucide-react';
 import { useShortsStore } from '@/lib/stores/shorts-store';
-import { useToggleLike } from '@/api/mutations';
+import { useToggleShortLike } from '@/api/mutations/shorts.mutations';
 import { toast } from 'sonner';
 
 interface MobileActionButtonsProps {
   videoUuid: string;
+  hasLiked: boolean;
   channelDp?: string;
 }
 
@@ -20,17 +21,16 @@ function FireIcon() {
   );
 }
 
-export function MobileActionButtons({ videoUuid, channelDp }: MobileActionButtonsProps) {
-  const { hasLiked, setHasLiked, toggleComments } = useShortsStore();
-  const toggleLike = useToggleLike();
+export function MobileActionButtons({ videoUuid, hasLiked, channelDp }: MobileActionButtonsProps) {
+  const { toggleComments } = useShortsStore();
+  const toggleLike = useToggleShortLike();
 
-  const handleToggleLike = async () => {
-    try {
-      await toggleLike.mutateAsync(videoUuid);
-      setHasLiked(!hasLiked);
-    } catch {
-      toast.error('Please login to like');
-    }
+  const handleToggleLike = () => {
+    toggleLike.mutate(videoUuid, {
+      onError: () => {
+        toast.error('Please login to like');
+      },
+    });
   };
 
   return (
