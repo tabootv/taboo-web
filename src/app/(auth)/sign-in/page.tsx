@@ -77,10 +77,11 @@ function SignInContent() {
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-white/70 mb-1.5">Email</label>
+          <label htmlFor="email" className="block text-sm font-medium text-white/70 mb-1.5">Email</label>
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
             <input
+              id="email"
               type="email"
               name="email"
               placeholder="Enter your email"
@@ -99,10 +100,11 @@ function SignInContent() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-white/70 mb-1.5">Password</label>
+          <label htmlFor="password" className="block text-sm font-medium text-white/70 mb-1.5">Password</label>
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
             <input
+              id="password"
               type="password"
               name="password"
               placeholder="Enter your password"

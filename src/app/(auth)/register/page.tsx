@@ -100,10 +100,11 @@ export default function RegisterPage() {
         {/* Name fields */}
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-sm font-medium text-white/70 mb-1.5">First name</label>
+            <label htmlFor="first_name" className="block text-sm font-medium text-white/70 mb-1.5">First name</label>
             <div className="relative">
               <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
               <input
+                id="first_name"
                 type="text"
                 name="first_name"
                 placeholder="First"
@@ -118,8 +119,9 @@ export default function RegisterPage() {
             {errors.first_name && <p className="mt-1 text-xs text-red-primary">{errors.first_name}</p>}
           </div>
           <div>
-            <label className="block text-sm font-medium text-white/70 mb-1.5">Last name</label>
+            <label htmlFor="last_name" className="block text-sm font-medium text-white/70 mb-1.5">Last name</label>
             <input
+              id="last_name"
               type="text"
               name="last_name"
               placeholder="Last"
@@ -135,10 +137,11 @@ export default function RegisterPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-white/70 mb-1.5">Email</label>
+          <label htmlFor="email" className="block text-sm font-medium text-white/70 mb-1.5">Email</label>
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
             <input
+              id="email"
               type="email"
               name="email"
               placeholder="Enter your email"
@@ -154,10 +157,11 @@ export default function RegisterPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-white/70 mb-1.5">Password</label>
+          <label htmlFor="password" className="block text-sm font-medium text-white/70 mb-1.5">Password</label>
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
             <input
+              id="password"
               type="password"
               name="password"
               placeholder="Create a password"
@@ -173,10 +177,11 @@ export default function RegisterPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-white/70 mb-1.5">Confirm password</label>
+          <label htmlFor="password_confirmation" className="block text-sm font-medium text-white/70 mb-1.5">Confirm password</label>
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
             <input
+              id="password_confirmation"
               type="password"
               name="password_confirmation"
               placeholder="Confirm your password"
