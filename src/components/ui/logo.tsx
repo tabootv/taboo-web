@@ -71,7 +71,7 @@ export function Logo({ className, size = 'md', linkTo = '/home' }: LogoProps) {
 
   if (linkTo) {
     return (
-      <Link href={linkTo} className="inline-block">
+      <Link href={linkTo} className="inline-block" aria-label="TabooTV Home">
         {logo}
       </Link>
     );

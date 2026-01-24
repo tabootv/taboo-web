@@ -179,7 +179,7 @@ export default function SinglePostPage({ params }: { params: Promise<{ post: str
                 >
                   <Image
                     src={post.media[0]?.original_url || ''}
-                    alt=""
+                    alt={post.caption ? `Post image: ${post.caption.substring(0, 100)}` : 'Community post image'}
                     fill
                     className="object-cover"
                   />
@@ -192,7 +192,12 @@ export default function SinglePostPage({ params }: { params: Promise<{ post: str
                       onClick={() => handleImageClick(index)}
                       className="relative aspect-square cursor-pointer hover:opacity-90 transition-opacity"
                     >
-                      <Image src={media.original_url || ''} alt="" fill className="object-cover" />
+                      <Image 
+                        src={media.original_url || ''} 
+                        alt={post.caption ? `Post image ${index + 1}: ${post.caption.substring(0, 50)}` : `Community post image ${index + 1}`} 
+                        fill 
+                        className="object-cover" 
+                      />
                       {index === 3 && post.media && post.media.length > 4 && (
                         <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                           <span className="text-white text-xl font-bold">
