@@ -148,19 +148,49 @@ Used by single route?
 
 ---
 
-### PR 3.4: Colocate Series Components
+### PR 3.4: Colocate Series Components ✅
 
 **Deliverable**: Move series components to route
 
+**Status**: Complete
+
 **Tasks**:
-- [ ] Create `app/(main)/series/_components/`
-- [ ] Move `src/components/series/*`
-- [ ] Update imports
-- [ ] Delete old directory
+- [x] Create `app/(main)/series/_components/`
+- [x] Move `src/components/series/*`
+- [x] Update imports
+- [x] Delete old directory
+
+**Implementation Details**:
+
+1. **Created directory**: `app/(main)/series/_components/`
+
+2. **Moved 6 components** from `src/components/series/` to `app/(main)/series/_components/`:
+   - `EpisodeCard/`
+   - `PlayerPageSkeleton/`
+   - `SeriesCardSkeleton/`
+   - `SeriesPageSkeleton/`
+   - `SeriesPremiumCard/`
+   - `TrailerModal/`
+
+3. **Updated imports in 8 files**:
+   - `app/(main)/series/page.tsx` - Changed to relative imports `./_components/`
+   - `app/(main)/series/[slug]/page.tsx` - Changed to relative imports `../_components/`
+   - `app/(main)/series/[slug]/loading.tsx` - Changed to relative imports `../_components/`
+   - `app/(main)/series/[slug]/play/[videoUuid]/page.tsx` - Changed to relative imports `../../../_components/`
+   - `app/(main)/series/[slug]/play/[videoUuid]/loading.tsx` - Changed to relative imports `../../../_components/`
+   - `app/(main)/creators/[handler]/_components/tabs/CreatorSeriesTab.tsx` - Changed to absolute import `@/app/(main)/series/_components/`
+   - `app/(main)/creators/[handler]/_components/tabs/CreatorEducationTab.tsx` - Changed to absolute import `@/app/(main)/series/_components/`
+   - `app/(main)/videos/[id]/loading.tsx` - Changed to absolute import `@/app/(main)/series/_components/`
+
+4. **Deleted old directory**: `src/components/series/` (including empty `PlaylistCard/` subdirectory)
+
+5. **Updated codemod map**: `codemods/maps/components-series.json` with new paths
 
 **Validation**:
-- [ ] Series pages work
-- [ ] No broken imports
+- [x] Series pages work
+- [x] No broken imports
+- [x] TypeScript compilation passes
+- [x] Lint passes (no errors in modified files)
 
 **Rollback**: Restore old directory
 
@@ -168,19 +198,45 @@ Used by single route?
 
 ---
 
-### PR 3.5: Colocate Courses Components
+### PR 3.5: Colocate Courses Components ✅
 
 **Deliverable**: Move courses components to route
 
+**Status**: Complete
+
 **Tasks**:
-- [ ] Create `app/(main)/courses/_components/`
-- [ ] Move `src/components/courses/*`
-- [ ] Update imports
-- [ ] Delete old directory
+- [x] Create `app/(main)/courses/_components/`
+- [x] Move `src/components/courses/*`
+- [x] Update imports
+- [x] Delete old directory
+
+**Implementation Details**:
+
+1. **Created directory**: `app/(main)/courses/_components/`
+
+2. **Moved 5 components** from `src/components/courses/` to `app/(main)/courses/_components/`:
+   - `CourseCard/`
+   - `CoursePageSkeleton/`
+   - `CoursePlayerPageSkeleton/`
+   - `LessonCard/`
+   - `LessonCardPlayer/`
+
+3. **Updated imports in 5 files**:
+   - `app/(main)/courses/page.tsx` - Changed to relative import `./_components/`
+   - `app/(main)/courses/[id]/page.tsx` - Changed to relative imports `../_components/`
+   - `app/(main)/courses/[id]/loading.tsx` - Changed to relative import `../_components/`
+   - `app/(main)/courses/[id]/play/[videoUuid]/page.tsx` - Changed to relative imports `../../../_components/`
+   - `app/(main)/courses/[id]/play/[videoUuid]/loading.tsx` - Changed to relative import `../../../_components/`
+
+4. **Deleted old directory**: `src/components/courses/`
+
+5. **Updated codemod map**: `codemods/maps/components-courses.json` with new paths
 
 **Validation**:
-- [ ] Courses pages work
-- [ ] No broken imports
+- [x] Courses pages work
+- [x] No broken imports
+- [x] TypeScript compilation passes
+- [x] Lint passes (no errors in modified files)
 
 **Rollback**: Restore old directory
 
@@ -188,25 +244,47 @@ Used by single route?
 
 ---
 
-### PR 3.6: Colocate Video Components
+### PR 3.6: Colocate Video Components ✅
 
 **Deliverable**: Organize video components
 
-**Decision**: Video components may be used across multiple routes. Evaluate:
-- Single route only → `app/(main)/videos/_components/`
-- Multiple routes → `features/video/components/`
+**Status**: Complete
+
+**Decision**: Video components are used across multiple routes (videos, courses, searches, etc.), so moved to `features/video/components/` (shared location).
 
 **Tasks**:
-- [ ] Audit video component usage
-- [ ] Create appropriate directory
-- [ ] Move `src/components/video/*`
-- [ ] Update imports
-- [ ] Delete old directory
+- [x] Audit video component usage
+- [x] Create appropriate directory
+- [x] Move `src/components/video/*`
+- [x] Update imports
+- [x] Delete old directory
+
+**Implementation Details**:
+
+1. **Decision**: Moved to `features/video/components/` because:
+   - `VideoPlayerSkeleton` is used in multiple routes (videos, courses)
+   - Components are shared across routes, not route-specific
+   - `features/video/components/` already exists with other video-related components
+
+2. **Moved 4 components** from `src/components/video/` to `features/video/components/`:
+   - `VideoCard/`
+   - `VideoCardSkeleton/`
+   - `VideoEmptyState/`
+   - `VideoPlayerSkeleton/`
+
+3. **Updated imports in 3 files**:
+   - `app/(main)/videos/[id]/page.tsx` - Changed to `@/features/video/components/VideoPlayerSkeleton`
+   - `app/(main)/courses/[id]/page.tsx` - Changed to `@/features/video/components/VideoPlayerSkeleton`
+   - `app/(main)/courses/[id]/play/[videoUuid]/page.tsx` - Changed to `@/features/video/components/VideoPlayerSkeleton`
+
+4. **Deleted old directory**: `src/components/video/` (including `index.ts` barrel file)
 
 **Validation**:
-- [ ] Video pages work
-- [ ] Video player works everywhere used
-- [ ] No broken imports
+- [x] Video pages work
+- [x] Video player works everywhere used
+- [x] No broken imports
+- [x] TypeScript compilation passes
+- [x] Lint passes (no errors in modified files)
 
 **Rollback**: Restore old directory
 
@@ -214,20 +292,45 @@ Used by single route?
 
 ---
 
-### PR 3.7: Colocate Studio Components
+### PR 3.7: Colocate Studio Components ✅
 
 **Deliverable**: Move studio components to route
 
+**Status**: Complete
+
 **Tasks**:
-- [ ] Create `app/studio/_components/`
-- [ ] Move `src/components/studio/*`
-- [ ] Update imports
-- [ ] Delete old directory
+- [x] Create `app/studio/_components/`
+- [x] Move `src/components/studio/*`
+- [x] Update imports
+- [x] Delete old directory
+
+**Implementation Details**:
+
+1. **Created directory**: `app/studio/_components/`
+
+2. **Moved 5 components** from `src/components/studio/` to `app/studio/_components/`:
+   - `ActionCard/`
+   - `ComingSoonItem/`
+   - `ContentTypeSelector/`
+   - `QuickLinkCard/`
+   - `StatCard/`
+
+3. **Updated imports in 4 files**:
+   - `app/studio/page.tsx` - Changed to relative import `./_components/`
+   - `app/studio/posts/page.tsx` - Changed to relative import `../_components/`
+   - `app/studio/upload/video/page.tsx` - Changed to relative import `../../_components/`
+   - `app/studio/upload/short/page.tsx` - Changed to relative import `../../_components/`
+
+4. **Deleted old directory**: `src/components/studio/`
+
+5. **Updated codemod map**: `codemods/maps/components-studio.json` with new paths
 
 **Validation**:
-- [ ] Studio pages work
-- [ ] Upload flows work
-- [ ] No broken imports
+- [x] Studio pages work
+- [x] Upload flows work
+- [x] No broken imports
+- [x] TypeScript compilation passes
+- [x] Lint passes (no errors in modified files)
 
 **Rollback**: Restore old directory
 
@@ -235,21 +338,58 @@ Used by single route?
 
 ---
 
-### PR 3.8: Clean Up Remaining Component Directories
+### PR 3.8: Clean Up Remaining Component Directories ✅
 
 **Deliverable**: Remove empty/obsolete component directories
 
+**Status**: Complete
+
 **Tasks**:
-- [ ] Audit remaining `src/components/*` directories
-- [ ] Remove empty directories
-- [ ] Consolidate truly shared components in `components/ui/` or `components/layout/`
-- [ ] Update any remaining imports
+- [x] Audit remaining `src/components/*` directories
+- [x] Remove empty directories
+- [x] Consolidate truly shared components in `components/ui/` or `components/layout/`
+- [x] Update any remaining imports
+
+**Implementation Details**:
+
+1. **Moved route-specific components**:
+   - `src/components/community/*` → `app/(main)/community/_components/` (4 components)
+   - `src/components/shorts/*` → `app/(main)/shorts/_components/` (1 component)
+
+2. **Removed barrel files** (Epic 1 cleanup):
+   - `src/components/community/index.ts` - Removed (components moved)
+   - `src/components/creator/index.ts` - Removed (updated to direct imports)
+   - `src/components/watchlist/index.ts` - Removed (updated to direct imports)
+
+3. **Updated imports in 6 files**:
+   - `app/(main)/community/page.tsx` - Changed to direct relative imports
+   - `app/(main)/community/[post]/loading.tsx` - Changed to relative import
+   - `app/(main)/shorts/[uuid]/loading.tsx` - Changed to relative import
+   - `app/(main)/creators/page.tsx` - Changed to direct imports (removed barrel)
+   - `app/(main)/creators/loading.tsx` - Changed to direct import
+   - `app/(main)/creators/[handler]/loading.tsx` - Changed to direct import
+
+4. **Deleted empty directories**:
+   - `src/components/community/` (after moving components)
+   - `src/components/shorts/` (after moving components)
+
+5. **Remaining shared components** (correctly placed):
+   - `ui/` - Core design system (shared)
+   - `layout/` - Global layouts (shared)
+   - `search/` - Global search UI (shared)
+   - `sidebar/` - Navigation sidebars (shared)
+   - `navigation/` - Navigation helpers (shared)
+   - `providers/` - App-wide providers (shared)
+   - `feature/` - Feature flags (shared)
+   - `watchlist/` - Watchlist components (shared, barrel removed)
+   - `creator/` - CreatorCard shared across routes (shared, barrel removed)
 
 **Validation**:
-- [ ] No empty directories
-- [ ] All components properly placed
-- [ ] TypeScript passes
-- [ ] Build succeeds
+- [x] No empty directories
+- [x] All components properly placed
+- [x] TypeScript passes
+- [x] Build succeeds
+- [x] Lint passes (no errors in modified files)
 
 **Rollback**: Restore directories if needed
 
