@@ -1,0 +1,29 @@
+export interface QualityTrack {
+  id: number;
+  height: number;
+  width: number;
+  bandwidth: number;
+  label: string;
+}
+
+export type SettingsPanel = 'main' | 'quality' | 'speed';
+
+// Shaka Player types are not fully typed, using any for now
+// Type aliases improve code readability despite SonarQube warning
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// NOSONAR - Type alias improves code readability
+export type ShakaPlayerInstance = any;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// NOSONAR - Type alias improves code readability
+export type ShakaModule = any;
+
+export interface SeekFeedback {
+  direction: 'forward' | 'backward';
+  seconds: number;
+}
+
+export interface SeekPreview {
+  time: number;
+  position: number;
+}
