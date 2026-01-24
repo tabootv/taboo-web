@@ -1,6 +1,6 @@
 'use client';
 
-import { postsClient as postsApi } from '@/api/client';
+import { postsClient as postsApi } from '@/api/client/posts.client';
 import { ImageLightbox } from '@/components/ui/image-lightbox';
 import { getCreatorRoute } from '@/lib/utils';
 import type { Post } from '@/types';

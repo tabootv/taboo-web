@@ -5,8 +5,8 @@
  */
 
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
-import type { CreatorListFilters } from '../client';
-import { creatorsClient } from '../client';
+import type { CreatorListFilters } from '../client/creators.client';
+import { creatorsClient } from '../client/creators.client';
 import { queryKeys } from '../query-keys';
 import type { Creator } from '../types';
 

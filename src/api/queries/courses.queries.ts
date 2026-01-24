@@ -5,8 +5,8 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import type { CourseListFilters } from '../client';
-import { coursesClient } from '../client';
+import type { CourseListFilters } from '../client/courses.client';
+import { coursesClient } from '../client/courses.client';
 import { queryKeys } from '../query-keys';
 
 /**

@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Lock, AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui';
 import { Logo } from '@/components/ui/logo';
-import { apiClient } from '@/api/client';
+import { apiClient } from '@/api/client/base-client';
 import { toast } from 'sonner';
 
 export default function ConfirmPasswordPage() {

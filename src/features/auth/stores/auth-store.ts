@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { isAuthenticated } from '@/api/client';
+import { isAuthenticated } from '@/api/client/base-client';
 
 /**
  * Auth store for client-side UI state only.

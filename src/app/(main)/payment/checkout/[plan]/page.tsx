@@ -4,7 +4,7 @@ import { useEffect, useState, use, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, ExternalLink, Check, Loader2, CreditCard } from 'lucide-react';
-import { subscriptionsClient as subscriptions } from '@/api/client';
+import { subscriptionsClient as subscriptions } from '@/api/client/subscriptions.client';
 import type { Plan } from '@/types';
 import { useAuthStore } from '@/lib/stores';
 import { Button, LoadingScreen } from '@/components/ui';
@@ -166,7 +166,6 @@ export default function CheckoutPage({ params }: { params: Promise<{ plan: strin
         <ArrowLeft className="w-5 h-5" />
         Back to plans
       </Link>
-
       <div className="grid md:grid-cols-2 gap-8">
         {/* Order Summary */}
         <div className="bg-surface rounded-xl border border-border p-6">
@@ -277,14 +276,14 @@ export default function CheckoutPage({ params }: { params: Promise<{ plan: strin
             </>
           ) : (
             /* No checkout available */
-            <div className="text-center py-8">
+            (<div className="text-center py-8">
               <p className="text-text-secondary mb-4">
                 Online checkout is not available for this plan.
               </p>
               <p className="text-sm text-text-secondary">
                 Please contact support for assistance.
               </p>
-            </div>
+            </div>)
           )}
         </div>
       </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { playlistsClient as playlistsApi } from '@/api/client';
+import { playlistsClient as playlistsApi } from '@/api/client/playlists.client';
 import { MediaPreviewModal } from '@/components/home/media-preview-modal';
 import { RailCard } from '@/components/home/rail-card';
 import { RailRow } from '@/components/home/rail-row';

@@ -9,7 +9,7 @@ import { Button, LoadingScreen, Spinner } from '@/components/ui';
 import { formatCompactNumber, formatDuration, formatRelativeTime } from '@/lib/utils';
 import { useAuthStore } from '@/lib/stores';
 import { toast } from 'sonner';
-import { apiClient } from '@/api/client';
+import { apiClient } from '@/api/client/base-client';
 
 export default function ContentVideosPage() {
   const { user } = useAuthStore();

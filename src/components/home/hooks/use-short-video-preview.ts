@@ -3,7 +3,7 @@
  */
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { shortsClient } from '@/api/client';
+import { shortsClient } from '@/api/client/shorts.client';
 import { getVideoUrl } from '../utils/shorts-utils';
 import { HOVER_DELAY, VIDEO_PREVIEW_DELAY } from '../constants/home-constants';
 import type { Video } from '@/types';

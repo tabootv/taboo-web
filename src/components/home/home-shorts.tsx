@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { homeClient } from '@/api/client';
+import { homeClient } from '@/api/client/home.client';
 import type { Video } from '@/types';
 import { SectionCard } from '@/components/home';
 import { ShortCard } from './components/ShortCard';

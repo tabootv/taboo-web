@@ -1,6 +1,6 @@
 'use client';
 
-import { homeClient } from '@/api/client';
+import { homeClient } from '@/api/client/home.client';
 import type { Series } from '@/types';
 import { useEffect, useState } from 'react';
 import { SeriesSection } from './components/SeriesSection';

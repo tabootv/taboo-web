@@ -5,7 +5,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { notificationsClient } from '../client';
+import { notificationsClient } from '../client/notifications.client';
 import { queryKeys } from '../query-keys';
 
 /**

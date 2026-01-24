@@ -5,8 +5,8 @@
  */
 
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
-import type { VideoListFilters } from '../client';
-import { videoClient } from '../client';
+import type { VideoListFilters } from '../client/video.client';
+import { videoClient } from '../client/video.client';
 import { queryKeys } from '../query-keys';
 import type { Video } from '../types';
 

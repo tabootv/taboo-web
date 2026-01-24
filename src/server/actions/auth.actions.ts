@@ -11,7 +11,7 @@
 
 'use server';
 
-import { authClient } from '@/api/client';
+import { authClient } from '@/api/client/auth.client';
 import { revalidatePath } from 'next/cache';
 
 export async function loginAction(credentials: { email: string; password: string }) {

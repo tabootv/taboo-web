@@ -5,7 +5,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { searchClient } from '../client';
+import { searchClient } from '../client/search.client';
 import { queryKeys } from '../query-keys';
 
 /**

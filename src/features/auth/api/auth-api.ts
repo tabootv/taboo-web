@@ -1,4 +1,4 @@
-import { apiClient, setToken, removeToken } from '@/api/client';
+import { apiClient, setToken, removeToken } from '@/api/client/base-client';
 import type { AuthResponse, MeResponse, LoginCredentials, RegisterData, FirebaseLoginData } from '@/types';
 
 /**

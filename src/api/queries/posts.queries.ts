@@ -5,7 +5,7 @@
  */
 
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
-import { postsClient } from '../client';
+import { postsClient } from '../client/posts.client';
 import { queryKeys } from '../query-keys';
 
 /**

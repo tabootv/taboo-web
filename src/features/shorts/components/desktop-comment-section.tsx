@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { X, Send } from 'lucide-react';
 import { useShortsStore } from '@/lib/stores/shorts-store';
 import { useAuthStore } from '@/lib/stores/auth-store';
-import { videoClient } from '@/api/client';
+import { videoClient } from '@/api/client/video.client';
 import type { Video } from '@/types';
 import { formatRelativeTime } from '@/lib/utils';
 import { toast } from 'sonner';

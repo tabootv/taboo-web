@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search } from 'lucide-react';
-import { searchClient as searchApi } from '@/api/client';
+import { searchClient as searchApi } from '@/api/client/search.client';
 import { useDebounce } from '@/hooks';
 import type { Video, Series, Creator } from '@/types';
 import { Spinner } from './spinner';

@@ -1,6 +1,6 @@
 'use client';
 
-import { homeClient } from '@/api/client';
+import { homeClient } from '@/api/client/home.client';
 import { Button } from '@/components/ui';
 import { useCreatorById } from '@/hooks/use-creator-by-id';
 import { getSeriesRoute } from '@/lib/utils';

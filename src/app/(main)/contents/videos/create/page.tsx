@@ -8,7 +8,7 @@ import { ArrowLeft, Upload, X, Film, AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui';
 import { useAuthStore } from '@/lib/stores';
 import { toast } from 'sonner';
-import { apiClient } from '@/api/client';
+import { apiClient } from '@/api/client/base-client';
 
 export default function CreateVideoPage() {
   const router = useRouter();

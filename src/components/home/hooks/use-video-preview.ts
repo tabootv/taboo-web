@@ -3,7 +3,7 @@
  */
 
 import { useState, useCallback } from 'react';
-import { videoClient as videosApi } from '@/api/client';
+import { videoClient as videosApi } from '@/api/client/video.client';
 import type { Video } from '@/types';
 
 interface UseVideoPreviewOptions {

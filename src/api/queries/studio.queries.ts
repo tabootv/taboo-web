@@ -5,7 +5,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { studioClient } from '../client';
+import { studioClient } from '../client/studio.client';
 
 /**
  * Hook to fetch studio dashboard

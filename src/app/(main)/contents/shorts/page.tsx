@@ -9,7 +9,7 @@ import { Button, LoadingScreen, Spinner } from '@/components/ui';
 import { formatCompactNumber } from '@/lib/utils';
 import { useAuthStore } from '@/lib/stores';
 import { toast } from 'sonner';
-import { apiClient } from '@/api/client';
+import { apiClient } from '@/api/client/base-client';
 
 export default function ContentShortsPage() {
   const { user } = useAuthStore();

@@ -4,7 +4,7 @@ import { useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Lock, Eye, EyeOff, CheckCircle } from 'lucide-react';
-import { authClient } from '@/api/client';
+import { authClient } from '@/api/client/auth.client';
 import { Button } from '@/components/ui';
 import { Logo } from '@/components/ui/logo';
 import { toast } from 'sonner';

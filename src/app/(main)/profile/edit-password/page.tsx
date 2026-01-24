@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Lock, Eye, EyeOff, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui';
-import { profileClient as profileApi } from '@/api/client';
+import { profileClient as profileApi } from '@/api/client/profile.client';
 import { toast } from 'sonner';
 
 export default function EditPasswordPage() {

@@ -3,7 +3,7 @@
  */
 
 import { useState, useCallback, useRef } from 'react';
-import { playlistsClient as playlistsApi } from '@/api/client';
+import { playlistsClient as playlistsApi } from '@/api/client/playlists.client';
 import type { Playlist, PaginatedResponse, Video } from '@/types';
 
 interface PlaylistWithVideos extends Omit<Playlist, 'videos'> {

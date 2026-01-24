@@ -1,6 +1,6 @@
 'use client';
 
-import { homeClient } from '@/api/client';
+import { homeClient } from '@/api/client/home.client';
 import { SectionCard } from '@/components/home';
 import { getCreatorRoute } from '@/lib/utils';
 import type { Creator } from '@/types';

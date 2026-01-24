@@ -55,7 +55,7 @@ import {
   ChartTooltip,
   type ChartConfig,
 } from '@/components/ui/chart';
-import { studioClient as studio } from '@/api/client';
+import { studioClient as studio } from '@/api/client/studio.client';
 import type { StudioVideoListItem } from '@/types';
 import Image from 'next/image';
 

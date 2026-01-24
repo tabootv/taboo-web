@@ -10,7 +10,7 @@ import { VideoPlayer } from '@/features/video';
 import { useAuthStore } from '@/lib/stores';
 import { formatCompactNumber, formatDuration, formatRelativeTime } from '@/lib/utils';
 import { toast } from 'sonner';
-import { apiClient } from '@/api/client';
+import { apiClient } from '@/api/client/base-client';
 import type { Video } from '@/types';
 
 export default function ShowShortPage({ params }: { params: Promise<{ id: string }> }) {

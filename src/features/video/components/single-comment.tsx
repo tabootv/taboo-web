@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react';
 import Image from 'next/image';
 import { Reply, Send } from 'lucide-react';
-import { videoClient } from '@/api/client';
+import { videoClient } from '@/api/client/video.client';
 import type { Comment } from '@/types';
 import { formatRelativeTime } from '@/lib/utils';
 

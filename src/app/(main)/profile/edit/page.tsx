@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import type { User } from '@/types';
-import { profileClient as profileApi } from '@/api/client';
+import { profileClient as profileApi } from '@/api/client/profile.client';
 import { Button, LoadingScreen } from '@/components/ui';
 import { toast } from 'sonner';
 import Link from 'next/link';

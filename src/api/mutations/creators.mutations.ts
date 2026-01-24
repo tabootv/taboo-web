@@ -5,7 +5,7 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { creatorsClient } from '../client';
+import { creatorsClient } from '../client/creators.client';
 import type { CreatorListResponse, FollowResponse } from '../client/creators.client';
 import { queryKeys } from '../query-keys';
 import type { Creator } from '../types';

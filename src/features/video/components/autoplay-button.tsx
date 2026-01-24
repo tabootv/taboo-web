@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { videoClient } from '@/api/client';
+import { videoClient } from '@/api/client/video.client';
 import { useAuthStore } from '@/lib/stores/auth-store';
 
 interface AutoplayButtonProps {

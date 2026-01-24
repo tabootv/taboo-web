@@ -1,6 +1,6 @@
 'use client';
 
-import { postsClient as postsApi } from '@/api/client';
+import { postsClient as postsApi } from '@/api/client/posts.client';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import type { Post, PostComment as PostCommentType } from '@/types';
 import { Send } from 'lucide-react';

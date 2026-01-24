@@ -4,7 +4,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Crown, Check, CreditCard, Lock, AlertCircle } from 'lucide-react';
-import { subscriptionsClient as subscriptionsApi } from '@/api/client';
+import { subscriptionsClient as subscriptionsApi } from '@/api/client/subscriptions.client';
 import type { Plan } from '@/types';
 import { useAuthStore } from '@/lib/stores';
 import { Button, LoadingScreen } from '@/components/ui';

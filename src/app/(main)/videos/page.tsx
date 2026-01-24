@@ -1,6 +1,6 @@
 'use client';
 
-import { VideoListFilters } from '@/api';
+import type { VideoListFilters } from '@/api/client/video.client';
 import { useCreatorsListPublic, useVideoList } from '@/api/queries';
 import { useCountries, useTags } from '@/api/queries/public.queries';
 import { MediaPreviewModal } from '@/components/home/media-preview-modal';

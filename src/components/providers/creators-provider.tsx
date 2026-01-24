@@ -1,4 +1,4 @@
-import { creatorsClient } from '@/api/client';
+import { creatorsClient } from '@/api/client/creators.client';
 import { queryKeys } from '@/api/query-keys';
 import { HydrationBoundary, QueryClient, dehydrate } from '@tanstack/react-query';
 

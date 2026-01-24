@@ -12,7 +12,8 @@
  */
 
 import { cache } from 'react';
-import { homeClient, playlistsClient } from '@/api/client';
+import { homeClient } from '@/api/client/home.client';
+import { playlistsClient } from '@/api/client/playlists.client';
 import type { Banner, Creator, Playlist, Series, Video } from '@/types';
 import { cookies } from 'next/headers';
 

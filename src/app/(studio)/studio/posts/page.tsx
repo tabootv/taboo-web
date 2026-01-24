@@ -1,6 +1,6 @@
 'use client';
 
-import { studioClient as studio } from '@/api/client';
+import { studioClient as studio } from '@/api/client/studio.client';
 import { ContentTypeSelector } from '@/components/studio';
 import { Button } from '@/components/ui';
 import { Card, CardContent } from '@/components/ui/card';

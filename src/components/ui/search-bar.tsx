@@ -1,6 +1,6 @@
 'use client';
 
-import { searchClient as searchApi } from '@/api/client';
+import { searchClient as searchApi } from '@/api/client/search.client';
 import { useDebounce } from '@/hooks';
 import { cn, getCreatorRoute, getSeriesRoute } from '@/lib/utils';
 import type { Creator, Series, Video } from '@/types';

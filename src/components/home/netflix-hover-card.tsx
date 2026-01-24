@@ -1,6 +1,6 @@
 'use client';
 
-import { videoClient as videosApi } from '@/api/client';
+import { videoClient as videosApi } from '@/api/client/video.client';
 import { useSavedVideosStore, type SavedVideo } from '@/lib/stores/saved-videos-store';
 import type { Video } from '@/types';
 import { Play } from 'lucide-react';

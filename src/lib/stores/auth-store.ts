@@ -1,4 +1,5 @@
-import { authClient, isAuthenticated, removeToken } from '@/api/client';
+import { authClient } from '@/api/client/auth.client';
+import { isAuthenticated, removeToken } from '@/api/client/base-client';
 import type { FirebaseLoginData, LoginCredentials, RegisterData, User } from '@/types';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';

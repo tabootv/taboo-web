@@ -5,7 +5,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { profileClient } from '../client';
+import { profileClient } from '../client/profile.client';
 
 /**
  * Hook to fetch user profile

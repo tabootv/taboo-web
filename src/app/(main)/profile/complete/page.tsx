@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { Camera, User, ChevronRight, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui';
 import { Logo } from '@/components/ui/logo';
-import { profileClient as profileApi } from '@/api/client';
+import { profileClient as profileApi } from '@/api/client/profile.client';
 import { useAuthStore } from '@/lib/stores';
 import { toast } from 'sonner';
 

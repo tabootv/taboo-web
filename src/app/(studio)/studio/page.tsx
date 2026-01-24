@@ -136,7 +136,7 @@ export default function StudioDashboard() {
     let cancelled = false;
     async function loadCounts() {
       try {
-        const { creatorsClient } = await import('@/api/client');
+        const { creatorsClient } = await import('@/api/client/creators.client');
         const creator = await creatorsClient.getProfile(Number(channelId));
         if (!cancelled) {
           setContentTotals({

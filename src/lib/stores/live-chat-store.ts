@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import type { ChatMessage } from '@/types';
-import { livechatClient } from '@/api/client';
+import { livechatClient } from '@/api/client/livechat.client';
 
 interface LiveChatState {
   isOpen: boolean;

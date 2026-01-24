@@ -7,7 +7,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { videoClient } from '../client';
+import { videoClient } from '../client/video.client';
 import { queryKeys } from '../query-keys';
 import type { MeResponse, Video } from '../types';
 
