@@ -11,6 +11,8 @@ import {
   useQualityManagement,
   useShakaPlayer,
 } from './hooks';
+
+const noop = () => {};
 import { PlayerControls } from './player-controls';
 import type { SeekPreview } from './types';
 
@@ -125,7 +127,7 @@ export function ShakaPlayer({
     volume,
     handleVolumeChange,
     showSettings: false,
-    setShowSettings: () => { },
+    setShowSettings: noop,
   });
 
   const handleProgressHover = useCallback(

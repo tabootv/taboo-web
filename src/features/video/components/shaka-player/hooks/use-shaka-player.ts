@@ -5,6 +5,7 @@ import { PLAYER_CONFIG, STORAGE_KEYS } from '../../../constants/player-constants
 import type { ShakaModule, ShakaPlayerInstance } from '../types';
 
 const VOLUME_STORAGE_KEY = STORAGE_KEYS.VOLUME;
+const PREVIEW_THROTTLE_MS = PLAYER_CONFIG.PREVIEW.THROTTLE_MS;
 
 interface UseShakaPlayerParams {
   src: string;
@@ -232,9 +233,7 @@ export function useShakaPlayer({
 
   // Create canvas for preview frame capture
   useEffect(() => {
-    if (!previewCanvasRef.current) {
-      previewCanvasRef.current = document.createElement('canvas');
-    }
+    previewCanvasRef.current ??= document.createElement('canvas');
     return () => {
       previewCanvasRef.current = null;
     };
@@ -252,7 +251,7 @@ export function useShakaPlayer({
       if (!ctx) return;
 
       const now = Date.now();
-      if (now - previewThrottleRef.current < 150) return;
+      if (now - previewThrottleRef.current < PREVIEW_THROTTLE_MS) return;
       previewThrottleRef.current = now;
 
       video.currentTime = time;

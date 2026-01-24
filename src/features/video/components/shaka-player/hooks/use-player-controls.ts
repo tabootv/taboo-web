@@ -6,6 +6,7 @@ import type { SeekFeedback } from '../types';
 
 const VOLUME_STORAGE_KEY = STORAGE_KEYS.VOLUME;
 const CONTROLS_HIDE_DELAY = PLAYER_CONFIG.CONTROLS_HIDE_DELAY;
+const FEEDBACK_DISPLAY_MS = PLAYER_CONFIG.FEEDBACK_DISPLAY_MS;
 
 interface UsePlayerControlsParams {
   videoRef: React.RefObject<HTMLVideoElement | null>;
@@ -104,7 +105,7 @@ export function usePlayerControls({
       setIsMuted(clampedVolume === 0);
       saveVolume(clampedVolume);
       setVolumeFeedback(Math.round(clampedVolume * 100));
-      setTimeout(() => setVolumeFeedback(null), 800);
+      setTimeout(() => setVolumeFeedback(null), FEEDBACK_DISPLAY_MS);
     },
     [videoRef, saveVolume]
   );
@@ -133,7 +134,7 @@ export function usePlayerControls({
         direction: seconds > 0 ? 'forward' : 'backward',
         seconds: Math.abs(seconds),
       });
-      setTimeout(() => setSeekFeedback(null), 800);
+      setTimeout(() => setSeekFeedback(null), FEEDBACK_DISPLAY_MS);
     },
     [videoRef, duration, onSeek]
   );
