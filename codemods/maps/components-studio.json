@@ -1,7 +1,7 @@
 {
-  "ActionCard": "@/components/studio/ActionCard",
-  "ComingSoonItem": "@/components/studio/ComingSoonItem",
-  "ContentTypeSelector": "@/components/studio/ContentTypeSelector",
-  "QuickLinkCard": "@/components/studio/QuickLinkCard",
-  "StatCard": "@/components/studio/StatCard"
+  "ActionCard": "@/app/studio/_components/ActionCard",
+  "ComingSoonItem": "@/app/studio/_components/ComingSoonItem",
+  "ContentTypeSelector": "@/app/studio/_components/ContentTypeSelector",
+  "QuickLinkCard": "@/app/studio/_components/QuickLinkCard",
+  "StatCard": "@/app/studio/_components/StatCard"
 }

@@ -1,8 +1,8 @@
 {
-  "CoursePageSkeleton": "@/components/courses/CoursePageSkeleton",
-  "CoursePlayerPageSkeleton": "@/components/courses/CoursePlayerPageSkeleton",
-  "CourseCard": "@/components/courses/CourseCard",
-  "CourseCardProps": "@/components/courses/CourseCard",
-  "LessonCard": "@/components/courses/LessonCard",
-  "LessonCardPlayer": "@/components/courses/LessonCardPlayer"
+  "CoursePageSkeleton": "@/app/(main)/courses/_components/CoursePageSkeleton",
+  "CoursePlayerPageSkeleton": "@/app/(main)/courses/_components/CoursePlayerPageSkeleton",
+  "CourseCard": "@/app/(main)/courses/_components/CourseCard",
+  "CourseCardProps": "@/app/(main)/courses/_components/CourseCard",
+  "LessonCard": "@/app/(main)/courses/_components/LessonCard",
+  "LessonCardPlayer": "@/app/(main)/courses/_components/LessonCardPlayer"
 }

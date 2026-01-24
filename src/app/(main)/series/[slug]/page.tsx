@@ -1,8 +1,8 @@
 'use client';;
 import { useSeriesDetail } from '@/api/queries/series.queries';
-import { EpisodeCard } from '@/components/series/EpisodeCard';
-import { SeriesPageSkeleton } from '@/components/series/SeriesPageSkeleton';
-import { TrailerModal } from '@/components/series/TrailerModal';
+import { EpisodeCard } from '../_components/EpisodeCard';
+import { SeriesPageSkeleton } from '../_components/SeriesPageSkeleton';
+import { TrailerModal } from '../_components/TrailerModal';
 import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
 import { useSidebar } from '@/components/ui/sidebar';
 import { cn, extractIdFromSlug, formatDuration, getCreatorRoute, getSeriesPlayRoute, isValidId } from '@/lib/utils';

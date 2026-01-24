@@ -1,9 +1,9 @@
 'use client';;
 import { useCourseDetail } from '@/api/queries/courses.queries';
-import { CoursePageSkeleton } from '@/components/courses/CoursePageSkeleton';
-import { LessonCard } from '@/components/courses/LessonCard';
+import { CoursePageSkeleton } from '../_components/CoursePageSkeleton';
+import { LessonCard } from '../_components/LessonCard';
 import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
-import { VideoPlayerSkeleton } from '@/components/video';
+import { VideoPlayerSkeleton } from '@/features/video/components/VideoPlayerSkeleton';
 import { useAuthStore } from '@/lib/stores/auth-store';
 import { cn, formatDuration, getCreatorRoute } from '@/lib/utils';
 import { BookOpen, ChevronDown, Clock, GraduationCap, LogIn, Play, Users } from 'lucide-react';

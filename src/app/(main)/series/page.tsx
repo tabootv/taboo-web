@@ -1,7 +1,7 @@
 'use client';;
 import { useSeriesList } from '@/api/queries/series.queries';
-import { SeriesCardSkeleton } from '@/components/series/SeriesCardSkeleton';
-import { SeriesPremiumCard } from '@/components/series/SeriesPremiumCard';
+import { SeriesCardSkeleton } from './_components/SeriesCardSkeleton';
+import { SeriesPremiumCard } from './_components/SeriesPremiumCard';
 import { Play } from 'lucide-react';
 import { useMemo } from 'react';
 

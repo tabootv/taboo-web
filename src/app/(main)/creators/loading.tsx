@@ -1,4 +1,4 @@
-import { CreatorCardSkeleton } from '@/components/creator';
+import { CreatorCardSkeleton } from '@/components/creator/CreatorCardSkeleton';
 import { PageHeader } from '@/components/ui/page-header';
 
 export default function CreatorsPageLoading() {

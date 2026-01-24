@@ -3,7 +3,7 @@ import { useRelatedVideos, useVideoPlay } from '@/api/queries/video.queries';
 import { Button } from '@/components/ui/button';
 import { LoadingScreen } from '@/components/ui/spinner';
 import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
-import { VideoPlayerSkeleton } from '@/components/video';
+import { VideoPlayerSkeleton } from '@/features/video/components/VideoPlayerSkeleton';
 import { LikeButton } from '@/features/video/components/like-button';
 import { SaveButton } from '@/features/video/components/save-button';
 import { VideoComments } from '@/features/video/components/video-comments';

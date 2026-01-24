@@ -1,7 +1,7 @@
 'use client';
 
 import { studioClient as studio } from '@/api/client/studio.client';
-import { ContentTypeSelector } from '@/components/studio/ContentTypeSelector';
+import { ContentTypeSelector } from '../_components/ContentTypeSelector';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuthStore } from '@/lib/stores';

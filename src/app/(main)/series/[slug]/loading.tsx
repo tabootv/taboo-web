@@ -1,4 +1,4 @@
-import { SeriesPageSkeleton } from '@/components/series/SeriesPageSkeleton';
+import { SeriesPageSkeleton } from '../_components/SeriesPageSkeleton';
 
 export default function SeriesDetailPageLoading() {
   return <SeriesPageSkeleton />;

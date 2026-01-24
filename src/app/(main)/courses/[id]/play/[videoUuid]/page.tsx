@@ -2,10 +2,10 @@
 import { useToggleAutoplay } from '@/api/mutations';
 import { useCourseDetail, useCoursePlay } from '@/api/queries/courses.queries';
 import { useMe } from '@/api/queries/auth.queries';
-import { CoursePlayerPageSkeleton } from '@/components/courses/CoursePlayerPageSkeleton';
-import { LessonCardPlayer } from '@/components/courses/LessonCardPlayer';
+import { CoursePlayerPageSkeleton } from '../../../_components/CoursePlayerPageSkeleton';
+import { LessonCardPlayer } from '../../../_components/LessonCardPlayer';
 import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
-import { VideoPlayerSkeleton } from '@/components/video';
+import { VideoPlayerSkeleton } from '@/features/video/components/VideoPlayerSkeleton';
 import { cn, formatDuration, formatRelativeTime, getCreatorRoute } from '@/lib/utils';
 import { ChevronRight, Clock, Play, SkipForward } from 'lucide-react';
 import dynamic from 'next/dynamic';

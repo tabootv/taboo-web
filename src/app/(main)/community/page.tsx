@@ -2,7 +2,9 @@
 
 import { useCreatePost, useDeletePost } from '@/api/mutations';
 import { usePostsList } from '@/api/queries/posts.queries';
-import { CreatePostCard, FeedPost, PostSkeleton } from '@/components/community';
+import { CreatePostCard } from './_components/CreatePostCard';
+import { FeedPost } from './_components/FeedPost';
+import { PostSkeleton } from './_components/PostSkeleton';
 import { useAuthStore } from '@/lib/stores';
 import { MessageCircle, Rss, Star } from 'lucide-react';
 import Link from 'next/link';

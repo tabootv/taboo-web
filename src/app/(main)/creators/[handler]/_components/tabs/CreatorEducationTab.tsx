@@ -1,7 +1,7 @@
 'use client';
 
 import { useCreatorCoursesInfinite } from '@/api/queries/creators.queries';
-import { SeriesPremiumCard } from '@/components/series/SeriesPremiumCard';
+import { SeriesPremiumCard } from '@/app/(main)/series/_components/SeriesPremiumCard';
 import type { Course, Creator } from '@/types';
 import { useMemo } from 'react';
 import { InfiniteScrollLoader } from './shared/InfiniteScrollLoader';

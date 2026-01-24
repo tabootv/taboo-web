@@ -1,4 +1,4 @@
-import { CoursePageSkeleton } from '@/components/courses/CoursePageSkeleton';
+import { CoursePageSkeleton } from '../_components/CoursePageSkeleton';
 
 export default function CourseDetailPageLoading() {
   return <CoursePageSkeleton />;

@@ -14,7 +14,7 @@ import {
 import { useEffect, useMemo, useState } from 'react';
 import { useAuthStore } from '@/lib/stores';
 import { formatNumber } from '@/lib/utils';
-import { StatCard } from '@/components/studio/StatCard';
+import { StatCard } from './_components/StatCard';
 import { Card, CardContent } from '@/components/ui/card';
 
 type MapVideo = {

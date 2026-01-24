@@ -1,6 +1,6 @@
 'use client';;
 import { useCoursesList } from '@/api/queries/courses.queries';
-import { CourseCard } from '@/components/courses/CourseCard';
+import { CourseCard } from './_components/CourseCard';
 import { Button } from '@/components/ui/button';
 import { ContentGrid } from '@/components/ui/content-grid';
 import { LoadingScreen } from '@/components/ui/spinner';
