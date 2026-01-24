@@ -5,12 +5,11 @@ import type { NextRequest } from 'next/server';
 const TOKEN_KEY = 'tabootv_token';
 
 // Public routes that don't require authentication
+// Note: Duplicate auth routes (/login, /signup, /sign-up) are handled by
+// HTTP 301 redirects in next.config.ts before reaching middleware
 const PUBLIC_ROUTES = [
   '/sign-in',
-  '/sign-up',
-  '/login',
   '/register',
-  '/signup',
   '/forgot-password',
   '/reset-password',
   '/verify-email',
@@ -42,8 +41,8 @@ const SKIP_PATTERNS = [
   '.eot',
 ];
 
-// Auth pages for redirect logic
-const AUTH_PAGES = ['/sign-in', '/sign-up', '/login', '/register', '/signup'];
+// Auth pages for redirect logic (canonical routes only)
+const AUTH_PAGES = ['/sign-in', '/register'];
 
 // Interface for /me API response
 interface MeResponse {

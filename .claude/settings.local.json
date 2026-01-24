@@ -69,7 +69,11 @@
       "Bash(node scripts/measure-bundle.js:*)",
       "Bash(node scripts/measure-build-time.js:*)",
       "Bash(node scripts/measure-hmr.js:*)",
-      "Bash(npx jscodeshift:*)"
+      "Bash(npx jscodeshift:*)",
+      "Bash(chmod:*)",
+      "Bash(node scripts/verify-redirects.js:*)",
+      "Bash(npm run verify-redirects:*)",
+      "Bash(pnpm run build:*)"
     ],
     "deny": [],
     "ask": []
