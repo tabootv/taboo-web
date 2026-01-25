@@ -70,7 +70,9 @@ TabooTV is a **premium video streaming platform** frontend built with modern web
 - **Next.js 16** with App Router
   - Server Components by default
   - Client Components with `'use client'` directive
-  - Route groups: `(main)`, `(auth)`, `(studio)`, `(subscription)`
+  - Route groups: `(main)`, `(auth)` (no `(studio)` - direct route now)
+  - Colocated components: `_components/` folders within routes
+  - Colocated server actions: `_actions.ts` files within routes
   - API route proxying to backend
 
 #### State Management
@@ -105,98 +107,102 @@ TabooTV is a **premium video streaming platform** frontend built with modern web
 
 ```
 src/
-├── app/                    # Next.js App Router pages
+├── app/                    # Next.js App Router (routes + colocated assets)
 │   ├── (main)/            # Main app pages with navbar
-│   │   ├── home/         # Homepage with sections
-│   │   ├── videos/       # Video listing and detail
-│   │   ├── series/       # Series listing and player
-│   │   ├── courses/      # Courses listing and player
-│   │   ├── shorts/       # Shorts feed
-│   │   ├── community/    # Community posts
-│   │   ├── profile/      # User profile
-│   │   ├── search/       # Search results
+│   │   ├── home/
+│   │   │   ├── page.tsx
+│   │   │   └── _components/   # Homepage-specific components
+│   │   ├── videos/
+│   │   ├── series/
+│   │   │   └── _components/   # Series-specific components
+│   │   ├── courses/
+│   │   │   └── _components/   # Course-specific components
+│   │   ├── shorts/
+│   │   ├── community/
+│   │   │   ├── _components/   # Community-specific components
+│   │   │   └── _actions.ts    # Community server actions
+│   │   ├── creators/
+│   │   │   └── [handler]/
+│   │   │       └── _components/  # Creator profile components
+│   │   ├── profile/
+│   │   │   └── edit/
+│   │   │       └── _actions.ts   # Profile update actions
 │   │   └── ...
 │   ├── (auth)/           # Auth pages without main layout
-│   │   ├── sign-in/     # Login
-│   │   ├── sign-up/      # Registration
-│   │   ├── plans/        # Subscription plans
-│   │   └── ...
-│   ├── (studio)/         # Creator studio pages
-│   │   └── studio/       # Dashboard, upload, analytics
+│   │   ├── sign-in/
+│   │   │   └── _actions.ts    # Login action
+│   │   ├── register/
+│   │   │   └── _actions.ts    # Registration action
+│   │   ├── forgot-password/
+│   │   │   └── _actions.ts
+│   │   └── reset-password/
+│   │       └── _actions.ts
+│   ├── studio/           # Creator studio (direct route, no group)
+│   │   ├── _components/  # Studio-specific components
+│   │   ├── upload/
+│   │   │   ├── video/
+│   │   │   │   └── _actions.ts  # Video upload action
+│   │   │   └── short/
+│   │   │       └── _actions.ts  # Short upload action
+│   │   └── layout.tsx
 │   ├── api/              # Next.js API routes (proxies)
 │   └── layout.tsx        # Root layout with providers
 │
-├── api/                   # NEW: TanStack Query API layer
-│   ├── client/           # Domain-specific API clients
-│   │   ├── base-client.ts      # Axios wrapper with auth
-│   │   ├── auth.client.ts      # Authentication
-│   │   ├── video.client.ts     # Videos
-│   │   ├── series.client.ts    # Series
-│   │   ├── courses.client.ts   # Courses
-│   │   ├── posts.client.ts     # Community posts
-│   │   ├── home.client.ts      # Home feed
-│   │   ├── creators.client.ts  # Creators
-│   │   ├── search.client.ts     # Search
-│   │   ├── studio.client.ts    # Creator studio
+├── api/                   # TanStack Query API layer
+│   ├── client/           # Domain-specific API clients (direct imports)
+│   │   ├── base-client.ts
+│   │   ├── video.client.ts
+│   │   ├── series.client.ts
 │   │   └── ...
-│   ├── queries/          # TanStack Query hooks
+│   ├── queries/          # Query hooks (direct imports)
 │   │   ├── video.queries.ts
 │   │   ├── series.queries.ts
 │   │   └── ...
-│   ├── mutations/        # Mutation hooks
+│   ├── mutations/        # Mutation hooks (direct imports)
 │   │   ├── video.mutations.ts
-│   │   ├── auth.mutations.ts
+│   │   ├── posts.mutations.ts
 │   │   └── ...
-│   ├── query-keys.ts     # Centralized query key factories
-│   └── types/            # API-specific types
+│   └── query-keys.ts     # Centralized query key factories
 │
-├── components/            # React components
+├── components/            # SHARED React components only
 │   ├── ui/              # Design system components
-│   │   ├── page-header.tsx
-│   │   ├── media-card.tsx
-│   │   ├── filter-chips.tsx
-│   │   ├── content-grid.tsx
-│   │   └── ...
-│   ├── layout/           # Layout components
-│   │   ├── navbar.tsx
-│   │   ├── sidebar.tsx
-│   │   └── footer.tsx
-│   ├── home/            # Homepage sections
-│   │   ├── banner-slider.tsx
-│   │   ├── featured-section.tsx
-│   │   ├── netflix-hover-card.tsx
-│   │   └── ...
-│   ├── video/           # Video player components
-│   │   ├── video-player.tsx
-│   │   ├── shaka-player.tsx
-│   │   └── ...
-│   ├── shorts/          # Shorts feed components
-│   └── ...
+│   ├── layout/          # Navbar, Footer, Sidebar
+│   ├── creator/         # Shared creator components
+│   ├── search/          # Search components
+│   └── sidebar/         # Sidebar components
 │
-├── lib/                  # Utilities and legacy code
-│   ├── api/             # Legacy API (being migrated)
-│   │   ├── client.ts    # Axios instance
-│   │   ├── endpoints.ts # API endpoints
-│   │   └── studio.ts    # Studio APIs
+├── features/             # Feature modules (reusable across routes)
+│   ├── video/
+│   │   ├── components/  # VideoCard, VideoPlayer, etc.
+│   │   └── hooks/
+│   ├── shorts/
+│   │   └── components/
+│   ├── series/
+│   │   └── components/
+│   └── community/
+│       └── components/
+│
+├── hooks/                # Shared custom hooks
+│
+├── shared/               # Consolidated utilities (canonical location)
 │   ├── stores/          # Zustand stores
 │   │   ├── auth-store.ts
 │   │   ├── shorts-store.ts
 │   │   ├── watchlist-store.ts
+│   │   ├── sidebar-store.ts
 │   │   └── ...
-│   ├── hooks/           # Custom React hooks
-│   ├── utils.ts         # Utility functions
-│   └── design-tokens.ts # Design system tokens
-│
-├── shared/               # Shared infrastructure
-│   ├── components/      # Shared components
-│   │   ├── providers/   # QueryProvider, etc.
-│   │   └── error-boundary.tsx
-│   └── lib/             # Shared utilities
-│       ├── query-client.ts
-│       └── config/
+│   ├── utils/           # Utility functions
+│   │   ├── formatting.ts    # cn(), formatDuration, formatNumber
+│   │   ├── routes.ts
+│   │   ├── search-utils.ts
+│   │   └── ...
+│   ├── lib/             # Library instances
+│   │   ├── design-tokens.ts
+│   │   ├── api/         # API utilities
+│   │   └── validations/
+│   └── components/      # Providers, error boundary
 │
 └── types/                # TypeScript type definitions
-    └── index.ts
 ```
 
 ### API Layer Architecture
@@ -448,7 +454,7 @@ async rewrites() {
 
 ### Zustand Stores
 
-#### Auth Store (`src/lib/stores/auth-store.ts`)
+#### Auth Store (`src/shared/stores/auth-store.ts`)
 
 **Purpose:** User authentication and subscription status
 
@@ -472,7 +478,7 @@ async rewrites() {
 
 **Persistence:** localStorage (`tabootv-auth`)
 
-#### Shorts Store (`src/lib/stores/shorts-store.ts`)
+#### Shorts Store (`src/shared/stores/shorts-store.ts`)
 
 **Purpose:** Shorts feed state and navigation
 
@@ -493,7 +499,7 @@ async rewrites() {
 - `toggleMute()` - Toggle mute
 - `prependVideo(video)` - Add video to start
 
-#### Watchlist Store (`src/lib/stores/watchlist-store.ts`)
+#### Watchlist Store (`src/shared/stores/watchlist-store.ts`)
 
 **Purpose:** User's saved videos/series/courses
 
@@ -510,7 +516,7 @@ async rewrites() {
 
 **Persistence:** localStorage
 
-#### Sidebar Store (`src/lib/stores/sidebar-store.ts`)
+#### Sidebar Store (`src/shared/stores/sidebar-store.ts`)
 
 **Purpose:** Navigation sidebar state
 
@@ -528,7 +534,7 @@ async rewrites() {
 
 **Persistence:** localStorage (expanded state only)
 
-#### Live Chat Store (`src/lib/stores/live-chat-store.ts`)
+#### Live Chat Store (`src/shared/stores/live-chat-store.ts`)
 
 **Purpose:** Real-time chat messages
 
@@ -545,7 +551,7 @@ async rewrites() {
 - `sendMessage(content)` - Send message
 - `appendMessage(message)` - Add message
 
-#### Saved Videos Store (`src/lib/stores/saved-videos-store.ts`)
+#### Saved Videos Store (`src/shared/stores/saved-videos-store.ts`)
 
 **Purpose:** Bookmarked videos
 
@@ -561,7 +567,7 @@ async rewrites() {
 
 **Persistence:** localStorage
 
-#### Studio Sidebar Store (`src/lib/stores/studio-sidebar-store.ts`)
+#### Studio Sidebar Store (`src/shared/stores/studio-sidebar-store.ts`)
 
 **Purpose:** Creator studio sidebar state
 
@@ -570,13 +576,13 @@ Similar to main sidebar store but for studio pages.
 ### Store Usage Patterns
 
 ```typescript
-// Auth store (persisted)
-import { useAuthStore } from '@/lib/stores';
+// Auth store (persisted) - direct import
+import { useAuthStore } from '@/shared/stores/auth-store';
 
-const { user, isAuthenticated, login } = useAuthStore();
+const { user, isAuthenticated } = useAuthStore();
 
-// UI state (not persisted)
-import { useSidebarStore } from '@/lib/stores';
+// UI state (not persisted) - direct import
+import { useSidebarStore } from '@/shared/stores/sidebar-store';
 
 const { isExpanded, toggleExpanded } = useSidebarStore();
 ```
@@ -615,7 +621,7 @@ const { isExpanded, toggleExpanded } = useSidebarStore();
 | Tertiary  | `#6b7280` | Timestamps, hints       |
 | Muted     | `#4b5563` | Disabled text           |
 
-**Design Tokens File:** `src/lib/design-tokens.ts`
+**Design Tokens File:** `src/shared/lib/design-tokens.ts`
 
 ### Typography
 
@@ -830,7 +836,7 @@ Premium feel with gradient overlays:
    transformOrigin: index === 0 ? 'left center' : 'right center';
    ```
 
-**Full Documentation:** See `docs/NETFLIX-HOVER-CARD-PATTERN.md`
+**Implementation Details:** See Netflix-style Hover Cards section above
 
 ---
 
@@ -1081,21 +1087,23 @@ useEffect(() => {
 
 **Routes:**
 
-- `/sign-in` - Login
-- `/sign-up` - Registration
+- `/sign-in` - Login (canonical)
+- `/register` - Registration (canonical)
 - `/forgot-password` - Password reset
 - `/reset-password` - Reset password form
 - `/verify-email` - Email verification
+- `/login` → `/sign-in` (HTTP 301 redirect)
+- `/sign-up`, `/signup` → `/register` (HTTP 301 redirects)
 
 ### Creator Studio
 
-**Location:** `/studio/*`
+**Location:** `/studio/*` (direct route, not in a route group)
 
 **Features:**
 
 - Dashboard with stats
-- Video upload (long-form)
-- Short upload (vertical)
+- Video upload (long-form) with server actions
+- Short upload (vertical) with server actions
 - Post creation
 - Analytics
 - Content management
@@ -1105,7 +1113,15 @@ useEffect(() => {
 - `/studio` - Dashboard
 - `/studio/upload/video` - Upload video
 - `/studio/upload/short` - Upload short
-- `/studio/post` - Create post
+- `/studio/posts` - Manage posts
+- `/studio/analytics` - Analytics dashboard
+- `/studio/earnings` - Earnings overview
+- `/studio/payouts` - Payout history
+- `/studio/settings` - Studio settings
+
+**Server Actions:**
+- `src/app/studio/upload/video/_actions.ts` - Video upload handling
+- `src/app/studio/upload/short/_actions.ts` - Short upload handling
 
 **API:** `studioClient` from `src/api/client/studio.client.ts`
 
@@ -1153,9 +1169,9 @@ Configured in `tsconfig.json`:
 **Usage:**
 
 ```typescript
-import { useAuthStore } from '@/lib/stores';
-import { VideoPlayer } from '@/components/video';
-import { apiClient } from '@/api/client';
+import { useAuthStore } from '@/shared/stores/auth-store';
+import { ShakaPlayer } from '@/features/video/components/shaka-player';
+import { videoClient } from '@/api/client/video.client';
 ```
 
 ### Environment Variables
@@ -1281,7 +1297,7 @@ export function VideosContent() {
 1. **Use Design Tokens:**
 
    ```tsx
-   import { colors, spacing } from '@/lib/design-tokens';
+   import { colors, spacing } from '@/shared/lib/design-tokens';
    ```
 
 2. **Use Typography Classes:**
@@ -1299,7 +1315,7 @@ export function VideosContent() {
 4. **Use `cn()` for Conditional Classes:**
 
    ```tsx
-   import { cn } from '@/lib/utils';
+   import { cn } from '@/shared/utils/formatting';
 
    className={cn('base-class', isActive && 'active-class')}
    ```
@@ -1369,7 +1385,7 @@ const videos = useMemo(() => {
 }, [data]);
 ```
 
-**Full Migration Guide:** See `docs/MIGRATION_GUIDE.md`
+**Migration Patterns:** See the examples above for common migration patterns
 
 ### Design System Migration
 
@@ -1592,26 +1608,32 @@ import Image from 'next/image';
 - `src/components/ui/media-card.tsx` - Media card component
 - `src/components/ui/filter-chips.tsx` - Filter chips component
 - `src/components/ui/content-grid.tsx` - Responsive grid layout
-- `src/components/video/video-player.tsx` - Video player wrapper
-- `src/components/video/shaka-player.tsx` - Shaka Player implementation
-- `src/components/home/netflix-hover-card.tsx` - Netflix-style hover card
-- `src/components/home/featured-section.tsx` - Featured videos section
+- `src/features/video/components/shaka-player/` - Shaka Player implementation
+- `src/app/(main)/home/_components/netflix-hover-card.tsx` - Netflix-style hover card
+- `src/app/(main)/home/_components/featured.tsx` - Featured videos section
 
 **Stores:**
 
-- `src/lib/stores/auth-store.ts` - Authentication (persisted to localStorage)
-- `src/lib/stores/shorts-store.ts` - Shorts feed state
-- `src/lib/stores/watchlist-store.ts` - Watchlist (persisted)
-- `src/lib/stores/sidebar-store.ts` - Navigation sidebar state
-- `src/lib/stores/live-chat-store.ts` - Live chat messages
-- `src/lib/stores/saved-videos-store.ts` - Bookmarked videos
-- `src/lib/stores/index.ts` - Store exports
+- `src/shared/stores/auth-store.ts` - Authentication (persisted to localStorage)
+- `src/shared/stores/shorts-store.ts` - Shorts feed state
+- `src/shared/stores/watchlist-store.ts` - Watchlist (persisted)
+- `src/shared/stores/sidebar-store.ts` - Navigation sidebar state
+- `src/shared/stores/live-chat-store.ts` - Live chat messages
+- `src/shared/stores/saved-videos-store.ts` - Bookmarked videos
 
 **Design:**
 
-- `src/lib/design-tokens.ts` - Design tokens (colors, spacing, typography)
+- `src/shared/lib/design-tokens.ts` - Design tokens (colors, spacing, typography)
 - `src/app/globals.css` - Global styles (CSS variables, utility classes)
 - `components.json` - shadcn/ui component configuration
+
+**Server Actions (Colocated with Routes):**
+
+- `src/app/(auth)/sign-in/_actions.ts` - Login action
+- `src/app/(auth)/register/_actions.ts` - Registration action
+- `src/app/(main)/profile/edit/_actions.ts` - Profile update actions
+- `src/app/studio/upload/video/_actions.ts` - Video upload action
+- `src/app/studio/upload/short/_actions.ts` - Short upload action
 
 ### Common Patterns
 
@@ -1727,5 +1749,5 @@ export function LikeButton({ videoId }: { videoId: string }) {
 
 ---
 
-**Last Updated:** December 2024  
+**Last Updated:** January 2025
 **Maintained By:** TabooTV Development Team

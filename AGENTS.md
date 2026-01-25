@@ -27,7 +27,7 @@ npm run test         # Unit tests (Vitest)
 ## Code Style
 
 - **Icons**: lucide-react
-- **Styling**: Tailwind CSS with `cn()` utility from `@/lib/utils`
+- **Styling**: Tailwind CSS with `cn()` utility from `@/shared/utils/formatting`
 - **Path alias**: `@/` maps to `src/`
 - **Components**: Server Components by default, `'use client'` when needed
 
@@ -37,34 +37,33 @@ npm run test         # Unit tests (Vitest)
 
 ```
 src/
-├── app/              # Next.js App Router (routes only)
+├── app/              # Next.js App Router (routes + colocated components)
 │   ├── (main)/       # Main app pages with navbar
-│   ├── (auth)/       # Auth pages (sign-in, sign-up, plans)
-│   └── (studio)/     # Creator studio pages
+│   │   └── [route]/
+│   │       ├── page.tsx
+│   │       ├── _components/   # Route-specific components
+│   │       └── _actions.ts    # Route-specific server actions
+│   ├── (auth)/       # Auth pages (sign-in, register, plans)
+│   └── studio/       # Creator studio pages (direct route, no group)
 ├── api/              # TanStack Query API layer
 │   ├── client/       # Domain-specific HTTP clients
 │   ├── queries/      # Query hooks (useVideo, useSeriesList, etc.)
-│   ├── mutations/    # Mutation hooks (useToggleLike, useLogin, etc.)
-│   ├── types/        # Re-exports from @/types
+│   ├── mutations/    # Mutation hooks (useToggleLike, etc.)
 │   └── query-keys.ts # Centralized query key factories
 ├── components/
 │   ├── ui/           # Shadcn primitives + custom components
 │   ├── layout/       # Navbar, Footer, Sidebar
-│   ├── home/         # Homepage sections (NetflixHoverCard, etc.)
-│   └── [domain]/     # Domain-specific components
-├── features/         # Feature modules (auth, video, shorts, etc.)
+│   └── [domain]/     # Shared domain components
+├── features/         # Feature modules (video, shorts, series, etc.)
 │   └── [feature]/
 │       ├── components/
-│       ├── hooks/
-│       └── stores/
-├── hooks/            # ALL shared custom hooks (centralized)
-├── lib/
+│       └── hooks/
+├── hooks/            # Shared custom hooks
+├── shared/           # Consolidated utilities
 │   ├── stores/       # Zustand stores (auth, shorts, sidebar)
-│   ├── utils/        # Utility functions
-│   ├── utils.ts      # Main utils (cn, formatDuration, formatNumber)
-│   └── design-tokens.ts
-├── types/            # ALL TypeScript interfaces (centralized)
-└── shared/           # Providers, error boundary
+│   ├── utils/        # Utility functions (formatting, routes, etc.)
+│   └── lib/          # Library instances (design-tokens, validations)
+└── types/            # TypeScript interfaces
 ```
 
 ### Content Types
@@ -79,17 +78,31 @@ src/
 
 ```tsx
 // Query hooks for data fetching
-import { useVideo, useVideoList } from '@/api/queries';
+import { useVideo, useVideoList } from '@/api/queries/video.queries';
 const { data, isLoading } = useVideo(id);
 
 // Mutation hooks for actions (with optimistic updates)
-import { useToggleLike } from '@/api/mutations';
+import { useToggleLike } from '@/api/mutations/video.mutations';
 const toggleLike = useToggleLike();
 toggleLike.mutate(videoId);
 
 // Direct client calls (non-component code)
-import { videoClient } from '@/api/client';
+import { videoClient } from '@/api/client/video.client';
 const data = await videoClient.getVideo(id);
+```
+
+### Server Actions (Colocated)
+
+```tsx
+// Auth actions in route-specific locations
+import { loginAction } from '@/app/(auth)/sign-in/_actions';
+import { registerAction } from '@/app/(auth)/register/_actions';
+
+// Profile actions
+import { updateProfileAction } from '@/app/(main)/profile/edit/_actions';
+
+// Upload actions
+import { uploadVideoAction } from '@/app/studio/upload/video/_actions';
 ```
 
 ### Public API: Map Videos
@@ -115,8 +128,8 @@ Returns paginated public videos optimized for maps/listings.
 ### Zustand Store Usage
 
 ```tsx
-import { useAuthStore } from '@/lib/stores';
-const { user, isAuthenticated, login } = useAuthStore();
+import { useAuthStore } from '@/shared/stores/auth-store';
+const { user, isAuthenticated } = useAuthStore();
 ```
 
 ### Hooks Usage
@@ -174,10 +187,11 @@ import { PageHeader, FilterChips, MediaCard, ContentGrid } from '@/components/ui
 |---------|----------|
 | Design System Guide | `docs/DESIGN_SYSTEM.md` |
 | Full Project Context | `docs/PROJECT_CONTEXT.md` |
-| Design Tokens | `src/lib/design-tokens.ts` |
+| Design Tokens | `src/shared/lib/design-tokens.ts` |
 | Query Keys | `src/api/query-keys.ts` |
-| Auth Store | `src/lib/stores/auth-store.ts` |
-| Video Player | `src/components/video/shaka-player.tsx` |
+| Auth Store | `src/shared/stores/auth-store.ts` |
+| Video Player | `src/features/video/components/shaka-player/index.tsx` |
+| Formatting Utils | `src/shared/utils/formatting.ts` |
 
 ## Environment Variables
 
