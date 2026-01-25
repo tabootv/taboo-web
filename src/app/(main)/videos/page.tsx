@@ -1,12 +1,12 @@
 'use client';;
 import type { VideoListFilters } from '@/api/client/video.client';
 import { useCreatorsListPublic } from '@/api/queries/creators.queries';
-import { useVideoList } from '@/api/queries/video.queries';
 import { useCountries, useTags } from '@/api/queries/public.queries';
-import { MediaPreviewModal } from '../home/_components/media-preview-modal';
+import { useVideoList } from '@/api/queries/video.queries';
 import type { Video } from '@/types';
 import { Film } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { MediaPreviewModal } from '../home/_components/media-preview-modal';
 import { SelectFilter } from './components/select-filter';
 import { VideoCardEnhanced } from './components/video-card-enhanced';
 import { VideoGridSkeleton } from './components/video-grid-skeleton';
@@ -29,8 +29,6 @@ export default function VideosPage() {
   const { data: creatorsData } = useCreatorsListPublic();
   const { data: countriesData } = useCountries();
   const { data: tagsData } = useTags();
-
-  console.log(countriesData);
 
   // Build filter object, omitting undefined values for exactOptionalPropertyTypes compliance
   const videoFilters = useMemo(() => {
