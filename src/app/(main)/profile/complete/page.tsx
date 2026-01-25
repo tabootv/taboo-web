@@ -7,7 +7,7 @@ import { Camera, User, ChevronRight, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/ui/logo';
 import { profileClient as profileApi } from '@/api/client/profile.client';
-import { useAuthStore } from '@/lib/stores';
+import { useAuthStore } from '@/shared/stores/auth-store';
 import { toast } from 'sonner';
 
 type Step = 'photo' | 'details' | 'complete';

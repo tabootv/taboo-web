@@ -2,7 +2,7 @@
 
 import { homeClient } from '@/api/client/home.client';
 import { SectionCard } from './section-card';
-import { getCreatorRoute } from '@/lib/utils';
+import { getCreatorRoute } from '@/shared/utils/formatting';
 import type { Creator } from '@/types';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';

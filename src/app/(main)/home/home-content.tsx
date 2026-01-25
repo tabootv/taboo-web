@@ -8,7 +8,7 @@ import { HomeSeriesSection } from './_components/home-series';
 import { HomeShortsSection } from './_components/home-shorts';
 import { RecommendedSection } from './_components/recommended';
 import { useCallback } from 'react';
-import type { HomePageData } from '@/lib/api/home-data';
+import type { HomePageData } from '@/shared/lib/api/home-data';
 import { useEffect, useState } from 'react';
 import { PlaylistsInfiniteScroll } from './playlists-infinite-scroll';
 

@@ -4,7 +4,7 @@ import { playlistsClient as playlistsApi } from '@/api/client/playlists.client';
 import { MediaPreviewModal } from './_components/media-preview-modal';
 import { RailCard } from './_components/rail-card';
 import { RailRow } from './_components/rail-row';
-import { HomePageData } from '@/lib/api';
+import type { HomePageData } from '@/shared/lib/api/home-data';
 import type { Playlist, Video } from '@/types';
 import { useCallback, useEffect, useRef, useState } from 'react';
 

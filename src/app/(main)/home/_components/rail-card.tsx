@@ -1,7 +1,7 @@
 'use client';
 
-import { useSavedVideosStore, type SavedVideo } from '@/lib/stores/saved-videos-store';
-import { formatDuration, formatRelativeTime } from '@/lib/utils';
+import { useSavedVideosStore, type SavedVideo } from '@/shared/stores/saved-videos-store';
+import { formatDuration, formatRelativeTime } from '@/shared/utils/formatting';
 import type { Video } from '@/types';
 import { Check, Clock, Play, Plus } from 'lucide-react';
 import Image from 'next/image';

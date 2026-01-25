@@ -4,7 +4,7 @@
 
 import { useSearchParams } from 'next/navigation';
 import { useMemo } from 'react';
-import type { AffiliateTrackingData } from '@/lib/utils/affiliate-tracking';
+import type { AffiliateTrackingData } from '@/shared/utils/affiliate-tracking';
 
 export function useAffiliateTracking(): AffiliateTrackingData {
   const searchParams = useSearchParams();

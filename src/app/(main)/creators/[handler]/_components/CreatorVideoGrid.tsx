@@ -1,7 +1,7 @@
 'use client';
 
-import { cn, formatDuration } from '@/lib/utils';
-import { getCountryName } from '@/lib/utils/country';
+import { cn, formatDuration } from '@/shared/utils/formatting';
+import { getCountryName } from '@/shared/utils/country';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { CreatorVideoGridProps } from './types';

@@ -4,7 +4,7 @@
 
 import Image from 'next/image';
 import { Clock, Eye, Heart } from 'lucide-react';
-import { formatNumber, formatRelativeTime } from '@/lib/utils';
+import { formatNumber, formatRelativeTime } from '@/shared/utils/formatting';
 import { MEDIA_CARD_SIZE_STYLES } from '../constants/media-card-constants';
 import type { MediaCardProps } from '../media-card';
 

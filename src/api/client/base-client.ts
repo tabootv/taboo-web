@@ -6,7 +6,7 @@
  */
 
 import { getRequiredEnv } from '@/shared/lib/config/env';
-import { redirect } from '@/shared/lib/utils/redirect';
+import { redirect } from '@/shared/utils/redirect';
 import axios, {
   AxiosError,
   AxiosInstance,

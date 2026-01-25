@@ -3,8 +3,8 @@
 import { StudioSidebar } from '@/components/sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { StudioHeader } from '@/features/creator-studio';
-import { useAuthStore } from '@/lib/stores';
-import { cn } from '@/lib/utils';
+import { useAuthStore } from '@/shared/stores/auth-store';
+import { cn } from '@/shared/utils/formatting';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ArrowLeft, ExternalLink, Check, Loader2, CreditCard } from 'lucide-react';
 import { subscriptionsClient as subscriptions } from '@/api/client/subscriptions.client';
 import type { Plan } from '@/types';
-import { useAuthStore } from '@/lib/stores';
+import { useAuthStore } from '@/shared/stores/auth-store';
 import { Button } from '@/components/ui/button';
 import { LoadingScreen } from '@/components/ui/spinner';
 import { toast } from 'sonner';

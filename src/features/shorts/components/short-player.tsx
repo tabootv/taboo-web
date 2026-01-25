@@ -4,7 +4,7 @@ import { useToggleShortLike, useToggleShortBookmark } from '@/api/mutations/shor
 import { Avatar } from '@/components/ui/avatar';
 import { usePrefersReducedMotion } from '@/hooks';
 import { useFeature } from '@/hooks/use-feature';
-import { formatCompactNumber, getCreatorRoute } from '@/lib/utils';
+import { formatCompactNumber, getCreatorRoute } from '@/shared/utils/formatting';
 import type { Video } from '@/types';
 import {
   Bookmark,

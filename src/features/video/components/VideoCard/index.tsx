@@ -1,6 +1,6 @@
 'use client';
 
-import { formatDuration, formatRelativeTime } from '@/lib/utils';
+import { formatDuration, formatRelativeTime } from '@/shared/utils/formatting';
 import { usePrefetch } from '@/hooks/use-prefetch';
 import type { Video } from '@/types';
 import { Clock, Film } from 'lucide-react';

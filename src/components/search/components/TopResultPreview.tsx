@@ -5,7 +5,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Play } from 'lucide-react';
-import { formatDuration, getSeriesRoute } from '@/lib/utils';
+import { formatDuration, getSeriesRoute } from '@/shared/utils/formatting';
 import type { Video, Series } from '@/types';
 
 interface TopResultPreviewProps {

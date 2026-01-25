@@ -5,7 +5,7 @@ import { usePostsList } from '@/api/queries/posts.queries';
 import { CreatePostCard } from './_components/CreatePostCard';
 import { FeedPost } from './_components/FeedPost';
 import { PostSkeleton } from './_components/PostSkeleton';
-import { useAuthStore } from '@/lib/stores';
+import { useAuthStore } from '@/shared/stores/auth-store';
 import { MessageCircle, Rss, Star } from 'lucide-react';
 import Link from 'next/link';
 import { useMemo, useTransition } from 'react';

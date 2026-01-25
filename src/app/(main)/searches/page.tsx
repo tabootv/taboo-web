@@ -2,7 +2,7 @@
 
 import { Spinner } from '@/components/ui/spinner';
 import { useMixedSearch } from '@/hooks/useMixedSearch';
-import { formatDuration, getCreatorRoute } from '@/lib/utils';
+import { formatDuration, getCreatorRoute } from '@/shared/utils/formatting';
 import type { Creator, Video } from '@/types';
 import { Search as SearchIcon, X } from 'lucide-react';
 import Image from 'next/image';

@@ -7,7 +7,7 @@ import { Check, Crown, Star, X, Sparkles } from 'lucide-react';
 import { WhopCheckoutEmbed } from '@whop/checkout/react';
 import { subscriptionsClient as subscriptionsApi } from '@/api/client/subscriptions.client';
 import type { Plan } from '@/types';
-import { useAuthStore } from '@/lib/stores';
+import { useAuthStore } from '@/shared/stores/auth-store';
 import { toast } from 'sonner';
 
 const DEFAULT_BENEFITS = [

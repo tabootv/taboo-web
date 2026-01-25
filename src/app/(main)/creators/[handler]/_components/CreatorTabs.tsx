@@ -1,7 +1,7 @@
 'use client';
 
 import type { CreatorTabsProps } from './types';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/utils/formatting';
 
 export function CreatorTabs({ activeTab, onTabChange, tabs }: CreatorTabsProps) {
   return (

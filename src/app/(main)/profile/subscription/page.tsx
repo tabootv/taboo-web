@@ -12,7 +12,7 @@ import {
   AlertCircle,
   Smartphone,
 } from 'lucide-react';
-import { useAuthStore } from '@/lib/stores';
+import { useAuthStore } from '@/shared/stores/auth-store';
 import { useSubscription } from '@/hooks';
 import { Button } from '@/components/ui/button';
 

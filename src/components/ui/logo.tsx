@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/utils/formatting';
 
 interface LogoProps {
   className?: string;

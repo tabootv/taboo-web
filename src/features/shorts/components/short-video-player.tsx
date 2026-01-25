@@ -2,7 +2,7 @@
 
 import { useRef, useState, useEffect, useCallback, ReactNode } from 'react';
 import { Volume2, VolumeX } from 'lucide-react';
-import { useShortsStore } from '@/lib/stores/shorts-store';
+import { useShortsStore } from '@/shared/stores/shorts-store';
 import type { Video } from '@/types';
 import { usePrefersReducedMotion } from '@/hooks';
 

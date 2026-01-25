@@ -1,4 +1,4 @@
-import { cn, formatDuration } from '@/lib/utils';
+import { cn, formatDuration } from '@/shared/utils/formatting';
 import type { Video } from '@/types';
 import { Lock, Play } from 'lucide-react';
 import Image from 'next/image';

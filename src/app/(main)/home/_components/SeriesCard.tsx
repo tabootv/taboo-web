@@ -2,7 +2,7 @@
  * Individual series card component for the vertical list
  */
 
-import { cn, getSeriesRoute } from '@/lib/utils';
+import { cn, getSeriesRoute } from '@/shared/utils/formatting';
 import type { Series } from '@/types';
 import { ChevronRight, Film, Play } from 'lucide-react';
 import Image from 'next/image';

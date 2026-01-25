@@ -4,7 +4,7 @@ import { useToggleBookmark } from '@/api/mutations';
 import { Avatar } from '@/components/ui/avatar';
 import { useCreatorById } from '@/hooks/use-creator-by-id';
 import { useFeature } from '@/hooks/use-feature';
-import { formatRelativeTime } from '@/lib/utils';
+import { formatRelativeTime } from '@/shared/utils/formatting';
 import type { Video } from '@/types';
 import { Check, Play, Plus } from 'lucide-react';
 import Image from 'next/image';

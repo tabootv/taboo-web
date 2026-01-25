@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/utils/formatting';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 

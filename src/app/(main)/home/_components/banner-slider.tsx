@@ -3,7 +3,7 @@
 import { homeClient } from '@/api/client/home.client';
 import { Button } from '@/components/ui/button';
 import { useCreatorById } from '@/hooks/use-creator-by-id';
-import { getSeriesRoute } from '@/lib/utils';
+import { getSeriesRoute } from '@/shared/utils/formatting';
 import type { Banner } from '@/types';
 import { ChevronLeft, ChevronRight, Play } from 'lucide-react';
 import Image from 'next/image';

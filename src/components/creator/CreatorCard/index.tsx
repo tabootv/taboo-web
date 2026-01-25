@@ -2,7 +2,7 @@
 
 import { useToggleFollowCreator } from '@/api/mutations';
 import { usePrefetch } from '@/hooks/use-prefetch';
-import { getCreatorRoute } from '@/lib/utils';
+import { getCreatorRoute } from '@/shared/utils/formatting';
 import type { Creator } from '@/types';
 import { Check, Loader2, Video } from 'lucide-react';
 import Image from 'next/image';

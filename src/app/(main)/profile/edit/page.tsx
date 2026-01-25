@@ -12,7 +12,7 @@ import {
   Eye,
   EyeOff,
 } from 'lucide-react';
-import { useAuthStore } from '@/lib/stores/auth-store';
+import { useAuthStore } from '@/shared/stores/auth-store';
 import type { User } from '@/types';
 import {
   updateProfileAction,

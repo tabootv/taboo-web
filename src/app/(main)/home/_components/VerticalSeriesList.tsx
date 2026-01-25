@@ -5,7 +5,7 @@
 import { useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronUp, ChevronDown } from 'lucide-react';
-import { cn, getSeriesRoute } from '@/lib/utils';
+import { cn, getSeriesRoute } from '@/shared/utils/formatting';
 import { SeriesCard } from './SeriesCard';
 import type { Series } from '@/types';
 

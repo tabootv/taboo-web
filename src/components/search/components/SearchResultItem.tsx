@@ -4,9 +4,9 @@
 
 import Image from 'next/image';
 import { Film, Play, BookOpen, Users } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { highlightMatch } from '@/lib/utils/highlightMatch';
-import { formatCompactNumber } from '@/lib/utils';
+import { cn } from '@/shared/utils/formatting';
+import { highlightMatch } from '@/shared/utils/highlightMatch';
+import { formatCompactNumber } from '@/shared/utils/formatting';
 import type { Video, Series, Creator } from '@/types';
 
 type ResultItem =

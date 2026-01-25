@@ -4,7 +4,7 @@ import { studioClient as studio } from '@/api/client/studio.client';
 import { ContentTypeSelector } from '../_components/ContentTypeSelector';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { useAuthStore } from '@/lib/stores';
+import { useAuthStore } from '@/shared/stores/auth-store';
 import { Image as ImageIcon, Loader2, Mic, Send, X } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';

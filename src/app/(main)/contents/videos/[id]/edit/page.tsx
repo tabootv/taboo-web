@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { ArrowLeft, X, Film, AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LoadingScreen } from '@/components/ui/spinner';
-import { useAuthStore } from '@/lib/stores';
+import { useAuthStore } from '@/shared/stores/auth-store';
 import { toast } from 'sonner';
 import { apiClient } from '@/api/client/base-client';
 import type { Video } from '@/types';

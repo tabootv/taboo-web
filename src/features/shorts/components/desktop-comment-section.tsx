@@ -3,11 +3,11 @@
 import { useState, KeyboardEvent } from 'react';
 import Image from 'next/image';
 import { X, Send } from 'lucide-react';
-import { useShortsStore } from '@/lib/stores/shorts-store';
-import { useAuthStore } from '@/lib/stores/auth-store';
+import { useShortsStore } from '@/shared/stores/shorts-store';
+import { useAuthStore } from '@/shared/stores/auth-store';
 import { videoClient } from '@/api/client/video.client';
 import type { Video } from '@/types';
-import { formatRelativeTime } from '@/lib/utils';
+import { formatRelativeTime } from '@/shared/utils/formatting';
 import { toast } from 'sonner';
 
 interface DesktopCommentSectionProps {

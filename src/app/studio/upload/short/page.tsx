@@ -12,8 +12,8 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { useAuthStore } from '@/lib/stores';
-import { uploadShortSchema, type UploadShortInput } from '@/lib/validations/upload';
+import { useAuthStore } from '@/shared/stores/auth-store';
+import { uploadShortSchema, type UploadShortInput } from '@/shared/lib/validations/upload';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   AlertCircle,

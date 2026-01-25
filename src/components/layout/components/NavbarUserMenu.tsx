@@ -7,8 +7,8 @@ import { useRouter } from 'next/navigation';
 import { Bell, User, LogOut, Settings, Bookmark, Clapperboard } from 'lucide-react';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { useAuthStore } from '@/lib/stores';
+import { cn } from '@/shared/utils/formatting';
+import { useAuthStore } from '@/shared/stores/auth-store';
 import { useUserMenu } from '../hooks/use-user-menu';
 
 interface NavbarUserMenuProps {

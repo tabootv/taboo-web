@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/utils/formatting';
 import Image from 'next/image';
 import type { CreatorShortsGridProps } from './types';
 

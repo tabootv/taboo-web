@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { MediaCardThumbnail } from './components/MediaCardThumbnail';
 import { MediaCardContent } from './components/MediaCardContent';
-import { getSeriesRoute } from '@/lib/utils';
+import { getSeriesRoute } from '@/shared/utils/formatting';
 
 export interface MediaCardProps {
   /** Unique identifier */

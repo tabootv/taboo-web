@@ -3,7 +3,7 @@
  */
 
 import Image from 'next/image';
-import { formatRelativeTime } from '@/lib/utils';
+import { formatRelativeTime } from '@/shared/utils/formatting';
 import type { Video } from '@/types';
 
 interface HoverCardActionsProps {

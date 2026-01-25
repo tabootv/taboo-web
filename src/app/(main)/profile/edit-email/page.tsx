@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { ArrowLeft, Mail, Lock, AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { profileClient as profileApi } from '@/api/client/profile.client';
-import { useAuthStore } from '@/lib/stores';
+import { useAuthStore } from '@/shared/stores/auth-store';
 import { toast } from 'sonner';
 
 export default function EditEmailPage() {

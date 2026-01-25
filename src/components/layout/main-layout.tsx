@@ -3,7 +3,7 @@
 import { NavigationProgress } from '@/components/navigation/NavigationProgress';
 import { AppSidebar } from '@/components/sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { useAuthStore } from '@/lib/stores';
+import { useAuthStore } from '@/shared/stores/auth-store';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { Toaster } from 'sonner';

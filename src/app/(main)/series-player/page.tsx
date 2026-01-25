@@ -3,7 +3,7 @@
 import { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { LoadingScreen } from '@/components/ui/spinner';
-import { getSeriesRoute, getSeriesPlayRoute } from '@/lib/utils';
+import { getSeriesRoute, getSeriesPlayRoute } from '@/shared/utils/formatting';
 
 function SeriesPlayerContent() {
   const router = useRouter();

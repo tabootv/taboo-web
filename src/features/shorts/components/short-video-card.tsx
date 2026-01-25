@@ -2,8 +2,8 @@
 
 import { useToggleShortLike } from '@/api/mutations/shorts.mutations';
 import { usePrefersReducedMotion } from '@/hooks';
-import { useShortsStore } from '@/lib/stores/shorts-store';
-import { formatCompactNumber, getCreatorRoute } from '@/lib/utils';
+import { useShortsStore } from '@/shared/stores/shorts-store';
+import { formatCompactNumber, getCreatorRoute } from '@/shared/utils/formatting';
 import type { Video } from '@/types';
 import {
   Heart,

@@ -6,8 +6,8 @@ import { Plus, Play, Edit, Trash2, Eye, ThumbsUp, Clock, MoreVertical } from 'lu
 import type { Video } from '@/types';
 import { Button } from '@/components/ui/button';
 import { LoadingScreen, Spinner } from '@/components/ui/spinner';
-import { formatCompactNumber, formatDuration, formatRelativeTime } from '@/lib/utils';
-import { useAuthStore } from '@/lib/stores';
+import { formatCompactNumber, formatDuration, formatRelativeTime } from '@/shared/utils/formatting';
+import { useAuthStore } from '@/shared/stores/auth-store';
 import { toast } from 'sonner';
 import { apiClient } from '@/api/client/base-client';
 

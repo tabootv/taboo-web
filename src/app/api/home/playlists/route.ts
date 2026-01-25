@@ -1,4 +1,4 @@
-import { fetchHomeData } from '@/lib/api/home-data';
+import { fetchHomeData } from '@/shared/lib/api/home-data';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {

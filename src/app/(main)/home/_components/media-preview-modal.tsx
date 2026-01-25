@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { X } from 'lucide-react';
-import { useSavedVideosStore, type SavedVideo } from '@/lib/stores/saved-videos-store';
+import { useSavedVideosStore, type SavedVideo } from '@/shared/stores/saved-videos-store';
 import type { Video } from '@/types';
 import { PreviewVideoPlayer } from './PreviewVideoPlayer';
 import { PreviewMediaInfo } from './PreviewMediaInfo';

@@ -5,7 +5,7 @@ import { SeriesPageSkeleton } from '../_components/SeriesPageSkeleton';
 import { TrailerModal } from '../_components/TrailerModal';
 import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
 import { useSidebar } from '@/components/ui/sidebar';
-import { cn, extractIdFromSlug, formatDuration, getCreatorRoute, getSeriesPlayRoute, isValidId } from '@/lib/utils';
+import { cn, extractIdFromSlug, formatDuration, getCreatorRoute, getSeriesPlayRoute, isValidId } from '@/shared/utils/formatting';
 import { ChevronDown, Clock, Info, Play } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';

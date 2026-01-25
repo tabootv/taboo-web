@@ -1,7 +1,7 @@
 'use client';
 
 import { Flame, MessageCircle } from 'lucide-react';
-import { useShortsStore } from '@/lib/stores/shorts-store';
+import { useShortsStore } from '@/shared/stores/shorts-store';
 import { useToggleShortLike } from '@/api/mutations/shorts.mutations';
 import { toast } from 'sonner';
 

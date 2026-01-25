@@ -2,7 +2,7 @@
 
 import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
 import { usePrefetch } from '@/hooks/use-prefetch';
-import { getSeriesRoute } from '@/lib/utils';
+import { getSeriesRoute } from '@/shared/utils/formatting';
 import type { Series } from '@/types';
 import { Play } from 'lucide-react';
 import Image from 'next/image';

@@ -4,7 +4,7 @@
 
 import Image from 'next/image';
 import { Film, Play, BookOpen, Users, ArrowUpRight, TrendingUp } from 'lucide-react';
-import { getCreatorRoute, getSeriesRoute } from '@/lib/utils';
+import { getCreatorRoute, getSeriesRoute } from '@/shared/utils/formatting';
 import type { Video, Series, Creator } from '@/types';
 
 interface SearchResult {

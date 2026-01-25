@@ -3,7 +3,7 @@
  */
 
 import { Search, X } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/utils/formatting';
 
 interface NavbarSearchBarProps {
   isSearchExpanded: boolean;

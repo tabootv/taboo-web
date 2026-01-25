@@ -1,7 +1,7 @@
 'use client';
 
 import { usePrefetch } from '@/hooks/use-prefetch';
-import { formatDuration } from '@/lib/utils';
+import { formatDuration } from '@/shared/utils/formatting';
 import type { Channel, Video } from '@/types';
 import { Clock, GraduationCap, Play } from 'lucide-react';
 import Image from 'next/image';

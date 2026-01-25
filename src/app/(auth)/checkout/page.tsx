@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ArrowLeft, Crown, Check, CreditCard, Lock, AlertCircle } from 'lucide-react';
 import { subscriptionsClient as subscriptionsApi } from '@/api/client/subscriptions.client';
 import type { Plan } from '@/types';
-import { useAuthStore } from '@/lib/stores';
+import { useAuthStore } from '@/shared/stores/auth-store';
 import { Button } from '@/components/ui/button';
 import { LoadingScreen } from '@/components/ui/spinner';
 import { Logo } from '@/components/ui/logo';

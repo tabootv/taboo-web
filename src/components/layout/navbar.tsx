@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect, useCallback } from 'react';
 import { Menu, X } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/utils/formatting';
 import { Logo } from '@/components/ui/logo';
 import { useSearchExpansion } from '@/components/search/hooks/use-search-expansion';
 import { useMobileMenu } from './hooks/use-mobile-menu';

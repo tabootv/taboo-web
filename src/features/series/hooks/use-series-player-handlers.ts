@@ -1,7 +1,7 @@
 'use client';
 
 import { useToggleAutoplay, useToggleDislike, useToggleLike } from '@/api/mutations';
-import { getSeriesPlayRoute } from '@/lib/utils';
+import { getSeriesPlayRoute } from '@/shared/utils/formatting';
 import type { Video } from '@/types';
 import { useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';

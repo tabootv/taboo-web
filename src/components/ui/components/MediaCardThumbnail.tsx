@@ -4,7 +4,7 @@
 
 import Image from 'next/image';
 import { Play, Film, Lock } from 'lucide-react';
-import { formatDuration } from '@/lib/utils';
+import { formatDuration } from '@/shared/utils/formatting';
 import type { MediaCardProps } from '../media-card';
 
 interface MediaCardThumbnailProps {

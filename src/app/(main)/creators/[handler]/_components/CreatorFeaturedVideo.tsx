@@ -1,7 +1,7 @@
 'use client';
 
-import { cn } from '@/lib/utils';
-import { getCountryName } from '@/lib/utils/country';
+import { cn } from '@/shared/utils/formatting';
+import { getCountryName } from '@/shared/utils/country';
 import { Globe } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';

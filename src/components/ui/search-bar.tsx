@@ -2,7 +2,7 @@
 
 import { searchClient as searchApi } from '@/api/client/search.client';
 import { useDebounce } from '@/hooks';
-import { cn, getCreatorRoute, getSeriesRoute } from '@/lib/utils';
+import { cn, getCreatorRoute, getSeriesRoute } from '@/shared/utils/formatting';
 import type { Creator, Series, Video } from '@/types';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';

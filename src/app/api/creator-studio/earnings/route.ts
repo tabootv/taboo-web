@@ -1,4 +1,4 @@
-import { getComprehensiveEarningsData, type GroupBy, type V2Commission, type V2Payout } from '@/lib/firstpromoter/client';
+import { getComprehensiveEarningsData, type GroupBy, type V2Commission, type V2Payout } from '@/shared/lib/firstpromoter/client';
 import { getRequiredEnv } from '@/shared/lib/config/env';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';

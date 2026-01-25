@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useCreators } from '@/api/queries/home.queries';
 import { useMapVideos } from '@/api/queries/public.queries';
 import { useDebounce } from './use-debounce';
-import { calculateSimilarity, detectCountry, getCountryCode } from '@/lib/utils/search-utils';
+import { calculateSimilarity, detectCountry, getCountryCode } from '@/shared/utils/search-utils';
 import type { Creator, Video } from '@/types';
 
 type MapVideo = {

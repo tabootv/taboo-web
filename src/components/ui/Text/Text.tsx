@@ -1,5 +1,5 @@
 import { HTMLAttributes, forwardRef } from 'react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/utils/formatting';
 import type { TextVariant } from '@/types';
 
 export interface TextProps extends HTMLAttributes<HTMLParagraphElement> {

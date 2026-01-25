@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ContentGrid } from '@/components/ui/content-grid';
 import { LoadingScreen } from '@/components/ui/spinner';
 import { PageHeader } from '@/components/ui/page-header';
-import { useAuthStore } from '@/lib/stores/auth-store';
+import { useAuthStore } from '@/shared/stores/auth-store';
 import { GraduationCap, LogIn } from 'lucide-react';
 import Link from 'next/link';
 import { useRef } from 'react';

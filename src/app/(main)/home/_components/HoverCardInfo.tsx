@@ -4,7 +4,7 @@
 
 import Image from 'next/image';
 import { Play, Plus, Check, ChevronDown } from 'lucide-react';
-import { formatDuration } from '@/lib/utils';
+import { formatDuration } from '@/shared/utils/formatting';
 import type { Video } from '@/types';
 
 interface HoverCardInfoProps {

@@ -15,7 +15,7 @@ import {
   Loader2,
   Check,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/utils/formatting';
 
 export interface QualityOption {
   label: string;

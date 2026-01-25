@@ -1,5 +1,5 @@
 import { ErrorBoundary } from '@/shared/components/error-boundary';
-import { QueryProvider } from '@/shared/components/providers';
+import { QueryProvider } from '@/shared/components/providers/query-provider';
 import type { Metadata, Viewport } from 'next';
 import { Figtree } from 'next/font/google';
 import './globals.css';

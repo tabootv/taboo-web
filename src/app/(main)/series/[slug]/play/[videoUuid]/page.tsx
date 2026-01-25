@@ -8,7 +8,7 @@ import {
   useSeriesPlayerData,
   useSeriesPlayerHandlers,
 } from '@/features/series';
-import { extractIdFromSlug, isValidId } from '@/lib/utils';
+import { extractIdFromSlug, isValidId } from '@/shared/utils/formatting';
 import { use, useEffect, useRef } from 'react';
 
 export default function SeriesPlayerPage({

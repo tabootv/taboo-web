@@ -7,7 +7,7 @@ import {
 import { useNotifications } from '@/api/queries/notifications.queries';
 import { Button } from '@/components/ui/button';
 import { LoadingScreen } from '@/components/ui/spinner';
-import { getCreatorRoute, getSeriesRoute } from '@/lib/utils';
+import { getCreatorRoute, getSeriesRoute } from '@/shared/utils/formatting';
 import type { Notification } from '@/types';
 import { formatDistanceToNow } from 'date-fns';
 import { Bell, Check, Film, Heart, MessageSquare, Trash2, UserPlus, X } from 'lucide-react';

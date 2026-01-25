@@ -3,7 +3,7 @@
  */
 
 import { Search, ArrowRight } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/utils/formatting';
 import { SearchResultItem } from './SearchResultItem';
 import type { Video, Series, Creator } from '@/types';
 

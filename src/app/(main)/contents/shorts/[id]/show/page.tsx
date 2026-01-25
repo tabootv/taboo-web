@@ -7,8 +7,8 @@ import { ArrowLeft, Edit, Eye, ThumbsUp, MessageCircle, Clock, ExternalLink } fr
 import { Button } from '@/components/ui/button';
 import { LoadingScreen } from '@/components/ui/spinner';
 import { VideoPlayer } from '@/features/video/components/video-player';
-import { useAuthStore } from '@/lib/stores';
-import { formatCompactNumber, formatDuration, formatRelativeTime } from '@/lib/utils';
+import { useAuthStore } from '@/shared/stores/auth-store';
+import { formatCompactNumber, formatDuration, formatRelativeTime } from '@/shared/utils/formatting';
 import { toast } from 'sonner';
 import { apiClient } from '@/api/client/base-client';
 import type { Video } from '@/types';

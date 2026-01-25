@@ -12,7 +12,7 @@ import { CreatorPostsTab } from './_components/tabs/CreatorPostsTab';
 import { CreatorEducationTab } from './_components/tabs/CreatorEducationTab';
 import type { TabConfig, TabType } from './_components/types';
 import { Button } from '@/components/ui/button';
-import { buildSocialUrl } from '@/lib/utils/social';
+import { buildSocialUrl } from '@/shared/utils/social';
 import { Globe, Play, PlaySquare } from 'lucide-react';
 import { useMemo, useState } from 'react';
 

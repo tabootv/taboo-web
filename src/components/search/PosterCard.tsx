@@ -1,7 +1,7 @@
 'use client';
 
 import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
-import { cn, formatCompactNumber, formatDuration, getCreatorRoute, getSeriesRoute } from '@/lib/utils';
+import { cn, formatCompactNumber, formatDuration, getCreatorRoute, getSeriesRoute } from '@/shared/utils/formatting';
 import { Check, MoreHorizontal, Play, Plus } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';

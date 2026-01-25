@@ -1,7 +1,7 @@
 'use client';
 
 import { Play, ThumbsUp } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/utils/formatting';
 import type { Video } from '@/types';
 import { useSeriesPlayerHandlers } from '../hooks/use-series-player-handlers';
 

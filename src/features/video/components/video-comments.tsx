@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect } from 'react';
 import Image from 'next/image';
 import { Send } from 'lucide-react';
 import { videoClient } from '@/api/client/video.client';
-import { useAuthStore } from '@/lib/stores/auth-store';
+import { useAuthStore } from '@/shared/stores/auth-store';
 import type { Comment, Video } from '@/types';
 import { SingleComment } from './single-comment';
 

@@ -1,4 +1,4 @@
-import { fetchHomeData } from '@/lib/api/home-data';
+import { fetchHomeData } from '@/shared/lib/api/home-data';
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { HomeContent } from './home-content';

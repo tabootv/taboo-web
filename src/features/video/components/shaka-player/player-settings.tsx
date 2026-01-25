@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/utils/formatting';
 import { Check, ChevronRight } from 'lucide-react';
 import { useMemo } from 'react';
 import { PLAYBACK_SPEEDS } from '../../constants/player-constants';

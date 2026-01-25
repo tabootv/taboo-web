@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/utils/formatting';
 import { Loader2, Play, Volume1, Volume2, VolumeX } from 'lucide-react';
 import Image from 'next/image';
 import { useCallback, useMemo, useRef, useState } from 'react';

@@ -12,8 +12,8 @@ import {
   GraduationCap,
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
-import { useAuthStore } from '@/lib/stores';
-import { formatNumber } from '@/lib/utils';
+import { useAuthStore } from '@/shared/stores/auth-store';
+import { formatNumber } from '@/shared/utils/formatting';
 import { StatCard } from './_components/StatCard';
 import { Card, CardContent } from '@/components/ui/card';
 

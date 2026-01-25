@@ -1,6 +1,6 @@
 'use client';
 
-import { formatDuration } from '@/lib/utils';
+import { formatDuration } from '@/shared/utils/formatting';
 import type { SeekPreview as SeekPreviewType } from './types';
 
 interface SeekPreviewProps {

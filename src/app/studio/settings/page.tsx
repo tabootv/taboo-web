@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { useAuthStore } from '@/lib/stores';
+import { useAuthStore } from '@/shared/stores/auth-store';
 import { Bell, Camera, Settings, Shield, User } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';

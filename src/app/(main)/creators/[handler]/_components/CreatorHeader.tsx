@@ -1,7 +1,7 @@
 'use client';
 
 import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/utils/formatting';
 import Image from 'next/image';
 import type { CreatorHeaderProps } from './types';
 

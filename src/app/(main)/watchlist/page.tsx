@@ -8,8 +8,8 @@ import {
   useWatchlistStore,
   type WatchlistItem,
   type WatchlistItemType,
-} from '@/lib/stores/watchlist-store';
-import { formatDuration, getSeriesRoute } from '@/lib/utils';
+} from '@/shared/stores/watchlist-store';
+import { formatDuration, getSeriesRoute } from '@/shared/utils/formatting';
 
 type FilterType = WatchlistItemType | 'all';
 

@@ -6,7 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, Upload, X, Film, AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useAuthStore } from '@/lib/stores';
+import { useAuthStore } from '@/shared/stores/auth-store';
 import { toast } from 'sonner';
 import { apiClient } from '@/api/client/base-client';
 

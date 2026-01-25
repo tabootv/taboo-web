@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import type { Video } from '@/types';
-import { formatRelativeTime } from '@/lib/utils';
+import { formatRelativeTime } from '@/shared/utils/formatting';
 
 interface ShortHeaderProps {
   video: Video;

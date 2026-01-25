@@ -6,7 +6,7 @@ import { CoursePlayerPageSkeleton } from '../../../_components/CoursePlayerPageS
 import { LessonCardPlayer } from '../../../_components/LessonCardPlayer';
 import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
 import { VideoPlayerSkeleton } from '@/features/video/components/VideoPlayerSkeleton';
-import { cn, formatDuration, formatRelativeTime, getCreatorRoute } from '@/lib/utils';
+import { cn, formatDuration, formatRelativeTime, getCreatorRoute } from '@/shared/utils/formatting';
 import { ChevronRight, Clock, Play, SkipForward } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';

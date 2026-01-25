@@ -3,7 +3,7 @@
  */
 
 import { Spinner } from '@/components/ui/spinner';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/utils/formatting';
 import { Search, X } from 'lucide-react';
 
 interface SearchInputProps {

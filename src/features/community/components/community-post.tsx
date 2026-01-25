@@ -2,7 +2,7 @@
 
 import { postsClient as postsApi } from '@/api/client/posts.client';
 import { ImageLightbox } from '@/components/ui/image-lightbox';
-import { getCreatorRoute } from '@/lib/utils';
+import { getCreatorRoute } from '@/shared/utils/formatting';
 import type { Post } from '@/types';
 import { MoreHorizontal, Trash2 } from 'lucide-react';
 import Image from 'next/image';

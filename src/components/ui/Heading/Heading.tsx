@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/utils/formatting';
 import type { HeadingLevel } from '@/types';
 import { HTMLAttributes, JSX, createElement } from 'react';
 

@@ -7,9 +7,9 @@ import { VideoPlayerSkeleton } from '@/features/video/components/VideoPlayerSkel
 import { LikeButton } from '@/features/video/components/like-button';
 import { SaveButton } from '@/features/video/components/save-button';
 import { VideoComments } from '@/features/video/components/video-comments';
-import { useAuthStore } from '@/lib/stores/auth-store';
-import { formatRelativeTime, getCreatorRoute } from '@/lib/utils';
-import { getTagKey, normalizeTags } from '@/lib/utils/tags';
+import { useAuthStore } from '@/shared/stores/auth-store';
+import { formatRelativeTime, getCreatorRoute } from '@/shared/utils/formatting';
+import { getTagKey, normalizeTags } from '@/shared/utils/tags';
 import type { Tag, Video } from '@/types';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import dynamic from 'next/dynamic';

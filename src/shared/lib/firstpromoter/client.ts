@@ -2,7 +2,11 @@
  * Server-only FirstPromoter API client
  * NEVER import this file in client components
  * Uses V1 API for profile/rewards and V2 API for date-filtered reports
+ *
+ * Functions are wrapped with React.cache() to deduplicate calls within a single request
  */
+
+import { cache } from 'react';
 
 import { getRequiredEnv } from '@/shared/lib/config/env';
 
@@ -251,8 +255,9 @@ export interface V2Payout {
 
 /**
  * Get promoter profile and lifetime stats from V1 API
+ * Wrapped with React.cache() to deduplicate calls within a single request
  */
-export async function getPromoterProfile(promoterId: number): Promise<PromoterProfile | null> {
+export const getPromoterProfile = cache(async (promoterId: number): Promise<PromoterProfile | null> => {
   try {
     const response = await fetch(`${V1_BASE_URL}/promoters/show?id=${promoterId}`, {
       method: 'GET',
@@ -308,93 +313,99 @@ export async function getPromoterProfile(promoterId: number): Promise<PromoterPr
     console.error('FirstPromoter getPromoterProfile exception:', error);
     return null;
   }
-}
+});
 
 /**
  * Get date-filtered reports from V2 API
  * Returns clicks, signups, customers, sales, revenue filtered by date range
+ * Wrapped with React.cache() to deduplicate calls within a single request
  */
-export async function getPromoterReports(
-  promoterId: number,
-  startDate: string,
-  endDate: string,
-  groupBy: GroupBy
-): Promise<V2ReportResponse | null> {
-  try {
-    // Format dates as YYYY-MM-DD for the API
-    const startDateStr = new Date(startDate).toISOString().split('T')[0];
-    const endDateStr = new Date(endDate).toISOString().split('T')[0];
+export const getPromoterReports = cache(
+  async (
+    promoterId: number,
+    startDate: string,
+    endDate: string,
+    groupBy: GroupBy
+  ): Promise<V2ReportResponse | null> => {
+    try {
+      // Format dates as YYYY-MM-DD for the API
+      const startDateStr = new Date(startDate).toISOString().split('T')[0];
+      const endDateStr = new Date(endDate).toISOString().split('T')[0];
 
-    const columns = 'clicks_count,referrals_count,customers_count,sales_count,revenue_amount';
-    const url = `${V2_BASE_URL}/reports/promoters?promoter_id=${promoterId}&start_date=${startDateStr}&end_date=${endDateStr}&group_by=${groupBy}&columns=${columns}`;
+      const columns = 'clicks_count,referrals_count,customers_count,sales_count,revenue_amount';
+      const url = `${V2_BASE_URL}/reports/promoters?promoter_id=${promoterId}&start_date=${startDateStr}&end_date=${endDateStr}&group_by=${groupBy}&columns=${columns}`;
 
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: getV2Headers(),
-      next: { revalidate: 60 },
-    });
-
-    if (!response.ok) {
-      console.error(
-        'FirstPromoter getPromoterReports error:',
-        response.status,
-        await response.text()
-      );
-      return null;
-    }
-
-    const data = await response.json();
-    // API returns an array, we want the first (and only) item for single promoter
-    return Array.isArray(data) && data.length > 0 ? data[0] : null;
-  } catch (error) {
-    console.error('FirstPromoter getPromoterReports exception:', error);
-    return null;
-  }
-}
-
-/**
- * Get rewards list for time series data (with pagination to fetch ALL records)
- */
-export async function getRewardsList(promoterId: number): Promise<RewardV1Response[]> {
-  const allRewards: RewardV1Response[] = [];
-  let page = 1;
-  const perPage = 100;
-
-  try {
-    while (true) {
-      const response = await fetch(
-        `${V1_BASE_URL}/rewards/list?promoter_id=${promoterId}&page=${page}&per_page=${perPage}`,
-        {
-          method: 'GET',
-          headers: getV1Headers(),
-          next: { revalidate: 60 },
-        }
-      );
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: getV2Headers(),
+        next: { revalidate: 60 },
+      });
 
       if (!response.ok) {
         console.error(
-          'FirstPromoter getRewardsList error:',
+          'FirstPromoter getPromoterReports error:',
           response.status,
           await response.text()
         );
-        break;
+        return null;
       }
 
-      const pageData = await response.json();
-      if (!pageData || pageData.length === 0) break;
-
-      allRewards.push(...pageData);
-
-      // If we got less than perPage, we've reached the last page
-      if (pageData.length < perPage) break;
-      page++;
+      const data = await response.json();
+      // API returns an array, we want the first (and only) item for single promoter
+      return Array.isArray(data) && data.length > 0 ? data[0] : null;
+    } catch (error) {
+      console.error('FirstPromoter getPromoterReports exception:', error);
+      return null;
     }
-  } catch (error) {
-    console.error('FirstPromoter getRewardsList exception:', error);
   }
+);
 
-  return allRewards;
-}
+/**
+ * Get rewards list for time series data (with pagination to fetch ALL records)
+ * Wrapped with React.cache() to deduplicate calls within a single request
+ */
+export const getRewardsList = cache(
+  async (promoterId: number): Promise<RewardV1Response[]> => {
+    const allRewards: RewardV1Response[] = [];
+    let page = 1;
+    const perPage = 100;
+
+    try {
+      while (true) {
+        const response = await fetch(
+          `${V1_BASE_URL}/rewards/list?promoter_id=${promoterId}&page=${page}&per_page=${perPage}`,
+          {
+            method: 'GET',
+            headers: getV1Headers(),
+            next: { revalidate: 60 },
+          }
+        );
+
+        if (!response.ok) {
+          console.error(
+            'FirstPromoter getRewardsList error:',
+            response.status,
+            await response.text()
+          );
+          break;
+        }
+
+        const pageData = await response.json();
+        if (!pageData || pageData.length === 0) break;
+
+        allRewards.push(...pageData);
+
+        // If we got less than perPage, we've reached the last page
+        if (pageData.length < perPage) break;
+        page++;
+      }
+    } catch (error) {
+      console.error('FirstPromoter getRewardsList exception:', error);
+    }
+
+    return allRewards;
+  }
+);
 
 /**
  * Get date string in YYYY-MM-DD format (ignoring time)
@@ -505,8 +516,9 @@ function getFilteredRewardsStats(
  * Get promoter earnings data with time series
  * Uses V2 API for date-filtered stats (clicks, signups, customers, sales, revenue)
  * and V1 rewards list for earnings calculation
+ * Wrapped with React.cache() to deduplicate calls within a single request
  */
-export async function getPromoterEarningsData(params: ReportParams) {
+export const getPromoterEarningsData = cache(async (params: ReportParams) => {
   const [profile, rewards, v2Reports] = await Promise.all([
     getPromoterProfile(params.promoterId),
     getRewardsList(params.promoterId),
@@ -529,154 +541,171 @@ export async function getPromoterEarningsData(params: ReportParams) {
   };
 
   return { profile, series, rawRewards: rewards, filteredStats, v2Reports };
-}
+});
 
 /**
  * Get enhanced promoter profile from V2 API
  * Returns more detailed stats including active customers, pending balance, referral link
+ * Wrapped with React.cache() to deduplicate calls within a single request
  */
-export async function getPromoterProfileV2(promoterId: number): Promise<V2PromoterProfile | null> {
-  try {
-    const response = await fetch(`${V2_BASE_URL}/promoters/${promoterId}`, {
-      method: 'GET',
-      headers: getV2Headers(),
-      next: { revalidate: 60 },
-    });
+export const getPromoterProfileV2 = cache(
+  async (promoterId: number): Promise<V2PromoterProfile | null> => {
+    try {
+      const response = await fetch(`${V2_BASE_URL}/promoters/${promoterId}`, {
+        method: 'GET',
+        headers: getV2Headers(),
+        next: { revalidate: 60 },
+      });
 
-    if (!response.ok) {
-      console.error(
-        'FirstPromoter getPromoterProfileV2 error:',
-        response.status,
-        await response.text()
-      );
+      if (!response.ok) {
+        console.error(
+          'FirstPromoter getPromoterProfileV2 error:',
+          response.status,
+          await response.text()
+        );
+        return null;
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('FirstPromoter getPromoterProfileV2 exception:', error);
       return null;
     }
-
-    return await response.json();
-  } catch (error) {
-    console.error('FirstPromoter getPromoterProfileV2 exception:', error);
-    return null;
   }
-}
+);
 
 /**
  * Get commissions list from V2 API (with pagination)
+ * Wrapped with React.cache() to deduplicate calls within a single request
  */
-export async function getCommissionsList(
-  promoterId: number,
-  options: { page?: number; perPage?: number; startDate?: string; endDate?: string } = {}
-): Promise<{ commissions: V2Commission[]; total: number }> {
-  const { page = 1, perPage = 20, startDate, endDate } = options;
+export const getCommissionsList = cache(
+  async (
+    promoterId: number,
+    options: { page?: number; perPage?: number; startDate?: string; endDate?: string } = {}
+  ): Promise<{ commissions: V2Commission[]; total: number }> => {
+    const { page = 1, perPage = 20, startDate, endDate } = options;
 
-  try {
-    let url = `${V2_BASE_URL}/commissions?promoter_id=${promoterId}&page=${page}&per_page=${perPage}`;
+    try {
+      let url = `${V2_BASE_URL}/commissions?promoter_id=${promoterId}&page=${page}&per_page=${perPage}`;
 
-    if (startDate) {
-      url += `&start_date=${new Date(startDate).toISOString().split('T')[0]}`;
-    }
-    if (endDate) {
-      url += `&end_date=${new Date(endDate).toISOString().split('T')[0]}`;
-    }
+      if (startDate) {
+        url += `&start_date=${new Date(startDate).toISOString().split('T')[0]}`;
+      }
+      if (endDate) {
+        url += `&end_date=${new Date(endDate).toISOString().split('T')[0]}`;
+      }
 
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: getV2Headers(),
-      next: { revalidate: 60 },
-    });
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: getV2Headers(),
+        next: { revalidate: 60 },
+      });
 
-    if (!response.ok) {
-      console.error(
-        'FirstPromoter getCommissionsList error:',
-        response.status,
-        await response.text()
-      );
+      if (!response.ok) {
+        console.error(
+          'FirstPromoter getCommissionsList error:',
+          response.status,
+          await response.text()
+        );
+        return { commissions: [], total: 0 };
+      }
+
+      const data = await response.json();
+      return {
+        commissions: Array.isArray(data) ? data : [],
+        total: Array.isArray(data) ? data.length : 0,
+      };
+    } catch (error) {
+      console.error('FirstPromoter getCommissionsList exception:', error);
       return { commissions: [], total: 0 };
     }
-
-    const data = await response.json();
-    return {
-      commissions: Array.isArray(data) ? data : [],
-      total: Array.isArray(data) ? data.length : 0,
-    };
-  } catch (error) {
-    console.error('FirstPromoter getCommissionsList exception:', error);
-    return { commissions: [], total: 0 };
   }
-}
+);
 
 /**
  * Get referrals list from V2 API (with pagination)
+ * Wrapped with React.cache() to deduplicate calls within a single request
  */
-export async function getReferralsList(
-  promoterId: number,
-  options: { page?: number; perPage?: number; state?: string } = {}
-): Promise<V2Referral[]> {
-  const { page = 1, perPage = 20, state } = options;
+export const getReferralsList = cache(
+  async (
+    promoterId: number,
+    options: { page?: number; perPage?: number; state?: string } = {}
+  ): Promise<V2Referral[]> => {
+    const { page = 1, perPage = 20, state } = options;
 
-  try {
-    let url = `${V2_BASE_URL}/referrals?promoter_id=${promoterId}&page=${page}&per_page=${perPage}`;
-    if (state) {
-      url += `&state=${state}`;
-    }
+    try {
+      let url = `${V2_BASE_URL}/referrals?promoter_id=${promoterId}&page=${page}&per_page=${perPage}`;
+      if (state) {
+        url += `&state=${state}`;
+      }
 
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: getV2Headers(),
-      next: { revalidate: 60 },
-    });
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: getV2Headers(),
+        next: { revalidate: 60 },
+      });
 
-    if (!response.ok) {
-      console.error(
-        'FirstPromoter getReferralsList error:',
-        response.status,
-        await response.text()
-      );
+      if (!response.ok) {
+        console.error(
+          'FirstPromoter getReferralsList error:',
+          response.status,
+          await response.text()
+        );
+        return [];
+      }
+
+      const data = await response.json();
+      return Array.isArray(data) ? data : [];
+    } catch (error) {
+      console.error('FirstPromoter getReferralsList exception:', error);
       return [];
     }
-
-    const data = await response.json();
-    return Array.isArray(data) ? data : [];
-  } catch (error) {
-    console.error('FirstPromoter getReferralsList exception:', error);
-    return [];
   }
-}
+);
 
 /**
  * Get payouts list from V2 API (with pagination)
+ * Wrapped with React.cache() to deduplicate calls within a single request
  */
-export async function getPayoutsList(
-  promoterId: number,
-  options: { page?: number; perPage?: number } = {}
-): Promise<V2Payout[]> {
-  const { page = 1, perPage = 20 } = options;
+export const getPayoutsList = cache(
+  async (
+    promoterId: number,
+    options: { page?: number; perPage?: number } = {}
+  ): Promise<V2Payout[]> => {
+    const { page = 1, perPage = 20 } = options;
 
-  try {
-    const url = `${V2_BASE_URL}/payouts?promoter_id=${promoterId}&page=${page}&per_page=${perPage}`;
+    try {
+      const url = `${V2_BASE_URL}/payouts?promoter_id=${promoterId}&page=${page}&per_page=${perPage}`;
 
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: getV2Headers(),
-      next: { revalidate: 60 },
-    });
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: getV2Headers(),
+        next: { revalidate: 60 },
+      });
 
-    if (!response.ok) {
-      console.error('FirstPromoter getPayoutsList error:', response.status, await response.text());
+      if (!response.ok) {
+        console.error(
+          'FirstPromoter getPayoutsList error:',
+          response.status,
+          await response.text()
+        );
+        return [];
+      }
+
+      const data = await response.json();
+      return Array.isArray(data) ? data : [];
+    } catch (error) {
+      console.error('FirstPromoter getPayoutsList exception:', error);
       return [];
     }
-
-    const data = await response.json();
-    return Array.isArray(data) ? data : [];
-  } catch (error) {
-    console.error('FirstPromoter getPayoutsList exception:', error);
-    return [];
   }
-}
+);
 
 /**
  * Get comprehensive earnings data with all V2 API data
+ * Wrapped with React.cache() to deduplicate calls within a single request
  */
-export async function getComprehensiveEarningsData(params: ReportParams) {
+export const getComprehensiveEarningsData = cache(async (params: ReportParams) => {
   const [profileV2, rewards, v2Reports, commissions, payouts] = await Promise.all([
     getPromoterProfileV2(params.promoterId),
     getRewardsList(params.promoterId),
@@ -741,4 +770,4 @@ export async function getComprehensiveEarningsData(params: ReportParams) {
     payoutHistory: payouts,
     v2Reports,
   };
-}
+});

@@ -3,7 +3,7 @@
 import { CheckCircle } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { formatRelativeTime, getCreatorRoute } from '@/lib/utils';
+import { formatRelativeTime, getCreatorRoute } from '@/shared/utils/formatting';
 
 interface SeriesChannelInfoProps {
   channelHandler?: string;

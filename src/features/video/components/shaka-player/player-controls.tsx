@@ -1,6 +1,6 @@
 'use client';
 
-import { cn, formatDuration } from '@/lib/utils';
+import { cn, formatDuration } from '@/shared/utils/formatting';
 import {
   Maximize,
   Minimize,

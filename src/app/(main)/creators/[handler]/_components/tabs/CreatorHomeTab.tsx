@@ -6,7 +6,7 @@ import { useMemo } from 'react';
 import { CreatorFeaturedVideo } from '../CreatorFeaturedVideo';
 import { CreatorShortsGrid } from '../CreatorShortsGrid';
 import { CreatorVideoGrid } from '../CreatorVideoGrid';
-import { shuffleArray } from '@/lib/utils/array';
+import { shuffleArray } from '@/shared/utils/array';
 import type { TabType } from '../types';
 
 interface CreatorHomeTabProps {

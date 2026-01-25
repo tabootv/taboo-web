@@ -7,9 +7,9 @@ import {
   formatAddedAt,
   type WatchlistItem,
   type WatchlistItemType,
-} from '@/lib/stores/watchlist-store';
+} from '@/shared/stores/watchlist-store';
 import { usePrefetch } from '@/hooks/use-prefetch';
-import { getSeriesRoute } from '@/lib/utils';
+import { getSeriesRoute } from '@/shared/utils/formatting';
 
 interface WatchlistCardProps {
   item: WatchlistItem;

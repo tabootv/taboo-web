@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { subscriptionsClient } from '@/api/client/subscriptions.client';
-import { useAuthStore } from '@/lib/stores';
+import { useAuthStore } from '@/shared/stores/auth-store';
 import type { SubscriptionInfo, Plan } from '@/types';
 
 /**

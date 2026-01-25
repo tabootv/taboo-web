@@ -6,7 +6,7 @@ import {
   useWatchlistStore,
   type WatchlistItem,
   type WatchlistItemType,
-} from '@/lib/stores/watchlist-store';
+} from '@/shared/stores/watchlist-store';
 import type { Video, Series, Course } from '@/types';
 
 interface WatchlistButtonProps {

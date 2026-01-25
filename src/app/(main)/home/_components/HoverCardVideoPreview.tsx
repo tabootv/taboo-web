@@ -3,7 +3,7 @@
  */
 
 import { Play, Volume2, VolumeX } from 'lucide-react';
-import { formatDuration } from '@/lib/utils';
+import { formatDuration } from '@/shared/utils/formatting';
 
 interface HoverCardVideoPreviewProps {
   previewUrl: string | null;

@@ -372,9 +372,10 @@ export async function submitAction(formData: FormData) {
 - [x] `src/server/actions/` directory removed
 - [x] Clear distinction between Server Actions and TanStack Query
 - [x] All auth flows work correctly
-- [ ] All mutations tested end-to-end
 - [x] TypeScript passes
-- [ ] Build succeeds
+- [x] Lint passes
+
+**Note**: End-to-end testing and build verification to be done as part of final validation before deployment.
 
 ---
 

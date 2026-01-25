@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Play } from 'lucide-react';
-import { formatDuration, getSeriesPlayRoute } from '@/lib/utils';
+import { formatDuration, getSeriesPlayRoute } from '@/shared/utils/formatting';
 import { usePrefetch } from '@/hooks/use-prefetch';
 import type { Channel, Video } from '@/types';
 

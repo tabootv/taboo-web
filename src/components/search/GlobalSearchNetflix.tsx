@@ -14,7 +14,7 @@ import {
   X,
   Loader2,
 } from 'lucide-react';
-import { cn, getCreatorRoute, getSeriesRoute } from '@/lib/utils';
+import { cn, getCreatorRoute, getSeriesRoute } from '@/shared/utils/formatting';
 import { useDebounce } from '@/hooks';
 import { searchClient as searchApi } from '@/api/client/search.client';
 import type { Video, Series, Creator } from '@/types';

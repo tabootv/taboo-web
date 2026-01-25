@@ -5,7 +5,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Plus, Check, Clock, Eye, Heart, ChevronDown } from 'lucide-react';
-import { formatDuration, formatCompactNumber, formatRelativeTime, getCreatorRoute } from '@/lib/utils';
+import { formatDuration, formatCompactNumber, formatRelativeTime, getCreatorRoute } from '@/shared/utils/formatting';
 import type { Video } from '@/types';
 
 interface PreviewMediaInfoProps {

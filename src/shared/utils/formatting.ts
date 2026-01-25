@@ -73,4 +73,4 @@ export {
   getCreatorRoute,
   extractIdFromSlug,
   isValidId,
-} from './utils/routes';
+} from './routes';
