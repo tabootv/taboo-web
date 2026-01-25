@@ -73,7 +73,10 @@
       "Bash(chmod:*)",
       "Bash(node scripts/verify-redirects.js:*)",
       "Bash(npm run verify-redirects:*)",
-      "Bash(pnpm run build:*)"
+      "Bash(pnpm run build:*)",
+      "Bash(du:*)",
+      "Skill(sync-project-docs)",
+      "Skill(sync-project-docs:*)"
     ],
     "deny": [],
     "ask": []
