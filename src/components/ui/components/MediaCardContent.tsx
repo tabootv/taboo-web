@@ -32,14 +32,11 @@ export function MediaCardContent({
       {/* Channel Info */}
       {channel && (
         <div className="flex items-start gap-2 mb-2">
-          <div className={`${styles.avatar} relative rounded-full overflow-hidden flex-shrink-0 bg-surface`}>
+          <div
+            className={`${styles.avatar} relative rounded-full overflow-hidden flex-shrink-0 bg-surface`}
+          >
             {channel.avatar ? (
-              <Image
-                src={channel.avatar}
-                alt={channel.name}
-                fill
-                className="object-cover"
-              />
+              <Image src={channel.avatar} alt={channel.name} fill className="object-cover" />
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-red-primary to-red-dark flex items-center justify-center">
                 <span className="text-xs font-bold text-white">
@@ -54,17 +51,13 @@ export function MediaCardContent({
             <h3 className={`title-card ${styles.title}`}>{title}</h3>
 
             {/* Channel Name */}
-            <p className={`${styles.meta} text-text-secondary mt-0.5 truncate`}>
-              {channel.name}
-            </p>
+            <p className={`${styles.meta} text-text-secondary mt-0.5 truncate`}>{channel.name}</p>
           </div>
         </div>
       )}
 
       {/* Title without channel */}
-      {!channel && (
-        <h3 className={`title-card ${styles.title} mb-2`}>{title}</h3>
-      )}
+      {!channel && <h3 className={`title-card ${styles.title} mb-2`}>{title}</h3>}
 
       {/* Metadata Row */}
       <div className={`flex items-center gap-3 ${styles.meta} text-text-secondary`}>
@@ -90,4 +83,3 @@ export function MediaCardContent({
     </div>
   );
 }
-

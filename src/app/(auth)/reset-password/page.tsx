@@ -75,9 +75,7 @@ function ResetPasswordForm() {
               Your password has been successfully reset. You can now sign in with your new password.
             </p>
             <Link href="/sign-in">
-              <Button className="w-full btn-premium">
-                Sign In
-              </Button>
+              <Button className="w-full btn-premium">Sign In</Button>
             </Link>
           </div>
         </div>
@@ -95,9 +93,7 @@ function ResetPasswordForm() {
               This password reset link is invalid or has expired. Please request a new one.
             </p>
             <Link href="/forgot-password">
-              <Button className="w-full btn-premium">
-                Request New Link
-              </Button>
+              <Button className="w-full btn-premium">Request New Link</Button>
             </Link>
           </div>
         </div>
@@ -126,9 +122,7 @@ function ResetPasswordForm() {
           {/* Header */}
           <div className="text-center mb-8">
             <h1 className="text-2xl font-bold text-text-primary mb-2">Create New Password</h1>
-            <p className="text-text-secondary">
-              Enter your new password below
-            </p>
+            <p className="text-text-secondary">Enter your new password below</p>
           </div>
 
           {/* Form */}
@@ -176,16 +170,16 @@ function ResetPasswordForm() {
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary"
                 >
-                  {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showConfirmPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
                 </button>
               </div>
             </div>
 
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full btn-premium py-3"
-            >
+            <Button type="submit" disabled={isSubmitting} className="w-full btn-premium py-3">
               {isSubmitting ? 'Resetting...' : 'Reset Password'}
             </Button>
           </form>
@@ -197,11 +191,13 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-text-secondary">Loading...</div>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-text-secondary">Loading...</div>
+        </div>
+      }
+    >
       <ResetPasswordForm />
     </Suspense>
   );

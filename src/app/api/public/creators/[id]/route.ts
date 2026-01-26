@@ -5,10 +5,7 @@ import { getRequiredEnv } from '@/shared/lib/config/env';
 // Force dynamic to avoid build-time env var requirement
 export const dynamic = 'force-dynamic';
 
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const API_URL = getRequiredEnv('NEXT_PUBLIC_API_URL');
   const SERVICE_TOKEN = getRequiredEnv('SERVICE_API_TOKEN');
@@ -17,7 +14,7 @@ export async function GET(
     // Fetch creator from Laravel API with service token
     const response = await fetch(`${API_URL}/creators/${id}`, {
       headers: {
-        'Accept': 'application/json',
+        Accept: 'application/json',
         Authorization: `Bearer ${SERVICE_TOKEN}`,
       },
       next: { revalidate: 300 }, // Cache for 5 minutes
@@ -43,10 +40,7 @@ export async function GET(
     });
   } catch (error) {
     console.error('Failed to fetch creator:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch creator' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch creator' }, { status: 500 });
   }
 }
 

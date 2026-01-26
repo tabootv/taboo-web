@@ -2,10 +2,7 @@
  * Social media URL utilities
  */
 
-export function buildSocialUrl(
-  platform: string,
-  handle: string | null | undefined
-): string | null {
+export function buildSocialUrl(platform: string, handle: string | null | undefined): string | null {
   if (!handle) return null;
   if (handle.startsWith('http://') || handle.startsWith('https://')) return handle;
   const cleanHandle = handle.replace(/^@/, '');

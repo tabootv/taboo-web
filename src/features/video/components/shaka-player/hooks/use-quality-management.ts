@@ -9,7 +9,10 @@ interface UseQualityManagementReturn {
   isAutoQuality: boolean;
   playbackSpeed: number;
   updateQualityTracks: (player: ShakaPlayerInstance) => void;
-  selectQuality: (quality: QualityTrack | null, shakaRef: React.RefObject<ShakaPlayerInstance | null>) => void;
+  selectQuality: (
+    quality: QualityTrack | null,
+    shakaRef: React.RefObject<ShakaPlayerInstance | null>
+  ) => void;
   changePlaybackSpeed: (speed: number, videoRef: React.RefObject<HTMLVideoElement | null>) => void;
 }
 
@@ -49,35 +52,35 @@ export function useQualityManagement(): UseQualityManagementReturn {
     }
   }, []);
 
-  const selectQuality = useCallback((
-    quality: QualityTrack | null,
-    shakaRef: React.RefObject<ShakaPlayerInstance | null>
-  ) => {
-    if (!shakaRef.current) return;
-    if (quality === null) {
-      shakaRef.current.configure({ abr: { enabled: true } });
-      setIsAutoQuality(true);
-      setSelectedQuality(null);
-    } else {
-      shakaRef.current.configure({ abr: { enabled: false } });
-      const tracks = shakaRef.current.getVariantTracks();
-      const targetTrack = tracks.find((t: { height?: number }) => t.height === quality.height);
-      if (targetTrack) {
-        shakaRef.current.selectVariantTrack(targetTrack, true);
+  const selectQuality = useCallback(
+    (quality: QualityTrack | null, shakaRef: React.RefObject<ShakaPlayerInstance | null>) => {
+      if (!shakaRef.current) return;
+      if (quality === null) {
+        shakaRef.current.configure({ abr: { enabled: true } });
+        setIsAutoQuality(true);
+        setSelectedQuality(null);
+      } else {
+        shakaRef.current.configure({ abr: { enabled: false } });
+        const tracks = shakaRef.current.getVariantTracks();
+        const targetTrack = tracks.find((t: { height?: number }) => t.height === quality.height);
+        if (targetTrack) {
+          shakaRef.current.selectVariantTrack(targetTrack, true);
+        }
+        setIsAutoQuality(false);
+        setSelectedQuality(quality);
       }
-      setIsAutoQuality(false);
-      setSelectedQuality(quality);
-    }
-  }, []);
+    },
+    []
+  );
 
-  const changePlaybackSpeed = useCallback((
-    speed: number,
-    videoRef: React.RefObject<HTMLVideoElement | null>
-  ) => {
-    if (!videoRef.current) return;
-    videoRef.current.playbackRate = speed;
-    setPlaybackSpeed(speed);
-  }, []);
+  const changePlaybackSpeed = useCallback(
+    (speed: number, videoRef: React.RefObject<HTMLVideoElement | null>) => {
+      if (!videoRef.current) return;
+      videoRef.current.playbackRate = speed;
+      setPlaybackSpeed(speed);
+    },
+    []
+  );
 
   return {
     availableQualities,

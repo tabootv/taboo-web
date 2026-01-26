@@ -1,4 +1,4 @@
-'use client';;
+'use client';
 import type { VideoListFilters } from '@/api/client/video.client';
 import { useCreatorsListPublic } from '@/api/queries/creators.queries';
 import { useCountries, useTags } from '@/api/queries/public.queries';
@@ -67,7 +67,10 @@ export default function VideosPage() {
 
   // Country options from dedicated countries API (simple string array)
   const countryOptions = useMemo(() => {
-    return (countriesData?.data || []).map((country) => ({ label: country.name, value: String(country.id) }));
+    return (countriesData?.data || []).map((country) => ({
+      label: country.name,
+      value: String(country.id),
+    }));
   }, [countriesData]);
 
   // Tag options from dedicated tags API (with id, name, count)
@@ -134,20 +137,14 @@ export default function VideosPage() {
             label="Country"
             value={countryFilter || 'all'}
             onChange={(val) => setCountryFilter(val === 'all' ? null : val)}
-            options={[
-              { label: 'All countries', value: 'all' },
-              ...countryOptions
-            ]}
+            options={[{ label: 'All countries', value: 'all' }, ...countryOptions]}
           />
 
           <SelectFilter
             label="Tag"
             value={tagFilter?.toString() || 'all'}
             onChange={(val) => setTagFilter(val === 'all' ? null : Number(val))}
-            options={[
-              { label: 'All tags', value: 'all' },
-              ...tagOptions,
-            ]}
+            options={[{ label: 'All tags', value: 'all' }, ...tagOptions]}
           />
 
           <SelectFilter

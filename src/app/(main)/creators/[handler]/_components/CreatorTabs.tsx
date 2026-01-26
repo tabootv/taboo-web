@@ -18,9 +18,7 @@ export function CreatorTabs({ activeTab, onTabChange, tabs }: CreatorTabsProps) 
               'border-b-2 border-transparent',
               'transition-all duration-200',
               'hover:text-white/80',
-              activeTab === tab.key
-                ? 'text-white border-b-2 border-[#AB0113]'
-                : 'text-white/50'
+              activeTab === tab.key ? 'text-white border-b-2 border-[#AB0113]' : 'text-white/50'
             )}
           >
             {tab.label}

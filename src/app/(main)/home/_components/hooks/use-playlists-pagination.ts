@@ -24,9 +24,7 @@ interface UsePlaylistsPaginationReturn {
   checkIfAllLoaded: () => boolean;
 }
 
-export function usePlaylistsPagination(
-  onAllLoaded: () => void
-): UsePlaylistsPaginationReturn {
+export function usePlaylistsPagination(onAllLoaded: () => void): UsePlaylistsPaginationReturn {
   const [playlistsList, setPlaylistsList] = useState<PlaylistWithVideos[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [lastPage, setLastPage] = useState<number | null>(null);
@@ -53,7 +51,10 @@ export function usePlaylistsPagination(
 
     setLoadingPlaylists(true);
     try {
-      const response = await playlistsApi.list({ page: currentPage, per_page: 3 }) as PaginatedResponse<Playlist>;
+      const response = (await playlistsApi.list({
+        page: currentPage,
+        per_page: 3,
+      })) as PaginatedResponse<Playlist>;
       const items = response.data || [];
 
       const enhancedItems: PlaylistWithVideos[] = items.map((p) => ({
@@ -89,4 +90,3 @@ export function usePlaylistsPagination(
     checkIfAllLoaded,
   };
 }
-

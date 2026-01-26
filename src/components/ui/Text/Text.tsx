@@ -16,13 +16,7 @@ export const Text = forwardRef<HTMLParagraphElement, TextProps>(
       lead: 'text-xl leading-8',
     };
 
-    return (
-      <Component
-        ref={ref}
-        className={cn(variants[variant], className)}
-        {...props}
-      />
-    );
+    return <Component ref={ref} className={cn(variants[variant], className)} {...props} />;
   }
 );
 

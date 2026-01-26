@@ -45,14 +45,17 @@ export interface Video {
   series_id?: number;
   tags?: Tag[];
   comments?: Comment[];
-  country?: string | {
-    id?: number;
-    name?: string;
-    emoji?: string;
-    iso?: string;
-    name_with_flag?: string;
-    emoji_code?: string;
-  } | null;
+  country?:
+    | string
+    | {
+        id?: number;
+        name?: string;
+        emoji?: string;
+        iso?: string;
+        name_with_flag?: string;
+        emoji_code?: string;
+      }
+    | null;
 }
 
 export interface ShortVideo extends Video {

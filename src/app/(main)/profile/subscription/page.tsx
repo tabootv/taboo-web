@@ -142,12 +142,14 @@ export default function SubscriptionPage() {
       )}
       {isSubscribed ? (
         /* Active Subscription View */
-        (<div className="space-y-6">
+        <div className="space-y-6">
           {/* Status Card */}
           <div className="bg-surface rounded-xl border border-border p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-semibold text-text-primary">Current Plan</h2>
-              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${statusDisplay.bgColor} ${statusDisplay.color}`}>
+              <div
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${statusDisplay.bgColor} ${statusDisplay.color}`}
+              >
                 {statusDisplay.icon}
                 <span className="text-sm font-medium">{statusDisplay.label}</span>
               </div>
@@ -165,9 +167,7 @@ export default function SubscriptionPage() {
               {/* Provider */}
               <div className="flex items-center justify-between py-3 border-b border-border">
                 <span className="text-text-secondary">Billing Provider</span>
-                <span className="text-text-primary font-medium">
-                  {getProviderDisplay()}
-                </span>
+                <span className="text-text-primary font-medium">{getProviderDisplay()}</span>
               </div>
 
               {/* Period End */}
@@ -196,11 +196,10 @@ export default function SubscriptionPage() {
 
             {provider === 'apple' ? (
               /* Apple subscription management */
-              (<div className="space-y-4">
+              <div className="space-y-4">
                 <p className="text-text-secondary text-sm">
-                  Your subscription is managed through the Apple App Store.
-                  To update your payment method, cancel, or change your plan,
-                  use your device&apos;s subscription settings.
+                  Your subscription is managed through the Apple App Store. To update your payment
+                  method, cancel, or change your plan, use your device&apos;s subscription settings.
                 </p>
                 <div className="flex items-center gap-3 p-4 bg-background rounded-lg border border-border">
                   <Smartphone className="w-8 h-8 text-text-secondary" />
@@ -218,30 +217,31 @@ export default function SubscriptionPage() {
                   View detailed instructions
                   <ExternalLink className="w-4 h-4" />
                 </Link>
-              </div>)
+              </div>
             ) : provider === 'google' ? (
               /* Google Play subscription management */
-              (<div className="space-y-4">
+              <div className="space-y-4">
                 <p className="text-text-secondary text-sm">
-                  Your subscription is managed through Google Play.
-                  To update your payment method, cancel, or change your plan,
-                  use the Play Store app.
+                  Your subscription is managed through Google Play. To update your payment method,
+                  cancel, or change your plan, use the Play Store app.
                 </p>
                 <Button
-                  onClick={() => window.open('https://play.google.com/store/account/subscriptions', '_blank')}
+                  onClick={() =>
+                    window.open('https://play.google.com/store/account/subscriptions', '_blank')
+                  }
                   variant="outline"
                   className="w-full flex items-center justify-center gap-2"
                 >
                   Open Google Play Subscriptions
                   <ExternalLink className="w-4 h-4" />
                 </Button>
-              </div>)
+              </div>
             ) : manageUrl ? (
               /* Whop/other provider with manage URL */
-              (<div className="space-y-4">
+              <div className="space-y-4">
                 <p className="text-text-secondary text-sm">
-                  Manage your subscription, update payment methods, or cancel
-                  anytime through our billing portal.
+                  Manage your subscription, update payment methods, or cancel anytime through our
+                  billing portal.
                 </p>
                 <Button
                   onClick={openManageSubscription}
@@ -250,10 +250,10 @@ export default function SubscriptionPage() {
                   Manage Subscription
                   <ExternalLink className="w-4 h-4" />
                 </Button>
-              </div>)
+              </div>
             ) : (
               /* No management URL available */
-              (<div className="space-y-4">
+              <div className="space-y-4">
                 <p className="text-text-secondary text-sm">
                   To manage your subscription, please contact our support team.
                 </p>
@@ -264,28 +264,24 @@ export default function SubscriptionPage() {
                   Contact Support
                   <ExternalLink className="w-4 h-4" />
                 </a>
-              </div>)
+              </div>
             )}
           </div>
-        </div>)
+        </div>
       ) : (
         /* No Active Subscription View */
-        (<div className="bg-surface rounded-xl border border-border p-8 text-center">
+        <div className="bg-surface rounded-xl border border-border p-8 text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-surface-hover flex items-center justify-center">
             <CreditCard className="w-8 h-8 text-text-secondary" />
           </div>
-          <h2 className="text-xl font-semibold text-text-primary mb-2">
-            No Active Subscription
-          </h2>
+          <h2 className="text-xl font-semibold text-text-primary mb-2">No Active Subscription</h2>
           <p className="text-text-secondary mb-6 max-w-md mx-auto">
             Subscribe to TabooTV to unlock all premium content from your favorite creators.
           </p>
           <Link href="/choose-plan">
-            <Button className="btn-premium">
-              View Plans
-            </Button>
+            <Button className="btn-premium">View Plans</Button>
           </Link>
-        </div>)
+        </div>
       )}
     </div>
   );

@@ -7,13 +7,7 @@ export interface HeadingProps extends HTMLAttributes<HTMLHeadingElement> {
   as?: HeadingLevel;
 }
 
-export function Heading({
-  level,
-  as,
-  className,
-  children,
-  ...props
-}: HeadingProps) {
+export function Heading({ level, as, className, children, ...props }: HeadingProps) {
   const Tag = `h${as || level}` as keyof JSX.IntrinsicElements;
 
   const styles = {

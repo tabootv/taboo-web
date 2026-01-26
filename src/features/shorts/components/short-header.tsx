@@ -50,7 +50,9 @@ export function ShortHeader({ video }: ShortHeaderProps) {
       </div>
 
       {/* Title */}
-      <p className="text-sm md:text-[16px] text-white break-words line-clamp-2 mt-4">{video.title}</p>
+      <p className="text-sm md:text-[16px] text-white break-words line-clamp-2 mt-4">
+        {video.title}
+      </p>
 
       {/* Tags */}
       {visibleTags.length > 0 && (

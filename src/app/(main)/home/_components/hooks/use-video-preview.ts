@@ -19,7 +19,13 @@ export function useVideoPreview({ video, initialUrl }: UseVideoPreviewOptions) {
   const [isFetchingUrl, setIsFetchingUrl] = useState(false);
 
   // Get video URL for preview (prefer lower quality for preview, fallback to HLS or fetched URL)
-  const initialPreviewUrl = initialUrl || video.url_480 || video.url_720 || video.url_1080 || video.url_hls || video.hls_url;
+  const initialPreviewUrl =
+    initialUrl ||
+    video.url_480 ||
+    video.url_720 ||
+    video.url_1080 ||
+    video.url_hls ||
+    video.hls_url;
   const previewUrl = initialPreviewUrl || fetchedPreviewUrl;
 
   const fetchPreviewUrl = useCallback(async () => {
@@ -28,7 +34,12 @@ export function useVideoPreview({ video, initialUrl }: UseVideoPreviewOptions) {
       setIsFetchingUrl(true);
       try {
         const videoDetails = await videosApi.get(video.id);
-        const url = videoDetails.url_480 || videoDetails.url_720 || videoDetails.url_1080 || videoDetails.url_hls || videoDetails.hls_url;
+        const url =
+          videoDetails.url_480 ||
+          videoDetails.url_720 ||
+          videoDetails.url_1080 ||
+          videoDetails.url_hls ||
+          videoDetails.hls_url;
         if (url) {
           setFetchedPreviewUrl(url);
         }
@@ -47,4 +58,3 @@ export function useVideoPreview({ video, initialUrl }: UseVideoPreviewOptions) {
     fetchPreviewUrl,
   };
 }
-

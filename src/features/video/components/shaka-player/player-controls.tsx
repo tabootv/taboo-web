@@ -206,8 +206,9 @@ export function PlayerControls({
                     [&::-webkit-slider-thumb]:shadow [&::-webkit-slider-thumb]:transition-transform
                     [&::-webkit-slider-thumb]:hover:scale-110"
                   style={{
-                    background: `linear-gradient(to right, white ${(isMuted ? 0 : volume) * 100
-                      }%, rgba(255,255,255,0.25) ${(isMuted ? 0 : volume) * 100}%)`,
+                    background: `linear-gradient(to right, white ${
+                      (isMuted ? 0 : volume) * 100
+                    }%, rgba(255,255,255,0.25) ${(isMuted ? 0 : volume) * 100}%)`,
                   }}
                 />
               </div>
@@ -272,11 +273,7 @@ export function PlayerControls({
               className="p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
               title="Fullscreen (F)"
             >
-              {isFullscreen ? (
-                <Minimize className="w-5 h-5" />
-              ) : (
-                <Maximize className="w-5 h-5" />
-              )}
+              {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
             </button>
           </div>
         </div>

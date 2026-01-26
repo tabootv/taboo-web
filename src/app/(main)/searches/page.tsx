@@ -16,13 +16,8 @@ function SearchContent() {
 
   const [query, setQuery] = useState(initialQuery);
 
-  const {
-    filteredVideos,
-    filteredCreators,
-    isLoading,
-    countryHeader,
-    hasResults,
-  } = useMixedSearch(query);
+  const { filteredVideos, filteredCreators, isLoading, countryHeader, hasResults } =
+    useMixedSearch(query);
 
   useEffect(() => {
     if (query !== initialQuery) {
@@ -178,7 +173,6 @@ function VideoCard({ video }: { video: Video }) {
     </Link>
   );
 }
-
 
 function CreatorCard({ creator }: { creator: Creator }) {
   return (

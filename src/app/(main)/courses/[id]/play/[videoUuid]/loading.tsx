@@ -3,4 +3,3 @@ import { CoursePlayerPageSkeleton } from '../../../_components/CoursePlayerPageS
 export default function CoursePlayerPageLoading() {
   return <CoursePlayerPageSkeleton />;
 }
-

@@ -45,12 +45,7 @@ export function MobileCommentSection({ video }: MobileCommentSectionProps) {
   return (
     <>
       {/* Backdrop */}
-      {showComments && (
-        <div
-          className="absolute z-40 inset-0 md:hidden"
-          onClick={toggleComments}
-        />
-      )}
+      {showComments && <div className="absolute z-40 inset-0 md:hidden" onClick={toggleComments} />}
 
       {/* Comment panel with slide-up animation */}
       <div
@@ -144,7 +139,9 @@ function MobileComment({ comment }: { comment: any }) {
             {formatRelativeTime(comment.created_at)}
           </span>
         </div>
-        <p className="text-xs text-white/80 mt-0.5 break-words">{comment.content || comment.body}</p>
+        <p className="text-xs text-white/80 mt-0.5 break-words">
+          {comment.content || comment.body}
+        </p>
 
         {/* Replies */}
         {comment.replies && comment.replies.length > 0 && (

@@ -9,7 +9,6 @@ interface SearchInputProps {
 }
 
 export function SearchInput({ className }: SearchInputProps) {
-  
   const router = useRouter();
   const [query, setQuery] = useState('');
 

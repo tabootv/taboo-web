@@ -44,7 +44,8 @@ export default function ForgotPasswordPage() {
             </div>
             <h1 className="text-2xl font-bold text-text-primary mb-3">Check Your Email</h1>
             <p className="text-text-secondary mb-6">
-              We&apos;ve sent a password reset link to <span className="text-text-primary font-medium">{email}</span>
+              We&apos;ve sent a password reset link to{' '}
+              <span className="text-text-primary font-medium">{email}</span>
             </p>
             <p className="text-sm text-text-secondary mb-6">
               Didn&apos;t receive the email? Check your spam folder or try again.
@@ -118,11 +119,7 @@ export default function ForgotPasswordPage() {
               </div>
             </div>
 
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full btn-premium py-3"
-            >
+            <Button type="submit" disabled={isSubmitting} className="w-full btn-premium py-3">
               {isSubmitting ? 'Sending...' : 'Send Reset Link'}
             </Button>
           </form>
@@ -130,7 +127,10 @@ export default function ForgotPasswordPage() {
           {/* Footer */}
           <p className="text-center text-sm text-text-secondary mt-6">
             Remember your password?{' '}
-            <Link href="/sign-in" className="text-red-primary hover:text-red-hover transition-colors">
+            <Link
+              href="/sign-in"
+              className="text-red-primary hover:text-red-hover transition-colors"
+            >
               Sign In
             </Link>
           </p>

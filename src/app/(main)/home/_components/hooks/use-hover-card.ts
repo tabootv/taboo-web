@@ -40,12 +40,15 @@ export function useHoverCard(options?: UseHoverCardOptions) {
       // Start playing video after expansion
       if (videoRef.current) {
         videoRef.current.currentTime = 0;
-        videoRef.current.play().then(() => {
-          setIsVideoPlaying(true);
-          options?.onVideoPlay?.();
-        }).catch(() => {
-          // Video play failed, stay on thumbnail
-        });
+        videoRef.current
+          .play()
+          .then(() => {
+            setIsVideoPlaying(true);
+            options?.onVideoPlay?.();
+          })
+          .catch(() => {
+            // Video play failed, stay on thumbnail
+          });
       }
     }, HOVER_DELAY);
   }, [options]);
@@ -99,4 +102,3 @@ export function useHoverCard(options?: UseHoverCardOptions) {
     handleVideoLoaded,
   };
 }
-

@@ -5,4 +5,3 @@ export function ShortPlayerSkeleton() {
     </div>
   );
 }
-

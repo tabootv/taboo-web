@@ -1,4 +1,4 @@
-'use client';;
+'use client';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -36,7 +36,9 @@ export default function ContentVideosPage() {
         current_page?: number;
         last_page?: number;
       }
-      const response = await apiClient.get<VideosResponse>('/contents/videos', { params: { page: pageNum } });
+      const response = await apiClient.get<VideosResponse>('/contents/videos', {
+        params: { page: pageNum },
+      });
       const newVideos = response.videos?.data || response.data || [];
 
       if (reset) {
@@ -151,11 +153,7 @@ export default function ContentVideosPage() {
       ) : (
         <div className="space-y-4">
           {videosList.map((video) => (
-            <VideoCard
-              key={video.uuid}
-              video={video}
-              onDelete={() => handleDelete(video)}
-            />
+            <VideoCard key={video.uuid} video={video} onDelete={() => handleDelete(video)} />
           ))}
         </div>
       )}

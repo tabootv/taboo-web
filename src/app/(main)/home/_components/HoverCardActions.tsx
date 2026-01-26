@@ -18,9 +18,7 @@ export function HoverCardActions({ video, showDate }: HoverCardActionsProps) {
         {video.title}
       </h3>
       {showDate && video.published_at && (
-        <p className="text-xs text-text-secondary mt-1">
-          {formatRelativeTime(video.published_at)}
-        </p>
+        <p className="text-xs text-text-secondary mt-1">{formatRelativeTime(video.published_at)}</p>
       )}
       <div className="flex items-center gap-2 mt-1">
         {video.channel?.dp ? (
@@ -34,11 +32,8 @@ export function HoverCardActions({ video, showDate }: HoverCardActionsProps) {
             </span>
           </div>
         )}
-        <p className="text-xs text-text-secondary truncate">
-          {video.channel?.name}
-        </p>
+        <p className="text-xs text-text-secondary truncate">{video.channel?.name}</p>
       </div>
     </div>
   );
 }
-

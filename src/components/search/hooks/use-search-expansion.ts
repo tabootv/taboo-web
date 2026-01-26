@@ -49,4 +49,3 @@ export function useSearchExpansion(options?: UseSearchExpansionOptions) {
     inputRef,
   };
 }
-

@@ -245,10 +245,10 @@ export function SearchBar({ className }: { className?: string }) {
 
   const hasResults = Boolean(
     results &&
-      (results.videos.length > 0 ||
-        results.shorts.length > 0 ||
-        results.series.length > 0 ||
-        results.creators.length > 0)
+    (results.videos.length > 0 ||
+      results.shorts.length > 0 ||
+      results.series.length > 0 ||
+      results.creators.length > 0)
   );
 
   const showDropdown = !!(isOpen && (recentSearches.length > 0 || query.trim()));

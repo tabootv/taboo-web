@@ -48,11 +48,7 @@ export function HoverCardInfo({
           }`}
           title={saved ? 'Remove from My List' : 'Add to My List'}
         >
-          {saved ? (
-            <Check className="w-4 h-4" />
-          ) : (
-            <Plus className="w-4 h-4" />
-          )}
+          {saved ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
         </button>
         <button
           onClick={onToggleDescription}
@@ -63,18 +59,16 @@ export function HoverCardInfo({
           }`}
           title="More Info"
         >
-          <ChevronDown className={`w-4 h-4 text-white transition-transform duration-200 ${showFullDescription ? 'rotate-180' : ''}`} />
+          <ChevronDown
+            className={`w-4 h-4 text-white transition-transform duration-200 ${showFullDescription ? 'rotate-180' : ''}`}
+          />
         </button>
       </div>
 
       {/* Video meta info */}
       <div className="flex items-center gap-2 text-[10px] mb-1.5 flex-wrap">
-        {isNew && (
-          <span className="text-green-400 font-semibold">New</span>
-        )}
-        {video.duration && (
-          <span className="text-white/70">{formatDuration(video.duration)}</span>
-        )}
+        {isNew && <span className="text-green-400 font-semibold">New</span>}
+        {video.duration && <span className="text-white/70">{formatDuration(video.duration)}</span>}
         {video.views_count !== undefined && (
           <span className="text-white/70">{video.views_count.toLocaleString()} views</span>
         )}
@@ -84,14 +78,14 @@ export function HoverCardInfo({
       </div>
 
       {/* Title */}
-      <h3 className="font-semibold text-white text-[12px] line-clamp-1 mb-1">
-        {video.title}
-      </h3>
+      <h3 className="font-semibold text-white text-[12px] line-clamp-1 mb-1">{video.title}</h3>
 
       {/* Description - Netflix Style */}
-      <p className={`text-[10px] text-white/70 leading-relaxed mb-2 transition-all duration-200 ${
-        showFullDescription ? 'line-clamp-none max-h-24 overflow-y-auto' : 'line-clamp-2'
-      }`}>
+      <p
+        className={`text-[10px] text-white/70 leading-relaxed mb-2 transition-all duration-200 ${
+          showFullDescription ? 'line-clamp-none max-h-24 overflow-y-auto' : 'line-clamp-2'
+        }`}
+      >
         {description}
       </p>
 
@@ -108,9 +102,7 @@ export function HoverCardInfo({
             </span>
           </div>
         )}
-        <p className="text-[10px] text-white/60 truncate flex-1">
-          {video.channel?.name}
-        </p>
+        <p className="text-[10px] text-white/60 truncate flex-1">{video.channel?.name}</p>
       </div>
 
       {/* Tags if available */}
@@ -129,4 +121,3 @@ export function HoverCardInfo({
     </div>
   );
 }
-

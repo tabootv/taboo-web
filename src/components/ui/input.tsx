@@ -48,9 +48,7 @@ function PasswordRequirements({ password }: { password: string }) {
           ) : (
             <X className="w-3 h-3 text-text-secondary" />
           )}
-          <span className={req.met ? 'text-green-500' : 'text-text-secondary'}>
-            {req.text}
-          </span>
+          <span className={req.met ? 'text-green-500' : 'text-text-secondary'}>{req.text}</span>
         </div>
       ))}
     </div>
@@ -123,11 +121,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary transition-colors p-1"
               tabIndex={-1}
             >
-              {showPassword ? (
-                <EyeOff className="w-4 h-4" />
-              ) : (
-                <Eye className="w-4 h-4" />
-              )}
+              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           )}
           {rightIcon && !isPassword && (

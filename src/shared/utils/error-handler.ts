@@ -59,4 +59,3 @@ export function handleApiError(error: unknown, defaultMessage = 'An error occurr
   const message = getErrorMessage(error);
   return message || defaultMessage;
 }
-

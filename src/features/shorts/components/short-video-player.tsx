@@ -13,7 +13,12 @@ interface ShortVideoPlayerProps {
   children?: ReactNode; // For overlay slot
 }
 
-export function ShortVideoPlayer({ video, index: _index, isActive, children }: ShortVideoPlayerProps) {
+export function ShortVideoPlayer({
+  video,
+  index: _index,
+  isActive,
+  children,
+}: ShortVideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isBuffering, setIsBuffering] = useState(true);
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);

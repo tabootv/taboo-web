@@ -53,9 +53,7 @@ export function NavbarSearchBar({
             placeholder="Search..."
             className={cn(
               'transition-all duration-300 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none',
-              isSearchExpanded
-                ? 'flex-1 px-3 py-2 bg-transparent'
-                : 'w-0 opacity-0 overflow-hidden'
+              isSearchExpanded ? 'flex-1 px-3 py-2 bg-transparent' : 'w-0 opacity-0 overflow-hidden'
             )}
           />
         </div>
@@ -77,4 +75,3 @@ export function NavbarSearchBar({
     </div>
   );
 }
-

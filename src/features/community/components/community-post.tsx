@@ -98,10 +98,7 @@ export function CommunityPost({ post, currentUserId, onDelete }: CommunityPostPr
 
                 {isMenuOpen && (
                   <>
-                    <div
-                      className="fixed inset-0 z-10"
-                      onClick={() => setIsMenuOpen(false)}
-                    />
+                    <div className="fixed inset-0 z-10" onClick={() => setIsMenuOpen(false)} />
                     <div className="absolute right-0 mt-1 w-[170px] bg-surface rounded-lg border border-border shadow-lg z-20 overflow-hidden">
                       <button
                         onClick={confirmDelete}
@@ -129,12 +126,7 @@ export function CommunityPost({ post, currentUserId, onDelete }: CommunityPostPr
                   onClick={() => handleImageClick(0)}
                   className="relative aspect-video w-full rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
                 >
-                  <Image
-                    src={post.post_image[0]!}
-                    alt="Post image"
-                    fill
-                    className="object-cover"
-                  />
+                  <Image src={post.post_image[0]!} alt="Post image" fill className="object-cover" />
                 </button>
               ) : (
                 <div className="grid grid-cols-2 gap-2">

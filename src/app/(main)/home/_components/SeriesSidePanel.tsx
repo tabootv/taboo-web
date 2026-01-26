@@ -1,7 +1,13 @@
 import { seriesClient } from '@/api/client/series.client';
 import { useFeature } from '@/hooks/use-feature';
 import { useSavedVideosStore, type SavedVideo } from '@/shared/stores/saved-videos-store';
-import { cn, formatCompactNumber, getCreatorRoute, getSeriesRoute, getSeriesPlayRoute } from '@/shared/utils/formatting';
+import {
+  cn,
+  formatCompactNumber,
+  getCreatorRoute,
+  getSeriesRoute,
+  getSeriesPlayRoute,
+} from '@/shared/utils/formatting';
 import type { Series } from '@/types';
 import { Check, ChevronRight, Clock, Film, Play, Plus } from 'lucide-react';
 import Image from 'next/image';

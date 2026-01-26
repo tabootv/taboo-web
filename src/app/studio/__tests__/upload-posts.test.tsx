@@ -16,11 +16,16 @@ test('selecting images shows previews and allows removal', async () => {
   render(<CreatePostPage />);
 
   // The image input is hidden inside a label with the ImageIcon; find by role fallback
-  const labels = screen.getAllByRole('button', { hidden: true });
+  const _labels = screen.getAllByRole('button', { hidden: true });
   // fallback: query for hidden file inputs
-  const fileInputs = Array.from(document.querySelectorAll('input[type="file"][accept^="image"]')) as HTMLInputElement[];
+  const fileInputs = Array.from(
+    document.querySelectorAll('input[type="file"][accept^="image"]')
+  ) as HTMLInputElement[];
   expect(fileInputs.length).toBeGreaterThanOrEqual(1);
-  const files = [new File(['a'], 'a.png', { type: 'image/png' }), new File(['b'], 'b.jpg', { type: 'image/jpeg' })];
+  const files = [
+    new File(['a'], 'a.png', { type: 'image/png' }),
+    new File(['b'], 'b.jpg', { type: 'image/jpeg' }),
+  ];
 
   await userEvent.upload(fileInputs[0], files);
 

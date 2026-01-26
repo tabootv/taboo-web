@@ -19,7 +19,12 @@ interface NetflixHoverCardProps {
   fixedHeight?: boolean;
 }
 
-export function NetflixHoverCard({ video, showDate, index = 0, fixedHeight: _fixedHeight = true }: NetflixHoverCardProps) {
+export function NetflixHoverCard({
+  video,
+  showDate,
+  index = 0,
+  fixedHeight: _fixedHeight = true,
+}: NetflixHoverCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isVideoReady, setIsVideoReady] = useState(false);
@@ -44,11 +49,15 @@ export function NetflixHoverCard({ video, showDate, index = 0, fixedHeight: _fix
   }, [isSaved, video.id]);
 
   const thumbnail = video.thumbnail_webp || video.thumbnail || video.card_thumbnail;
-  const isNew = !!(video.published_at && new Date(video.published_at).getTime() > Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const isNew = !!(
+    video.published_at &&
+    new Date(video.published_at).getTime() > Date.now() - 7 * 24 * 60 * 60 * 1000
+  );
   const description = video.description || video.title;
 
   // Get video URL for preview (prefer lower quality for preview, fallback to HLS or fetched URL)
-  const initialPreviewUrl = video.url_480 || video.url_720 || video.url_1080 || video.url_hls || video.hls_url;
+  const initialPreviewUrl =
+    video.url_480 || video.url_720 || video.url_1080 || video.url_hls || video.hls_url;
   const previewUrl = initialPreviewUrl || fetchedPreviewUrl;
 
   const handleMouseEnter = useCallback(async () => {
@@ -65,7 +74,12 @@ export function NetflixHoverCard({ video, showDate, index = 0, fixedHeight: _fix
       setIsFetchingUrl(true);
       try {
         const videoDetails = await videosApi.get(video.id);
-        const url = videoDetails.url_480 || videoDetails.url_720 || videoDetails.url_1080 || videoDetails.url_hls || videoDetails.hls_url;
+        const url =
+          videoDetails.url_480 ||
+          videoDetails.url_720 ||
+          videoDetails.url_1080 ||
+          videoDetails.url_hls ||
+          videoDetails.hls_url;
         if (url) {
           setFetchedPreviewUrl(url);
         }
@@ -83,11 +97,14 @@ export function NetflixHoverCard({ video, showDate, index = 0, fixedHeight: _fix
       // Start playing video after expansion
       if (videoRef.current) {
         videoRef.current.currentTime = 0;
-        videoRef.current.play().then(() => {
-          setIsVideoPlaying(true);
-        }).catch(() => {
-          // Video play failed, stay on thumbnail
-        });
+        videoRef.current
+          .play()
+          .then(() => {
+            setIsVideoPlaying(true);
+          })
+          .catch(() => {
+            // Video play failed, stay on thumbnail
+          });
       }
     }, 400);
   }, [initialPreviewUrl, fetchedPreviewUrl, isFetchingUrl, video.id]);
@@ -119,7 +136,7 @@ export function NetflixHoverCard({ video, showDate, index = 0, fixedHeight: _fix
     e.preventDefault();
     e.stopPropagation();
 
-    setIsMuted(prev => {
+    setIsMuted((prev) => {
       if (videoRef.current) {
         videoRef.current.muted = !prev;
       }
@@ -127,35 +144,41 @@ export function NetflixHoverCard({ video, showDate, index = 0, fixedHeight: _fix
     });
   }, []);
 
-  const handleSave = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleSave = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
 
-    if (!video.id) return;
+      if (!video.id) return;
 
-    const savedVideo: SavedVideo = {
-      id: video.id,
-      title: video.title,
-      thumbnail: video.thumbnail_webp || video.thumbnail || null,
-      channelName: video.channel?.name || null,
-      savedAt: Date.now(),
-    };
-    const newState = toggleSave(savedVideo);
-    setSaved(newState);
-  }, [video, toggleSave]);
+      const savedVideo: SavedVideo = {
+        id: video.id,
+        title: video.title,
+        thumbnail: video.thumbnail_webp || video.thumbnail || null,
+        channelName: video.channel?.name || null,
+        savedAt: Date.now(),
+      };
+      const newState = toggleSave(savedVideo);
+      setSaved(newState);
+    },
+    [video, toggleSave]
+  );
 
   const toggleDescription = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
-    setShowFullDescription(prev => !prev);
+    setShowFullDescription((prev) => !prev);
   }, []);
 
-  const handlePlay = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    router.push(`/videos/${video.id}`);
-  }, [router, video.id]);
+  const handlePlay = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      router.push(`/videos/${video.id}`);
+    },
+    [router, video.id]
+  );
 
   // Cleanup on unmount
   useEffect(() => {
@@ -180,11 +203,14 @@ export function NetflixHoverCard({ video, showDate, index = 0, fixedHeight: _fix
       setTimeout(() => {
         if (videoRef.current) {
           videoRef.current.currentTime = 0;
-          videoRef.current.play().then(() => {
-            setIsVideoPlaying(true);
-          }).catch(() => {
-            // Video play failed
-          });
+          videoRef.current
+            .play()
+            .then(() => {
+              setIsVideoPlaying(true);
+            })
+            .catch(() => {
+              // Video play failed
+            });
         }
       }, 100);
     }
@@ -210,8 +236,9 @@ export function NetflixHoverCard({ video, showDate, index = 0, fixedHeight: _fix
       style={{ zIndex: showExpanded ? 100 : 1 }}
     >
       <div
-        className={`netflix-card relative transition-all duration-300 ease-out ${showExpanded ? 'netflix-card-expanded' : ''
-          }`}
+        className={`netflix-card relative transition-all duration-300 ease-out ${
+          showExpanded ? 'netflix-card-expanded' : ''
+        }`}
         style={{
           transformOrigin: getTransformOrigin(),
           transform: showExpanded ? 'scale(1.4)' : 'scale(1)',
@@ -219,15 +246,18 @@ export function NetflixHoverCard({ video, showDate, index = 0, fixedHeight: _fix
       >
         <Link href={`/videos/${video.id}`} className="block">
           {/* Main Card */}
-          <div className={`relative rounded-lg overflow-hidden bg-surface ${showExpanded ? 'rounded-b-none' : ''}`}>
+          <div
+            className={`relative rounded-lg overflow-hidden bg-surface ${showExpanded ? 'rounded-b-none' : ''}`}
+          >
             <div className="relative aspect-video">
               {thumbnail && !imageError ? (
                 <Image
                   src={thumbnail}
                   alt={video.title}
                   fill
-                  className={`object-cover transition-opacity duration-300 ${isVideoPlaying && isVideoReady ? 'opacity-0' : 'opacity-100'
-                    }`}
+                  className={`object-cover transition-opacity duration-300 ${
+                    isVideoPlaying && isVideoReady ? 'opacity-0' : 'opacity-100'
+                  }`}
                   sizes="(max-width: 768px) 200px, 280px"
                   priority={index < 4}
                   onError={() => setImageError(true)}

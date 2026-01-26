@@ -9,10 +9,7 @@ export interface AffiliateTrackingData {
   ref?: string;
 }
 
-export function buildCheckoutUrl(
-  baseUrl: string,
-  trackingData?: AffiliateTrackingData
-): string {
+export function buildCheckoutUrl(baseUrl: string, trackingData?: AffiliateTrackingData): string {
   if (!trackingData) return baseUrl;
   const url = new URL(baseUrl);
   if (trackingData.utm_source) url.searchParams.set('utm_source', trackingData.utm_source);

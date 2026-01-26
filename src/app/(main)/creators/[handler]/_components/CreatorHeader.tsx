@@ -9,9 +9,8 @@ export function CreatorHeader({
   creator,
   featuredVideoThumbnail,
   stats,
-  socialLinks
+  socialLinks,
 }: CreatorHeaderProps) {
-
   return (
     <section className="relative min-h-[60vh] flex items-end pb-12 pt-[130px]">
       <div className="absolute inset-0 overflow-hidden">

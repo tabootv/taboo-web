@@ -122,8 +122,8 @@ export function MediaCard({
     type === 'series'
       ? getSeriesRoute(_id, title)
       : type === 'short'
-      ? `/shorts/${uuid}`
-      : `/videos/${uuid}`;
+        ? `/shorts/${uuid}`
+        : `/videos/${uuid}`;
 
   // Aspect ratio based on type
   const aspectRatio = type === 'short' ? 'aspect-[9/16]' : 'aspect-video';

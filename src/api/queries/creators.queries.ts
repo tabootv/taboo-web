@@ -248,4 +248,3 @@ export function useCreatorCoursesInfinite(
     gcTime: 1000 * 60 * 30,
   });
 }
-

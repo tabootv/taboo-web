@@ -15,10 +15,7 @@ interface PlaylistWithVideos extends Omit<Playlist, 'videos'> {
 }
 
 interface UsePlaylistVideosReturn {
-  fetchPlaylistVideos: (
-    playlist: PlaylistWithVideos,
-    page?: number
-  ) => Promise<void>;
+  fetchPlaylistVideos: (playlist: PlaylistWithVideos, page?: number) => Promise<void>;
 }
 
 export function usePlaylistVideos(
@@ -62,4 +59,3 @@ export function usePlaylistVideos(
 
   return { fetchPlaylistVideos };
 }
-

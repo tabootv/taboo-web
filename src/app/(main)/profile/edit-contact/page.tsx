@@ -46,9 +46,7 @@ export default function EditContactPage() {
           Back to Edit Profile
         </Link>
         <h1 className="text-2xl font-bold text-text-primary">Edit Phone Number</h1>
-        <p className="text-text-secondary mt-1">
-          Update your contact phone number
-        </p>
+        <p className="text-text-secondary mt-1">Update your contact phone number</p>
       </div>
 
       {/* Current Phone */}
@@ -84,19 +82,12 @@ export default function EditContactPage() {
               className="w-full pl-10 pr-4 py-3 bg-surface border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-transparent text-text-primary placeholder:text-text-secondary"
             />
           </div>
-          <p className="mt-2 text-sm text-text-secondary">
-            Include country code (e.g., +1 for US)
-          </p>
+          <p className="mt-2 text-sm text-text-secondary">Include country code (e.g., +1 for US)</p>
         </div>
 
         {/* Actions */}
         <div className="flex gap-3 pt-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => router.back()}
-            className="flex-1"
-          >
+          <Button type="button" variant="outline" onClick={() => router.back()} className="flex-1">
             Cancel
           </Button>
           <Button type="submit" disabled={isLoading} className="flex-1 btn-premium">

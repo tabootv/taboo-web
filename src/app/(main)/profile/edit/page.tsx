@@ -2,16 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  User as UserIcon,
-  Mail,
-  Lock,
-  Phone,
-  Trash2,
-  ArrowLeft,
-  Eye,
-  EyeOff,
-} from 'lucide-react';
+import { User as UserIcon, Mail, Lock, Phone, Trash2, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { useAuthStore } from '@/shared/stores/auth-store';
 import type { User } from '@/types';
 import {
@@ -60,10 +51,7 @@ export default function SettingsPage() {
     <div className="max-w-4xl mx-auto px-4 py-6">
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
-        <Link
-          href="/profile"
-          className="p-2 rounded-sm hover:bg-hover transition-colors"
-        >
+        <Link href="/profile" className="p-2 rounded-sm hover:bg-hover transition-colors">
           <ArrowLeft className="w-5 h-5 text-text-secondary" />
         </Link>
         <div>
@@ -107,13 +95,7 @@ export default function SettingsPage() {
   );
 }
 
-function ProfileSettings({
-  user,
-  onUpdate,
-}: {
-  user: User | null;
-  onUpdate: () => Promise<void>;
-}) {
+function ProfileSettings({ user, onUpdate }: { user: User | null; onUpdate: () => Promise<void> }) {
   const [firstName, setFirstName] = useState(user?.first_name || '');
   const [lastName, setLastName] = useState(user?.last_name || '');
   const [displayName, setDisplayName] = useState(user?.display_name || '');
@@ -150,9 +132,7 @@ function ProfileSettings({
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-text-secondary mb-2">
-            First Name
-          </label>
+          <label className="block text-sm font-medium text-text-secondary mb-2">First Name</label>
           <input
             type="text"
             value={firstName}
@@ -161,9 +141,7 @@ function ProfileSettings({
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-text-secondary mb-2">
-            Last Name
-          </label>
+          <label className="block text-sm font-medium text-text-secondary mb-2">Last Name</label>
           <input
             type="text"
             value={lastName}
@@ -174,9 +152,7 @@ function ProfileSettings({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-text-secondary mb-2">
-          Display Name
-        </label>
+        <label className="block text-sm font-medium text-text-secondary mb-2">Display Name</label>
         <input
           type="text"
           value={displayName}
@@ -206,13 +182,7 @@ function ProfileSettings({
   );
 }
 
-function EmailSettings({
-  user,
-  onUpdate,
-}: {
-  user: User | null;
-  onUpdate: () => Promise<void>;
-}) {
+function EmailSettings({ user, onUpdate }: { user: User | null; onUpdate: () => Promise<void> }) {
   const [email, setEmail] = useState(user?.email || '');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -351,9 +321,7 @@ function PasswordSettings() {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-text-secondary mb-2">
-          New Password
-        </label>
+        <label className="block text-sm font-medium text-text-secondary mb-2">New Password</label>
         <input
           type={showPasswords ? 'text' : 'password'}
           value={newPassword}
@@ -409,8 +377,8 @@ function DangerZone() {
       <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-md">
         <h3 className="font-medium text-text-primary mb-2">Delete Account</h3>
         <p className="text-sm text-text-secondary mb-4">
-          Once you delete your account, there is no going back. All your data will be
-          permanently removed. Please be certain.
+          Once you delete your account, there is no going back. All your data will be permanently
+          removed. Please be certain.
         </p>
 
         {!showConfirm ? (
@@ -428,11 +396,7 @@ function DangerZone() {
               Are you absolutely sure? This action cannot be undone.
             </p>
             <div className="flex gap-3">
-              <Button
-                variant="outline"
-                onClick={() => setShowConfirm(false)}
-                disabled={isDeleting}
-              >
+              <Button variant="outline" onClick={() => setShowConfirm(false)} disabled={isDeleting}>
                 Cancel
               </Button>
               <Button

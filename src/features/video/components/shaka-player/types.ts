@@ -10,11 +10,10 @@ export type SettingsPanel = 'main' | 'quality' | 'speed';
 
 // Shaka Player types are not fully typed, using any for now
 // Type aliases improve code readability despite SonarQube warning
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 // NOSONAR - Type alias improves code readability
 export type ShakaPlayerInstance = any;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 // NOSONAR - Type alias improves code readability
 export type ShakaModule = any;
 

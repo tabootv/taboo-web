@@ -257,63 +257,65 @@ export interface V2Payout {
  * Get promoter profile and lifetime stats from V1 API
  * Wrapped with React.cache() to deduplicate calls within a single request
  */
-export const getPromoterProfile = cache(async (promoterId: number): Promise<PromoterProfile | null> => {
-  try {
-    const response = await fetch(`${V1_BASE_URL}/promoters/show?id=${promoterId}`, {
-      method: 'GET',
-      headers: getV1Headers(),
-      next: { revalidate: 60 },
-    });
+export const getPromoterProfile = cache(
+  async (promoterId: number): Promise<PromoterProfile | null> => {
+    try {
+      const response = await fetch(`${V1_BASE_URL}/promoters/show?id=${promoterId}`, {
+        method: 'GET',
+        headers: getV1Headers(),
+        next: { revalidate: 60 },
+      });
 
-    if (!response.ok) {
-      console.error(
-        'FirstPromoter getPromoterProfile error:',
-        response.status,
-        await response.text()
+      if (!response.ok) {
+        console.error(
+          'FirstPromoter getPromoterProfile error:',
+          response.status,
+          await response.text()
+        );
+        return null;
+      }
+
+      const data: PromoterV1Response = await response.json();
+
+      // Aggregate stats from all promotions
+      const totalStats = data.promotions.reduce(
+        (acc, promo) => ({
+          clicks: acc.clicks + (promo.visitors_count || 0),
+          signups: acc.signups + (promo.leads_count || 0),
+          customers: acc.customers + (promo.customers_count || 0),
+          sales: acc.sales + (promo.sales_count || 0),
+          revenue: acc.revenue + (promo.sales_total || 0),
+        }),
+        { clicks: 0, signups: 0, customers: 0, sales: 0, revenue: 0 }
       );
+
+      // Build normalized profile
+      const name =
+        data.profile?.first_name && data.profile?.last_name
+          ? `${data.profile.first_name} ${data.profile.last_name}`.trim()
+          : data.profile?.first_name || data.email.split('@')[0] || 'Unknown';
+
+      return {
+        id: data.id,
+        email: data.email,
+        name,
+        status: data.status,
+        refId: data.default_ref_id,
+        stats: {
+          ...totalStats,
+          earnings: data.earnings_balance?.cash || data.current_balance?.cash || 0,
+        },
+        balance: {
+          current: data.current_balance?.cash || 0,
+          paid: data.paid_balance?.cash || 0,
+        },
+      };
+    } catch (error) {
+      console.error('FirstPromoter getPromoterProfile exception:', error);
       return null;
     }
-
-    const data: PromoterV1Response = await response.json();
-
-    // Aggregate stats from all promotions
-    const totalStats = data.promotions.reduce(
-      (acc, promo) => ({
-        clicks: acc.clicks + (promo.visitors_count || 0),
-        signups: acc.signups + (promo.leads_count || 0),
-        customers: acc.customers + (promo.customers_count || 0),
-        sales: acc.sales + (promo.sales_count || 0),
-        revenue: acc.revenue + (promo.sales_total || 0),
-      }),
-      { clicks: 0, signups: 0, customers: 0, sales: 0, revenue: 0 }
-    );
-
-    // Build normalized profile
-    const name =
-      data.profile?.first_name && data.profile?.last_name
-        ? `${data.profile.first_name} ${data.profile.last_name}`.trim()
-        : data.profile?.first_name || data.email.split('@')[0] || 'Unknown';
-
-    return {
-      id: data.id,
-      email: data.email,
-      name,
-      status: data.status,
-      refId: data.default_ref_id,
-      stats: {
-        ...totalStats,
-        earnings: data.earnings_balance?.cash || data.current_balance?.cash || 0,
-      },
-      balance: {
-        current: data.current_balance?.cash || 0,
-        paid: data.paid_balance?.cash || 0,
-      },
-    };
-  } catch (error) {
-    console.error('FirstPromoter getPromoterProfile exception:', error);
-    return null;
   }
-});
+);
 
 /**
  * Get date-filtered reports from V2 API
@@ -364,48 +366,46 @@ export const getPromoterReports = cache(
  * Get rewards list for time series data (with pagination to fetch ALL records)
  * Wrapped with React.cache() to deduplicate calls within a single request
  */
-export const getRewardsList = cache(
-  async (promoterId: number): Promise<RewardV1Response[]> => {
-    const allRewards: RewardV1Response[] = [];
-    let page = 1;
-    const perPage = 100;
+export const getRewardsList = cache(async (promoterId: number): Promise<RewardV1Response[]> => {
+  const allRewards: RewardV1Response[] = [];
+  let page = 1;
+  const perPage = 100;
 
-    try {
-      while (true) {
-        const response = await fetch(
-          `${V1_BASE_URL}/rewards/list?promoter_id=${promoterId}&page=${page}&per_page=${perPage}`,
-          {
-            method: 'GET',
-            headers: getV1Headers(),
-            next: { revalidate: 60 },
-          }
-        );
-
-        if (!response.ok) {
-          console.error(
-            'FirstPromoter getRewardsList error:',
-            response.status,
-            await response.text()
-          );
-          break;
+  try {
+    while (true) {
+      const response = await fetch(
+        `${V1_BASE_URL}/rewards/list?promoter_id=${promoterId}&page=${page}&per_page=${perPage}`,
+        {
+          method: 'GET',
+          headers: getV1Headers(),
+          next: { revalidate: 60 },
         }
+      );
 
-        const pageData = await response.json();
-        if (!pageData || pageData.length === 0) break;
-
-        allRewards.push(...pageData);
-
-        // If we got less than perPage, we've reached the last page
-        if (pageData.length < perPage) break;
-        page++;
+      if (!response.ok) {
+        console.error(
+          'FirstPromoter getRewardsList error:',
+          response.status,
+          await response.text()
+        );
+        break;
       }
-    } catch (error) {
-      console.error('FirstPromoter getRewardsList exception:', error);
-    }
 
-    return allRewards;
+      const pageData = await response.json();
+      if (!pageData || pageData.length === 0) break;
+
+      allRewards.push(...pageData);
+
+      // If we got less than perPage, we've reached the last page
+      if (pageData.length < perPage) break;
+      page++;
+    }
+  } catch (error) {
+    console.error('FirstPromoter getRewardsList exception:', error);
   }
-);
+
+  return allRewards;
+});
 
 /**
  * Get date string in YYYY-MM-DD format (ignoring time)

@@ -1,4 +1,4 @@
-'use client';;
+'use client';
 import { useToggleAutoplay } from '@/api/mutations';
 import { useCourseDetail, useCoursePlay } from '@/api/queries/courses.queries';
 import { useMe } from '@/api/queries/auth.queries';
@@ -15,7 +15,10 @@ import { useRouter } from 'next/navigation';
 import { use, useCallback, useEffect, useRef, useState } from 'react';
 
 const VideoPlayer = dynamic(
-  () => import('@/features/video/components/video-player').then((mod) => ({ default: mod.VideoPlayer })),
+  () =>
+    import('@/features/video/components/video-player').then((mod) => ({
+      default: mod.VideoPlayer,
+    })),
   {
     loading: () => <VideoPlayerSkeleton />,
     ssr: false,
@@ -165,10 +168,7 @@ export default function CoursePlayerPage({
 
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-4 pb-4 border-b border-white/10">
               <div className="flex items-center gap-3">
-                <Link
-                  href={getCreatorRoute(currentVideo.channel?.handler)}
-                  className="shrink-0"
-                >
+                <Link href={getCreatorRoute(currentVideo.channel?.handler)} className="shrink-0">
                   <div className="relative w-10 h-10 rounded-full overflow-hidden">
                     {currentVideo.channel?.dp ? (
                       <Image

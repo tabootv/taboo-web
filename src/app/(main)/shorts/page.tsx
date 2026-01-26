@@ -1,4 +1,4 @@
-'use client';;
+'use client';
 import { useToggleShortLike } from '@/api/mutations/shorts.mutations';
 import { ShortVideoCard } from '@/features/shorts/components/short-video-card';
 import { useShortsFeed } from '@/features/shorts/hooks/use-shorts-feed';
@@ -39,19 +39,13 @@ export default function ShortsPage() {
   // URL synchronization with state machine
   // Use first video's UUID or empty string for index page
   const firstUuid = shorts[0]?.uuid ?? '';
-  const {
-    currentIndex,
-    currentUuid,
-    isReady,
-    handleSwiperInit,
-    handleSlideChange,
-    swiperRef,
-  } = useShortsUrlSync({
-    shorts,
-    initialUuid: firstUuid,
-    initialIndex,
-    isLoading,
-  });
+  const { currentIndex, currentUuid, isReady, handleSwiperInit, handleSlideChange, swiperRef } =
+    useShortsUrlSync({
+      shorts,
+      initialUuid: firstUuid,
+      initialIndex,
+      isLoading,
+    });
 
   // Like mutation
   const toggleLike = useToggleShortLike();
@@ -244,11 +238,7 @@ export default function ShortsPage() {
           const isNearActive = !isActive && Math.abs(currentIndex - index) <= 2;
 
           return (
-            <SwiperSlide
-              key={video.uuid}
-              virtualIndex={index}
-              className="!h-full !w-full"
-            >
+            <SwiperSlide key={video.uuid} virtualIndex={index} className="!h-full !w-full">
               <ShortVideoCard
                 video={video}
                 index={index}

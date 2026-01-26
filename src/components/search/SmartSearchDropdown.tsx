@@ -118,7 +118,6 @@ function CreatorResultItem({
   );
 }
 
-
 export function SmartSearchDropdown({ className }: SmartSearchDropdownProps) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -319,9 +318,7 @@ export function SmartSearchDropdown({ className }: SmartSearchDropdownProps) {
                           closeDropdown();
                         }}
                       >
-                        <span className="text-sm">
-                          See all videos →
-                        </span>
+                        <span className="text-sm">See all videos →</span>
                       </div>
                     )}
                   </>

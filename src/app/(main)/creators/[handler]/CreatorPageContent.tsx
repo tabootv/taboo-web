@@ -103,11 +103,11 @@ export function CreatorPageContent({ handler }: CreatorPageContentProps) {
   const { data: videosData } = useVideos(
     creator
       ? {
-        creators: String(creator.id),
-        short: false,
-        sort_by: 'latest',
-        per_page: 1,
-      }
+          creators: String(creator.id),
+          short: false,
+          sort_by: 'latest',
+          per_page: 1,
+        }
       : undefined,
     {
       enabled: !!creator?.id,
@@ -241,9 +241,7 @@ export function CreatorPageContent({ handler }: CreatorPageContentProps) {
 
       <CreatorTabs activeTab={activeTab} onTabChange={setActiveTab} tabs={tabs} />
 
-      {activeTab === 'home' && (
-        <CreatorHomeTab creator={creator} onTabChange={setActiveTab} />
-      )}
+      {activeTab === 'home' && <CreatorHomeTab creator={creator} onTabChange={setActiveTab} />}
 
       {activeTab === 'videos' && <CreatorVideosTab creator={creator} />}
 

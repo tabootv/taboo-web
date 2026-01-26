@@ -46,7 +46,12 @@ export default function EarningsPage() {
             <p className="text-xs uppercase tracking-[0.2em] text-white/50">Payouts</p>
             <h1 className="text-2xl lg:text-3xl font-bold">Earnings Dashboard</h1>
           </div>
-          <Button onClick={fetchIframeToken} variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10">
+          <Button
+            onClick={fetchIframeToken}
+            variant="outline"
+            size="sm"
+            className="border-white/20 text-white hover:bg-white/10"
+          >
             <RefreshCw className="w-4 h-4 mr-2" />
             Refresh
           </Button>
@@ -69,7 +74,11 @@ export default function EarningsPage() {
               </div>
               <p className="text-white/80 mb-2">Unable to load earnings dashboard</p>
               <p className="text-white/50 text-sm mb-4">{error}</p>
-              <Button onClick={fetchIframeToken} variant="outline" className="border-white/20 text-white hover:bg-white/10">
+              <Button
+                onClick={fetchIframeToken}
+                variant="outline"
+                className="border-white/20 text-white hover:bg-white/10"
+              >
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Try Again
               </Button>

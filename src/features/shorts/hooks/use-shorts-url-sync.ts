@@ -70,11 +70,7 @@ export function useShortsUrlSync(options: UseShortsUrlSyncOptions): UseShortsUrl
   // Handle external UUID change (navigation from outside)
   useEffect(() => {
     // Detect if URL UUID changed externally (e.g., browser back/forward)
-    if (
-      syncState === 'syncing' &&
-      initialUuid !== previousUuidRef.current &&
-      shorts.length > 0
-    ) {
+    if (syncState === 'syncing' && initialUuid !== previousUuidRef.current && shorts.length > 0) {
       // Find the new index
       const newIndex = shorts.findIndex((s) => s.uuid === initialUuid);
       if (newIndex >= 0 && newIndex !== currentIndex) {
@@ -147,11 +143,7 @@ export function useShortsUrlSync(options: UseShortsUrlSyncOptions): UseShortsUrl
       // Update URL using History API (faster than Next.js router)
       if (newShort.uuid !== previousUuidRef.current) {
         const newUrl = `/shorts/${newShort.uuid}`;
-        window.history.replaceState(
-          { shortIndex: newIndex, shortUuid: newShort.uuid },
-          '',
-          newUrl
-        );
+        window.history.replaceState({ shortIndex: newIndex, shortUuid: newShort.uuid }, '', newUrl);
         previousUuidRef.current = newShort.uuid;
       }
     },

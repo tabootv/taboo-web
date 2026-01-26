@@ -1,4 +1,4 @@
-'use client';;
+'use client';
 import { useEffect, useState, useCallback } from 'react';
 import { homeClient } from '@/api/client/home.client';
 import type { Video } from '@/types';
@@ -77,10 +77,7 @@ export function FeaturedSection({ initialVideos }: FeaturedSectionProps) {
       </RailRow>
 
       {/* Preview Modal - rendered via portal */}
-      <MediaPreviewModal
-        video={previewVideo}
-        onClose={handleClosePreview}
-      />
+      <MediaPreviewModal video={previewVideo} onClose={handleClosePreview} />
     </>
   );
 }

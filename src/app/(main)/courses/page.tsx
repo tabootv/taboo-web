@@ -1,4 +1,4 @@
-'use client';;
+'use client';
 import { useCoursesList } from '@/api/queries/courses.queries';
 import { CourseCard } from './_components/CourseCard';
 import { Button } from '@/components/ui/button';

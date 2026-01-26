@@ -20,4 +20,3 @@ export function useSearch(query: string | null | undefined, page = 1) {
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }
-

@@ -128,9 +128,7 @@ export default function CreateVideoPage() {
 
         {/* Video Upload */}
         <div>
-          <label className="block text-sm font-medium text-text-primary mb-2">
-            Video File *
-          </label>
+          <label className="block text-sm font-medium text-text-primary mb-2">Video File *</label>
           {videoPreview ? (
             <div className="relative aspect-video rounded-lg overflow-hidden bg-black">
               <video src={videoPreview} controls className="w-full h-full" />
@@ -166,9 +164,7 @@ export default function CreateVideoPage() {
 
         {/* Thumbnail */}
         <div>
-          <label className="block text-sm font-medium text-text-primary mb-2">
-            Thumbnail
-          </label>
+          <label className="block text-sm font-medium text-text-primary mb-2">Thumbnail</label>
           {thumbnailPreview ? (
             <div className="relative w-64 aspect-video rounded-lg overflow-hidden">
               <Image src={thumbnailPreview} alt="Thumbnail" fill className="object-cover" />

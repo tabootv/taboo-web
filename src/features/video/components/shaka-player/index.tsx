@@ -59,14 +59,9 @@ export function ShakaPlayer({
     changePlaybackSpeed,
   } = useQualityManagement();
 
-  const {
-    isPiP,
-    isPiPSupported,
-    isPiPRef,
-    togglePiP,
-    handleEnterPiP,
-    handleLeavePiP,
-  } = usePiPMode({ videoRef });
+  const { isPiP, isPiPSupported, isPiPRef, togglePiP, handleEnterPiP, handleLeavePiP } = usePiPMode(
+    { videoRef }
+  );
 
   const {
     isLoading,

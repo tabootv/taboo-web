@@ -79,9 +79,7 @@ export function LessonCard({ video, lessonNumber, courseId, channel }: LessonCar
                   {(video.channel?.name || channel?.name) && (
                     <>
                       <span>•</span>
-                      <span className="truncate">
-                        {video.channel?.name || channel?.name}
-                      </span>
+                      <span className="truncate">{video.channel?.name || channel?.name}</span>
                     </>
                   )}
                 </div>

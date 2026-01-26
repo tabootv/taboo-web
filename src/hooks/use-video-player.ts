@@ -80,38 +80,53 @@ export function useVideoPlayer(options: UseVideoPlayerOptions = {}) {
   }, [isMuted, mute, unmute]);
 
   // Volume
-  const changeVolume = useCallback((newVolume: number) => {
-    if (!videoRef.current) return;
-    const clampedVolume = Math.max(0, Math.min(1, newVolume));
-    videoRef.current.volume = clampedVolume;
-    setVolume(clampedVolume);
-    if (clampedVolume === 0) {
-      setIsMuted(true);
-    } else if (isMuted) {
-      setIsMuted(false);
-    }
-  }, [isMuted]);
+  const changeVolume = useCallback(
+    (newVolume: number) => {
+      if (!videoRef.current) return;
+      const clampedVolume = Math.max(0, Math.min(1, newVolume));
+      videoRef.current.volume = clampedVolume;
+      setVolume(clampedVolume);
+      if (clampedVolume === 0) {
+        setIsMuted(true);
+      } else if (isMuted) {
+        setIsMuted(false);
+      }
+    },
+    [isMuted]
+  );
 
   // Seek
-  const seek = useCallback((time: number) => {
-    if (!videoRef.current) return;
-    const clampedTime = Math.max(0, Math.min(duration, time));
-    videoRef.current.currentTime = clampedTime;
-    setCurrentTime(clampedTime);
-  }, [duration]);
+  const seek = useCallback(
+    (time: number) => {
+      if (!videoRef.current) return;
+      const clampedTime = Math.max(0, Math.min(duration, time));
+      videoRef.current.currentTime = clampedTime;
+      setCurrentTime(clampedTime);
+    },
+    [duration]
+  );
 
-  const seekPercent = useCallback((percent: number) => {
-    const time = (percent / 100) * duration;
-    seek(time);
-  }, [duration, seek]);
+  const seekPercent = useCallback(
+    (percent: number) => {
+      const time = (percent / 100) * duration;
+      seek(time);
+    },
+    [duration, seek]
+  );
 
-  const skipForward = useCallback((seconds: number = 10) => {
-    seek(currentTime + seconds);
-  }, [currentTime, seek]);
+  const skipForward = useCallback(
+    (seconds: number = 10) => {
+      seek(currentTime + seconds);
+    },
+    [currentTime, seek]
+  );
 
-  const skipBackward = useCallback((seconds: number = 10) => {
-    seek(currentTime - seconds);
-  }, [currentTime, seek]);
+  const skipBackward = useCallback(
+    (seconds: number = 10) => {
+      seek(currentTime - seconds);
+    },
+    [currentTime, seek]
+  );
 
   // Fullscreen
   const enterFullscreen = useCallback(async () => {

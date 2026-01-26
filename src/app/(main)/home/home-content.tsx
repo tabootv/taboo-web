@@ -50,9 +50,7 @@ export function HomeContent({ initialData }: HomeContentProps) {
           onLastPageReached={setHasReachedEnd}
         />
 
-        {hasReachedEnd && (
-          <EndOfContentMessage onScrollToTop={handleScrollToTop} />
-        )}
+        {hasReachedEnd && <EndOfContentMessage onScrollToTop={handleScrollToTop} />}
       </div>
     </>
   );

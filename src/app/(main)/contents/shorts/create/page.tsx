@@ -138,9 +138,7 @@ export default function CreateShortPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Video Upload */}
           <div>
-            <label className="block text-sm font-medium text-text-primary mb-2">
-              Video File *
-            </label>
+            <label className="block text-sm font-medium text-text-primary mb-2">Video File *</label>
             {videoPreview ? (
               <div className="relative aspect-[9/16] rounded-lg overflow-hidden bg-black max-w-[240px]">
                 <video src={videoPreview} controls className="w-full h-full object-cover" />
@@ -178,9 +176,7 @@ export default function CreateShortPage() {
           <div className="space-y-6">
             {/* Thumbnail */}
             <div>
-              <label className="block text-sm font-medium text-text-primary mb-2">
-                Thumbnail
-              </label>
+              <label className="block text-sm font-medium text-text-primary mb-2">Thumbnail</label>
               {thumbnailPreview ? (
                 <div className="relative w-32 aspect-[9/16] rounded-lg overflow-hidden">
                   <Image src={thumbnailPreview} alt="Thumbnail" fill className="object-cover" />

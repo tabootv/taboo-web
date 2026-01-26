@@ -18,20 +18,23 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
         <div
           className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px]"
           style={{
-            background: 'radial-gradient(ellipse at center, rgba(171, 0, 19, 0.08) 0%, transparent 70%)',
+            background:
+              'radial-gradient(ellipse at center, rgba(171, 0, 19, 0.08) 0%, transparent 70%)',
           }}
         />
         {/* Subtle ambient glow */}
         <div
           className="absolute bottom-0 left-0 w-[600px] h-[600px]"
           style={{
-            background: 'radial-gradient(circle at center, rgba(255,255,255,0.02) 0%, transparent 60%)',
+            background:
+              'radial-gradient(circle at center, rgba(255,255,255,0.02) 0%, transparent 60%)',
           }}
         />
         <div
           className="absolute top-1/3 right-0 w-[500px] h-[500px]"
           style={{
-            background: 'radial-gradient(circle at center, rgba(255,255,255,0.015) 0%, transparent 60%)',
+            background:
+              'radial-gradient(circle at center, rgba(255,255,255,0.015) 0%, transparent 60%)',
           }}
         />
       </div>
@@ -50,7 +53,8 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
           <div
             className="rounded-2xl p-8 backdrop-blur-xl"
             style={{
-              background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+              background:
+                'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
               border: '1px solid rgba(255,255,255,0.08)',
               boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
             }}

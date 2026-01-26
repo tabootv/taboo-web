@@ -21,9 +21,8 @@ export const searchClient = {
     const data = await apiClient.get<{ results?: SearchResults } | SearchResults>('/search', {
       params: { q: query, ...params } as Record<string, unknown>,
     });
-    return (typeof data === 'object' && data !== null && 'results' in data)
+    return typeof data === 'object' && data !== null && 'results' in data
       ? data.results || data
       : (data as SearchResults);
   },
 };
-

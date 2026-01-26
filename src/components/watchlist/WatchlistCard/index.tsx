@@ -37,11 +37,7 @@ export function WatchlistCard({ item, onRemove }: WatchlistCardProps) {
 
   return (
     <div className="series-card-clean group relative">
-      <Link
-        href={href}
-        prefetch={true}
-        onMouseEnter={() => href !== '#' && prefetchRoute(href)}
-      >
+      <Link href={href} prefetch={true} onMouseEnter={() => href !== '#' && prefetchRoute(href)}>
         <div className="relative aspect-video w-full overflow-hidden rounded-t-xl">
           {item.thumbnail ? (
             <Image
@@ -62,10 +58,7 @@ export function WatchlistCard({ item, onRemove }: WatchlistCardProps) {
 
           {item.progress !== undefined && item.progress > 0 && (
             <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
-              <div
-                className="h-full bg-red-primary"
-                style={{ width: `${item.progress}%` }}
-              />
+              <div className="h-full bg-red-primary" style={{ width: `${item.progress}%` }} />
             </div>
           )}
 
@@ -125,4 +118,3 @@ export function WatchlistCard({ item, onRemove }: WatchlistCardProps) {
     </div>
   );
 }
-

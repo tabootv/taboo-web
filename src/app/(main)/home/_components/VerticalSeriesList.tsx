@@ -33,7 +33,8 @@ export function VerticalSeriesList({ series, selectedIndex, onSelect }: Vertical
     if (isDesktop) {
       const fullyVisible = itemRect.top >= listRect.top && itemRect.bottom <= listRect.bottom;
       if (!fullyVisible) {
-        const targetTop = selectedItem.offsetTop - list.clientHeight / 2 + selectedItem.clientHeight / 2;
+        const targetTop =
+          selectedItem.offsetTop - list.clientHeight / 2 + selectedItem.clientHeight / 2;
         list.scrollTo({ top: Math.max(targetTop, 0), behavior: 'smooth' });
       }
     } else {
@@ -128,4 +129,3 @@ export function VerticalSeriesList({ series, selectedIndex, onSelect }: Vertical
     </div>
   );
 }
-

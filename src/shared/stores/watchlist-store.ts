@@ -9,11 +9,13 @@ export interface WatchlistItem {
   type: WatchlistItemType;
   title: string;
   thumbnail: string | null;
-  channel?: {
-    id: number;
-    name: string;
-    dp?: string | null | undefined;
-  } | undefined;
+  channel?:
+    | {
+        id: number;
+        name: string;
+        dp?: string | null | undefined;
+      }
+    | undefined;
   duration?: string | undefined;
   progress?: number | undefined; // 0-100 percentage
   videosCount?: number | undefined; // For series/courses

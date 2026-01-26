@@ -5,7 +5,12 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Plus, Check, Clock, Eye, Heart, ChevronDown } from 'lucide-react';
-import { formatDuration, formatCompactNumber, formatRelativeTime, getCreatorRoute } from '@/shared/utils/formatting';
+import {
+  formatDuration,
+  formatCompactNumber,
+  formatRelativeTime,
+  getCreatorRoute,
+} from '@/shared/utils/formatting';
 import type { Video } from '@/types';
 
 interface PreviewMediaInfoProps {
@@ -68,9 +73,7 @@ export function PreviewMediaInfo({
           </span>
         )}
         {video.published_at && (
-          <span className="text-white/50">
-            {formatRelativeTime(video.published_at)}
-          </span>
+          <span className="text-white/50">{formatRelativeTime(video.published_at)}</span>
         )}
       </div>
 
@@ -151,4 +154,3 @@ export function PreviewMediaInfo({
     </div>
   );
 }
-

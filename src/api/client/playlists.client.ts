@@ -22,7 +22,10 @@ export const playlistsClient = {
   /**
    * Get paginated list of playlists
    */
-  list: async (filters?: PlaylistsListFilters, serverToken?: string): Promise<PaginatedResponse<Playlist>> => {
+  list: async (
+    filters?: PlaylistsListFilters,
+    serverToken?: string
+  ): Promise<PaginatedResponse<Playlist>> => {
     const data = await apiClient.get<{
       data?: PaginatedResponse<Playlist>;
     }>('/playlists', {

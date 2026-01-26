@@ -63,10 +63,11 @@ export interface MapVideosQueryFilters {
 export function useMapVideosInfinite(filters?: MapVideosQueryFilters) {
   return useInfiniteQuery({
     queryKey: queryKeys.videos.mapList(filters as Record<string, unknown>),
-    queryFn: ({ pageParam = 1 }) =>
-      publicClient.getMapVideos({ ...filters, page: pageParam }),
+    queryFn: ({ pageParam = 1 }) => publicClient.getMapVideos({ ...filters, page: pageParam }),
     getNextPageParam: (lastPage) =>
-      lastPage.pagination.current_page < lastPage.pagination.last_page ? lastPage.pagination.current_page + 1 : undefined,
+      lastPage.pagination.current_page < lastPage.pagination.last_page
+        ? lastPage.pagination.current_page + 1
+        : undefined,
     initialPageParam: 1,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });

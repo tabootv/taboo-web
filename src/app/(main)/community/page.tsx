@@ -79,7 +79,7 @@ export default function CommunityPage() {
           <div className="space-y-4">
             {isLoading ? (
               // Skeleton Loading
-              (Array.from({ length: 3 }).map((_, i) => <PostSkeleton key={`skeleton-${i}`} />))
+              Array.from({ length: 3 }).map((_, i) => <PostSkeleton key={`skeleton-${i}`} />)
             ) : postsList.length > 0 ? (
               <>
                 {postsList.map((post) => (
@@ -111,7 +111,7 @@ export default function CommunityPage() {
               </>
             ) : (
               // Empty State
-              (<div className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="flex flex-col items-center justify-center py-16 text-center">
                 <div className="w-20 h-20 rounded-full bg-[#131315] flex items-center justify-center mb-6">
                   <MessageCircle className="w-8 h-8 text-red-primary" />
                 </div>
@@ -119,7 +119,7 @@ export default function CommunityPage() {
                 <p className="text-text-secondary max-w-sm">
                   Be the first to share something with the community!
                 </p>
-              </div>)
+              </div>
             )}
           </div>
         </div>

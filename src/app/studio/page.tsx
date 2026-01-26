@@ -32,7 +32,255 @@ type AggregatedStats = {
 };
 
 const ISO_CODES = [
-  'AF','AX','AL','DZ','AS','AD','AO','AI','AQ','AG','AR','AM','AW','AU','AT','AZ','BS','BH','BD','BB','BY','BE','BZ','BJ','BM','BT','BO','BQ','BA','BW','BV','BR','IO','BN','BG','BF','BI','CV','KH','CM','CA','KY','CF','TD','CL','CN','CX','CC','CO','KM','CD','CG','CK','CR','CI','HR','CU','CW','CY','CZ','DK','DJ','DM','DO','EC','EG','SV','GQ','ER','EE','SZ','ET','FK','FO','FJ','FI','FR','GF','PF','TF','GA','GM','GE','DE','GH','GI','GR','GL','GD','GP','GU','GT','GG','GN','GW','GY','HT','HM','VA','HN','HK','HU','IS','IN','ID','IR','IQ','IE','IM','IL','IT','JM','JP','JE','JO','KZ','KE','KI','KP','KR','KW','KG','LA','LV','LB','LS','LR','LY','LI','LT','LU','MO','MK','MG','MW','MY','MV','ML','MT','MH','MQ','MR','MU','YT','MX','FM','MD','MC','MN','ME','MS','MA','MZ','MM','NA','NR','NP','NL','NC','NZ','NI','NE','NG','NU','NF','MP','NO','OM','PK','PW','PS','PA','PG','PY','PE','PH','PN','PL','PT','PR','QA','RE','RO','RU','RW','BL','SH','KN','LC','MF','PM','VC','WS','SM','ST','SA','SN','RS','SC','SL','SG','SX','SK','SI','SB','SO','ZA','GS','SS','ES','LK','SD','SR','SJ','SE','CH','SY','TW','TJ','TZ','TH','TL','TG','TK','TO','TT','TN','TR','TM','TC','TV','UG','UA','AE','GB','US','UM','UY','UZ','VU','VE','VN','VG','VI','WF','EH','YE','ZM','ZW'
+  'AF',
+  'AX',
+  'AL',
+  'DZ',
+  'AS',
+  'AD',
+  'AO',
+  'AI',
+  'AQ',
+  'AG',
+  'AR',
+  'AM',
+  'AW',
+  'AU',
+  'AT',
+  'AZ',
+  'BS',
+  'BH',
+  'BD',
+  'BB',
+  'BY',
+  'BE',
+  'BZ',
+  'BJ',
+  'BM',
+  'BT',
+  'BO',
+  'BQ',
+  'BA',
+  'BW',
+  'BV',
+  'BR',
+  'IO',
+  'BN',
+  'BG',
+  'BF',
+  'BI',
+  'CV',
+  'KH',
+  'CM',
+  'CA',
+  'KY',
+  'CF',
+  'TD',
+  'CL',
+  'CN',
+  'CX',
+  'CC',
+  'CO',
+  'KM',
+  'CD',
+  'CG',
+  'CK',
+  'CR',
+  'CI',
+  'HR',
+  'CU',
+  'CW',
+  'CY',
+  'CZ',
+  'DK',
+  'DJ',
+  'DM',
+  'DO',
+  'EC',
+  'EG',
+  'SV',
+  'GQ',
+  'ER',
+  'EE',
+  'SZ',
+  'ET',
+  'FK',
+  'FO',
+  'FJ',
+  'FI',
+  'FR',
+  'GF',
+  'PF',
+  'TF',
+  'GA',
+  'GM',
+  'GE',
+  'DE',
+  'GH',
+  'GI',
+  'GR',
+  'GL',
+  'GD',
+  'GP',
+  'GU',
+  'GT',
+  'GG',
+  'GN',
+  'GW',
+  'GY',
+  'HT',
+  'HM',
+  'VA',
+  'HN',
+  'HK',
+  'HU',
+  'IS',
+  'IN',
+  'ID',
+  'IR',
+  'IQ',
+  'IE',
+  'IM',
+  'IL',
+  'IT',
+  'JM',
+  'JP',
+  'JE',
+  'JO',
+  'KZ',
+  'KE',
+  'KI',
+  'KP',
+  'KR',
+  'KW',
+  'KG',
+  'LA',
+  'LV',
+  'LB',
+  'LS',
+  'LR',
+  'LY',
+  'LI',
+  'LT',
+  'LU',
+  'MO',
+  'MK',
+  'MG',
+  'MW',
+  'MY',
+  'MV',
+  'ML',
+  'MT',
+  'MH',
+  'MQ',
+  'MR',
+  'MU',
+  'YT',
+  'MX',
+  'FM',
+  'MD',
+  'MC',
+  'MN',
+  'ME',
+  'MS',
+  'MA',
+  'MZ',
+  'MM',
+  'NA',
+  'NR',
+  'NP',
+  'NL',
+  'NC',
+  'NZ',
+  'NI',
+  'NE',
+  'NG',
+  'NU',
+  'NF',
+  'MP',
+  'NO',
+  'OM',
+  'PK',
+  'PW',
+  'PS',
+  'PA',
+  'PG',
+  'PY',
+  'PE',
+  'PH',
+  'PN',
+  'PL',
+  'PT',
+  'PR',
+  'QA',
+  'RE',
+  'RO',
+  'RU',
+  'RW',
+  'BL',
+  'SH',
+  'KN',
+  'LC',
+  'MF',
+  'PM',
+  'VC',
+  'WS',
+  'SM',
+  'ST',
+  'SA',
+  'SN',
+  'RS',
+  'SC',
+  'SL',
+  'SG',
+  'SX',
+  'SK',
+  'SI',
+  'SB',
+  'SO',
+  'ZA',
+  'GS',
+  'SS',
+  'ES',
+  'LK',
+  'SD',
+  'SR',
+  'SJ',
+  'SE',
+  'CH',
+  'SY',
+  'TW',
+  'TJ',
+  'TZ',
+  'TH',
+  'TL',
+  'TG',
+  'TK',
+  'TO',
+  'TT',
+  'TN',
+  'TR',
+  'TM',
+  'TC',
+  'TV',
+  'UG',
+  'UA',
+  'AE',
+  'GB',
+  'US',
+  'UM',
+  'UY',
+  'UZ',
+  'VU',
+  'VE',
+  'VN',
+  'VG',
+  'VI',
+  'WF',
+  'EH',
+  'YE',
+  'ZM',
+  'ZW',
 ];
 
 const regionNames = new Intl.DisplayNames(['en'], { type: 'region' });
@@ -50,7 +298,7 @@ const ALT_COUNTRY_CODES: Record<string, string> = {
   'north korea': 'KP',
   korea: 'KR',
   russia: 'RU',
-  'palestine': 'PS',
+  palestine: 'PS',
   'gaza strip': 'PS',
   'west bank': 'PS',
   'ivory coast': 'CI',
@@ -68,14 +316,14 @@ const ALT_COUNTRY_CODES: Record<string, string> = {
   taiwan: 'TW',
   laos: 'LA',
   vietnam: 'VN',
-  'venezuela': 'VE',
-  'iran': 'IR',
-  'iraq': 'IQ',
-  'afghanistan': 'AF',
-  'china': 'CN',
-  'bangladesh': 'BD',
-  'lebanon': 'LB',
-  'nepal': 'NP',
+  venezuela: 'VE',
+  iran: 'IR',
+  iraq: 'IQ',
+  afghanistan: 'AF',
+  china: 'CN',
+  bangladesh: 'BD',
+  lebanon: 'LB',
+  nepal: 'NP',
 };
 
 const countryNameToCode = (name: string | undefined | null): string | null => {
@@ -104,28 +352,18 @@ export default function StudioDashboard() {
   const [isLoadingMap, setIsLoadingMap] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
   const [mapStats, setMapStats] = useState<AggregatedStats | null>(null);
-  const [contentTotals, setContentTotals] = useState<{ videos: number; shorts: number; posts: number; series: number; courses: number } | null>(null);
-
-  if (!channel) {
-    return null;
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const channelData = channel as Record<string, any>;
-  const totals = {
-    videos: contentTotals?.videos ?? channelData.videos_count ?? 0,
-    shorts: contentTotals?.shorts ?? channelData.short_videos_count ?? channelData.shorts_count ?? 0,
-    posts: contentTotals?.posts ?? channelData.posts_count ?? 0,
-    series: contentTotals?.series ?? channelData.series_count ?? 0,
-    courses: contentTotals?.courses ?? channelData.course_count ?? 0,
-  };
+  const [contentTotals, setContentTotals] = useState<{
+    videos: number;
+    shorts: number;
+    posts: number;
+    series: number;
+    courses: number;
+  } | null>(null);
 
   const coverageDisplay = useMemo(() => {
     if (!mapStats) return null;
     const recorded = mapStats.countriesRecorded || 0;
-    const percent = mapStats.coveragePercent
-      ? mapStats.coveragePercent
-      : (recorded / 195) * 100;
+    const percent = mapStats.coveragePercent ? mapStats.coveragePercent : (recorded / 195) * 100;
     return `${percent.toFixed(1)}%`;
   }, [mapStats]);
 
@@ -161,12 +399,13 @@ export default function StudioDashboard() {
   useEffect(() => {
     const channelId = channel?.id;
     if (!channelId) return;
+    const id = channelId; // capture for closure
     let cancelled = false;
     async function load() {
       setIsLoadingMap(true);
       setMapError(null);
       try {
-        const videos = await fetchMapVideos(channelId);
+        const videos = await fetchMapVideos(id);
         const stats = computeStats(videos);
         if (!cancelled) {
           setMapStats(stats);
@@ -188,6 +427,21 @@ export default function StudioDashboard() {
     };
   }, [channel?.id]);
 
+  if (!channel) {
+    return null;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const channelData = channel as Record<string, any>;
+  const totals = {
+    videos: contentTotals?.videos ?? channelData.videos_count ?? 0,
+    shorts:
+      contentTotals?.shorts ?? channelData.short_videos_count ?? channelData.shorts_count ?? 0,
+    posts: contentTotals?.posts ?? channelData.posts_count ?? 0,
+    series: contentTotals?.series ?? channelData.series_count ?? 0,
+    courses: contentTotals?.courses ?? channelData.course_count ?? 0,
+  };
+
   return (
     <div className="p-6 lg:p-8 space-y-8">
       {/* Intro */}
@@ -205,10 +459,10 @@ export default function StudioDashboard() {
         </div>
         <div>
           <p className="text-xs uppercase tracking-[0.2em] text-white/50 mb-1">Creator Studio</p>
-          <h1 className="text-3xl font-bold text-white leading-tight">Welcome back, {channel.name}</h1>
-          <p className="text-white/60 text-sm">
-            Here’s what’s happening with your content.
-          </p>
+          <h1 className="text-3xl font-bold text-white leading-tight">
+            Welcome back, {channel.name}
+          </h1>
+          <p className="text-white/60 text-sm">Here’s what’s happening with your content.</p>
         </div>
       </div>
 
@@ -293,11 +547,7 @@ export default function StudioDashboard() {
               label="Countries"
               value={`${formatNumber(mapStats?.countriesRecorded ?? 0)}`}
             />
-            <StatCard
-              icon={MapPin}
-              label="Coverage"
-              value={coverageDisplay || '—'}
-            />
+            <StatCard icon={MapPin} label="Coverage" value={coverageDisplay || '—'} />
             <StatCard
               icon={Globe2}
               label="Global Reach"
@@ -305,9 +555,7 @@ export default function StudioDashboard() {
             />
           </div>
 
-          {mapError && (
-            <p className="text-sm text-red-300">{mapError}</p>
-          )}
+          {mapError && <p className="text-sm text-red-300">{mapError}</p>}
 
           {isLoadingMap && !mapStats && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -335,7 +583,9 @@ export default function StudioDashboard() {
                     <div className="w-20 h-2 bg-white/10 rounded-full overflow-hidden">
                       <div
                         className="h-full bg-gradient-to-r from-red-primary to-red-primary/70"
-                        style={{ width: `${Math.min(100, (country.count / (mapStats.topCountries[0]?.count || 1)) * 100)}%` }}
+                        style={{
+                          width: `${Math.min(100, (country.count / (mapStats.topCountries[0]?.count || 1)) * 100)}%`,
+                        }}
                       />
                     </div>
                     <span className="text-xs text-white/40 w-8 text-right">#{idx + 1}</span>
@@ -346,7 +596,9 @@ export default function StudioDashboard() {
           )}
 
           {!mapError && !isLoadingMap && mapStats && mapStats.topCountries.length === 0 && (
-            <p className="text-sm text-white/50">Start filming around the world to see your coverage!</p>
+            <p className="text-sm text-white/50">
+              Start filming around the world to see your coverage!
+            </p>
           )}
         </CardContent>
       </Card>
@@ -393,7 +645,8 @@ async function fetchMapVideos(creatorId: string | number): Promise<MapVideo[]> {
   let page = 1;
   let lastPage = 1;
 
-  while (page <= lastPage && page <= 5) { // Limit to 5 pages max
+  while (page <= lastPage && page <= 5) {
+    // Limit to 5 pages max
     const url = new URL('https://app.taboo.tv/api/public/map-videos');
     url.searchParams.set('page', String(page));
     url.searchParams.set('per_page', '50');
@@ -462,4 +715,3 @@ function computeStats(videos: MapVideo[]): AggregatedStats {
     topTags,
   };
 }
-

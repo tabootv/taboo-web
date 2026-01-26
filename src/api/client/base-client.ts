@@ -88,7 +88,7 @@ class ApiClient {
   }
 
   getToken(serverToken?: string): string | undefined {
-    if (serverToken) return serverToken
+    if (serverToken) return serverToken;
     if (globalThis.window === undefined) return undefined;
     return Cookies.get(TOKEN_KEY);
   }

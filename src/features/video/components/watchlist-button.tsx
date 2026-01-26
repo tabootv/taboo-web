@@ -49,13 +49,14 @@ export function WatchlistButton({
         ('thumbnail' in item ? item.thumbnail : null) ||
         ('trailer_thumbnail' in item ? item.trailer_thumbnail : null) ||
         null,
-      channel: 'channel' in item && item.channel
-        ? {
-            id: item.channel.id,
-            name: item.channel.name,
-            dp: item.channel.dp || null,
-          }
-        : undefined,
+      channel:
+        'channel' in item && item.channel
+          ? {
+              id: item.channel.id,
+              name: item.channel.name,
+              dp: item.channel.dp || null,
+            }
+          : undefined,
       duration: 'duration' in item && item.duration ? String(item.duration) : undefined,
       videosCount: 'videos_count' in item ? item.videos_count : undefined,
       addedAt: Date.now(),
@@ -69,10 +70,7 @@ export function WatchlistButton({
     // SSR placeholder
     if (variant === 'icon-only') {
       return (
-        <button
-          disabled
-          className={`p-2 rounded-full bg-white/10 text-white ${className}`}
-        >
+        <button disabled className={`p-2 rounded-full bg-white/10 text-white ${className}`}>
           <Bookmark className="w-5 h-5" />
         </button>
       );
@@ -95,9 +93,7 @@ export function WatchlistButton({
       <button
         onClick={handleToggle}
         className={`p-2 rounded-full transition-colors ${
-          inWatchlist
-            ? 'bg-white text-black'
-            : 'bg-white/10 text-white hover:bg-white/15'
+          inWatchlist ? 'bg-white text-black' : 'bg-white/10 text-white hover:bg-white/15'
         } ${className}`}
         title={inWatchlist ? 'Remove from watchlist' : 'Add to watchlist'}
       >
@@ -112,9 +108,7 @@ export function WatchlistButton({
       <button
         onClick={handleToggle}
         className={`px-3 py-1.5 flex items-center gap-1.5 text-xs font-medium rounded-full transition-colors ${
-          inWatchlist
-            ? 'bg-white text-black'
-            : 'bg-white/10 text-white hover:bg-white/15'
+          inWatchlist ? 'bg-white text-black' : 'bg-white/10 text-white hover:bg-white/15'
         } ${className}`}
         title={inWatchlist ? 'Remove from watchlist' : 'Add to watchlist'}
       >
@@ -129,9 +123,7 @@ export function WatchlistButton({
     <button
       onClick={handleToggle}
       className={`h-[26px] md:h-[30px] px-3 flex items-center gap-1.5 text-sm md:text-base font-normal rounded-full transition-colors ${
-        inWatchlist
-          ? 'bg-white text-black'
-          : 'bg-white/10 text-white hover:bg-white/15'
+        inWatchlist ? 'bg-white text-black' : 'bg-white/10 text-white hover:bg-white/15'
       } ${className}`}
       title={inWatchlist ? 'Remove from watchlist' : 'Add to watchlist'}
     >

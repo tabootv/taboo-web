@@ -37,4 +37,3 @@ export function SeriesDescription({
     </button>
   );
 }
-

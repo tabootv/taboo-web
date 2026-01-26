@@ -1,4 +1,4 @@
-'use client';;
+'use client';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -35,7 +35,9 @@ export default function ContentShortsPage() {
         current_page?: number;
         last_page?: number;
       }
-      const response = await apiClient.get<ShortsResponse>('/contents/shorts', { params: { page: pageNum } });
+      const response = await apiClient.get<ShortsResponse>('/contents/shorts', {
+        params: { page: pageNum },
+      });
       const newShorts = response.videos?.data || response.data || [];
 
       if (reset) {
@@ -150,11 +152,7 @@ export default function ContentShortsPage() {
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {shortsList.map((short) => (
-            <ShortCard
-              key={short.uuid}
-              short={short}
-              onDelete={() => handleDelete(short)}
-            />
+            <ShortCard key={short.uuid} short={short} onDelete={() => handleDelete(short)} />
           ))}
         </div>
       )}

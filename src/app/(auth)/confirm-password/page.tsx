@@ -68,7 +68,10 @@ export default function ConfirmPasswordPage() {
             )}
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-text-primary mb-2">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-text-primary mb-2"
+              >
                 Password
               </label>
               <div className="relative">
@@ -86,7 +89,13 @@ export default function ConfirmPasswordPage() {
             </div>
 
             <Button type="submit" disabled={isLoading} className="w-full btn-premium">
-              {isLoading ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Confirming...</> : 'Confirm'}
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" /> Confirming...
+                </>
+              ) : (
+                'Confirm'
+              )}
             </Button>
           </form>
         </div>

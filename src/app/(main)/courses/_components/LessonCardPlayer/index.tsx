@@ -35,7 +35,9 @@ export function LessonCardPlayer({
       <div
         className={cn(
           'group flex gap-3 p-2 rounded-xl transition-all',
-          isLocked ? 'opacity-50' : 'hover:ring-1 hover:ring-red-primary/50 hover:shadow-[0_0_15px_rgba(171,0,19,0.3)]'
+          isLocked
+            ? 'opacity-50'
+            : 'hover:ring-1 hover:ring-red-primary/50 hover:shadow-[0_0_15px_rgba(171,0,19,0.3)]'
         )}
       >
         <div className="relative w-[140px] h-[79px] shrink-0 rounded-lg overflow-hidden bg-surface">
@@ -100,9 +102,7 @@ export function LessonCardPlayer({
           </p>
 
           {video.channel?.name && (
-            <p className="text-xs text-white/40 mt-1">
-              {video.channel.name}
-            </p>
+            <p className="text-xs text-white/40 mt-1">{video.channel.name}</p>
           )}
         </div>
       </div>

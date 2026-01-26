@@ -12,9 +12,7 @@ export function CreatorVideoGrid({
   showAll = false,
 }: CreatorVideoGridProps) {
   if (videos.length === 0) {
-    return (
-      <div className="text-white/40 text-sm py-10 text-center">No videos found.</div>
-    );
+    return <div className="text-white/40 text-sm py-10 text-center">No videos found.</div>;
   }
 
   if (variant === 'rail') {
@@ -54,9 +52,7 @@ export function CreatorVideoGrid({
               )}
             </div>
 
-            <h4
-              className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-white mt-2.5 line-clamp-2"
-            >
+            <h4 className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-white mt-2.5 line-clamp-2">
               {video.title}
             </h4>
           </Link>
@@ -67,11 +63,7 @@ export function CreatorVideoGrid({
 
   return (
     <div
-      className={cn(
-        'grid gap-5',
-        'grid-cols-1 sm:grid-cols-2',
-        'lg:grid-cols-3 xl:grid-cols-4'
-      )}
+      className={cn('grid gap-5', 'grid-cols-1 sm:grid-cols-2', 'lg:grid-cols-3 xl:grid-cols-4')}
     >
       {(showAll ? videos : videos.slice(0, 18)).map((video) => (
         <a
@@ -106,9 +98,7 @@ export function CreatorVideoGrid({
               </div>
             )}
           </div>
-          <h4
-            className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold text-white mt-2.5 line-clamp-2"
-          >
+          <h4 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold text-white mt-2.5 line-clamp-2">
             {video.title}
           </h4>
         </a>

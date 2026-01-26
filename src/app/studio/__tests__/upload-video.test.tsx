@@ -31,9 +31,10 @@ test('video selection shows preview and remove revokes URL', async () => {
   });
 
   // click remove button (the X in the video preview)
-  const removeBtn = document.querySelector('button[aria-label]') || document.querySelector('button');
+  const removeBtn =
+    document.querySelector('button[aria-label]') || document.querySelector('button');
   if (removeBtn) userEvent.click(removeBtn as Element);
 
   expect(URL.revokeObjectURL).toHaveBeenCalled();
 });
-re
+re;

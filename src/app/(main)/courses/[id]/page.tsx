@@ -1,4 +1,4 @@
-'use client';;
+'use client';
 import { useCourseDetail } from '@/api/queries/courses.queries';
 import { CoursePageSkeleton } from '../_components/CoursePageSkeleton';
 import { LessonCard } from '../_components/LessonCard';
@@ -14,7 +14,10 @@ import { useRouter } from 'next/navigation';
 import { use, useRef, useState } from 'react';
 
 const VideoPlayer = dynamic(
-  () => import('@/features/video/components/video-player').then((mod) => ({ default: mod.VideoPlayer })),
+  () =>
+    import('@/features/video/components/video-player').then((mod) => ({
+      default: mod.VideoPlayer,
+    })),
   {
     loading: () => <VideoPlayerSkeleton />,
     ssr: false,

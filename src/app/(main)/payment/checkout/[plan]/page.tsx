@@ -1,4 +1,4 @@
-'use client';;
+'use client';
 import { useEffect, useState, use, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -85,7 +85,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ plan: strin
           return;
         }
         // Wait 2 seconds between polls
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, 2000));
       }
       // If still not subscribed after polling, show message
       toast.info('Payment received. Your subscription will be active shortly.');
@@ -200,7 +200,12 @@ export default function CheckoutPage({ params }: { params: Promise<{ plan: strin
               <div className="flex items-center justify-between mb-2">
                 <span className="text-text-secondary">Subtotal</span>
                 <span className="text-text-primary">
-                  ${plan.price} / {plan.interval === 'yearly' ? 'year' : plan.interval === 'lifetime' ? 'one-time' : 'month'}
+                  ${plan.price} /{' '}
+                  {plan.interval === 'yearly'
+                    ? 'year'
+                    : plan.interval === 'lifetime'
+                      ? 'one-time'
+                      : 'month'}
                 </span>
               </div>
               {plan.interval === 'yearly' && (
@@ -276,14 +281,12 @@ export default function CheckoutPage({ params }: { params: Promise<{ plan: strin
             </>
           ) : (
             /* No checkout available */
-            (<div className="text-center py-8">
+            <div className="text-center py-8">
               <p className="text-text-secondary mb-4">
                 Online checkout is not available for this plan.
               </p>
-              <p className="text-sm text-text-secondary">
-                Please contact support for assistance.
-              </p>
-            </div>)
+              <p className="text-sm text-text-secondary">Please contact support for assistance.</p>
+            </div>
           )}
         </div>
       </div>

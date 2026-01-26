@@ -28,4 +28,3 @@ export function FilterSelect({ label, value, options, onChange }: FilterSelectPr
     </div>
   );
 }
-

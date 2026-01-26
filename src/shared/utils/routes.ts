@@ -47,7 +47,9 @@ export function getSeriesPlayRoute(
     return `/series/${baseId}/play/${videoUuid}`;
   }
   const slug = slugify(title);
-  return slug ? `/series/${baseId}-${slug}/play/${videoUuid}` : `/series/${baseId}/play/${videoUuid}`;
+  return slug
+    ? `/series/${baseId}-${slug}/play/${videoUuid}`
+    : `/series/${baseId}/play/${videoUuid}`;
 }
 
 /**

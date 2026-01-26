@@ -1,18 +1,8 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-} from 'recharts';
-import {
-  ChartContainer,
-  ChartTooltip,
-  type ChartConfig,
-} from '@/components/ui/chart';
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts';
+import { ChartContainer, ChartTooltip, type ChartConfig } from '@/components/ui/chart';
 
 interface SeriesDataPoint {
   period: string;
@@ -148,9 +138,11 @@ export function FunnelAreaChart({ data, groupBy }: FunnelAreaChartProps) {
     }));
   }, [data, groupBy]);
 
-  const showLeftAxis = visibleMetrics.has('clicks') || visibleMetrics.has('signups') || visibleMetrics.has('customers');
+  const showLeftAxis =
+    visibleMetrics.has('clicks') ||
+    visibleMetrics.has('signups') ||
+    visibleMetrics.has('customers');
   const showRightAxis = visibleMetrics.has('revenue');
-
 
   if (!data || data.length === 0) {
     return (
@@ -175,16 +167,10 @@ export function FunnelAreaChart({ data, groupBy }: FunnelAreaChartProps) {
                   ? 'text-white shadow-sm'
                   : 'bg-white/5 text-white/40 hover:bg-white/10 hover:text-white/60'
               }`}
-              style={
-                isActive
-                  ? { backgroundColor: metric.color }
-                  : undefined
-              }
+              style={isActive ? { backgroundColor: metric.color } : undefined}
             >
               <div
-                className={`w-2 h-2 rounded-full transition-opacity ${
-                  isActive ? 'bg-white' : ''
-                }`}
+                className={`w-2 h-2 rounded-full transition-opacity ${isActive ? 'bg-white' : ''}`}
                 style={!isActive ? { backgroundColor: metric.color, opacity: 0.5 } : undefined}
               />
               {metric.label}
@@ -197,7 +183,12 @@ export function FunnelAreaChart({ data, groupBy }: FunnelAreaChartProps) {
       <ChartContainer config={chartConfig} className="h-[300px] w-full">
         <AreaChart
           data={chartData}
-          margin={{ top: 10, right: showRightAxis ? 60 : 10, left: showLeftAxis ? 10 : 0, bottom: 0 }}
+          margin={{
+            top: 10,
+            right: showRightAxis ? 60 : 10,
+            left: showLeftAxis ? 10 : 0,
+            bottom: 0,
+          }}
         >
           <defs>
             {METRICS.map((metric) => (
@@ -214,11 +205,7 @@ export function FunnelAreaChart({ data, groupBy }: FunnelAreaChartProps) {
               </linearGradient>
             ))}
           </defs>
-          <CartesianGrid
-            strokeDasharray="3 3"
-            stroke="rgba(255,255,255,0.05)"
-            vertical={false}
-          />
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
           <XAxis
             dataKey="formattedPeriod"
             tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 11 }}
@@ -262,7 +249,10 @@ export function FunnelAreaChart({ data, groupBy }: FunnelAreaChartProps) {
                       if (!metric || !visibleMetrics.has(metric.key)) return null;
 
                       return (
-                        <div key={entry.dataKey} className="flex items-center justify-between gap-4">
+                        <div
+                          key={entry.dataKey}
+                          className="flex items-center justify-between gap-4"
+                        >
                           <div className="flex items-center gap-2">
                             <div
                               className="w-2 h-2 rounded-full"

@@ -47,4 +47,3 @@ export function SeriesChannelInfo({
     </div>
   );
 }
-

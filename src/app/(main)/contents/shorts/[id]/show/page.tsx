@@ -1,4 +1,4 @@
-'use client';;
+'use client';
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -25,12 +25,15 @@ export default function ShowShortPage({ params }: { params: Promise<{ id: string
     async function fetchShort() {
       try {
         setIsLoading(true);
-        const response = await apiClient.get<{ video?: Video; data?: Video } | Video>(`/contents/shorts/${id}`);
-        const shortData = response && typeof response === 'object' && 'video' in response
-          ? response.video
-          : response && typeof response === 'object' && 'data' in response
-            ? response.data
-            : response as Video;
+        const response = await apiClient.get<{ video?: Video; data?: Video } | Video>(
+          `/contents/shorts/${id}`
+        );
+        const shortData =
+          response && typeof response === 'object' && 'video' in response
+            ? response.video
+            : response && typeof response === 'object' && 'data' in response
+              ? response.data
+              : (response as Video);
         setShort(shortData ?? null);
       } catch (err) {
         console.error('Failed to fetch short:', err);

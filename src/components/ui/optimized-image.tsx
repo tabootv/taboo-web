@@ -80,7 +80,13 @@ export function OptimizedImage({
   }
 
   return (
-    <div className={cn('relative overflow-hidden', aspectRatioClasses[aspectRatio], fill ? '' : className)}>
+    <div
+      className={cn(
+        'relative overflow-hidden',
+        aspectRatioClasses[aspectRatio],
+        fill ? '' : className
+      )}
+    >
       {/* Skeleton loader */}
       {showSkeleton && isLoading && mounted && (
         <div className="absolute inset-0 bg-surface animate-pulse">
@@ -115,11 +121,7 @@ interface ThumbnailImageProps extends Omit<OptimizedImageProps, 'aspectRatio'> {
   variant?: 'video' | 'shorts' | 'avatar' | 'banner';
 }
 
-export function ThumbnailImage({
-  variant = 'video',
-  className,
-  ...props
-}: ThumbnailImageProps) {
+export function ThumbnailImage({ variant = 'video', className, ...props }: ThumbnailImageProps) {
   const variantConfig = {
     video: {
       aspectRatio: 'video' as const,

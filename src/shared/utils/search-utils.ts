@@ -303,7 +303,6 @@ export function detectCountry(query: string): string | null {
 
   const normalized = query.trim().toLowerCase();
 
-
   if (ALT_COUNTRY_CODES[normalized]) {
     const code = ALT_COUNTRY_CODES[normalized];
     return getRegionNames().of(code) || normalized;

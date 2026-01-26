@@ -147,9 +147,7 @@ export function PlayerSettings({
                   playbackSpeed === speed && 'bg-white/5'
                 )}
               >
-                <span className="text-white text-sm">
-                  {speed === 1 ? 'Normal' : `${speed}x`}
-                </span>
+                <span className="text-white text-sm">{speed === 1 ? 'Normal' : `${speed}x`}</span>
                 {playbackSpeed === speed && <Check className="w-4 h-4 text-red-primary" />}
               </button>
             ))}

@@ -22,9 +22,7 @@ export function ContentGlobe({
     >
       <div className="text-white/60 text-center">
         <p>Globe visualization coming soon</p>
-        <p className="text-sm mt-2 text-white/40">
-          Install d3 package to enable interactive globe
-        </p>
+        <p className="text-sm mt-2 text-white/40">Install d3 package to enable interactive globe</p>
       </div>
     </div>
   );

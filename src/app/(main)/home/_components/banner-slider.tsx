@@ -92,7 +92,9 @@ export function BannerSlider({ initialBanners }: BannerSliderProps) {
     currentBanner.type === 'video' ? currentBanner.thumbnail : currentBanner.trailer_thumbnail;
 
   const href =
-    currentBanner.type === 'series' ? getSeriesRoute(currentBanner.id, currentBanner.title) : `/videos/${currentBanner.id}`;
+    currentBanner.type === 'series'
+      ? getSeriesRoute(currentBanner.id, currentBanner.title)
+      : `/videos/${currentBanner.id}`;
 
   return (
     <div className="relative w-full overflow-hidden group">

@@ -38,7 +38,9 @@ function VerifyEmailContent() {
         } catch (error: unknown) {
           setStatus('error');
           const err = error as { response?: { data?: { message?: string } } };
-          setMessage(err.response?.data?.message || 'Email verification failed. The link may have expired.');
+          setMessage(
+            err.response?.data?.message || 'Email verification failed. The link may have expired.'
+          );
         }
       } else {
         // No token - show pending verification state
@@ -121,12 +123,12 @@ function VerifyEmailContent() {
 
           {status === 'error' && (
             <div className="space-y-3">
-              <Button
-                onClick={handleResendVerification}
-                disabled={isResending}
-                className="w-full"
-              >
-                {isResending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
+              <Button onClick={handleResendVerification} disabled={isResending} className="w-full">
+                {isResending ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                )}
                 {isResending ? 'Sending...' : 'Resend Verification Email'}
               </Button>
               <Link href="/sign-in" className="block">
@@ -151,7 +153,11 @@ function VerifyEmailContent() {
                 variant="outline"
                 className="w-full"
               >
-                {isResending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
+                {isResending ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                )}
                 {isResending ? 'Sending...' : 'Resend Verification Email'}
               </Button>
               <p className="text-sm text-text-secondary">

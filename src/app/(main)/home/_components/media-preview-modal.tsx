@@ -15,7 +15,11 @@ interface MediaPreviewModalProps {
   triggerRef?: React.RefObject<HTMLElement>;
 }
 
-export function MediaPreviewModal({ video, onClose, triggerRef: _triggerRef }: MediaPreviewModalProps) {
+export function MediaPreviewModal({
+  video,
+  onClose,
+  triggerRef: _triggerRef,
+}: MediaPreviewModalProps) {
   const [mounted, setMounted] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
@@ -103,11 +107,14 @@ export function MediaPreviewModal({ video, onClose, triggerRef: _triggerRef }: M
     if (!video || !videoRef.current) return;
 
     const timer = setTimeout(() => {
-      videoRef.current?.play().then(() => {
-        setIsVideoPlaying(true);
-      }).catch(() => {
-        // Autoplay blocked
-      });
+      videoRef.current
+        ?.play()
+        .then(() => {
+          setIsVideoPlaying(true);
+        })
+        .catch(() => {
+          // Autoplay blocked
+        });
     }, 300);
 
     return () => clearTimeout(timer);
@@ -121,11 +128,14 @@ export function MediaPreviewModal({ video, onClose, triggerRef: _triggerRef }: M
     }, 200);
   }, [onClose]);
 
-  const handleBackdropClick = useCallback((e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      handleClose();
-    }
-  }, [handleClose]);
+  const handleBackdropClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (e.target === e.currentTarget) {
+        handleClose();
+      }
+    },
+    [handleClose]
+  );
 
   const handlePlay = useCallback(() => {
     if (video) {
@@ -157,9 +167,13 @@ export function MediaPreviewModal({ video, onClose, triggerRef: _triggerRef }: M
 
   if (!mounted || !video) return null;
 
-  const previewUrl = video.url_480 || video.url_720 || video.url_1080 || video.url_hls || video.hls_url || null;
+  const previewUrl =
+    video.url_480 || video.url_720 || video.url_1080 || video.url_hls || video.hls_url || null;
   const thumbnail = video.thumbnail_webp || video.thumbnail || video.card_thumbnail || null;
-  const isNew = !!(video.published_at && new Date(video.published_at).getTime() > Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const isNew = !!(
+    video.published_at &&
+    new Date(video.published_at).getTime() > Date.now() - 7 * 24 * 60 * 60 * 1000
+  );
   const description = video.description || '';
 
   const modalContent = (

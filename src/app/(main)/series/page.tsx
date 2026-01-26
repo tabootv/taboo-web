@@ -1,4 +1,4 @@
-'use client';;
+'use client';
 import { useSeriesList } from '@/api/queries/series.queries';
 import { SeriesCardSkeleton } from './_components/SeriesCardSkeleton';
 import { SeriesPremiumCard } from './_components/SeriesPremiumCard';

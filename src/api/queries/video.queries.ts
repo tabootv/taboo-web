@@ -153,9 +153,10 @@ export function useVideos(
       }
 
       if (filters?.sort_by) {
-        listFilters.sort_by = filters.sort_by === 'latest'
-          ? 'newest'
-          : (filters.sort_by as 'trending' | 'newest' | 'oldest' | 'longest' | 'shortest');
+        listFilters.sort_by =
+          filters.sort_by === 'latest'
+            ? 'newest'
+            : (filters.sort_by as 'trending' | 'newest' | 'oldest' | 'longest' | 'shortest');
       }
 
       const response = await videoClient.list(listFilters);

@@ -48,9 +48,7 @@ export default function WatchlistPage() {
             <Bookmark className="w-7 h-7 text-red-primary" />
             <h1 className="text-2xl md:text-3xl font-bold text-white">My Watchlist</h1>
           </div>
-          <p className="text-text-secondary mb-8">
-            Keep track of content you want to watch later.
-          </p>
+          <p className="text-text-secondary mb-8">Keep track of content you want to watch later.</p>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="space-y-2">
@@ -73,9 +71,7 @@ export default function WatchlistPage() {
           <Bookmark className="w-7 h-7 text-red-primary" />
           <h1 className="text-2xl md:text-3xl font-bold text-white">My Watchlist</h1>
         </div>
-        <p className="text-text-secondary mb-6">
-          Keep track of content you want to watch later.
-        </p>
+        <p className="text-text-secondary mb-6">Keep track of content you want to watch later.</p>
 
         {/* Filter Tabs */}
         <div className="flex items-center gap-1 overflow-x-auto hide-scrollbar border-b border-white/5 mb-8">
@@ -112,11 +108,7 @@ export default function WatchlistPage() {
         {filteredWatchlist.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {filteredWatchlist.map((item) => (
-              <WatchlistCard
-                key={`${item.type}-${item.id}`}
-                item={item}
-                onRemove={handleRemove}
-              />
+              <WatchlistCard key={`${item.type}-${item.id}`} item={item} onRemove={handleRemove} />
             ))}
           </div>
         ) : (
@@ -125,9 +117,7 @@ export default function WatchlistPage() {
               <Bookmark className="w-8 h-8 text-red-primary" />
             </div>
             <h3 className="text-xl font-semibold text-white mb-2">
-              {activeFilter === 'all'
-                ? 'Your watchlist is empty'
-                : `No ${activeFilter}s saved`}
+              {activeFilter === 'all' ? 'Your watchlist is empty' : `No ${activeFilter}s saved`}
             </h3>
             <p className="text-text-secondary max-w-md mb-6">
               {activeFilter === 'all'
@@ -175,7 +165,9 @@ function WatchlistCard({
           )}
           {item.duration && (
             <span className="absolute bottom-2 right-2 px-1.5 py-0.5 bg-black/80 text-white text-xs rounded font-medium">
-              {formatDuration(typeof item.duration === 'string' ? parseInt(item.duration, 10) : item.duration)}
+              {formatDuration(
+                typeof item.duration === 'string' ? parseInt(item.duration, 10) : item.duration
+              )}
             </span>
           )}
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30">

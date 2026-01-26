@@ -72,9 +72,7 @@ export function SearchResults({
   if (!isLoading && !hasResults) {
     return (
       <div className="text-center py-8">
-        <p className="text-text-secondary mb-4">
-          No results found for &quot;{query}&quot;
-        </p>
+        <p className="text-text-secondary mb-4">No results found for &quot;{query}&quot;</p>
         <button
           onClick={onViewAll}
           className="px-4 py-2 bg-red-primary hover:bg-red-600 text-white rounded-lg transition-colors"
@@ -173,4 +171,3 @@ export function SearchResults({
 
   return null;
 }
-

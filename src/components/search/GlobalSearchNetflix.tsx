@@ -1,19 +1,8 @@
 'use client';
 
-import {
-  useState,
-  useRef,
-  useEffect,
-  useCallback,
-  forwardRef,
-  useImperativeHandle,
-} from 'react';
+import { useState, useRef, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  Search,
-  X,
-  Loader2,
-} from 'lucide-react';
+import { Search, X, Loader2 } from 'lucide-react';
 import { cn, getCreatorRoute, getSeriesRoute } from '@/shared/utils/formatting';
 import { useDebounce } from '@/hooks';
 import { searchClient as searchApi } from '@/api/client/search.client';

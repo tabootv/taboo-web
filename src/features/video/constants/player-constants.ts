@@ -25,4 +25,3 @@ export const PLAYER_CONFIG = {
     THROTTLE_MS: 150,
   },
 } as const;
-

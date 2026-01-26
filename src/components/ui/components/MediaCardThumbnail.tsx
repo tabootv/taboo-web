@@ -58,7 +58,7 @@ export function MediaCardThumbnail({
     <div className={`relative ${aspectRatio} overflow-hidden bg-surface`}>
       {/* Image */}
       <Image
-        src={imageError ? '/placeholder-video.jpg' : (thumbnailWebp || thumbnail)}
+        src={imageError ? '/placeholder-video.jpg' : thumbnailWebp || thumbnail}
         alt={title}
         fill
         className="object-cover transition-transform duration-300 group-hover:scale-105"
@@ -142,4 +142,3 @@ export function MediaCardThumbnail({
     </div>
   );
 }
-

@@ -43,11 +43,10 @@ export function useMixedSearch(query: string): UseMixedSearchResult {
 
   const filteredVideos = useMemo(() => {
     if (!debouncedQuery || debouncedQuery.length < 3) return [];
-    return searchVideos
-      .filter((v) => {
-        const isShort = v.short || v.is_short || v.type === 'short';
-        return !isShort;
-      });
+    return searchVideos.filter((v) => {
+      const isShort = v.short || v.is_short || v.type === 'short';
+      return !isShort;
+    });
   }, [searchVideos, debouncedQuery]);
 
   const allCreatorsRef = useRef(allCreators);

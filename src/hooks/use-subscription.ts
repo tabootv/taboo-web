@@ -120,7 +120,7 @@ export function usePlans() {
     try {
       const plansData = await subscriptionsClient.getPlans();
       // Filter to only active plans
-      const activePlans = plansData.filter(p => p.is_active !== false);
+      const activePlans = plansData.filter((p) => p.is_active !== false);
       setPlans(activePlans);
     } catch (err) {
       console.error('Failed to fetch plans:', err);
@@ -137,9 +137,12 @@ export function usePlans() {
   /**
    * Get a specific plan by slug or interval
    */
-  const getPlan = useCallback((identifier: string | 'monthly' | 'yearly' | 'lifetime') => {
-    return plans.find(p => p.slug === identifier || p.interval === identifier);
-  }, [plans]);
+  const getPlan = useCallback(
+    (identifier: string | 'monthly' | 'yearly' | 'lifetime') => {
+      return plans.find((p) => p.slug === identifier || p.interval === identifier);
+    },
+    [plans]
+  );
 
   /**
    * Get Whop checkout URL for a plan

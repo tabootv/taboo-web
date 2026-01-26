@@ -143,23 +143,14 @@ export function PlaylistsSection({ instanceId, onAllLoaded }: PlaylistsSectionPr
         ))}
 
         {loadingPlaylists && (
-          <div className="text-center py-6 text-text-secondary">
-            Loading more playlists...
-          </div>
+          <div className="text-center py-6 text-text-secondary">Loading more playlists...</div>
         )}
 
-        <div
-          id={`playlists-end-${instanceId}`}
-          className="h-10 opacity-0 pointer-events-none"
-        />
+        <div id={`playlists-end-${instanceId}`} className="h-10 opacity-0 pointer-events-none" />
       </div>
 
       {/* Preview Modal - rendered via portal */}
-      <MediaPreviewModal
-        video={previewVideo}
-        onClose={handleClosePreview}
-      />
+      <MediaPreviewModal video={previewVideo} onClose={handleClosePreview} />
     </>
   );
 }
-

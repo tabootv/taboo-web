@@ -14,8 +14,10 @@ export function highlightMatch(
   query: string,
   options: HighlightOptions = {}
 ): React.ReactNode {
-  const { className = 'bg-red-primary/30 text-text-primary rounded px-0.5', caseSensitive = false } =
-    options;
+  const {
+    className = 'bg-red-primary/30 text-text-primary rounded px-0.5',
+    caseSensitive = false,
+  } = options;
 
   if (!query.trim()) {
     return text;
@@ -33,9 +35,7 @@ export function highlightMatch(
   return (
     <>
       {parts.map((part, index) => {
-        const isMatch = caseSensitive
-          ? part === query
-          : part.toLowerCase() === query.toLowerCase();
+        const isMatch = caseSensitive ? part === query : part.toLowerCase() === query.toLowerCase();
 
         if (isMatch) {
           return (

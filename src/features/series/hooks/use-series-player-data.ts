@@ -1,4 +1,4 @@
-'use client';;
+'use client';
 import { useMe } from '@/api/queries/auth.queries';
 import { useSeriesDetail, useSeriesPlay } from '@/api/queries/series.queries';
 
@@ -30,4 +30,3 @@ export function useSeriesPlayerData(seriesId: string, videoUuid: string) {
     seriesData,
   };
 }
-

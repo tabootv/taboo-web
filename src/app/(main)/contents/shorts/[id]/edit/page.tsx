@@ -1,4 +1,4 @@
-'use client';;
+'use client';
 import { useState, useRef, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -34,8 +34,16 @@ export default function EditShortPage({ params }: { params: Promise<{ id: string
     async function fetchShort() {
       try {
         setIsLoading(true);
-        const response = await apiClient.get<{ video?: Video; data?: Video } | Video>(`/contents/shorts/${id}`);
-        const shortData = (response && typeof response === 'object' && 'video' in response ? response.video : response && typeof response === 'object' && 'data' in response ? response.data : response) as Video;
+        const response = await apiClient.get<{ video?: Video; data?: Video } | Video>(
+          `/contents/shorts/${id}`
+        );
+        const shortData = (
+          response && typeof response === 'object' && 'video' in response
+            ? response.video
+            : response && typeof response === 'object' && 'data' in response
+              ? response.data
+              : response
+        ) as Video;
         setShort(shortData);
         setFormData({
           title: shortData.title || '',
@@ -150,9 +158,7 @@ export default function EditShortPage({ params }: { params: Promise<{ id: string
           <div className="space-y-6">
             {/* Thumbnail */}
             <div>
-              <label className="block text-sm font-medium text-text-primary mb-2">
-                Thumbnail
-              </label>
+              <label className="block text-sm font-medium text-text-primary mb-2">Thumbnail</label>
               {thumbnailPreview ? (
                 <div className="relative w-32 aspect-[9/16] rounded-lg overflow-hidden">
                   <Image src={thumbnailPreview} alt="Thumbnail" fill className="object-cover" />

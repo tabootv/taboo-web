@@ -6,4 +6,3 @@ export const filterCategories: Array<{ id: WatchlistItemType | 'all'; name: stri
   { id: 'series', name: 'Series' },
   { id: 'course', name: 'Courses' },
 ];
-

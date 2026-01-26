@@ -50,11 +50,14 @@ export function useShortVideoPreview(video: Video) {
     hoverTimeoutRef.current = setTimeout(() => {
       if (videoRef.current) {
         videoRef.current.currentTime = 0;
-        videoRef.current.play().then(() => {
-          setIsVideoPlaying(true);
-        }).catch(() => {
-          // Video play failed
-        });
+        videoRef.current
+          .play()
+          .then(() => {
+            setIsVideoPlaying(true);
+          })
+          .catch(() => {
+            // Video play failed
+          });
       }
     }, HOVER_DELAY);
   }, [initialPreviewUrl, fetchedPreviewUrl, isFetchingUrl, video.uuid]);
@@ -105,11 +108,14 @@ export function useShortVideoPreview(video: Video) {
       setTimeout(() => {
         if (videoRef.current) {
           videoRef.current.currentTime = 0;
-          videoRef.current.play().then(() => {
-            setIsVideoPlaying(true);
-          }).catch(() => {
-            // Video play failed
-          });
+          videoRef.current
+            .play()
+            .then(() => {
+              setIsVideoPlaying(true);
+            })
+            .catch(() => {
+              // Video play failed
+            });
         }
       }, VIDEO_PREVIEW_DELAY);
     }
@@ -133,4 +139,3 @@ export function useShortVideoPreview(video: Video) {
     toggleMute,
   };
 }
-

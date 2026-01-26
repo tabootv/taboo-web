@@ -4,14 +4,9 @@ import { cn } from '@/shared/utils/formatting';
 import Image from 'next/image';
 import type { CreatorShortsGridProps } from './types';
 
-export function CreatorShortsGrid({
-  shorts,
-  variant = 'grid',
-}: CreatorShortsGridProps) {
+export function CreatorShortsGrid({ shorts, variant = 'grid' }: CreatorShortsGridProps) {
   if (shorts.length === 0) {
-    return (
-      <div className="text-white/40 text-sm py-10 text-center">No shorts found.</div>
-    );
+    return <div className="text-white/40 text-sm py-10 text-center">No shorts found.</div>;
   }
 
   if (variant === 'rail') {

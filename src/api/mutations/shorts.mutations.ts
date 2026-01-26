@@ -33,9 +33,7 @@ export function useToggleShortLike() {
       await queryClient.cancelQueries({ queryKey: queryKeys.shorts.lists() });
 
       // Snapshot previous detail value
-      const previousDetail = queryClient.getQueryData<ShortVideo>(
-        queryKeys.shorts.detail(uuid)
-      );
+      const previousDetail = queryClient.getQueryData<ShortVideo>(queryKeys.shorts.detail(uuid));
 
       // Snapshot previous list values (all infinite queries matching shorts.lists())
       const previousLists = queryClient.getQueriesData<InfiniteShortsData>({

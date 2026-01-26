@@ -58,18 +58,27 @@ function StatCard({ title, value, icon, subtitle, tooltip, highlight }: StatCard
                 </div>
               )}
             </div>
-            <p className={`text-xl font-bold leading-tight ${highlight ? 'text-[#ab0013]' : 'text-white'}`}>{value}</p>
+            <p
+              className={`text-xl font-bold leading-tight ${highlight ? 'text-[#ab0013]' : 'text-white'}`}
+            >
+              {value}
+            </p>
             {subtitle && <p className="text-[11px] text-white/30 mt-1 truncate">{subtitle}</p>}
           </div>
-          <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${highlight ? 'bg-[#ab0013]/20' : 'bg-white/5'}`}>
-            <div className={`${highlight ? 'text-[#ab0013]' : 'text-white/40'} [&>svg]:w-4 [&>svg]:h-4`}>{icon}</div>
+          <div
+            className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${highlight ? 'bg-[#ab0013]/20' : 'bg-white/5'}`}
+          >
+            <div
+              className={`${highlight ? 'text-[#ab0013]' : 'text-white/40'} [&>svg]:w-4 [&>svg]:h-4`}
+            >
+              {icon}
+            </div>
           </div>
         </div>
       </CardContent>
     </Card>
   );
 }
-
 
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('en-US', {
@@ -123,7 +132,6 @@ function getStatusColor(status: string): string {
   }
 }
 
-
 export default function EarningsPage() {
   const [dateRange, setDateRange] = useState<DateRange>('30d');
   const [groupBy, setGroupBy] = useState<GroupBy>('day');
@@ -164,7 +172,9 @@ export default function EarningsPage() {
             <AlertCircle className="w-8 h-8 text-destructive" />
           </div>
           <p className="text-muted-foreground mb-2">Unable to load earnings data</p>
-          <p className="text-muted-foreground/60 text-sm mb-4">{error?.message || 'An unexpected error occurred'}</p>
+          <p className="text-muted-foreground/60 text-sm mb-4">
+            {error?.message || 'An unexpected error occurred'}
+          </p>
           <Button onClick={() => refetch()} variant="outline">
             <RefreshCw className="w-4 h-4 mr-2" />
             Try Again
@@ -174,7 +184,8 @@ export default function EarningsPage() {
     );
   }
 
-  const periodLabel = dateRangeOptions.find((o) => o.value === dateRange)?.label || 'Selected period';
+  const periodLabel =
+    dateRangeOptions.find((o) => o.value === dateRange)?.label || 'Selected period';
 
   return (
     <div className="p-6 max-w-7xl mx-auto relative">
@@ -230,7 +241,6 @@ export default function EarningsPage() {
           </Button>
         </div>
       </div>
-
 
       {/* Balance Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
@@ -338,19 +348,27 @@ export default function EarningsPage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-xs text-white/40 mb-1">Total Clicks</p>
-                <p className="text-lg font-bold text-white">{formatNumber(data?.allTimeStats?.clicks || 0)}</p>
+                <p className="text-lg font-bold text-white">
+                  {formatNumber(data?.allTimeStats?.clicks || 0)}
+                </p>
               </div>
               <div>
                 <p className="text-xs text-white/40 mb-1">Total Signups</p>
-                <p className="text-lg font-bold text-white">{formatNumber(data?.allTimeStats?.signups || 0)}</p>
+                <p className="text-lg font-bold text-white">
+                  {formatNumber(data?.allTimeStats?.signups || 0)}
+                </p>
               </div>
               <div>
                 <p className="text-xs text-white/40 mb-1">Active Customers</p>
-                <p className="text-lg font-bold text-[#ab0013]">{formatNumber(data?.allTimeStats?.activeCustomers || 0)}</p>
+                <p className="text-lg font-bold text-[#ab0013]">
+                  {formatNumber(data?.allTimeStats?.activeCustomers || 0)}
+                </p>
               </div>
               <div>
                 <p className="text-xs text-white/40 mb-1">Total Earnings</p>
-                <p className="text-lg font-bold text-[#ab0013]">{formatCurrency(data?.allTimeStats?.earnings || 0)}</p>
+                <p className="text-lg font-bold text-[#ab0013]">
+                  {formatCurrency(data?.allTimeStats?.earnings || 0)}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -367,24 +385,32 @@ export default function EarningsPage() {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs text-white/40">Click to Signup</span>
-                  <span className="text-sm font-medium text-white">{data?.conversionRates?.clickToSignup || 0}%</span>
+                  <span className="text-sm font-medium text-white">
+                    {data?.conversionRates?.clickToSignup || 0}%
+                  </span>
                 </div>
                 <div className="h-2 rounded-full bg-white/5 overflow-hidden">
                   <div
                     className="h-full rounded-full bg-[#ab0013]/60"
-                    style={{ width: `${Math.min(data?.conversionRates?.clickToSignup || 0, 100)}%` }}
+                    style={{
+                      width: `${Math.min(data?.conversionRates?.clickToSignup || 0, 100)}%`,
+                    }}
                   />
                 </div>
               </div>
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs text-white/40">Signup to Customer</span>
-                  <span className="text-sm font-medium text-white">{data?.conversionRates?.signupToCustomer || 0}%</span>
+                  <span className="text-sm font-medium text-white">
+                    {data?.conversionRates?.signupToCustomer || 0}%
+                  </span>
                 </div>
                 <div className="h-2 rounded-full bg-white/5 overflow-hidden">
                   <div
                     className="h-full rounded-full bg-[#ab0013]"
-                    style={{ width: `${Math.min(data?.conversionRates?.signupToCustomer || 0, 100)}%` }}
+                    style={{
+                      width: `${Math.min(data?.conversionRates?.signupToCustomer || 0, 100)}%`,
+                    }}
                   />
                 </div>
               </div>
@@ -408,10 +434,7 @@ export default function EarningsPage() {
               <p className="text-[10px] text-white/30">Track your funnel from clicks to revenue</p>
             </div>
           </div>
-          <FunnelAreaChart
-            data={data?.series || []}
-            groupBy={data?.groupBy ?? 'day'}
-          />
+          <FunnelAreaChart data={data?.series || []} groupBy={data?.groupBy ?? 'day'} />
         </CardContent>
       </Card>
 
@@ -428,28 +451,54 @@ export default function EarningsPage() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-white/5">
-                    <th className="text-left text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-2">Customer</th>
-                    <th className="text-right text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-2">Sale</th>
-                    <th className="text-right text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-2">Commission</th>
-                    <th className="text-right text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-2">Status</th>
+                    <th className="text-left text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-2">
+                      Customer
+                    </th>
+                    <th className="text-right text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-2">
+                      Sale
+                    </th>
+                    <th className="text-right text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-2">
+                      Commission
+                    </th>
+                    <th className="text-right text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-2">
+                      Status
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {data?.recentCommissions && data.recentCommissions.length > 0 ? (
                     data.recentCommissions.slice(0, 5).map((commission) => (
-                      <tr key={commission.id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors">
+                      <tr
+                        key={commission.id}
+                        className="border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors"
+                      >
                         <td className="px-4 py-2.5">
-                          <div className="text-xs text-white truncate max-w-[120px]">{commission.referralEmail}</div>
-                          <div className="text-[10px] text-white/30">{getPlanLabel(commission.planId)} · {formatDateTime(commission.createdAt)}</div>
+                          <div className="text-xs text-white truncate max-w-[120px]">
+                            {commission.referralEmail}
+                          </div>
+                          <div className="text-[10px] text-white/30">
+                            {getPlanLabel(commission.planId)} ·{' '}
+                            {formatDateTime(commission.createdAt)}
+                          </div>
                         </td>
-                        <td className="px-4 py-2.5 text-xs text-white/50 text-right">{formatCurrency(commission.saleAmount)}</td>
-                        <td className="px-4 py-2.5 text-xs text-[#ab0013] text-right font-medium">{formatCurrency(commission.commissionAmount)}</td>
-                        <td className={`px-4 py-2.5 text-[10px] text-right capitalize ${getStatusColor(commission.status)}`}>{commission.status}</td>
+                        <td className="px-4 py-2.5 text-xs text-white/50 text-right">
+                          {formatCurrency(commission.saleAmount)}
+                        </td>
+                        <td className="px-4 py-2.5 text-xs text-[#ab0013] text-right font-medium">
+                          {formatCurrency(commission.commissionAmount)}
+                        </td>
+                        <td
+                          className={`px-4 py-2.5 text-[10px] text-right capitalize ${getStatusColor(commission.status)}`}
+                        >
+                          {commission.status}
+                        </td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={4} className="px-4 py-6 text-center text-[10px] text-white/30">No recent commissions</td>
+                      <td colSpan={4} className="px-4 py-6 text-center text-[10px] text-white/30">
+                        No recent commissions
+                      </td>
                     </tr>
                   )}
                 </tbody>
@@ -469,28 +518,55 @@ export default function EarningsPage() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-white/5">
-                    <th className="text-left text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-2">Period</th>
-                    <th className="text-right text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-2">Amount</th>
-                    <th className="text-right text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-2">Method</th>
-                    <th className="text-right text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-2">Status</th>
+                    <th className="text-left text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-2">
+                      Period
+                    </th>
+                    <th className="text-right text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-2">
+                      Amount
+                    </th>
+                    <th className="text-right text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-2">
+                      Method
+                    </th>
+                    <th className="text-right text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-2">
+                      Status
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {data?.payoutHistory && data.payoutHistory.length > 0 ? (
                     data.payoutHistory.slice(0, 5).map((payout) => (
-                      <tr key={payout.id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors">
+                      <tr
+                        key={payout.id}
+                        className="border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors"
+                      >
                         <td className="px-4 py-2.5">
-                          <div className="text-xs text-white">{formatDate(payout.periodStart)} - {formatDate(payout.periodEnd)}</div>
-                          {payout.paidAt && <div className="text-[10px] text-white/30">Paid {formatDate(payout.paidAt)}</div>}
+                          <div className="text-xs text-white">
+                            {formatDate(payout.periodStart)} - {formatDate(payout.periodEnd)}
+                          </div>
+                          {payout.paidAt && (
+                            <div className="text-[10px] text-white/30">
+                              Paid {formatDate(payout.paidAt)}
+                            </div>
+                          )}
                         </td>
-                        <td className="px-4 py-2.5 text-xs text-white font-medium text-right">{formatCurrency(payout.amount)}</td>
-                        <td className="px-4 py-2.5 text-xs text-white/50 text-right capitalize">{payout.payoutMethod}</td>
-                        <td className={`px-4 py-2.5 text-[10px] text-right capitalize ${getStatusColor(payout.status)}`}>{payout.status}</td>
+                        <td className="px-4 py-2.5 text-xs text-white font-medium text-right">
+                          {formatCurrency(payout.amount)}
+                        </td>
+                        <td className="px-4 py-2.5 text-xs text-white/50 text-right capitalize">
+                          {payout.payoutMethod}
+                        </td>
+                        <td
+                          className={`px-4 py-2.5 text-[10px] text-right capitalize ${getStatusColor(payout.status)}`}
+                        >
+                          {payout.status}
+                        </td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={4} className="px-4 py-6 text-center text-[10px] text-white/30">No payout history</td>
+                      <td colSpan={4} className="px-4 py-6 text-center text-[10px] text-white/30">
+                        No payout history
+                      </td>
                     </tr>
                   )}
                 </tbody>
@@ -511,10 +587,18 @@ export default function EarningsPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-white/5">
-                  <th className="text-left text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-2">Period</th>
-                  <th className="text-right text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-2">Sales</th>
-                  <th className="text-right text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-2">Revenue</th>
-                  <th className="text-right text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-2">Earnings</th>
+                  <th className="text-left text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-2">
+                    Period
+                  </th>
+                  <th className="text-right text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-2">
+                    Sales
+                  </th>
+                  <th className="text-right text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-2">
+                    Revenue
+                  </th>
+                  <th className="text-right text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-2">
+                    Earnings
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -524,22 +608,34 @@ export default function EarningsPage() {
                     const actualGroupBy = data.groupBy || 'day';
                     const formattedDate = date.toLocaleDateString('en-US', {
                       month: 'short',
-                      day: actualGroupBy === 'day' || actualGroupBy === 'week' ? 'numeric' : undefined,
+                      day:
+                        actualGroupBy === 'day' || actualGroupBy === 'week' ? 'numeric' : undefined,
                       year: actualGroupBy === 'month' ? 'numeric' : undefined,
                     });
 
                     return (
-                      <tr key={index} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors">
+                      <tr
+                        key={index}
+                        className="border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors"
+                      >
                         <td className="px-4 py-2.5 text-xs text-white">{formattedDate}</td>
-                        <td className="px-4 py-2.5 text-xs text-white/50 text-right">{row.count}</td>
-                        <td className="px-4 py-2.5 text-xs text-white/50 text-right">{formatCurrency(row.revenue)}</td>
-                        <td className="px-4 py-2.5 text-xs text-[#ab0013] text-right font-medium">{formatCurrency(row.earnings)}</td>
+                        <td className="px-4 py-2.5 text-xs text-white/50 text-right">
+                          {row.count}
+                        </td>
+                        <td className="px-4 py-2.5 text-xs text-white/50 text-right">
+                          {formatCurrency(row.revenue)}
+                        </td>
+                        <td className="px-4 py-2.5 text-xs text-[#ab0013] text-right font-medium">
+                          {formatCurrency(row.earnings)}
+                        </td>
                       </tr>
                     );
                   })
                 ) : (
                   <tr>
-                    <td colSpan={4} className="px-4 py-6 text-center text-[10px] text-white/30">No earnings data for this period</td>
+                    <td colSpan={4} className="px-4 py-6 text-center text-[10px] text-white/30">
+                      No earnings data for this period
+                    </td>
                   </tr>
                 )}
               </tbody>

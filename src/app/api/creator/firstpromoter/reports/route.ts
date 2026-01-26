@@ -192,7 +192,7 @@ function getMockReportData(
   const start = new Date(startDate);
   const end = new Date(endDate);
 
-  let current = new Date(start);
+  const current = new Date(start);
   while (current <= end) {
     data.push({
       date: current.toISOString().split('T')[0] ?? '',

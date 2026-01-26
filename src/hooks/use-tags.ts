@@ -9,4 +9,3 @@ import type { Tag } from '@/types';
 export function useNormalizedTags(tagsInput: RawTagsInput): Tag[] {
   return useMemo(() => normalizeTags(tagsInput), [tagsInput]);
 }
-

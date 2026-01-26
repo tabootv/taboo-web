@@ -15,16 +15,11 @@ function PlayIcon() {
   );
 }
 
-export function CreatorFeaturedVideo({
-  video,
-}: CreatorFeaturedVideoProps) {
-
+export function CreatorFeaturedVideo({ video }: CreatorFeaturedVideoProps) {
   return (
     <section className="bg-black py-9">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
-        <h2
-          className="text-2xl! sm:text-3xl! md:text-4xl! lg:text-5xl! font-bold leading-tight tracking-tight text-white mb-4 sm:mb-6"
-        >
+        <h2 className="text-2xl! sm:text-3xl! md:text-4xl! lg:text-5xl! font-bold leading-tight tracking-tight text-white mb-4 sm:mb-6">
           Latest Release
         </h2>
         <Link
@@ -73,9 +68,7 @@ export function CreatorFeaturedVideo({
           </div>
 
           <div className="pt-4">
-            <h3
-              className="text-white font-semibold mb-1.5 text-base! sm:text-lg! sm:mb-2"
-            >
+            <h3 className="text-white font-semibold mb-1.5 text-base! sm:text-lg! sm:mb-2">
               {video.title}
             </h3>
 

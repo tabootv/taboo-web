@@ -1,4 +1,4 @@
-'use client';;
+'use client';
 import {
   useDeleteAllNotifications,
   useMarkAllNotificationsRead,
@@ -125,10 +125,11 @@ export default function NotificationsPage() {
         <div className="flex gap-2 mb-4">
           <button
             onClick={() => setFilterTab('all')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filterTab === 'all'
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              filterTab === 'all'
                 ? 'bg-red-primary text-white'
                 : 'bg-surface text-text-secondary hover:bg-hover'
-              }`}
+            }`}
           >
             Todas
             {notificationsList.length > 0 && (
@@ -137,10 +138,11 @@ export default function NotificationsPage() {
           </button>
           <button
             onClick={() => setFilterTab('unread')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filterTab === 'unread'
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              filterTab === 'unread'
                 ? 'bg-red-primary text-white'
                 : 'bg-surface text-text-secondary hover:bg-hover'
-              }`}
+            }`}
           >
             Não Lidas
             {unreadNotifications.length > 0 && (
@@ -153,10 +155,11 @@ export default function NotificationsPage() {
           </button>
           <button
             onClick={() => setFilterTab('read')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filterTab === 'read'
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              filterTab === 'read'
                 ? 'bg-red-primary text-white'
                 : 'bg-surface text-text-secondary hover:bg-hover'
-              }`}
+            }`}
           >
             Lidas
             {readNotifications.length > 0 && (
@@ -243,7 +246,7 @@ function NotificationCard({
     dataString = notification.data;
     try {
       dataObj = JSON.parse(notification.data);
-    } catch { }
+    } catch {}
   } else if (typeof notification.data === 'object' && notification.data !== null) {
     dataObj = notification.data as Record<string, string | number | boolean | undefined>;
   }
@@ -301,10 +304,7 @@ function NotificationCard({
     }
 
     // Video notifications
-    if (
-      type === 'video' ||
-      type === String.raw`App\Notifications\NewVideoNotification`
-    ) {
+    if (type === 'video' || type === String.raw`App\Notifications\NewVideoNotification`) {
       if (dataObj.video_uuid) return `/videos/${dataObj.video_uuid}`;
       if (modelUuid) return `/videos/${modelUuid}`;
     }
@@ -358,8 +358,9 @@ function NotificationCard({
 
       case 'like':
       case String.raw`App\Notifications\VideoLikedNotification`:
-        return `${dataObj.user_name || 'Someone'} liked your video${dataObj.video_title ? `: ${dataObj.video_title}` : ''
-          }`;
+        return `${dataObj.user_name || 'Someone'} liked your video${
+          dataObj.video_title ? `: ${dataObj.video_title}` : ''
+        }`;
 
       case 'follow':
       case String.raw`App\Notifications\NewFollowerNotification`:
@@ -375,8 +376,9 @@ function NotificationCard({
 
   return (
     <div
-      className={`flex items-start gap-4 p-4 transition-colors hover:bg-hover group ${isUnread ? 'bg-red-primary/5' : ''
-        }`}
+      className={`flex items-start gap-4 p-4 transition-colors hover:bg-hover group ${
+        isUnread ? 'bg-red-primary/5' : ''
+      }`}
     >
       <div className="shrink-0">
         {image ? (
@@ -393,8 +395,9 @@ function NotificationCard({
       <div className="flex-1 min-w-0">
         <Link href={getNotificationLink()} className="block">
           <p
-            className={`text-sm ${isUnread ? 'text-text-primary font-medium' : 'text-text-secondary'
-              }`}
+            className={`text-sm ${
+              isUnread ? 'text-text-primary font-medium' : 'text-text-secondary'
+            }`}
           >
             {title}
           </p>

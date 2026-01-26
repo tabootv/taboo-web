@@ -83,9 +83,7 @@ export function SingleComment({
               />
             )}
           </div>
-          <span className="text-[12px] md:text-[13px] text-[#807E81]">
-            {comment.created_at}
-          </span>
+          <span className="text-[12px] md:text-[13px] text-[#807E81]">{comment.created_at}</span>
         </div>
 
         <button
@@ -149,12 +147,7 @@ export function SingleComment({
             </svg>
           )}
           {replies.map((reply) => (
-            <SingleComment
-              key={reply.uuid}
-              comment={reply}
-              videoUuid={videoUuid}
-              isReply={true}
-            />
+            <SingleComment key={reply.uuid} comment={reply} videoUuid={videoUuid} isReply={true} />
           ))}
         </div>
       )}

@@ -14,4 +14,3 @@ export function FeedPost({ post, currentUserId, onDelete }: FeedPostProps) {
     </div>
   );
 }
-

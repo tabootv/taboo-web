@@ -44,7 +44,9 @@ export default function EditEmailPage() {
       router.push('/profile');
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
-      setError(err.response?.data?.message || 'Failed to update email. Please check your password.');
+      setError(
+        err.response?.data?.message || 'Failed to update email. Please check your password.'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -123,12 +125,7 @@ export default function EditEmailPage() {
 
         {/* Actions */}
         <div className="flex gap-3 pt-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => router.back()}
-            className="flex-1"
-          >
+          <Button type="button" variant="outline" onClick={() => router.back()} className="flex-1">
             Cancel
           </Button>
           <Button type="submit" disabled={isLoading} className="flex-1 btn-premium">

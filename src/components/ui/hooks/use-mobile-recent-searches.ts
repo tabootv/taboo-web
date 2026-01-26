@@ -3,7 +3,10 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { MAX_MOBILE_RECENT_SEARCHES, MOBILE_RECENT_SEARCHES_KEY } from '@/components/search/constants/search-constants';
+import {
+  MAX_MOBILE_RECENT_SEARCHES,
+  MOBILE_RECENT_SEARCHES_KEY,
+} from '@/components/search/constants/search-constants';
 
 interface RecentSearch {
   query: string;
@@ -24,29 +27,37 @@ export function useMobileRecentSearches() {
     }
   }, []);
 
-  const saveRecentSearch = useCallback((query: string) => {
-    if (typeof window === 'undefined' || !query.trim()) return;
-    try {
-      const recent = recentSearches.filter((s) => s.query !== query);
-      const updated = [{ query, timestamp: Date.now() }, ...recent].slice(0, MAX_MOBILE_RECENT_SEARCHES);
-      localStorage.setItem(MOBILE_RECENT_SEARCHES_KEY, JSON.stringify(updated));
-      setRecentSearches(updated);
-    } catch (error) {
-      console.error('Failed to save recent search to localStorage:', error);
-    }
-  }, [recentSearches]);
+  const saveRecentSearch = useCallback(
+    (query: string) => {
+      if (typeof window === 'undefined' || !query.trim()) return;
+      try {
+        const recent = recentSearches.filter((s) => s.query !== query);
+        const updated = [{ query, timestamp: Date.now() }, ...recent].slice(
+          0,
+          MAX_MOBILE_RECENT_SEARCHES
+        );
+        localStorage.setItem(MOBILE_RECENT_SEARCHES_KEY, JSON.stringify(updated));
+        setRecentSearches(updated);
+      } catch (error) {
+        console.error('Failed to save recent search to localStorage:', error);
+      }
+    },
+    [recentSearches]
+  );
 
-  const removeRecentSearch = useCallback((query: string) => {
-    if (typeof window === 'undefined') return;
-    try {
-      const updated = recentSearches.filter((s) => s.query !== query);
-      localStorage.setItem(MOBILE_RECENT_SEARCHES_KEY, JSON.stringify(updated));
-      setRecentSearches(updated);
-    } catch (error) {
-      console.error('Failed to remove recent search from localStorage:', error);
-    }
-  }, [recentSearches]);
+  const removeRecentSearch = useCallback(
+    (query: string) => {
+      if (typeof window === 'undefined') return;
+      try {
+        const updated = recentSearches.filter((s) => s.query !== query);
+        localStorage.setItem(MOBILE_RECENT_SEARCHES_KEY, JSON.stringify(updated));
+        setRecentSearches(updated);
+      } catch (error) {
+        console.error('Failed to remove recent search from localStorage:', error);
+      }
+    },
+    [recentSearches]
+  );
 
   return { recentSearches, saveRecentSearch, removeRecentSearch };
 }
-

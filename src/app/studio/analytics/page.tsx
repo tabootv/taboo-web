@@ -50,11 +50,7 @@ import {
   PolarRadiusAxis,
   Label,
 } from 'recharts';
-import {
-  ChartContainer,
-  ChartTooltip,
-  type ChartConfig,
-} from '@/components/ui/chart';
+import { ChartContainer, ChartTooltip, type ChartConfig } from '@/components/ui/chart';
 import { studioClient as studio } from '@/api/client/studio.client';
 import type { StudioVideoListItem } from '@/types';
 import Image from 'next/image';
@@ -133,21 +129,38 @@ interface MetricCardProps {
   small?: boolean;
 }
 
-function MetricCard({ title, value, icon, subtitle, trend, description, highlight, small }: MetricCardProps) {
+function MetricCard({
+  title,
+  value,
+  icon,
+  subtitle,
+  trend,
+  description,
+  highlight,
+  small,
+}: MetricCardProps) {
   return (
     <Card className="group transition-all hover:scale-[1.01]">
       <CardContent className={small ? 'p-4' : 'p-5'}>
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <p className="text-xs text-white/50 font-medium mb-1">{title}</p>
-            <p className={`font-bold leading-tight ${highlight ? 'text-[#ab0013]' : 'text-white'} ${small ? 'text-xl' : 'text-2xl'}`}>
+            <p
+              className={`font-bold leading-tight ${highlight ? 'text-[#ab0013]' : 'text-white'} ${small ? 'text-xl' : 'text-2xl'}`}
+            >
               {value}
             </p>
             {subtitle && (
               <div className="flex items-center gap-2 mt-1.5">
                 {trend !== undefined && (
-                  <span className={`flex items-center text-xs font-medium ${trend >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                    {trend >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                  <span
+                    className={`flex items-center text-xs font-medium ${trend >= 0 ? 'text-emerald-400' : 'text-red-400'}`}
+                  >
+                    {trend >= 0 ? (
+                      <ArrowUpRight className="w-3 h-3" />
+                    ) : (
+                      <ArrowDownRight className="w-3 h-3" />
+                    )}
                     {Math.abs(trend).toFixed(1)}%
                   </span>
                 )}
@@ -158,8 +171,14 @@ function MetricCard({ title, value, icon, subtitle, trend, description, highligh
               <p className="text-[10px] text-white/25 mt-2 leading-relaxed">{description}</p>
             )}
           </div>
-          <div className={`rounded-xl flex items-center justify-center flex-shrink-0 transition-shadow duration-300 ${highlight ? 'bg-[#ab0013]/20 group-hover:shadow-[0_0_30px_rgba(171,0,19,0.5)]' : 'bg-white/5'} ${small ? 'w-8 h-8' : 'w-10 h-10'}`}>
-            <div className={`${highlight ? 'text-[#ab0013]' : 'text-white/40'} ${small ? '[&>svg]:w-4 [&>svg]:h-4' : '[&>svg]:w-5 [&>svg]:h-5'}`}>{icon}</div>
+          <div
+            className={`rounded-xl flex items-center justify-center flex-shrink-0 transition-shadow duration-300 ${highlight ? 'bg-[#ab0013]/20 group-hover:shadow-[0_0_30px_rgba(171,0,19,0.5)]' : 'bg-white/5'} ${small ? 'w-8 h-8' : 'w-10 h-10'}`}
+          >
+            <div
+              className={`${highlight ? 'text-[#ab0013]' : 'text-white/40'} ${small ? '[&>svg]:w-4 [&>svg]:h-4' : '[&>svg]:w-5 [&>svg]:h-5'}`}
+            >
+              {icon}
+            </div>
           </div>
         </div>
       </CardContent>
@@ -272,71 +291,72 @@ export default function AnalyticsPage() {
     };
   }, [dateRange, groupBy]);
 
-  const fetchData = useCallback(async (isInitial = false) => {
-    if (isInitial) {
-      setIsLoading(true);
-    } else {
-      setIsRefetching(true);
-    }
-    setError(null);
-
-    try {
-      const params = getDateParams();
-      const searchParams = new URLSearchParams({
-        start_date: params.start_date,
-        end_date: params.end_date,
-        group_by: params.group_by,
-      });
-
-      // Fetch earnings data (required)
-      const earningsResponse = await fetch(`/api/creator-studio/earnings?${searchParams}`);
-      const earningsResult = await earningsResponse.json();
-
-      if (!earningsResponse.ok) {
-        throw new Error(earningsResult.error || 'Failed to fetch analytics data');
+  const fetchData = useCallback(
+    async (isInitial = false) => {
+      if (isInitial) {
+        setIsLoading(true);
+      } else {
+        setIsRefetching(true);
       }
+      setError(null);
 
-      setEarningsData(earningsResult);
-
-      // Fetch content stats (optional - gracefully handle if endpoints don't exist)
       try {
-        const [videosResponse, shortsResponse] = await Promise.all([
-          studio.getVideos(1).catch(() => null),
-          studio.getShorts(1).catch(() => null),
-        ]);
-
-        // Calculate content stats if we got any data
-        const allContent = [
-          ...(videosResponse?.videos || []),
-          ...(shortsResponse?.videos || []),
-        ];
-        const totalViews = allContent.reduce((sum, v) => sum + (v.views_count || 0), 0);
-        const totalLikes = allContent.reduce((sum, v) => sum + (v.likes_count || 0), 0);
-        const totalComments = allContent.reduce((sum, v) => sum + (v.comments_count || 0), 0);
-        const avgEngagementRate = totalViews > 0 ? ((totalLikes + totalComments) / totalViews) * 100 : 0;
-
-        setContentStats({
-          totalVideos: videosResponse?.pagination?.total || 0,
-          totalShorts: shortsResponse?.pagination?.total || 0,
-          totalViews,
-          totalLikes,
-          totalComments,
-          avgEngagementRate,
-          topContent: allContent,
+        const params = getDateParams();
+        const searchParams = new URLSearchParams({
+          start_date: params.start_date,
+          end_date: params.end_date,
+          group_by: params.group_by,
         });
-      } catch (contentErr) {
-        // Content stats are optional - just log and continue
-        console.warn('Could not fetch content stats:', contentErr);
-        setContentStats(null);
+
+        // Fetch earnings data (required)
+        const earningsResponse = await fetch(`/api/creator-studio/earnings?${searchParams}`);
+        const earningsResult = await earningsResponse.json();
+
+        if (!earningsResponse.ok) {
+          throw new Error(earningsResult.error || 'Failed to fetch analytics data');
+        }
+
+        setEarningsData(earningsResult);
+
+        // Fetch content stats (optional - gracefully handle if endpoints don't exist)
+        try {
+          const [videosResponse, shortsResponse] = await Promise.all([
+            studio.getVideos(1).catch(() => null),
+            studio.getShorts(1).catch(() => null),
+          ]);
+
+          // Calculate content stats if we got any data
+          const allContent = [...(videosResponse?.videos || []), ...(shortsResponse?.videos || [])];
+          const totalViews = allContent.reduce((sum, v) => sum + (v.views_count || 0), 0);
+          const totalLikes = allContent.reduce((sum, v) => sum + (v.likes_count || 0), 0);
+          const totalComments = allContent.reduce((sum, v) => sum + (v.comments_count || 0), 0);
+          const avgEngagementRate =
+            totalViews > 0 ? ((totalLikes + totalComments) / totalViews) * 100 : 0;
+
+          setContentStats({
+            totalVideos: videosResponse?.pagination?.total || 0,
+            totalShorts: shortsResponse?.pagination?.total || 0,
+            totalViews,
+            totalLikes,
+            totalComments,
+            avgEngagementRate,
+            topContent: allContent,
+          });
+        } catch (contentErr) {
+          // Content stats are optional - just log and continue
+          console.warn('Could not fetch content stats:', contentErr);
+          setContentStats(null);
+        }
+      } catch (err) {
+        console.error('Failed to fetch analytics:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load analytics data');
+      } finally {
+        setIsLoading(false);
+        setIsRefetching(false);
       }
-    } catch (err) {
-      console.error('Failed to fetch analytics:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load analytics data');
-    } finally {
-      setIsLoading(false);
-      setIsRefetching(false);
-    }
-  }, [getDateParams]);
+    },
+    [getDateParams]
+  );
 
   useEffect(() => {
     fetchData(true);
@@ -359,12 +379,8 @@ export default function AnalyticsPage() {
     const totalCustomers = allTimeStats.customers;
     const activeCustomers = allTimeStats.activeCustomers;
     const churnedCustomers = totalCustomers - activeCustomers;
-    const churnRate = totalCustomers > 0
-      ? ((churnedCustomers / totalCustomers) * 100)
-      : 0;
-    const retentionRate = totalCustomers > 0
-      ? ((activeCustomers / totalCustomers) * 100)
-      : 0;
+    const churnRate = totalCustomers > 0 ? (churnedCustomers / totalCustomers) * 100 : 0;
+    const retentionRate = totalCustomers > 0 ? (activeCustomers / totalCustomers) * 100 : 0;
 
     // Month-over-month growth (compare last period to previous)
     let previousPeriodCustomers = 0;
@@ -381,7 +397,8 @@ export default function AnalyticsPage() {
       currentPeriodCustomers = secondHalf.reduce((sum, p) => sum + p.customers, 0);
 
       if (previousPeriodCustomers > 0) {
-        customerGrowthRate = ((currentPeriodCustomers - previousPeriodCustomers) / previousPeriodCustomers) * 100;
+        customerGrowthRate =
+          ((currentPeriodCustomers - previousPeriodCustomers) / previousPeriodCustomers) * 100;
       } else if (currentPeriodCustomers > 0) {
         customerGrowthRate = 100; // Infinite growth from 0
       }
@@ -395,9 +412,10 @@ export default function AnalyticsPage() {
     const currentPeriodEarnings = summary.earnings / 100;
 
     // Estimate MRR based on active customers (rough estimate)
-    const estimatedMRR = activeCustomers > 0
-      ? (allTimeStats.revenue / 100) / Math.max(1, totalCustomers) * activeCustomers
-      : 0;
+    const estimatedMRR =
+      activeCustomers > 0
+        ? (allTimeStats.revenue / 100 / Math.max(1, totalCustomers)) * activeCustomers
+        : 0;
 
     return {
       // Churn & Retention
@@ -440,27 +458,38 @@ export default function AnalyticsPage() {
 
       // Referral performance
       if (businessMetrics && businessMetrics.clicks > 100) {
-        insights.push(`${formatNumber(businessMetrics.clicks)} referral clicks this period. Your content is driving traffic.`);
+        insights.push(
+          `${formatNumber(businessMetrics.clicks)} referral clicks this period. Your content is driving traffic.`
+        );
       }
 
       // Conversion insight
       if (conversionRates.signupToCustomer > 20) {
-        insights.push(`${conversionRates.signupToCustomer.toFixed(1)}% of signups convert to customers. That's premium audience quality.`);
+        insights.push(
+          `${conversionRates.signupToCustomer.toFixed(1)}% of signups convert to customers. That's premium audience quality.`
+        );
       } else if (conversionRates.clickToSignup > 5) {
-        insights.push(`${conversionRates.clickToSignup.toFixed(1)}% click-to-signup rate. Good engagement with your referral links.`);
+        insights.push(
+          `${conversionRates.clickToSignup.toFixed(1)}% click-to-signup rate. Good engagement with your referral links.`
+        );
       }
 
       // Balance insight
       if (balance.current > 0) {
-        insights.push(`$${(balance.current / 100).toFixed(2)} available for payout. Time to get paid!`);
+        insights.push(
+          `$${(balance.current / 100).toFixed(2)} available for payout. Time to get paid!`
+        );
       }
 
       // Active subscribers insight
       if (allTimeStats.activeCustomers > 0) {
-        const retentionRate = allTimeStats.customers > 0
-          ? ((allTimeStats.activeCustomers / allTimeStats.customers) * 100).toFixed(0)
-          : 0;
-        insights.push(`${formatNumber(allTimeStats.activeCustomers)} active subscribers (${retentionRate}% retention). Recurring revenue secured.`);
+        const retentionRate =
+          allTimeStats.customers > 0
+            ? ((allTimeStats.activeCustomers / allTimeStats.customers) * 100).toFixed(0)
+            : 0;
+        insights.push(
+          `${formatNumber(allTimeStats.activeCustomers)} active subscribers (${retentionRate}% retention). Recurring revenue secured.`
+        );
       }
 
       // Content stats insights (if available)
@@ -468,15 +497,21 @@ export default function AnalyticsPage() {
         const { totalVideos, totalShorts, totalViews, avgEngagementRate } = contentStats;
 
         if (totalViews > 10000) {
-          insights.push(`${formatNumber(totalViews)} total views across your content. Keep creating.`);
+          insights.push(
+            `${formatNumber(totalViews)} total views across your content. Keep creating.`
+          );
         }
 
         if (avgEngagementRate > 5) {
-          insights.push(`${avgEngagementRate.toFixed(1)}% engagement rate. Your audience is locked in.`);
+          insights.push(
+            `${avgEngagementRate.toFixed(1)}% engagement rate. Your audience is locked in.`
+          );
         }
 
         if (totalShorts > totalVideos && totalVideos > 0) {
-          insights.push(`Shorts are your power play: ${totalShorts} shorts vs ${totalVideos} episodes.`);
+          insights.push(
+            `Shorts are your power play: ${totalShorts} shorts vs ${totalVideos} episodes.`
+          );
         }
       }
     }
@@ -512,9 +547,9 @@ export default function AnalyticsPage() {
 
     // Filter by type
     if (contentFilter === 'videos') {
-      content = content.filter(c => (c.duration || 0) > 60);
+      content = content.filter((c) => (c.duration || 0) > 60);
     } else if (contentFilter === 'shorts') {
-      content = content.filter(c => (c.duration || 0) <= 60);
+      content = content.filter((c) => (c.duration || 0) <= 60);
     }
 
     // Sort
@@ -545,9 +580,11 @@ export default function AnalyticsPage() {
 
     const engagementRate = views > 0 ? ((likes + comments) / views) * 100 : 0;
 
-    if (engagementRate > 10) badges.push({ label: 'High Engagement', color: 'bg-emerald-500/20 text-emerald-400' });
+    if (engagementRate > 10)
+      badges.push({ label: 'High Engagement', color: 'bg-emerald-500/20 text-emerald-400' });
     if (views > 1000) badges.push({ label: 'Trending', color: 'bg-[#ab0013]/20 text-[#ab0013]' });
-    if (comments > 50) badges.push({ label: 'Conversation Starter', color: 'bg-blue-500/20 text-blue-400' });
+    if (comments > 50)
+      badges.push({ label: 'Conversation Starter', color: 'bg-blue-500/20 text-blue-400' });
 
     return badges.slice(0, 2);
   };
@@ -581,7 +618,8 @@ export default function AnalyticsPage() {
     );
   }
 
-  const periodLabel = dateRangeOptions.find((o) => o.value === dateRange)?.label || 'Selected period';
+  const periodLabel =
+    dateRangeOptions.find((o) => o.value === dateRange)?.label || 'Selected period';
 
   return (
     <div className="p-6 max-w-7xl mx-auto relative">
@@ -605,7 +643,8 @@ export default function AnalyticsPage() {
             <h1 className="text-2xl font-bold text-foreground">Analytics</h1>
           </div>
           <p className="text-white/40 text-sm italic">
-            JARVIS, run performance analytics{earningsData?.promoter?.name && ` for ${earningsData.promoter.name}`}.
+            JARVIS, run performance analytics
+            {earningsData?.promoter?.name && ` for ${earningsData.promoter.name}`}.
           </p>
         </div>
 
@@ -637,7 +676,12 @@ export default function AnalyticsPage() {
             </SelectContent>
           </Select>
 
-          <Button onClick={() => fetchData(false)} variant="outline" size="sm" disabled={isRefetching}>
+          <Button
+            onClick={() => fetchData(false)}
+            variant="outline"
+            size="sm"
+            disabled={isRefetching}
+          >
             <RefreshCw className={`w-4 h-4 ${isRefetching ? 'animate-spin' : ''}`} />
           </Button>
         </div>
@@ -737,7 +781,7 @@ export default function AnalyticsPage() {
                 <RadialBarChart
                   data={[{ value: businessMetrics?.retentionRate || 0, fill: '#22c55e' }]}
                   startAngle={90}
-                  endAngle={90 - (360 * (businessMetrics?.retentionRate || 0) / 100)}
+                  endAngle={90 - (360 * (businessMetrics?.retentionRate || 0)) / 100}
                   innerRadius={50}
                   outerRadius={65}
                 >
@@ -748,14 +792,27 @@ export default function AnalyticsPage() {
                     className="first:fill-white/5 last:fill-transparent"
                     polarRadius={[54, 46]}
                   />
-                  <RadialBar dataKey="value" background={{ fill: 'rgba(255,255,255,0.05)' }} cornerRadius={10} />
+                  <RadialBar
+                    dataKey="value"
+                    background={{ fill: 'rgba(255,255,255,0.05)' }}
+                    cornerRadius={10}
+                  />
                   <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
                     <Label
                       content={({ viewBox }) => {
                         if (viewBox && 'cx' in viewBox && 'cy' in viewBox) {
                           return (
-                            <text x={viewBox.cx} y={viewBox.cy} textAnchor="middle" dominantBaseline="middle">
-                              <tspan x={viewBox.cx} y={viewBox.cy} className="fill-white text-2xl font-bold">
+                            <text
+                              x={viewBox.cx}
+                              y={viewBox.cy}
+                              textAnchor="middle"
+                              dominantBaseline="middle"
+                            >
+                              <tspan
+                                x={viewBox.cx}
+                                y={viewBox.cy}
+                                className="fill-white text-2xl font-bold"
+                              >
                                 {businessMetrics?.retentionRate || 0}%
                               </tspan>
                             </text>
@@ -769,7 +826,10 @@ export default function AnalyticsPage() {
               </ChartContainer>
               <div className="text-center mt-1">
                 <p className="text-xs font-medium text-white">Retention</p>
-                <p className="text-[10px] text-white/40">{businessMetrics?.activeCustomers || 0} of {businessMetrics?.totalCustomers || 0} active</p>
+                <p className="text-[10px] text-white/40">
+                  {businessMetrics?.activeCustomers || 0} of {businessMetrics?.totalCustomers || 0}{' '}
+                  active
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -784,7 +844,7 @@ export default function AnalyticsPage() {
                 <RadialBarChart
                   data={[{ value: businessMetrics?.churnRate || 0, fill: '#ef4444' }]}
                   startAngle={90}
-                  endAngle={90 - (360 * (businessMetrics?.churnRate || 0) / 100)}
+                  endAngle={90 - (360 * (businessMetrics?.churnRate || 0)) / 100}
                   innerRadius={50}
                   outerRadius={65}
                 >
@@ -795,14 +855,27 @@ export default function AnalyticsPage() {
                     className="first:fill-white/5 last:fill-transparent"
                     polarRadius={[54, 46]}
                   />
-                  <RadialBar dataKey="value" background={{ fill: 'rgba(255,255,255,0.05)' }} cornerRadius={10} />
+                  <RadialBar
+                    dataKey="value"
+                    background={{ fill: 'rgba(255,255,255,0.05)' }}
+                    cornerRadius={10}
+                  />
                   <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
                     <Label
                       content={({ viewBox }) => {
                         if (viewBox && 'cx' in viewBox && 'cy' in viewBox) {
                           return (
-                            <text x={viewBox.cx} y={viewBox.cy} textAnchor="middle" dominantBaseline="middle">
-                              <tspan x={viewBox.cx} y={viewBox.cy} className="fill-white text-2xl font-bold">
+                            <text
+                              x={viewBox.cx}
+                              y={viewBox.cy}
+                              textAnchor="middle"
+                              dominantBaseline="middle"
+                            >
+                              <tspan
+                                x={viewBox.cx}
+                                y={viewBox.cy}
+                                className="fill-white text-2xl font-bold"
+                              >
                                 {businessMetrics?.churnRate || 0}%
                               </tspan>
                             </text>
@@ -816,7 +889,9 @@ export default function AnalyticsPage() {
               </ChartContainer>
               <div className="text-center mt-1">
                 <p className="text-xs font-medium text-white">Churn Rate</p>
-                <p className="text-[10px] text-white/40">{businessMetrics?.churnedCustomers || 0} customers lost</p>
+                <p className="text-[10px] text-white/40">
+                  {businessMetrics?.churnedCustomers || 0} customers lost
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -829,9 +904,17 @@ export default function AnalyticsPage() {
                 className="mx-auto aspect-square h-[140px]"
               >
                 <RadialBarChart
-                  data={[{ value: Math.min(100, Math.abs(businessMetrics?.customerGrowthRate || 0)), fill: (businessMetrics?.customerGrowthRate || 0) >= 0 ? '#22c55e' : '#ef4444' }]}
+                  data={[
+                    {
+                      value: Math.min(100, Math.abs(businessMetrics?.customerGrowthRate || 0)),
+                      fill: (businessMetrics?.customerGrowthRate || 0) >= 0 ? '#22c55e' : '#ef4444',
+                    },
+                  ]}
                   startAngle={90}
-                  endAngle={90 - (360 * Math.min(100, Math.abs(businessMetrics?.customerGrowthRate || 0)) / 100)}
+                  endAngle={
+                    90 -
+                    (360 * Math.min(100, Math.abs(businessMetrics?.customerGrowthRate || 0))) / 100
+                  }
                   innerRadius={50}
                   outerRadius={65}
                 >
@@ -842,16 +925,30 @@ export default function AnalyticsPage() {
                     className="first:fill-white/5 last:fill-transparent"
                     polarRadius={[54, 46]}
                   />
-                  <RadialBar dataKey="value" background={{ fill: 'rgba(255,255,255,0.05)' }} cornerRadius={10} />
+                  <RadialBar
+                    dataKey="value"
+                    background={{ fill: 'rgba(255,255,255,0.05)' }}
+                    cornerRadius={10}
+                  />
                   <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
                     <Label
                       content={({ viewBox }) => {
                         if (viewBox && 'cx' in viewBox && 'cy' in viewBox) {
                           const rate = businessMetrics?.customerGrowthRate || 0;
                           return (
-                            <text x={viewBox.cx} y={viewBox.cy} textAnchor="middle" dominantBaseline="middle">
-                              <tspan x={viewBox.cx} y={viewBox.cy} className={`text-2xl font-bold ${rate >= 0 ? 'fill-emerald-400' : 'fill-red-400'}`}>
-                                {rate >= 0 ? '+' : ''}{rate}%
+                            <text
+                              x={viewBox.cx}
+                              y={viewBox.cy}
+                              textAnchor="middle"
+                              dominantBaseline="middle"
+                            >
+                              <tspan
+                                x={viewBox.cx}
+                                y={viewBox.cy}
+                                className={`text-2xl font-bold ${rate >= 0 ? 'fill-emerald-400' : 'fill-red-400'}`}
+                              >
+                                {rate >= 0 ? '+' : ''}
+                                {rate}%
                               </tspan>
                             </text>
                           );
@@ -874,7 +971,9 @@ export default function AnalyticsPage() {
             <CardContent className="p-4 flex flex-col items-center justify-center h-full">
               <div className="w-[130px] h-[130px] rounded-full bg-gradient-to-br from-[#ab0013]/20 to-[#ab0013]/5 border border-[#ab0013]/20 flex items-center justify-center">
                 <div className="text-center">
-                  <p className="text-3xl font-bold text-white">{businessMetrics?.newCustomersThisPeriod || 0}</p>
+                  <p className="text-3xl font-bold text-white">
+                    {businessMetrics?.newCustomersThisPeriod || 0}
+                  </p>
                   <p className="text-[10px] text-white/50">new</p>
                 </div>
               </div>
@@ -912,7 +1011,11 @@ export default function AnalyticsPage() {
                   <stop offset="100%" stopColor="#ab0013" stopOpacity={0.05} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="rgba(255,255,255,0.05)"
+                vertical={false}
+              />
               <XAxis
                 dataKey="formattedPeriod"
                 tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 11 }}
@@ -935,7 +1038,9 @@ export default function AnalyticsPage() {
                       <div className="text-white/60 text-[11px] font-medium mb-1">{label}</div>
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-[#ab0013]" />
-                        <span className="text-white text-sm font-bold">{Number(payload[0]?.value || 0)} customers</span>
+                        <span className="text-white text-sm font-bold">
+                          {Number(payload[0]?.value || 0)} customers
+                        </span>
                       </div>
                     </div>
                   );
@@ -1020,7 +1125,11 @@ export default function AnalyticsPage() {
                   <stop offset="100%" stopColor="#ab0013" stopOpacity={0.05} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="rgba(255,255,255,0.05)"
+                vertical={false}
+              />
               <XAxis
                 dataKey="formattedPeriod"
                 tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 11 }}
@@ -1042,12 +1151,22 @@ export default function AnalyticsPage() {
                     <div className="bg-black/95 backdrop-blur-xl border border-white/10 rounded-lg px-3 py-2.5 shadow-xl">
                       <div className="text-white/60 text-[11px] font-medium mb-2">{label}</div>
                       {payload.map((entry) => (
-                        <div key={entry.dataKey} className="flex items-center justify-between gap-4">
+                        <div
+                          key={entry.dataKey}
+                          className="flex items-center justify-between gap-4"
+                        >
                           <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
-                            <span className="text-white/50 text-xs capitalize">{entry.dataKey}</span>
+                            <div
+                              className="w-2 h-2 rounded-full"
+                              style={{ backgroundColor: entry.color }}
+                            />
+                            <span className="text-white/50 text-xs capitalize">
+                              {entry.dataKey}
+                            </span>
                           </div>
-                          <span className="text-white text-xs font-medium">{Number(entry.value).toLocaleString()}</span>
+                          <span className="text-white text-xs font-medium">
+                            {Number(entry.value).toLocaleString()}
+                          </span>
                         </div>
                       ))}
                     </div>
@@ -1089,9 +1208,11 @@ export default function AnalyticsPage() {
             {funnelData.map((item, index) => {
               const prevItem = index > 0 ? funnelData[index - 1] : null;
               const prevValue = prevItem ? prevItem.value : item.value;
-              const conversionRate = prevValue > 0 ? ((item.value / prevValue) * 100).toFixed(1) : '100';
+              const conversionRate =
+                prevValue > 0 ? ((item.value / prevValue) * 100).toFixed(1) : '100';
               const firstItem = funnelData[0];
-              const widthPercent = firstItem && firstItem.value > 0 ? (item.value / firstItem.value) * 100 : 0;
+              const widthPercent =
+                firstItem && firstItem.value > 0 ? (item.value / firstItem.value) * 100 : 0;
 
               return (
                 <div key={item.name} className="relative">
@@ -1099,7 +1220,9 @@ export default function AnalyticsPage() {
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-xs font-medium text-white/60">{item.name}</span>
                       {index > 0 && (
-                        <span className="text-[10px] text-white/40">{conversionRate}% from prev</span>
+                        <span className="text-[10px] text-white/40">
+                          {conversionRate}% from prev
+                        </span>
                       )}
                     </div>
                     <p className="text-2xl font-bold text-white">{item.value.toLocaleString()}</p>
@@ -1124,7 +1247,9 @@ export default function AnalyticsPage() {
             </div>
             <div className="flex items-center gap-2">
               <ArrowUpRight className="w-3 h-3 text-[#ab0013]" />
-              <span>Signup → Customer: {earningsData?.conversionRates?.signupToCustomer || 0}%</span>
+              <span>
+                Signup → Customer: {earningsData?.conversionRates?.signupToCustomer || 0}%
+              </span>
             </div>
           </div>
         </CardContent>
@@ -1139,7 +1264,10 @@ export default function AnalyticsPage() {
               <h3 className="text-sm font-semibold text-white">Top Content</h3>
             </div>
             <div className="flex items-center gap-2">
-              <Select value={contentFilter} onValueChange={(value) => setContentFilter(value as ContentFilter)}>
+              <Select
+                value={contentFilter}
+                onValueChange={(value) => setContentFilter(value as ContentFilter)}
+              >
                 <SelectTrigger className="w-[100px] h-8 text-xs">
                   <SelectValue />
                 </SelectTrigger>
@@ -1167,12 +1295,24 @@ export default function AnalyticsPage() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-white/5">
-                    <th className="text-left text-[10px] font-medium text-white/30 uppercase tracking-wider px-5 py-3">Content</th>
-                    <th className="text-right text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-3">Views</th>
-                    <th className="text-right text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-3">Likes</th>
-                    <th className="text-right text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-3">Comments</th>
-                    <th className="text-right text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-3">Engagement</th>
-                    <th className="text-left text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-3">Badges</th>
+                    <th className="text-left text-[10px] font-medium text-white/30 uppercase tracking-wider px-5 py-3">
+                      Content
+                    </th>
+                    <th className="text-right text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-3">
+                      Views
+                    </th>
+                    <th className="text-right text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-3">
+                      Likes
+                    </th>
+                    <th className="text-right text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-3">
+                      Comments
+                    </th>
+                    <th className="text-right text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-3">
+                      Engagement
+                    </th>
+                    <th className="text-left text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-3">
+                      Badges
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1180,12 +1320,16 @@ export default function AnalyticsPage() {
                     const views = item.views_count || 0;
                     const likes = item.likes_count || 0;
                     const comments = item.comments_count || 0;
-                    const engagement = views > 0 ? ((likes + comments) / views * 100).toFixed(1) : '0';
+                    const engagement =
+                      views > 0 ? (((likes + comments) / views) * 100).toFixed(1) : '0';
                     const badges = getContentBadges(item);
                     const isShort = (item.duration || 0) <= 60;
 
                     return (
-                      <tr key={item.id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors">
+                      <tr
+                        key={item.id}
+                        className="border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors"
+                      >
                         <td className="px-5 py-3">
                           <div className="flex items-center gap-3">
                             <div className="relative w-16 h-9 rounded overflow-hidden bg-white/5 flex-shrink-0">
@@ -1204,30 +1348,51 @@ export default function AnalyticsPage() {
                               )}
                             </div>
                             <div className="min-w-0">
-                              <p className="text-xs text-white font-medium truncate max-w-[200px]">{item.title}</p>
+                              <p className="text-xs text-white font-medium truncate max-w-[200px]">
+                                {item.title}
+                              </p>
                               <p className="text-[10px] text-white/40 flex items-center gap-1">
-                                {isShort ? <Play className="w-3 h-3" /> : <Film className="w-3 h-3" />}
+                                {isShort ? (
+                                  <Play className="w-3 h-3" />
+                                ) : (
+                                  <Film className="w-3 h-3" />
+                                )}
                                 {isShort ? 'Short' : 'Episode'}
                               </p>
                             </div>
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-xs text-white text-right font-medium">{formatNumber(views)}</td>
-                        <td className="px-4 py-3 text-xs text-white/60 text-right">{formatNumber(likes)}</td>
-                        <td className="px-4 py-3 text-xs text-white/60 text-right">{formatNumber(comments)}</td>
+                        <td className="px-4 py-3 text-xs text-white text-right font-medium">
+                          {formatNumber(views)}
+                        </td>
+                        <td className="px-4 py-3 text-xs text-white/60 text-right">
+                          {formatNumber(likes)}
+                        </td>
+                        <td className="px-4 py-3 text-xs text-white/60 text-right">
+                          {formatNumber(comments)}
+                        </td>
                         <td className="px-4 py-3 text-right">
-                          <span className={`text-xs font-medium ${parseFloat(engagement) > 5 ? 'text-[#ab0013]' : 'text-white/50'}`}>
+                          <span
+                            className={`text-xs font-medium ${parseFloat(engagement) > 5 ? 'text-[#ab0013]' : 'text-white/50'}`}
+                          >
                             {engagement}%
                           </span>
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-1">
                             {badges.map((badge, i) => (
-                              <span key={i} className={`text-[9px] px-2 py-0.5 rounded-full ${badge.color}`}>
+                              <span
+                                key={i}
+                                className={`text-[9px] px-2 py-0.5 rounded-full ${badge.color}`}
+                              >
                                 {badge.label}
                               </span>
                             ))}
-                            {index === 0 && <span className="text-[9px] px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-400">Top Performer</span>}
+                            {index === 0 && (
+                              <span className="text-[9px] px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-400">
+                                Top Performer
+                              </span>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -1239,7 +1404,9 @@ export default function AnalyticsPage() {
               <div className="px-5 py-12 text-center">
                 <Globe2 className="w-8 h-8 text-white/20 mx-auto mb-3" />
                 <p className="text-sm text-white/40">No content found</p>
-                <p className="text-xs text-white/30">Upload videos or shorts to see performance data</p>
+                <p className="text-xs text-white/30">
+                  Upload videos or shorts to see performance data
+                </p>
               </div>
             )}
           </div>
@@ -1277,7 +1444,11 @@ export default function AnalyticsPage() {
                   <stop offset="100%" stopColor="#fca5a5" stopOpacity={0.02} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="rgba(255,255,255,0.05)"
+                vertical={false}
+              />
               <XAxis
                 dataKey="formattedPeriod"
                 tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 11 }}
@@ -1299,10 +1470,18 @@ export default function AnalyticsPage() {
                     <div className="bg-black/95 backdrop-blur-xl border border-white/10 rounded-lg px-3 py-2.5 shadow-xl">
                       <div className="text-white/60 text-[11px] font-medium mb-2">{label}</div>
                       {payload.map((entry) => (
-                        <div key={entry.dataKey} className="flex items-center justify-between gap-4">
+                        <div
+                          key={entry.dataKey}
+                          className="flex items-center justify-between gap-4"
+                        >
                           <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
-                            <span className="text-white/50 text-xs capitalize">{String(entry.dataKey)}</span>
+                            <div
+                              className="w-2 h-2 rounded-full"
+                              style={{ backgroundColor: entry.color }}
+                            />
+                            <span className="text-white/50 text-xs capitalize">
+                              {String(entry.dataKey)}
+                            </span>
                           </div>
                           <span className="text-white text-xs font-medium">
                             {Number(entry.value).toLocaleString()}
@@ -1346,31 +1525,57 @@ export default function AnalyticsPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-white/5">
-                  <th className="text-left text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-2">Period</th>
-                  <th className="text-right text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-2">Clicks</th>
-                  <th className="text-right text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-2">Signups</th>
-                  <th className="text-right text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-2">Customers</th>
-                  <th className="text-right text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-2">Earnings</th>
+                  <th className="text-left text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-2">
+                    Period
+                  </th>
+                  <th className="text-right text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-2">
+                    Clicks
+                  </th>
+                  <th className="text-right text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-2">
+                    Signups
+                  </th>
+                  <th className="text-right text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-2">
+                    Customers
+                  </th>
+                  <th className="text-right text-[10px] font-medium text-white/30 uppercase tracking-wider px-4 py-2">
+                    Earnings
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {chartData && chartData.length > 0 ? (
-                  [...chartData].reverse().slice(0, 10).map((row, index) => (
-                    <tr key={index} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors">
-                      <td className="px-4 py-2.5 text-xs text-white">{row.formattedPeriod}</td>
-                      <td className="px-4 py-2.5 text-xs text-white/50 text-right">{row.clicks.toLocaleString()}</td>
-                      <td className="px-4 py-2.5 text-xs text-white/50 text-right">{row.signups.toLocaleString()}</td>
-                      <td className="px-4 py-2.5 text-xs text-white/50 text-right">{row.customers.toLocaleString()}</td>
-                      <td className="px-4 py-2.5 text-xs text-right">
-                        <span className={`font-medium ${row.earnings > 0 ? 'text-[#ab0013]' : 'text-white/50'}`}>
-                          ${(row.earnings / 100).toFixed(2)}
-                        </span>
-                      </td>
-                    </tr>
-                  ))
+                  [...chartData]
+                    .reverse()
+                    .slice(0, 10)
+                    .map((row, index) => (
+                      <tr
+                        key={index}
+                        className="border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors"
+                      >
+                        <td className="px-4 py-2.5 text-xs text-white">{row.formattedPeriod}</td>
+                        <td className="px-4 py-2.5 text-xs text-white/50 text-right">
+                          {row.clicks.toLocaleString()}
+                        </td>
+                        <td className="px-4 py-2.5 text-xs text-white/50 text-right">
+                          {row.signups.toLocaleString()}
+                        </td>
+                        <td className="px-4 py-2.5 text-xs text-white/50 text-right">
+                          {row.customers.toLocaleString()}
+                        </td>
+                        <td className="px-4 py-2.5 text-xs text-right">
+                          <span
+                            className={`font-medium ${row.earnings > 0 ? 'text-[#ab0013]' : 'text-white/50'}`}
+                          >
+                            ${(row.earnings / 100).toFixed(2)}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
                 ) : (
                   <tr>
-                    <td colSpan={5} className="px-4 py-6 text-center text-[10px] text-white/30">No data for this period</td>
+                    <td colSpan={5} className="px-4 py-6 text-center text-[10px] text-white/30">
+                      No data for this period
+                    </td>
                   </tr>
                 )}
               </tbody>

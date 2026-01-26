@@ -11,7 +11,11 @@ interface SeriesSectionProps {
   children: React.ReactNode;
 }
 
-export function SeriesSection({ title = 'Top Series', viewAllHref = '/series', children }: SeriesSectionProps) {
+export function SeriesSection({
+  title = 'Top Series',
+  viewAllHref = '/series',
+  children,
+}: SeriesSectionProps) {
   return (
     <section className="mt-8 md:mt-10">
       <div className="flex items-center justify-between mb-4">
@@ -28,4 +32,3 @@ export function SeriesSection({ title = 'Top Series', viewAllHref = '/series', c
     </section>
   );
 }
-

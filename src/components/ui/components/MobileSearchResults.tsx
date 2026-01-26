@@ -50,9 +50,7 @@ export function MobileSearchResults({ results, query, onItemClick }: MobileSearc
               </div>
               <div className="flex-1 text-left min-w-0">
                 <p className="text-sm text-text-primary line-clamp-2">{video.title}</p>
-                <p className="text-xs text-text-secondary truncate mt-0.5">
-                  {video.channel?.name}
-                </p>
+                <p className="text-xs text-text-secondary truncate mt-0.5">{video.channel?.name}</p>
               </div>
               <ArrowUpRight className="w-4 h-4 text-text-secondary flex-shrink-0" />
             </button>
@@ -142,12 +140,7 @@ export function MobileSearchResults({ results, query, onItemClick }: MobileSearc
             >
               <div className="relative w-12 h-12 rounded-full overflow-hidden bg-surface flex-shrink-0">
                 {creator.dp && (
-                  <Image
-                    src={creator.dp}
-                    alt={creator.name}
-                    fill
-                    className="object-cover"
-                  />
+                  <Image src={creator.dp} alt={creator.name} fill className="object-cover" />
                 )}
               </div>
               <div className="flex-1 text-left min-w-0">
@@ -173,4 +166,3 @@ export function MobileSearchResults({ results, query, onItemClick }: MobileSearc
     </div>
   );
 }
-

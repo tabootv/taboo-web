@@ -1,4 +1,4 @@
-'use client';;
+'use client';
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { X, Loader2 } from 'lucide-react';
@@ -93,11 +93,7 @@ function TrailerContent() {
       {/* Video Player */}
       <div className="w-full h-screen flex items-center justify-center">
         <div className="w-full max-w-6xl aspect-video">
-          <VideoPlayer
-            url_720={trailerUrl}
-            autoplay={true}
-            className="w-full h-full"
-          />
+          <VideoPlayer url_720={trailerUrl} autoplay={true} className="w-full h-full" />
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-'use client';;
+'use client';
 import { useUpdateAvatar } from '@/api/mutations';
 import { useBookmarkedVideos, useHistoryVideos, useLikedVideos } from '@/api/queries/video.queries';
 import { Avatar } from '@/components/ui/avatar';

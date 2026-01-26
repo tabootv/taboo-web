@@ -1,4 +1,4 @@
-'use client';;
+'use client';
 import { useRelatedVideos, useVideoPlay } from '@/api/queries/video.queries';
 import { Button } from '@/components/ui/button';
 import { LoadingScreen } from '@/components/ui/spinner';
@@ -19,7 +19,10 @@ import { useParams, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 const VideoPlayer = dynamic(
-  () => import('@/features/video/components/video-player').then((mod) => ({ default: mod.VideoPlayer })),
+  () =>
+    import('@/features/video/components/video-player').then((mod) => ({
+      default: mod.VideoPlayer,
+    })),
   {
     loading: () => <VideoPlayerSkeleton />,
     ssr: false,
@@ -60,7 +63,7 @@ export default function VideoPage() {
 
   const relatedVideos = useMemo(() => {
     const MIN_VIDEOS = 10;
-    let allVideos = playData?.videos || [];
+    const allVideos = playData?.videos || [];
 
     // Supplement with related videos if needed
     if (allVideos.length < MIN_VIDEOS && relatedData?.data) {
@@ -271,10 +274,7 @@ export default function VideoPage() {
 
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-3 pb-4">
               <div className="flex items-center gap-3">
-                <Link
-                  href={getCreatorRoute(video.channel?.handler)}
-                  className="shrink-0"
-                >
+                <Link href={getCreatorRoute(video.channel?.handler)} className="shrink-0">
                   <div className="relative size-10 rounded-full overflow-hidden">
                     {video.channel?.dp ? (
                       <Image

@@ -70,21 +70,27 @@ export async function GET(_request: NextRequest) {
     const promoterId = PROMOTER_ID_MAP[userEmail];
 
     if (!promoterId) {
-      return NextResponse.json({
-        error: 'No FirstPromoter account linked to this email',
-        email: userEmail
-      }, { status: 404 });
+      return NextResponse.json(
+        {
+          error: 'No FirstPromoter account linked to this email',
+          email: userEmail,
+        },
+        { status: 404 }
+      );
     }
 
     // Fetch promoter details from FirstPromoter V2 API
-    const fpResponse = await fetch(`https://firstpromoter.com/api/v2/company/promoters/${promoterId}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${FIRSTPROMOTER_API_KEY}`,
-        'Account-ID': FIRSTPROMOTER_V2_ACCOUNT_ID,
-        'Accept': 'application/json',
-      },
-    });
+    const fpResponse = await fetch(
+      `https://firstpromoter.com/api/v2/company/promoters/${promoterId}`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${FIRSTPROMOTER_API_KEY}`,
+          'Account-ID': FIRSTPROMOTER_V2_ACCOUNT_ID,
+          Accept: 'application/json',
+        },
+      }
+    );
 
     if (!fpResponse.ok) {
       const errorText = await fpResponse.text();
@@ -100,7 +106,9 @@ export async function GET(_request: NextRequest) {
     const stats: PromoterStats = {
       id: fpData.id,
       email: fpData.email,
-      name: fpData.name || `${fpData.profile?.first_name || ''} ${fpData.profile?.last_name || ''}`.trim(),
+      name:
+        fpData.name ||
+        `${fpData.profile?.first_name || ''} ${fpData.profile?.last_name || ''}`.trim(),
       state: fpData.state,
       stats: {
         clicks_count: fpData.stats?.clicks_count || 0,

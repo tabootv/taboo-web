@@ -34,39 +34,58 @@ const extractArray = <T>(data: unknown, key?: string): T[] => {
 
 export const homeClient = {
   getBanners: async (serverToken?: string): Promise<Banner[]> => {
-    const data = await apiClient.get<{ banners?: Banner[]; data?: Banner[] }>('/home/banners', serverToken ? { serverToken } : undefined);
+    const data = await apiClient.get<{ banners?: Banner[]; data?: Banner[] }>(
+      '/home/banners',
+      serverToken ? { serverToken } : undefined
+    );
     return extractArray<Banner>(data, 'banners');
   },
 
   getFeaturedVideos: async (serverToken?: string): Promise<Video[]> => {
-    const data = await apiClient.get<{ videos?: Video[]; data?: Video[] }>('/home/featured-videos', serverToken ? { serverToken } : undefined);
+    const data = await apiClient.get<{ videos?: Video[]; data?: Video[] }>(
+      '/home/featured-videos',
+      serverToken ? { serverToken } : undefined
+    );
     return extractArray<Video>(data, 'videos');
   },
 
   getShortVideos: async (serverToken?: string): Promise<Video[]> => {
-    const data = await apiClient.get<{ videos?: Video[]; data?: Video[] }>('/home/short-videos', serverToken ? { serverToken } : undefined);
+    const data = await apiClient.get<{ videos?: Video[]; data?: Video[] }>(
+      '/home/short-videos',
+      serverToken ? { serverToken } : undefined
+    );
     return extractArray<Video>(data, 'videos');
   },
 
   getShortVideosV2: async (serverToken?: string): Promise<Video[]> => {
-    const data = await apiClient.get<{ videos?: Video[]; data?: Video[] }>('/v2/home/short-videos', serverToken ? { serverToken } : undefined);
+    const data = await apiClient.get<{ videos?: Video[]; data?: Video[] }>(
+      '/v2/home/short-videos',
+      serverToken ? { serverToken } : undefined
+    );
     return extractArray<Video>(data, 'videos');
   },
 
   getRecommendedVideos: async (serverToken?: string): Promise<Video[]> => {
     const data = await apiClient.get<{ videos?: Video[]; data?: Video[] }>(
-      '/home/recommended-videos', serverToken ? { serverToken } : undefined
+      '/home/recommended-videos',
+      serverToken ? { serverToken } : undefined
     );
     return extractArray<Video>(data, 'videos');
   },
 
   getSeries: async (serverToken?: string): Promise<Series[]> => {
-    const data = await apiClient.get<{ series?: Series[]; data?: Series[] }>('/home/series', serverToken ? { serverToken } : undefined);
+    const data = await apiClient.get<{ series?: Series[]; data?: Series[] }>(
+      '/home/series',
+      serverToken ? { serverToken } : undefined
+    );
     return extractArray<Series>(data, 'series');
   },
 
   getCourses: async (serverToken?: string): Promise<Course[]> => {
-    const data = await apiClient.get<{ courses?: Course[]; data?: Course[] }>('/home/courses', serverToken ? { serverToken } : undefined);
+    const data = await apiClient.get<{ courses?: Course[]; data?: Course[] }>(
+      '/home/courses',
+      serverToken ? { serverToken } : undefined
+    );
     return extractArray<Course>(data, 'courses');
   },
 
@@ -75,7 +94,7 @@ export const homeClient = {
       '/creators',
       {
         params: { per_page: 20 },
-        ...(serverToken ? { serverToken } : {})
+        ...(serverToken ? { serverToken } : {}),
       }
     );
     return data.creators?.data || data.data || [];

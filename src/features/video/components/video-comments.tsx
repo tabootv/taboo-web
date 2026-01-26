@@ -30,7 +30,7 @@ export function VideoComments({ video, initialComments = [] }: VideoCommentsProp
 
   // Update comments when video changes
   useEffect(() => {
-    setCommentList(video.comments as Comment[] || initialComments);
+    setCommentList((video.comments as Comment[]) || initialComments);
   }, [video, initialComments]);
 
   const getVisibleComments = useCallback(() => {
@@ -82,9 +82,7 @@ export function VideoComments({ video, initialComments = [] }: VideoCommentsProp
 
   return (
     <div>
-      <p className="text-sm font-medium text-white/70">
-        {video.comments_count} comments
-      </p>
+      <p className="text-sm font-medium text-white/70">{video.comments_count} comments</p>
 
       {/* Comment Input */}
       <div className="flex items-center gap-3 mt-3 mb-3 md:my-5">
