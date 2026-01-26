@@ -76,7 +76,11 @@
       "Bash(pnpm run build:*)",
       "Bash(du:*)",
       "Skill(sync-project-docs)",
-      "Skill(sync-project-docs:*)"
+      "Skill(sync-project-docs:*)",
+      "Bash(node --version:*)",
+      "Bash(npm:*)",
+      "Bash(act:*)",
+      "Bash(gh extension:*)"
     ],
     "deny": [],
     "ask": []
