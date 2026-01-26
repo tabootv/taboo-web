@@ -10,27 +10,39 @@ import { cache } from 'react';
 
 import { getRequiredEnv } from '@/shared/lib/config/env';
 
-const FIRSTPROMOTER_API_KEY = getRequiredEnv('FIRSTPROMOTER_API_KEY');
-const FIRSTPROMOTER_ACCOUNT_ID = getRequiredEnv('FIRSTPROMOTER_ACCOUNT_ID');
-const V1_BASE_URL = getRequiredEnv('FIRSTPROMOTER_V1_API_URL');
-const V2_BASE_URL = getRequiredEnv('FIRSTPROMOTER_V2_API_URL');
-
 // Ensure this module is only used on the server
 if (globalThis.window !== undefined) {
   throw new TypeError('FirstPromoter client must only be used on the server');
 }
 
+// Lazy getters for environment variables (evaluated at runtime, not build time)
+function getApiKey(): string {
+  return getRequiredEnv('FIRSTPROMOTER_API_KEY');
+}
+
+function getAccountId(): string {
+  return getRequiredEnv('FIRSTPROMOTER_ACCOUNT_ID');
+}
+
+function getV1BaseUrl(): string {
+  return getRequiredEnv('FIRSTPROMOTER_V1_API_URL');
+}
+
+function getV2BaseUrl(): string {
+  return getRequiredEnv('FIRSTPROMOTER_V2_API_URL');
+}
+
 function getV1Headers(): HeadersInit {
   return {
-    Authorization: `Bearer ${FIRSTPROMOTER_API_KEY}`,
+    Authorization: `Bearer ${getApiKey()}`,
     Accept: 'application/json',
   };
 }
 
 function getV2Headers(): HeadersInit {
   return {
-    Authorization: `Bearer ${FIRSTPROMOTER_API_KEY}`,
-    'Account-ID': FIRSTPROMOTER_ACCOUNT_ID,
+    Authorization: `Bearer ${getApiKey()}`,
+    'Account-ID': getAccountId(),
     Accept: 'application/json',
   };
 }
@@ -260,7 +272,7 @@ export interface V2Payout {
 export const getPromoterProfile = cache(
   async (promoterId: number): Promise<PromoterProfile | null> => {
     try {
-      const response = await fetch(`${V1_BASE_URL}/promoters/show?id=${promoterId}`, {
+      const response = await fetch(`${getV1BaseUrl()}/promoters/show?id=${promoterId}`, {
         method: 'GET',
         headers: getV1Headers(),
         next: { revalidate: 60 },
@@ -335,7 +347,7 @@ export const getPromoterReports = cache(
       const endDateStr = new Date(endDate).toISOString().split('T')[0];
 
       const columns = 'clicks_count,referrals_count,customers_count,sales_count,revenue_amount';
-      const url = `${V2_BASE_URL}/reports/promoters?promoter_id=${promoterId}&start_date=${startDateStr}&end_date=${endDateStr}&group_by=${groupBy}&columns=${columns}`;
+      const url = `${getV2BaseUrl()}/reports/promoters?promoter_id=${promoterId}&start_date=${startDateStr}&end_date=${endDateStr}&group_by=${groupBy}&columns=${columns}`;
 
       const response = await fetch(url, {
         method: 'GET',
@@ -374,7 +386,7 @@ export const getRewardsList = cache(async (promoterId: number): Promise<RewardV1
   try {
     while (true) {
       const response = await fetch(
-        `${V1_BASE_URL}/rewards/list?promoter_id=${promoterId}&page=${page}&per_page=${perPage}`,
+        `${getV1BaseUrl()}/rewards/list?promoter_id=${promoterId}&page=${page}&per_page=${perPage}`,
         {
           method: 'GET',
           headers: getV1Headers(),
@@ -551,7 +563,7 @@ export const getPromoterEarningsData = cache(async (params: ReportParams) => {
 export const getPromoterProfileV2 = cache(
   async (promoterId: number): Promise<V2PromoterProfile | null> => {
     try {
-      const response = await fetch(`${V2_BASE_URL}/promoters/${promoterId}`, {
+      const response = await fetch(`${getV2BaseUrl()}/promoters/${promoterId}`, {
         method: 'GET',
         headers: getV2Headers(),
         next: { revalidate: 60 },
@@ -586,7 +598,7 @@ export const getCommissionsList = cache(
     const { page = 1, perPage = 20, startDate, endDate } = options;
 
     try {
-      let url = `${V2_BASE_URL}/commissions?promoter_id=${promoterId}&page=${page}&per_page=${perPage}`;
+      let url = `${getV2BaseUrl()}/commissions?promoter_id=${promoterId}&page=${page}&per_page=${perPage}`;
 
       if (startDate) {
         url += `&start_date=${new Date(startDate).toISOString().split('T')[0]}`;
@@ -634,7 +646,7 @@ export const getReferralsList = cache(
     const { page = 1, perPage = 20, state } = options;
 
     try {
-      let url = `${V2_BASE_URL}/referrals?promoter_id=${promoterId}&page=${page}&per_page=${perPage}`;
+      let url = `${getV2BaseUrl()}/referrals?promoter_id=${promoterId}&page=${page}&per_page=${perPage}`;
       if (state) {
         url += `&state=${state}`;
       }
@@ -675,7 +687,7 @@ export const getPayoutsList = cache(
     const { page = 1, perPage = 20 } = options;
 
     try {
-      const url = `${V2_BASE_URL}/payouts?promoter_id=${promoterId}&page=${page}&per_page=${perPage}`;
+      const url = `${getV2BaseUrl()}/payouts?promoter_id=${promoterId}&page=${page}&per_page=${perPage}`;
 
       const response = await fetch(url, {
         method: 'GET',

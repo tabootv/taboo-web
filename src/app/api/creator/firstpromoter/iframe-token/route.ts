@@ -2,8 +2,6 @@ import { getRequiredEnv } from '@/shared/lib/config/env';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
-const FIRSTPROMOTER_API_KEY = getRequiredEnv('FIRSTPROMOTER_API_KEY');
-
 // Mapping of user emails to FirstPromoter promoter IDs
 // TODO: Replace with database lookup once Laravel backend is ready
 const PROMOTER_ID_MAP: Record<string, number> = {
@@ -12,6 +10,7 @@ const PROMOTER_ID_MAP: Record<string, number> = {
 
 export async function GET() {
   try {
+    const FIRSTPROMOTER_API_KEY = getRequiredEnv('FIRSTPROMOTER_API_KEY');
     const cookieStore = await cookies();
     const token = cookieStore.get('tabootv_token')?.value;
 
@@ -19,7 +18,6 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { getRequiredEnv } = await import('@/shared/lib/config/env');
     const apiUrl = getRequiredEnv('NEXT_PUBLIC_API_URL');
 
     const userResponse = await fetch(`${apiUrl}/me`, {
