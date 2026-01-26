@@ -1,7 +1,7 @@
 'use client';
 
 import type { SearchCreator, SearchItem, SearchTag, SearchTitle } from '@/api/types';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/utils/formatting';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { CreatorAvatarCard, PosterCard, TagChip } from './PosterCard';
@@ -31,7 +31,7 @@ export function Rail({ label, items, type: _type = 'titles', onItemClick, classN
     checkArrows();
     const el = scrollRef.current;
     if (el) {
-      el.addEventListener('scroll', checkArrows);
+      el.addEventListener('scroll', checkArrows, { passive: true });
       window.addEventListener('resize', checkArrows);
       return () => {
         el.removeEventListener('scroll', checkArrows);

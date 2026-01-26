@@ -41,13 +41,11 @@ export function VideoRightSidebarCard({
   }
 
   // Filter tags to show (exclude +18, 18+, Sensitive)
-  const visibleTags = video.tags?.filter(
-    (tag) =>
-      tag.should_show &&
-      tag.name !== '+18' &&
-      tag.name !== '18+' &&
-      tag.name !== 'Sensitive'
-  ) || [];
+  const visibleTags =
+    video.tags?.filter(
+      (tag) =>
+        tag.should_show && tag.name !== '+18' && tag.name !== '18+' && tag.name !== 'Sensitive'
+    ) || [];
 
   return (
     <Link
@@ -95,9 +93,7 @@ export function VideoRightSidebarCard({
         )}
 
         <div className="flex items-center gap-1">
-          <p className="text-sm font-normal text-text-secondary">
-            {video.channel?.name}
-          </p>
+          <p className="text-sm font-normal text-text-secondary">{video.channel?.name}</p>
           <VerifiedBadge size={12} />
         </div>
       </div>

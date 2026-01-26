@@ -5,7 +5,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { subscriptionsClient } from '../client';
+import { subscriptionsClient } from '../client/subscriptions.client';
 import { queryKeys } from '../query-keys';
 
 /**
@@ -63,4 +63,3 @@ export function useSubscriptionInfo() {
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }
-

@@ -10,7 +10,7 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { useFeature } from '@/hooks/use-feature';
-import { useAuthStore } from '@/lib/stores';
+import { useAuthStore } from '@/shared/stores/auth-store';
 import { ChevronRight, Clapperboard } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';

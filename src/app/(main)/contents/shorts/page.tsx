@@ -1,15 +1,15 @@
 'use client';
-
 import { useEffect, useState, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Plus, Play, Edit, Trash2, Eye, ThumbsUp, MoreVertical } from 'lucide-react';
 import type { Video } from '@/types';
-import { Button, LoadingScreen, Spinner } from '@/components/ui';
-import { formatCompactNumber } from '@/lib/utils';
-import { useAuthStore } from '@/lib/stores';
+import { Button } from '@/components/ui/button';
+import { LoadingScreen, Spinner } from '@/components/ui/spinner';
+import { formatCompactNumber } from '@/shared/utils/formatting';
+import { useAuthStore } from '@/shared/stores/auth-store';
 import { toast } from 'sonner';
-import { apiClient } from '@/api/client';
+import { apiClient } from '@/api/client/base-client';
 
 export default function ContentShortsPage() {
   const { user } = useAuthStore();
@@ -35,7 +35,9 @@ export default function ContentShortsPage() {
         current_page?: number;
         last_page?: number;
       }
-      const response = await apiClient.get<ShortsResponse>('/contents/shorts', { params: { page: pageNum } });
+      const response = await apiClient.get<ShortsResponse>('/contents/shorts', {
+        params: { page: pageNum },
+      });
       const newShorts = response.videos?.data || response.data || [];
 
       if (reset) {
@@ -150,11 +152,7 @@ export default function ContentShortsPage() {
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {shortsList.map((short) => (
-            <ShortCard
-              key={short.uuid}
-              short={short}
-              onDelete={() => handleDelete(short)}
-            />
+            <ShortCard key={short.uuid} short={short} onDelete={() => handleDelete(short)} />
           ))}
         </div>
       )}

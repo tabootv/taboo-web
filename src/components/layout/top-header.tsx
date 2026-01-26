@@ -1,10 +1,10 @@
 'use client';
-
 import { SmartSearchDropdown } from '@/components/search';
-import { Avatar, Button } from '@/components/ui';
+import { Avatar } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/ui/logo';
 import { useSidebar } from '@/components/ui/sidebar';
-import { useAuthStore } from '@/lib/stores';
+import { useAuthStore } from '@/shared/stores/auth-store';
 import { Bell, LogOut, Menu, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';

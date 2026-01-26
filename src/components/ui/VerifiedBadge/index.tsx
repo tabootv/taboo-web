@@ -4,12 +4,7 @@ interface VerifiedBadgeProps {
 
 export function VerifiedBadge({ size = 18 }: VerifiedBadgeProps) {
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 500 500"
-      fill="none"
-    >
+    <svg width={size} height={size} viewBox="0 0 500 500" fill="none">
       {/* Red outer circle */}
       <path
         fill="#A80214"
@@ -32,4 +27,3 @@ export function VerifiedBadge({ size = 18 }: VerifiedBadgeProps) {
     </svg>
   );
 }
-

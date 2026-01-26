@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { videoClient } from '@/api/client';
-import { useAuthStore } from '@/lib/stores/auth-store';
+import { videoClient } from '@/api/client/video.client';
+import { useAuthStore } from '@/shared/stores/auth-store';
 
 interface AutoplayButtonProps {
   onAutoplayChange?: (enabled: boolean) => void;
@@ -39,9 +39,7 @@ export function AutoplayButton({ onAutoplayChange, initialValue }: AutoplayButto
     >
       <div
         className={`w-[26px] h-[14px] relative rounded-full overflow-hidden ${
-          autoplay
-            ? 'bg-gradient-to-r from-red-primary/80 to-surface/20'
-            : 'bg-surface'
+          autoplay ? 'bg-gradient-to-r from-red-primary/80 to-surface/20' : 'bg-surface'
         }`}
       >
         <div

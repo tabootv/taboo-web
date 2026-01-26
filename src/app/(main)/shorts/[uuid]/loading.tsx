@@ -1,6 +1,5 @@
-import { ShortPlayerSkeleton } from '@/components/shorts/ShortPlayerSkeleton';
+import { ShortPlayerSkeleton } from '../_components/ShortPlayerSkeleton';
 
 export default function ShortPageLoading() {
   return <ShortPlayerSkeleton />;
 }
-

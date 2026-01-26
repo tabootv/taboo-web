@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Mail, CheckCircle } from 'lucide-react';
-import { authClient } from '@/api/client';
-import { Button } from '@/components/ui';
+import { authClient } from '@/api/client/auth.client';
+import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/ui/logo';
 import { toast } from 'sonner';
 
@@ -44,7 +44,8 @@ export default function ForgotPasswordPage() {
             </div>
             <h1 className="text-2xl font-bold text-text-primary mb-3">Check Your Email</h1>
             <p className="text-text-secondary mb-6">
-              We&apos;ve sent a password reset link to <span className="text-text-primary font-medium">{email}</span>
+              We&apos;ve sent a password reset link to{' '}
+              <span className="text-text-primary font-medium">{email}</span>
             </p>
             <p className="text-sm text-text-secondary mb-6">
               Didn&apos;t receive the email? Check your spam folder or try again.
@@ -101,12 +102,13 @@ export default function ForgotPasswordPage() {
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-text-secondary mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-text-secondary mb-2">
                 Email Address
               </label>
               <div className="relative">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-secondary" />
                 <input
+                  id="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -117,11 +119,7 @@ export default function ForgotPasswordPage() {
               </div>
             </div>
 
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full btn-premium py-3"
-            >
+            <Button type="submit" disabled={isSubmitting} className="w-full btn-premium py-3">
               {isSubmitting ? 'Sending...' : 'Send Reset Link'}
             </Button>
           </form>
@@ -129,7 +127,10 @@ export default function ForgotPasswordPage() {
           {/* Footer */}
           <p className="text-center text-sm text-text-secondary mt-6">
             Remember your password?{' '}
-            <Link href="/sign-in" className="text-red-primary hover:text-red-hover transition-colors">
+            <Link
+              href="/sign-in"
+              className="text-red-primary hover:text-red-hover transition-colors"
+            >
               Sign In
             </Link>
           </p>

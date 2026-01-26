@@ -9,8 +9,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Logo } from '@/components/ui/logo';
 import { useSidebar } from '@/components/ui/sidebar';
-import { useAuthStore } from '@/lib/stores';
-import { getCreatorRoute } from '@/lib/utils';
+import { useAuthStore } from '@/shared/stores/auth-store';
+import { getCreatorRoute } from '@/shared/utils/formatting';
 import {
   Bell,
   ChevronDown,

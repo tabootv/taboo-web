@@ -113,27 +113,30 @@ export function FilterChips({
         return `
           ${base}
           rounded-full
-          ${isSelected
-            ? 'bg-red-primary text-white shadow-glow-medium'
-            : 'bg-white/5 text-text-secondary hover:bg-white/10 hover:text-white'
+          ${
+            isSelected
+              ? 'bg-red-primary text-white shadow-glow-medium'
+              : 'bg-white/5 text-text-secondary hover:bg-white/10 hover:text-white'
           }
         `;
       case 'underline':
         return `
           ${base}
           border-b-2 rounded-none
-          ${isSelected
-            ? 'border-red-primary text-white'
-            : 'border-transparent text-text-secondary hover:text-white hover:border-white/20'
+          ${
+            isSelected
+              ? 'border-red-primary text-white'
+              : 'border-transparent text-text-secondary hover:text-white hover:border-white/20'
           }
         `;
       default:
         return `
           ${base}
           rounded-xl
-          ${isSelected
-            ? 'bg-red-primary text-white shadow-glow-medium'
-            : 'bg-transparent text-text-secondary hover:bg-white/5 hover:text-white'
+          ${
+            isSelected
+              ? 'bg-red-primary text-white shadow-glow-medium'
+              : 'bg-transparent text-text-secondary hover:bg-white/5 hover:text-white'
           }
         `;
     }
@@ -181,10 +184,7 @@ export function FilterChips({
               <span
                 className={`
                   text-xs px-1.5 py-0.5 rounded-full
-                  ${selected === option.id
-                    ? 'bg-white/20'
-                    : 'bg-white/10'
-                  }
+                  ${selected === option.id ? 'bg-white/20' : 'bg-white/10'}
                 `}
               >
                 {option.count}

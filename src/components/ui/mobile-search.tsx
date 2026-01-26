@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search } from 'lucide-react';
-import { searchClient as searchApi } from '@/api/client';
+import { searchClient as searchApi } from '@/api/client/search.client';
 import { useDebounce } from '@/hooks';
 import type { Video, Series, Creator } from '@/types';
 import { Spinner } from './spinner';
@@ -92,25 +92,34 @@ export function MobileSearch({ isOpen, onClose }: MobileSearchProps) {
     inputRef.current?.focus();
   };
 
-  const handleItemClick = useCallback((href: string, searchQuery?: string) => {
-    if (searchQuery) {
-      saveRecentSearch(searchQuery);
-    } else if (query.trim()) {
-      saveRecentSearch(query);
-    }
-    router.push(href);
-    onClose();
-  }, [query, saveRecentSearch, router, onClose]);
+  const handleItemClick = useCallback(
+    (href: string, searchQuery?: string) => {
+      if (searchQuery) {
+        saveRecentSearch(searchQuery);
+      } else if (query.trim()) {
+        saveRecentSearch(query);
+      }
+      router.push(href);
+      onClose();
+    },
+    [query, saveRecentSearch, router, onClose]
+  );
 
-  const handleRemoveRecent = useCallback((e: React.MouseEvent, searchQuery: string) => {
-    e.stopPropagation();
-    e.preventDefault();
-    removeRecentSearch(searchQuery);
-  }, [removeRecentSearch]);
+  const handleRemoveRecent = useCallback(
+    (e: React.MouseEvent, searchQuery: string) => {
+      e.stopPropagation();
+      e.preventDefault();
+      removeRecentSearch(searchQuery);
+    },
+    [removeRecentSearch]
+  );
 
-  const handleRecentSearchClick = useCallback((searchQuery: string) => {
-    handleItemClick(`/searches?q=${encodeURIComponent(searchQuery)}`, searchQuery);
-  }, [handleItemClick]);
+  const handleRecentSearchClick = useCallback(
+    (searchQuery: string) => {
+      handleItemClick(`/searches?q=${encodeURIComponent(searchQuery)}`, searchQuery);
+    },
+    [handleItemClick]
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -184,11 +193,7 @@ export function MobileSearch({ isOpen, onClose }: MobileSearchProps) {
 
         {/* Search Results */}
         {query.trim() && !isLoading && hasResults && results && (
-          <MobileSearchResults
-            results={results}
-            query={query}
-            onItemClick={handleItemClick}
-          />
+          <MobileSearchResults results={results} query={query} onItemClick={handleItemClick} />
         )}
       </div>
     </div>

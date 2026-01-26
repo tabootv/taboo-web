@@ -5,7 +5,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { seriesClient } from '../client';
+import { seriesClient } from '../client/series.client';
 import { queryKeys } from '../query-keys';
 
 /**

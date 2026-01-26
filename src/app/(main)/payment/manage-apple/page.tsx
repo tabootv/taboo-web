@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { ArrowLeft, Apple, ExternalLink, Settings, CreditCard } from 'lucide-react';
-import { Button } from '@/components/ui';
+import { Button } from '@/components/ui/button';
 
 export default function ManageApplePage() {
   const openAppStoreSubscriptions = () => {
@@ -27,9 +27,7 @@ export default function ManageApplePage() {
           <Apple className="w-8 h-8 text-text-primary" />
         </div>
         <h1 className="text-2xl font-bold text-text-primary">Apple Subscription</h1>
-        <p className="text-text-secondary mt-2">
-          Manage your TabooTV subscription through Apple
-        </p>
+        <p className="text-text-secondary mt-2">Manage your TabooTV subscription through Apple</p>
       </div>
 
       {/* Info Cards */}
@@ -40,11 +38,10 @@ export default function ManageApplePage() {
               <Settings className="w-5 h-5 text-red-primary" />
             </div>
             <div>
-              <h3 className="font-semibold text-text-primary mb-1">
-                Manage Your Subscription
-              </h3>
+              <h3 className="font-semibold text-text-primary mb-1">Manage Your Subscription</h3>
               <p className="text-text-secondary text-sm">
-                Your subscription is managed through Apple. To change your plan, cancel, or update payment methods, you&apos;ll need to use your Apple ID settings.
+                Your subscription is managed through Apple. To change your plan, cancel, or update
+                payment methods, you&apos;ll need to use your Apple ID settings.
               </p>
             </div>
           </div>
@@ -56,11 +53,10 @@ export default function ManageApplePage() {
               <CreditCard className="w-5 h-5 text-blue-500" />
             </div>
             <div>
-              <h3 className="font-semibold text-text-primary mb-1">
-                Billing & Renewals
-              </h3>
+              <h3 className="font-semibold text-text-primary mb-1">Billing & Renewals</h3>
               <p className="text-text-secondary text-sm">
-                Apple handles all billing for your subscription. You can view your billing history and manage payment methods in your Apple ID settings.
+                Apple handles all billing for your subscription. You can view your billing history
+                and manage payment methods in your Apple ID settings.
               </p>
             </div>
           </div>
@@ -69,9 +65,7 @@ export default function ManageApplePage() {
 
       {/* Steps */}
       <div className="bg-surface rounded-xl border border-border p-6 mb-8">
-        <h3 className="font-semibold text-text-primary mb-4">
-          How to manage your subscription:
-        </h3>
+        <h3 className="font-semibold text-text-primary mb-4">How to manage your subscription:</h3>
         <ol className="space-y-3 text-text-secondary">
           <li className="flex gap-3">
             <span className="flex-shrink-0 w-6 h-6 bg-red-primary/10 text-red-primary rounded-full flex items-center justify-center text-sm font-medium">
@@ -101,10 +95,7 @@ export default function ManageApplePage() {
       </div>
 
       {/* Action Button */}
-      <Button
-        onClick={openAppStoreSubscriptions}
-        className="w-full btn-premium"
-      >
+      <Button onClick={openAppStoreSubscriptions} className="w-full btn-premium">
         <ExternalLink className="w-4 h-4 mr-2" />
         Open Apple Subscriptions
       </Button>

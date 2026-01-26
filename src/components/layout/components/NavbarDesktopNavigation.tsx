@@ -4,7 +4,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/utils/formatting';
 import { mainNavigation } from '../constants/navigation-constants';
 
 interface NavbarDesktopNavigationProps {
@@ -33,9 +33,7 @@ export function NavbarDesktopNavigation({ isSearchExpanded }: NavbarDesktopNavig
               isActive
                 ? 'bg-red-primary/10 text-red-primary'
                 : 'text-text-secondary hover:bg-hover hover:text-text-primary',
-              isSearchExpanded
-                ? 'px-2 py-2 text-sm gap-0'
-                : 'px-3 py-2 text-sm gap-2'
+              isSearchExpanded ? 'px-2 py-2 text-sm gap-0' : 'px-3 py-2 text-sm gap-2'
             )}
           >
             <item.icon className="w-4 h-4 flex-shrink-0" />
@@ -46,4 +44,3 @@ export function NavbarDesktopNavigation({ isSearchExpanded }: NavbarDesktopNavig
     </div>
   );
 }
-

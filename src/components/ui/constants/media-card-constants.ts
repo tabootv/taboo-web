@@ -28,4 +28,3 @@ export const MEDIA_CARD_IMAGE_SIZES = {
   md: '(max-width: 640px) 100vw, 33vw',
   lg: '(max-width: 640px) 100vw, 50vw',
 } as const;
-

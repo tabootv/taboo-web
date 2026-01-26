@@ -62,13 +62,16 @@ npm run test         # Unit tests (Vitest)
 
 ```
 src/
-├── app/              # Next.js App Router pages
+├── app/              # Next.js App Router (routes + colocated components)
+│   └── [route]/
+│       ├── _components/  # Route-specific components
+│       └── _actions.ts   # Route-specific server actions
 ├── api/              # TanStack Query API layer
-├── components/       # React components
+├── components/       # Shared React components
 │   ├── ui/           # Design system components
-│   ├── layout/       # Navbar, Footer, Sidebar
-│   └── video/        # Video player components
-├── lib/              # Utilities, stores, hooks
+│   └── layout/       # Navbar, Footer, Sidebar
+├── features/         # Feature modules (video, shorts, series)
+├── shared/           # Utilities, stores, lib
 └── types/            # TypeScript interfaces
 ```
 

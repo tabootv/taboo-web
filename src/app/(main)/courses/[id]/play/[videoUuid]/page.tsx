@@ -1,11 +1,12 @@
 'use client';
-
 import { useToggleAutoplay } from '@/api/mutations';
-import { useCourseDetail, useCoursePlay, useMe } from '@/api/queries';
-import { CoursePlayerPageSkeleton, LessonCardPlayer } from '@/components/courses';
+import { useCourseDetail, useCoursePlay } from '@/api/queries/courses.queries';
+import { useMe } from '@/api/queries/auth.queries';
+import { CoursePlayerPageSkeleton } from '../../../_components/CoursePlayerPageSkeleton';
+import { LessonCardPlayer } from '../../../_components/LessonCardPlayer';
 import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
-import { VideoPlayerSkeleton } from '@/components/video';
-import { cn, formatDuration, formatRelativeTime, getCreatorRoute } from '@/lib/utils';
+import { VideoPlayerSkeleton } from '@/features/video/components/VideoPlayerSkeleton';
+import { cn, formatDuration, formatRelativeTime, getCreatorRoute } from '@/shared/utils/formatting';
 import { ChevronRight, Clock, Play, SkipForward } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
@@ -14,7 +15,10 @@ import { useRouter } from 'next/navigation';
 import { use, useCallback, useEffect, useRef, useState } from 'react';
 
 const VideoPlayer = dynamic(
-  () => import('@/features/video').then((mod) => ({ default: mod.VideoPlayer })),
+  () =>
+    import('@/features/video/components/video-player').then((mod) => ({
+      default: mod.VideoPlayer,
+    })),
   {
     loading: () => <VideoPlayerSkeleton />,
     ssr: false,
@@ -164,10 +168,7 @@ export default function CoursePlayerPage({
 
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-4 pb-4 border-b border-white/10">
               <div className="flex items-center gap-3">
-                <Link
-                  href={getCreatorRoute(currentVideo.channel?.handler)}
-                  className="shrink-0"
-                >
+                <Link href={getCreatorRoute(currentVideo.channel?.handler)} className="shrink-0">
                   <div className="relative w-10 h-10 rounded-full overflow-hidden">
                     {currentVideo.channel?.dp ? (
                       <Image

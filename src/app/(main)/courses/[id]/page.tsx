@@ -1,11 +1,11 @@
 'use client';
-
-import { useCourseDetail } from '@/api/queries';
-import { CoursePageSkeleton, LessonCard } from '@/components/courses';
-import { VerifiedBadge } from '@/components/ui';
-import { VideoPlayerSkeleton } from '@/components/video';
-import { useAuthStore } from '@/lib/stores/auth-store';
-import { cn, formatDuration, getCreatorRoute } from '@/lib/utils';
+import { useCourseDetail } from '@/api/queries/courses.queries';
+import { CoursePageSkeleton } from '../_components/CoursePageSkeleton';
+import { LessonCard } from '../_components/LessonCard';
+import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
+import { VideoPlayerSkeleton } from '@/features/video/components/VideoPlayerSkeleton';
+import { useAuthStore } from '@/shared/stores/auth-store';
+import { cn, formatDuration, getCreatorRoute } from '@/shared/utils/formatting';
 import { BookOpen, ChevronDown, Clock, GraduationCap, LogIn, Play, Users } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
@@ -14,7 +14,10 @@ import { useRouter } from 'next/navigation';
 import { use, useRef, useState } from 'react';
 
 const VideoPlayer = dynamic(
-  () => import('@/features/video').then((mod) => ({ default: mod.VideoPlayer })),
+  () =>
+    import('@/features/video/components/video-player').then((mod) => ({
+      default: mod.VideoPlayer,
+    })),
   {
     loading: () => <VideoPlayerSkeleton />,
     ssr: false,

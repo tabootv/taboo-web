@@ -1,20 +1,25 @@
 'use client';
 
-import { useCreatePost, useDeletePost } from '@/api/mutations';
-import { usePostsList } from '@/api/queries';
-import { CreatePostCard, FeedPost, PostSkeleton } from '@/components/community';
-import { useAuthStore } from '@/lib/stores';
+import { useCreatePost } from '@/api/mutations';
+import { usePostsList } from '@/api/queries/posts.queries';
+import { CreatePostCard } from './_components/CreatePostCard';
+import { FeedPost } from './_components/FeedPost';
+import { PostSkeleton } from './_components/PostSkeleton';
+import { useAuthStore } from '@/shared/stores/auth-store';
 import { MessageCircle, Rss, Star } from 'lucide-react';
 import Link from 'next/link';
-import { useMemo } from 'react';
+import { useMemo, useTransition } from 'react';
+import { deletePostAction } from './_actions';
+import { toast } from 'sonner';
 
 export default function CommunityPage() {
   const { user } = useAuthStore();
+  const [, startTransition] = useTransition();
 
-  const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } = usePostsList();
+  const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage, refetch } =
+    usePostsList();
 
   const createPost = useCreatePost();
-  const deletePost = useDeletePost();
 
   const postsList = useMemo(() => {
     return data?.pages.flatMap((page) => page.data) || [];
@@ -25,14 +30,21 @@ export default function CommunityPage() {
   };
 
   const handleDeletePost = (id: number) => {
-    deletePost.mutate(id);
+    startTransition(async () => {
+      const result = await deletePostAction(id);
+      if (result.success) {
+        toast.success('Post deleted');
+        refetch();
+      } else {
+        toast.error('Failed to delete post');
+      }
+    });
   };
 
   return (
     <div className="series-page-atmosphere min-h-screen">
       {/* Atmospheric Background */}
       <div className="series-atmosphere-bg" />
-
       <div className="relative z-10">
         {/* Title left-aligned, tabs centered on the same line */}
         <div className="max-w-[1280px] mx-auto px-4 md:px-6 lg:px-8 pt-4 pb-3">

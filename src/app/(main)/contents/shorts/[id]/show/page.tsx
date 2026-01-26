@@ -1,16 +1,16 @@
 'use client';
-
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, Edit, Eye, ThumbsUp, MessageCircle, Clock, ExternalLink } from 'lucide-react';
-import { Button, LoadingScreen } from '@/components/ui';
-import { VideoPlayer } from '@/features/video';
-import { useAuthStore } from '@/lib/stores';
-import { formatCompactNumber, formatDuration, formatRelativeTime } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { LoadingScreen } from '@/components/ui/spinner';
+import { VideoPlayer } from '@/features/video/components/video-player';
+import { useAuthStore } from '@/shared/stores/auth-store';
+import { formatCompactNumber, formatDuration, formatRelativeTime } from '@/shared/utils/formatting';
 import { toast } from 'sonner';
-import { apiClient } from '@/api/client';
+import { apiClient } from '@/api/client/base-client';
 import type { Video } from '@/types';
 
 export default function ShowShortPage({ params }: { params: Promise<{ id: string }> }) {
@@ -25,12 +25,15 @@ export default function ShowShortPage({ params }: { params: Promise<{ id: string
     async function fetchShort() {
       try {
         setIsLoading(true);
-        const response = await apiClient.get<{ video?: Video; data?: Video } | Video>(`/contents/shorts/${id}`);
-        const shortData = response && typeof response === 'object' && 'video' in response
-          ? response.video
-          : response && typeof response === 'object' && 'data' in response
-            ? response.data
-            : response as Video;
+        const response = await apiClient.get<{ video?: Video; data?: Video } | Video>(
+          `/contents/shorts/${id}`
+        );
+        const shortData =
+          response && typeof response === 'object' && 'video' in response
+            ? response.video
+            : response && typeof response === 'object' && 'data' in response
+              ? response.data
+              : (response as Video);
         setShort(shortData ?? null);
       } catch (err) {
         console.error('Failed to fetch short:', err);

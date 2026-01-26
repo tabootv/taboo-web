@@ -4,9 +4,9 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Mail, Lock, AlertCircle, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui';
-import { profileClient as profileApi } from '@/api/client';
-import { useAuthStore } from '@/lib/stores';
+import { Button } from '@/components/ui/button';
+import { profileClient as profileApi } from '@/api/client/profile.client';
+import { useAuthStore } from '@/shared/stores/auth-store';
 import { toast } from 'sonner';
 
 export default function EditEmailPage() {
@@ -44,7 +44,9 @@ export default function EditEmailPage() {
       router.push('/profile');
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
-      setError(err.response?.data?.message || 'Failed to update email. Please check your password.');
+      setError(
+        err.response?.data?.message || 'Failed to update email. Please check your password.'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -123,12 +125,7 @@ export default function EditEmailPage() {
 
         {/* Actions */}
         <div className="flex gap-3 pt-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => router.back()}
-            className="flex-1"
-          >
+          <Button type="button" variant="outline" onClick={() => router.back()} className="flex-1">
             Cancel
           </Button>
           <Button type="submit" disabled={isLoading} className="flex-1 btn-premium">

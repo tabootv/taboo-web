@@ -1,14 +1,14 @@
 'use client';
-
 import { useState, useRef, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, X, Film, AlertCircle, Loader2 } from 'lucide-react';
-import { Button, LoadingScreen } from '@/components/ui';
-import { useAuthStore } from '@/lib/stores';
+import { Button } from '@/components/ui/button';
+import { LoadingScreen } from '@/components/ui/spinner';
+import { useAuthStore } from '@/shared/stores/auth-store';
 import { toast } from 'sonner';
-import { apiClient } from '@/api/client';
+import { apiClient } from '@/api/client/base-client';
 import type { Video } from '@/types';
 
 export default function EditVideoPage({ params }: { params: Promise<{ id: string }> }) {
@@ -35,12 +35,16 @@ export default function EditVideoPage({ params }: { params: Promise<{ id: string
     async function fetchVideo() {
       try {
         setIsLoading(true);
-        const response = await apiClient.get<{ video?: Video; data?: Video } | Video>(`/contents/videos/${id}`);
-        const videoData = (response && typeof response === 'object' && 'video' in response
-          ? response.video
-          : response && typeof response === 'object' && 'data' in response
-            ? response.data
-            : response) as Video;
+        const response = await apiClient.get<{ video?: Video; data?: Video } | Video>(
+          `/contents/videos/${id}`
+        );
+        const videoData = (
+          response && typeof response === 'object' && 'video' in response
+            ? response.video
+            : response && typeof response === 'object' && 'data' in response
+              ? response.data
+              : response
+        ) as Video;
         setVideo(videoData);
         setFormData({
           title: videoData.title || '',
@@ -154,9 +158,7 @@ export default function EditVideoPage({ params }: { params: Promise<{ id: string
 
         {/* Thumbnail */}
         <div>
-          <label className="block text-sm font-medium text-text-primary mb-2">
-            Thumbnail
-          </label>
+          <label className="block text-sm font-medium text-text-primary mb-2">Thumbnail</label>
           {thumbnailPreview ? (
             <div className="relative w-64 aspect-video rounded-lg overflow-hidden">
               <Image src={thumbnailPreview} alt="Thumbnail" fill className="object-cover" />

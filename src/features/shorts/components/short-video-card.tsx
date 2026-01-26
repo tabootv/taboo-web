@@ -1,20 +1,15 @@
 'use client';
 
-import { useRef, useState, useEffect, useCallback, memo } from 'react';
+import { useToggleShortLike } from '@/api/mutations/shorts.mutations';
+import { usePrefersReducedMotion } from '@/hooks';
+import { useShortsStore } from '@/shared/stores/shorts-store';
+import { formatCompactNumber, getCreatorRoute } from '@/shared/utils/formatting';
+import type { Video } from '@/types';
+import { Heart, Play, Volume2, VolumeX } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import {
-  Heart,
-  Volume2,
-  VolumeX,
-  Play,
-} from 'lucide-react';
-import { useShortsStore } from '@/lib/stores/shorts-store';
-import { videoClient } from '@/api/client';
-import { formatCompactNumber, getCreatorRoute } from '@/lib/utils';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import type { Video } from '@/types';
-import { usePrefersReducedMotion } from '@/hooks';
 
 interface ShortVideoCardProps {
   video: Video;
@@ -26,7 +21,12 @@ interface ShortVideoCardProps {
 // Detect if we're on a desktop/high-bandwidth device
 const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 768;
 
-function ShortVideoCardComponent({ video, index: _index, isActive, isNearActive = false }: ShortVideoCardProps) {
+function ShortVideoCardComponent({
+  video,
+  index: _index,
+  isActive,
+  isNearActive = false,
+}: ShortVideoCardProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
   const lastTapRef = useRef<number>(0);
@@ -41,13 +41,12 @@ function ShortVideoCardComponent({ video, index: _index, isActive, isNearActive 
   const [heartPosition, setHeartPosition] = useState({ x: 0, y: 0 });
   const lastProgressUpdate = useRef<number>(0);
 
-  const {
-    isMuted,
-    toggleMute,
-    hasLiked,
-    setHasLiked,
-  } = useShortsStore();
+  const { isMuted, toggleMute } = useShortsStore();
   const prefersReducedMotion = usePrefersReducedMotion();
+  const toggleLike = useToggleShortLike();
+
+  // Get like state from video prop (managed by React Query)
+  const hasLiked = video.has_liked ?? false;
 
   // Keep ref in sync with store value
   useEffect(() => {
@@ -56,16 +55,13 @@ function ShortVideoCardComponent({ video, index: _index, isActive, isNearActive 
 
   // Better video source selection: prefer higher quality on desktop
   const videoSrc = isDesktop
-    ? (video.url_720 || video.url_1080 || video.url_480 || video.hls_url || '')
-    : (video.url_480 || video.url_720 || video.hls_url || '');
+    ? video.url_720 || video.url_1080 || video.url_480 || video.hls_url || ''
+    : video.url_480 || video.url_720 || video.hls_url || '';
   const likesCount = video.likes_count ?? 0;
 
   // Determine preload strategy based on active/near-active state
-  const preloadStrategy = isActive && !prefersReducedMotion
-    ? 'auto'
-    : isNearActive
-      ? 'metadata'
-      : 'none';
+  const preloadStrategy =
+    isActive && !prefersReducedMotion ? 'auto' : isNearActive ? 'metadata' : 'none';
 
   // Helper to attempt playback
   const attemptPlay = useCallback(async () => {
@@ -176,33 +172,45 @@ function ShortVideoCardComponent({ video, index: _index, isActive, isNearActive 
     }
   }, []);
 
+  // Toggle like using mutation
+  const handleToggleLike = useCallback(() => {
+    toggleLike.mutate(video.uuid, {
+      onError: () => {
+        toast.error('Please login to like');
+      },
+    });
+  }, [toggleLike, video.uuid]);
+
   // Double tap to like
-  const handleVideoTap = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const now = Date.now();
-    const timeSinceLastTap = now - lastTapRef.current;
+  const handleVideoTap = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      const now = Date.now();
+      const timeSinceLastTap = now - lastTapRef.current;
 
-    if (timeSinceLastTap < 300 && timeSinceLastTap > 0) {
-      // Double tap - like
-      if (!prefersReducedMotion) {
-        const rect = e.currentTarget.getBoundingClientRect();
-        setHeartPosition({
-          x: e.clientX - rect.left,
-          y: e.clientY - rect.top,
-        });
-        setShowHeartAnimation(true);
-        setTimeout(() => setShowHeartAnimation(false), 1000);
+      if (timeSinceLastTap < 300 && timeSinceLastTap > 0) {
+        // Double tap - like
+        if (!prefersReducedMotion) {
+          const rect = e.currentTarget.getBoundingClientRect();
+          setHeartPosition({
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top,
+          });
+          setShowHeartAnimation(true);
+          setTimeout(() => setShowHeartAnimation(false), 1000);
+        }
+
+        if (!hasLiked) {
+          handleToggleLike();
+        }
+      } else {
+        // Single tap - toggle play
+        togglePlay();
       }
 
-      if (!hasLiked) {
-        handleToggleLike();
-      }
-    } else {
-      // Single tap - toggle play
-      togglePlay();
-    }
-
-    lastTapRef.current = now;
-  }, [hasLiked, togglePlay]);
+      lastTapRef.current = now;
+    },
+    [hasLiked, togglePlay, prefersReducedMotion, handleToggleLike]
+  );
 
   // Seek on progress bar click
   const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -213,24 +221,12 @@ function ShortVideoCardComponent({ video, index: _index, isActive, isNearActive 
     }
   };
 
-  const handleToggleLike = async () => {
-    try {
-      await videoClient.toggleLike(video.uuid);
-      setHasLiked(!hasLiked);
-    } catch {
-      toast.error('Please login to like');
-    }
-  };
-
   return (
     <div className="relative h-full w-full flex items-center justify-center bg-black shorts-slide-content">
       {/* Video Container - Full screen on mobile, centered on desktop */}
       <div className="relative h-full w-full md:max-h-full md:aspect-[9/16] md:w-auto shorts-video-wrapper">
         {/* Video */}
-        <div
-          className="relative h-full w-full cursor-pointer"
-          onClick={handleVideoTap}
-        >
+        <div className="relative h-full w-full cursor-pointer" onClick={handleVideoTap}>
           <video
             ref={videoRef}
             className="h-full w-full object-cover"
@@ -261,9 +257,7 @@ function ShortVideoCardComponent({ video, index: _index, isActive, isNearActive 
               className="absolute pointer-events-none z-50"
               style={{ left: heartPosition.x - 50, top: heartPosition.y - 50 }}
             >
-              <Heart
-                className="w-[100px] h-[100px] text-red-500 fill-red-500 animate-heart-pop"
-              />
+              <Heart className="w-[100px] h-[100px] text-red-500 fill-red-500 animate-heart-pop" />
             </div>
           )}
         </div>
@@ -344,9 +338,7 @@ function ShortVideoCardComponent({ video, index: _index, isActive, isNearActive 
           </Link>
 
           {/* Caption */}
-          <p className="text-white text-sm mt-2 line-clamp-2 leading-relaxed">
-            {video.title}
-          </p>
+          <p className="text-white text-sm mt-2 line-clamp-2 leading-relaxed">{video.title}</p>
 
           {/* Tags */}
           {video.tags && video.tags.length > 0 && (
@@ -401,9 +393,7 @@ function ActionButton({
         `}
       />
       {count !== undefined && (
-        <span className="text-white text-xs font-medium">
-          {formatCompactNumber(count)}
-        </span>
+        <span className="text-white text-xs font-medium">{formatCompactNumber(count)}</span>
       )}
     </button>
   );
@@ -416,6 +406,7 @@ export const ShortVideoCard = memo(ShortVideoCardComponent, (prevProps, nextProp
     prevProps.isActive === nextProps.isActive &&
     prevProps.isNearActive === nextProps.isNearActive &&
     prevProps.video.uuid === nextProps.video.uuid &&
-    prevProps.video.likes_count === nextProps.video.likes_count
+    prevProps.video.likes_count === nextProps.video.likes_count &&
+    prevProps.video.has_liked === nextProps.video.has_liked
   );
 });

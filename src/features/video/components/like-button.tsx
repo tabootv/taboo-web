@@ -1,6 +1,6 @@
 'use client';
 
-import { videoClient } from '@/api/client';
+import { videoClient } from '@/api/client/video.client';
 import type { Video } from '@/types';
 import { Heart } from 'lucide-react';
 import { useCallback, useState } from 'react';

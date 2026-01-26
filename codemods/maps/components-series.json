@@ -1,0 +1,8 @@
+{
+  "EpisodeCard": "@/app/(main)/series/_components/EpisodeCard",
+  "PlayerPageSkeleton": "@/app/(main)/series/_components/PlayerPageSkeleton",
+  "SeriesCardSkeleton": "@/app/(main)/series/_components/SeriesCardSkeleton",
+  "SeriesPageSkeleton": "@/app/(main)/series/_components/SeriesPageSkeleton",
+  "SeriesPremiumCard": "@/app/(main)/series/_components/SeriesPremiumCard",
+  "TrailerModal": "@/app/(main)/series/_components/TrailerModal"
+}

@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect, useCallback } from 'react';
 import { Menu, X } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/utils/formatting';
 import { Logo } from '@/components/ui/logo';
 import { useSearchExpansion } from '@/components/search/hooks/use-search-expansion';
 import { useMobileMenu } from './hooks/use-mobile-menu';
@@ -17,8 +17,17 @@ export function Navbar() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [isScrolled, setIsScrolled] = useState(false);
-  const { isExpanded: isSearchExpanded, inputRef: searchInputRef, toggle: handleSearchToggle, collapse: handleSearchClose } = useSearchExpansion();
-  const { isMobileMenuOpen, toggleMenu: toggleMobileMenu, closeMenu: closeMobileMenu } = useMobileMenu();
+  const {
+    isExpanded: isSearchExpanded,
+    inputRef: searchInputRef,
+    toggle: handleSearchToggle,
+    collapse: handleSearchClose,
+  } = useSearchExpansion();
+  const {
+    isMobileMenuOpen,
+    toggleMenu: toggleMobileMenu,
+    closeMenu: closeMobileMenu,
+  } = useMobileMenu();
 
   // Check if we're on the home page for transparent header
   const isHomePage = pathname === '/home' || pathname === '/';
@@ -64,7 +73,9 @@ export function Navbar() {
           <div
             className={cn(
               'transition-all duration-300 flex-shrink-0',
-              isSearchExpanded ? 'lg:opacity-100 lg:w-auto opacity-0 w-0 overflow-hidden' : 'opacity-100'
+              isSearchExpanded
+                ? 'lg:opacity-100 lg:w-auto opacity-0 w-0 overflow-hidden'
+                : 'opacity-100'
             )}
           >
             <Logo size="md" linkTo="/home" />

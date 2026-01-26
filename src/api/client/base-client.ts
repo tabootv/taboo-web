@@ -6,7 +6,7 @@
  */
 
 import { getRequiredEnv } from '@/shared/lib/config/env';
-import { redirect } from '@/shared/lib/utils/redirect';
+import { redirect } from '@/shared/utils/redirect';
 import axios, {
   AxiosError,
   AxiosInstance,
@@ -26,6 +26,7 @@ const getBaseURL = (): string => {
 
 export interface RequestConfig extends AxiosRequestConfig {
   params?: Record<string, unknown> | undefined;
+  serverToken?: string;
 }
 
 class ApiClient {
@@ -47,7 +48,9 @@ class ApiClient {
   private setupInterceptors(): void {
     this.client.interceptors.request.use(
       (config: InternalAxiosRequestConfig) => {
-        const token = this.getToken();
+        const serverToken = (config as RequestConfig).serverToken;
+        const token = serverToken || this.getToken();
+
         if (token && config.headers) {
           config.headers.Authorization = `Bearer ${token}`;
         }
@@ -84,7 +87,8 @@ class ApiClient {
     );
   }
 
-  getToken(): string | undefined {
+  getToken(serverToken?: string): string | undefined {
+    if (serverToken) return serverToken;
     if (globalThis.window === undefined) return undefined;
     return Cookies.get(TOKEN_KEY);
   }

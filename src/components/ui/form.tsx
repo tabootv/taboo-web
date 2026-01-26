@@ -12,7 +12,7 @@ import {
   type FieldValues,
 } from 'react-hook-form';
 
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/utils/formatting';
 
 const Form = FormProvider;
 
@@ -89,11 +89,7 @@ const FormLabel = React.forwardRef<
   return (
     <LabelPrimitive.Root
       ref={ref}
-      className={cn(
-        'text-sm font-medium text-white',
-        error && 'text-red-400',
-        className
-      )}
+      className={cn('text-sm font-medium text-white', error && 'text-red-400', className)}
       htmlFor={formItemId}
       {...props}
     />

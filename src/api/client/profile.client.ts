@@ -86,7 +86,10 @@ export const profileClient = {
    * Update password
    */
   updatePassword: async (passwordData: UpdatePasswordData): Promise<{ message: string }> => {
-    const data = await apiClient.post<{ message: string }>('/profile/update-password', passwordData);
+    const data = await apiClient.post<{ message: string }>(
+      '/profile/update-password',
+      passwordData
+    );
     return data;
   },
 
@@ -98,4 +101,3 @@ export const profileClient = {
     removeToken();
   },
 };
-

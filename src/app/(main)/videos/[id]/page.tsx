@@ -1,13 +1,15 @@
 'use client';
-
-import { useRelatedVideos, useVideoPlay } from '@/api/queries';
-import { Button, LoadingScreen } from '@/components/ui';
+import { useRelatedVideos, useVideoPlay } from '@/api/queries/video.queries';
+import { Button } from '@/components/ui/button';
+import { LoadingScreen } from '@/components/ui/spinner';
 import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
-import { VideoPlayerSkeleton } from '@/components/video';
-import { LikeButton, SaveButton, VideoComments } from '@/features/video';
-import { useAuthStore } from '@/lib/stores/auth-store';
-import { formatRelativeTime, getCreatorRoute } from '@/lib/utils';
-import { getTagKey, normalizeTags } from '@/lib/utils/tags';
+import { VideoPlayerSkeleton } from '@/features/video/components/VideoPlayerSkeleton';
+import { LikeButton } from '@/features/video/components/like-button';
+import { SaveButton } from '@/features/video/components/save-button';
+import { VideoComments } from '@/features/video/components/video-comments';
+import { useAuthStore } from '@/shared/stores/auth-store';
+import { formatRelativeTime, getCreatorRoute } from '@/shared/utils/formatting';
+import { getTagKey, normalizeTags } from '@/shared/utils/tags';
 import type { Tag, Video } from '@/types';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import dynamic from 'next/dynamic';
@@ -17,7 +19,10 @@ import { useParams, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 const VideoPlayer = dynamic(
-  () => import('@/features/video').then((mod) => ({ default: mod.VideoPlayer })),
+  () =>
+    import('@/features/video/components/video-player').then((mod) => ({
+      default: mod.VideoPlayer,
+    })),
   {
     loading: () => <VideoPlayerSkeleton />,
     ssr: false,
@@ -58,7 +63,7 @@ export default function VideoPage() {
 
   const relatedVideos = useMemo(() => {
     const MIN_VIDEOS = 10;
-    let allVideos = playData?.videos || [];
+    const allVideos = playData?.videos || [];
 
     // Supplement with related videos if needed
     if (allVideos.length < MIN_VIDEOS && relatedData?.data) {
@@ -155,7 +160,7 @@ export default function VideoPage() {
   useEffect(() => {
     const el = tagsScrollRef.current;
     if (el) {
-      el.addEventListener('scroll', handleTagsScroll);
+      el.addEventListener('scroll', handleTagsScroll, { passive: true });
       handleTagsScroll();
       return () => el.removeEventListener('scroll', handleTagsScroll);
     }
@@ -269,10 +274,7 @@ export default function VideoPage() {
 
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-3 pb-4">
               <div className="flex items-center gap-3">
-                <Link
-                  href={getCreatorRoute(video.channel?.handler)}
-                  className="shrink-0"
-                >
+                <Link href={getCreatorRoute(video.channel?.handler)} className="shrink-0">
                   <div className="relative size-10 rounded-full overflow-hidden">
                     {video.channel?.dp ? (
                       <Image

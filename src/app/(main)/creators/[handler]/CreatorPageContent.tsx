@@ -2,20 +2,17 @@
 
 import { useCreatorByHandler, useCreatorProfile } from '@/api/queries/creators.queries';
 import { useVideos } from '@/api/queries/video.queries';
-import {
-  CreatorEducationTab,
-  CreatorHeader,
-  CreatorHomeTab,
-  CreatorPostsTab,
-  CreatorSeriesTab,
-  CreatorShortsTab,
-  CreatorTabs,
-  CreatorVideosTab,
-  type TabConfig,
-  type TabType,
-} from '@/components/sections/CreatorProfile';
-import { Button } from '@/components/ui';
-import { buildSocialUrl } from '@/lib/utils/social';
+import { CreatorHeader } from './_components/CreatorHeader';
+import { CreatorTabs } from './_components/CreatorTabs';
+import { CreatorHomeTab } from './_components/tabs/CreatorHomeTab';
+import { CreatorVideosTab } from './_components/tabs/CreatorVideosTab';
+import { CreatorShortsTab } from './_components/tabs/CreatorShortsTab';
+import { CreatorSeriesTab } from './_components/tabs/CreatorSeriesTab';
+import { CreatorPostsTab } from './_components/tabs/CreatorPostsTab';
+import { CreatorEducationTab } from './_components/tabs/CreatorEducationTab';
+import type { TabConfig, TabType } from './_components/types';
+import { Button } from '@/components/ui/button';
+import { buildSocialUrl } from '@/shared/utils/social';
 import { Globe, Play, PlaySquare } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
@@ -106,11 +103,11 @@ export function CreatorPageContent({ handler }: CreatorPageContentProps) {
   const { data: videosData } = useVideos(
     creator
       ? {
-        creators: String(creator.id),
-        short: false,
-        sort_by: 'latest',
-        per_page: 1,
-      }
+          creators: String(creator.id),
+          short: false,
+          sort_by: 'latest',
+          per_page: 1,
+        }
       : undefined,
     {
       enabled: !!creator?.id,
@@ -244,9 +241,7 @@ export function CreatorPageContent({ handler }: CreatorPageContentProps) {
 
       <CreatorTabs activeTab={activeTab} onTabChange={setActiveTab} tabs={tabs} />
 
-      {activeTab === 'home' && (
-        <CreatorHomeTab creator={creator} onTabChange={setActiveTab} />
-      )}
+      {activeTab === 'home' && <CreatorHomeTab creator={creator} onTabChange={setActiveTab} />}
 
       {activeTab === 'videos' && <CreatorVideosTab creator={creator} />}
 

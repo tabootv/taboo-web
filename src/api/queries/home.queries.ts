@@ -5,7 +5,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { homeClient } from '../client';
+import { homeClient } from '../client/home.client';
 import { queryKeys } from '../query-keys';
 
 /**

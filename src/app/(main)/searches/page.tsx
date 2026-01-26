@@ -1,8 +1,8 @@
 'use client';
 
-import { Spinner } from '@/components/ui';
+import { Spinner } from '@/components/ui/spinner';
 import { useMixedSearch } from '@/hooks/useMixedSearch';
-import { formatDuration, getCreatorRoute } from '@/lib/utils';
+import { formatDuration, getCreatorRoute } from '@/shared/utils/formatting';
 import type { Creator, Video } from '@/types';
 import { Search as SearchIcon, X } from 'lucide-react';
 import Image from 'next/image';
@@ -16,13 +16,8 @@ function SearchContent() {
 
   const [query, setQuery] = useState(initialQuery);
 
-  const {
-    filteredVideos,
-    filteredCreators,
-    isLoading,
-    countryHeader,
-    hasResults,
-  } = useMixedSearch(query);
+  const { filteredVideos, filteredCreators, isLoading, countryHeader, hasResults } =
+    useMixedSearch(query);
 
   useEffect(() => {
     if (query !== initialQuery) {
@@ -178,7 +173,6 @@ function VideoCard({ video }: { video: Video }) {
     </Link>
   );
 }
-
 
 function CreatorCard({ creator }: { creator: Creator }) {
   return (

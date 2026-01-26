@@ -10,8 +10,8 @@ import type {
   UpdateEmailData,
   UpdatePasswordData,
   UpdateProfileData,
-} from '../client';
-import { profileClient } from '../client';
+} from '../client/profile.client';
+import { profileClient } from '../client/profile.client';
 
 /**
  * Hook to update profile
@@ -95,4 +95,3 @@ export function useDeleteAccount() {
     },
   });
 }
-

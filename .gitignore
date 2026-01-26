@@ -42,3 +42,7 @@ next-env.d.ts
 
 depreciated
 qa-reports
+audit-report.xml
+squirrel.toml
+component-analysis
+metrics

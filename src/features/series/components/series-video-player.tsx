@@ -1,6 +1,6 @@
 'use client';
 
-import { VideoPlayer } from '@/features/video';
+import { VideoPlayer } from '@/features/video/components/video-player';
 import type { Video } from '@/types';
 import { useSearchParams } from 'next/navigation';
 import { UpNextOverlay } from './up-next-overlay';
@@ -55,4 +55,3 @@ export function SeriesVideoPlayer({
     </div>
   );
 }
-

@@ -21,7 +21,7 @@ import {
   SidebarRail,
   SidebarSeparator,
 } from '@/components/ui/sidebar';
-import { useAuthStore } from '@/lib/stores';
+import { useAuthStore } from '@/shared/stores/auth-store';
 import { ChevronUp, CreditCard, LogOut, Settings, User2 } from 'lucide-react';
 import Link from 'next/link';
 import { NavMain } from './nav-main';

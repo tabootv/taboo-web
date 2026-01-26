@@ -1,12 +1,12 @@
 'use client';
-
-import { VideoListFilters } from '@/api';
-import { useCreatorsListPublic, useVideoList } from '@/api/queries';
+import type { VideoListFilters } from '@/api/client/video.client';
+import { useCreatorsListPublic } from '@/api/queries/creators.queries';
 import { useCountries, useTags } from '@/api/queries/public.queries';
-import { MediaPreviewModal } from '@/components/home/media-preview-modal';
+import { useVideoList } from '@/api/queries/video.queries';
 import type { Video } from '@/types';
 import { Film } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { MediaPreviewModal } from '../home/_components/media-preview-modal';
 import { SelectFilter } from './components/select-filter';
 import { VideoCardEnhanced } from './components/video-card-enhanced';
 import { VideoGridSkeleton } from './components/video-grid-skeleton';
@@ -29,8 +29,6 @@ export default function VideosPage() {
   const { data: creatorsData } = useCreatorsListPublic();
   const { data: countriesData } = useCountries();
   const { data: tagsData } = useTags();
-
-  console.log(countriesData);
 
   // Build filter object, omitting undefined values for exactOptionalPropertyTypes compliance
   const videoFilters = useMemo(() => {
@@ -69,7 +67,10 @@ export default function VideosPage() {
 
   // Country options from dedicated countries API (simple string array)
   const countryOptions = useMemo(() => {
-    return (countriesData?.data || []).map((country) => ({ label: country.name, value: String(country.id) }));
+    return (countriesData?.data || []).map((country) => ({
+      label: country.name,
+      value: String(country.id),
+    }));
   }, [countriesData]);
 
   // Tag options from dedicated tags API (with id, name, count)
@@ -136,20 +137,14 @@ export default function VideosPage() {
             label="Country"
             value={countryFilter || 'all'}
             onChange={(val) => setCountryFilter(val === 'all' ? null : val)}
-            options={[
-              { label: 'All countries', value: 'all' },
-              ...countryOptions
-            ]}
+            options={[{ label: 'All countries', value: 'all' }, ...countryOptions]}
           />
 
           <SelectFilter
             label="Tag"
             value={tagFilter?.toString() || 'all'}
             onChange={(val) => setTagFilter(val === 'all' ? null : Number(val))}
-            options={[
-              { label: 'All tags', value: 'all' },
-              ...tagOptions,
-            ]}
+            options={[{ label: 'All tags', value: 'all' }, ...tagOptions]}
           />
 
           <SelectFilter

@@ -10,7 +10,7 @@ import type {
   StudioUploadShortPayload,
   StudioUploadVideoPayload,
 } from '../types';
-import { studioClient } from '../client';
+import { studioClient } from '../client/studio.client';
 
 /**
  * Hook to upload a video
@@ -86,4 +86,3 @@ export function useDeleteShort() {
     },
   });
 }
-

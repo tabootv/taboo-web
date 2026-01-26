@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { normalizeTags, type RawTagsInput } from '@/lib/utils/tags';
+import { normalizeTags, type RawTagsInput } from '@/shared/utils/tags';
 import type { Tag } from '@/types';
 
 /**
@@ -9,4 +9,3 @@ import type { Tag } from '@/types';
 export function useNormalizedTags(tagsInput: RawTagsInput): Tag[] {
   return useMemo(() => normalizeTags(tagsInput), [tagsInput]);
 }
-

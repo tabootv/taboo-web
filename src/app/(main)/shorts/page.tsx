@@ -1,17 +1,17 @@
 'use client';
-
-import { useEffect, useCallback, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Virtual, Mousewheel, EffectCreative } from 'swiper/modules';
-import type { Swiper as SwiperType } from 'swiper';
-import { useShortsStore } from '@/lib/stores/shorts-store';
-import { useAuthStore } from '@/lib/stores/auth-store';
-import { ShortVideoCard } from '@/features/shorts';
-import { videoClient as videosApi } from '@/api/client';
-import { toast } from 'sonner';
-import { Loader2, ChevronUp, ChevronDown, LogIn, Video } from 'lucide-react';
+import { useToggleShortLike } from '@/api/mutations/shorts.mutations';
+import { ShortVideoCard } from '@/features/shorts/components/short-video-card';
+import { useShortsFeed } from '@/features/shorts/hooks/use-shorts-feed';
+import { useShortsUrlSync } from '@/features/shorts/hooks/use-shorts-url-sync';
+import { useAuthStore } from '@/shared/stores/auth-store';
+import { useShortsStore } from '@/shared/stores/shorts-store';
+import { ChevronDown, ChevronUp, Loader2, LogIn, Video } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect } from 'react';
+import { toast } from 'sonner';
+import { EffectCreative, Mousewheel, Virtual } from 'swiper/modules';
+import { Swiper, SwiperSlide } from 'swiper/react';
 
 import 'swiper/css';
 import 'swiper/css/virtual';
@@ -19,61 +19,50 @@ import 'swiper/css/effect-creative';
 
 export default function ShortsPage() {
   const router = useRouter();
-  const swiperRef = useRef<SwiperType | null>(null);
-  const isInitializedRef = useRef(false);
-  const [isReady, setIsReady] = useState(false);
 
   const { isAuthenticated } = useAuthStore();
+  const { toggleMute, setShowComments } = useShortsStore();
+
+  // Fetch shorts feed (no initial UUID for index page)
   const {
-    videos,
-    currentIndex,
+    shorts,
+    initialIndex,
     isLoading,
-    isLoadingMore,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
     error,
-    hasLiked,
     hasFetched,
-    fetchVideos,
-    setCurrentIndex,
-    toggleMute,
-    setHasLiked,
-  } = useShortsStore();
+    refetch,
+  } = useShortsFeed();
 
-  // Stabilize Zustand function references to prevent infinite loops
-  const fetchVideosRef = useRef(fetchVideos);
-  const setCurrentIndexRef = useRef(setCurrentIndex);
+  // URL synchronization with state machine
+  // Use first video's UUID or empty string for index page
+  const firstUuid = shorts[0]?.uuid ?? '';
+  const { currentIndex, currentUuid, isReady, handleSwiperInit, handleSlideChange, swiperRef } =
+    useShortsUrlSync({
+      shorts,
+      initialUuid: firstUuid,
+      initialIndex,
+      isLoading,
+    });
 
-  // Keep refs updated with latest function references
+  // Like mutation
+  const toggleLike = useToggleShortLike();
+
+  // Preload more when near end
   useEffect(() => {
-    fetchVideosRef.current = fetchVideos;
-  }, [fetchVideos]);
-
-  useEffect(() => {
-    setCurrentIndexRef.current = setCurrentIndex;
-  }, [setCurrentIndex]);
-
-  // Fetch videos on mount
-  useEffect(() => {
-    if (!hasFetched && !isLoading) {
-      fetchVideosRef.current();
+    if (isReady && currentIndex >= shorts.length - 3 && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
     }
-  }, [hasFetched, isLoading]);
+  }, [currentIndex, shorts.length, hasNextPage, isFetchingNextPage, fetchNextPage, isReady]);
 
-  // Mark as ready once we have videos - no artificial delay
+  // Close comments when switching videos
   useEffect(() => {
-    if (videos.length > 0 && !isReady) {
-      setIsReady(true);
-      isInitializedRef.current = true;
+    if (isReady) {
+      setShowComments(false);
     }
-  }, [videos.length, isReady]);
-
-  // URL sync
-  useEffect(() => {
-    if (!isInitializedRef.current || !isReady) return;
-    const currentVideo = videos[currentIndex];
-    if (currentVideo) {
-      window.history.replaceState(null, '', `/shorts/${currentVideo.uuid}`);
-    }
-  }, [currentIndex, videos, isReady]);
+  }, [currentIndex, isReady, setShowComments]);
 
   // Keyboard shortcuts
   const handleKeyDown = useCallback(
@@ -87,11 +76,10 @@ export default function ShortsPage() {
           break;
         case 'l':
           e.preventDefault();
-          const currentVideo = videos[currentIndex];
-          if (currentVideo) {
-            videosApi.toggleLike(currentVideo.uuid)
-              .then(() => setHasLiked(!hasLiked))
-              .catch(() => toast.error('Please login to like'));
+          if (currentUuid) {
+            toggleLike.mutate(currentUuid, {
+              onError: () => toast.error('Please login to like'),
+            });
           }
           break;
         case 'arrowdown':
@@ -109,7 +97,7 @@ export default function ShortsPage() {
           break;
       }
     },
-    [toggleMute, videos, currentIndex, hasLiked, setHasLiked, router, isReady]
+    [toggleMute, currentUuid, toggleLike, router, isReady, swiperRef]
   );
 
   useEffect(() => {
@@ -117,17 +105,8 @@ export default function ShortsPage() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
 
-  const handleSlideChange = useCallback((swiper: SwiperType) => {
-    if (!isInitializedRef.current) return;
-    setCurrentIndexRef.current(swiper.activeIndex);
-  }, []);
-
-  const handleSwiperInit = useCallback((swiper: SwiperType) => {
-    swiperRef.current = swiper;
-  }, []);
-
-  // Loading state - show during initial load or while fetching
-  if ((isLoading || !hasFetched) && videos.length === 0) {
+  // Loading state
+  if (isLoading && shorts.length === 0) {
     return (
       <div className="fixed top-14 left-0 right-0 bottom-0 bg-black flex items-center justify-center z-30 lg:left-[72px]">
         <div className="flex flex-col items-center gap-4">
@@ -139,7 +118,7 @@ export default function ShortsPage() {
   }
 
   // Error state
-  if (error && videos.length === 0) {
+  if (error && shorts.length === 0) {
     return (
       <div className="fixed top-14 left-0 right-0 bottom-0 bg-black flex flex-col items-center justify-center gap-4 z-30 lg:left-[72px]">
         <Video className="w-16 h-16 text-white/30 mb-2" />
@@ -157,9 +136,9 @@ export default function ShortsPage() {
           </>
         ) : (
           <>
-            <p className="text-red-400">{error}</p>
+            <p className="text-red-400">{error.message}</p>
             <button
-              onClick={() => fetchVideos()}
+              onClick={() => refetch()}
               className="px-6 py-2.5 bg-red-primary text-white rounded-full font-medium hover:bg-red-primary/80 transition-colors"
             >
               Try Again
@@ -171,7 +150,7 @@ export default function ShortsPage() {
   }
 
   // Empty state
-  if (videos.length === 0 && hasFetched) {
+  if (shorts.length === 0 && hasFetched) {
     return (
       <div className="fixed top-14 left-0 right-0 bottom-0 bg-black flex flex-col items-center justify-center gap-4 z-30 lg:left-[72px]">
         <Video className="w-16 h-16 text-white/30 mb-2" />
@@ -222,8 +201,8 @@ export default function ShortsPage() {
         }}
         virtual={{
           enabled: true,
-          addSlidesAfter: 3, // Increased for better preloading
-          addSlidesBefore: 2, // Increased for better preloading
+          addSlidesAfter: 3,
+          addSlidesBefore: 2,
         }}
         effect="creative"
         creativeEffect={{
@@ -254,17 +233,12 @@ export default function ShortsPage() {
         onSlideChange={handleSlideChange}
         className="h-full w-full shorts-swiper"
       >
-        {videos.map((video, index) => {
+        {shorts.map((video, index) => {
           const isActive = currentIndex === index;
-          // Mark adjacent slides for preloading (1 before, 2 after)
           const isNearActive = !isActive && Math.abs(currentIndex - index) <= 2;
 
           return (
-            <SwiperSlide
-              key={video.uuid}
-              virtualIndex={index}
-              className="!h-full !w-full"
-            >
+            <SwiperSlide key={video.uuid} virtualIndex={index} className="!h-full !w-full">
               <ShortVideoCard
                 video={video}
                 index={index}
@@ -288,7 +262,7 @@ export default function ShortsPage() {
         </button>
         <button
           onClick={() => swiperRef.current?.slideNext()}
-          disabled={currentIndex >= videos.length - 1}
+          disabled={currentIndex >= shorts.length - 1}
           className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-all backdrop-blur-sm border border-white/10"
           aria-label="Next short"
         >
@@ -297,7 +271,7 @@ export default function ShortsPage() {
       </div>
 
       {/* Loading more indicator */}
-      {isLoadingMore && (
+      {isFetchingNextPage && (
         <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-50">
           <Loader2 className="w-6 h-6 text-white animate-spin" />
         </div>

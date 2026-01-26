@@ -4,10 +4,10 @@ import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Camera, User, ChevronRight, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui';
+import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/ui/logo';
-import { profileClient as profileApi } from '@/api/client';
-import { useAuthStore } from '@/lib/stores';
+import { profileClient as profileApi } from '@/api/client/profile.client';
+import { useAuthStore } from '@/shared/stores/auth-store';
 import { toast } from 'sonner';
 
 type Step = 'photo' | 'details' | 'complete';
@@ -151,12 +151,7 @@ export default function CompleteProfilePage() {
                   onClick={() => fileInputRef.current?.click()}
                 >
                   {profileImage ? (
-                    <Image
-                      src={profileImage}
-                      alt="Profile"
-                      fill
-                      className="object-cover"
-                    />
+                    <Image src={profileImage} alt="Profile" fill className="object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-red-primary to-red-dark">
                       <User className="w-16 h-16 text-white/50" />
@@ -189,8 +184,10 @@ export default function CompleteProfilePage() {
                 >
                   {isLoading ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : profileImageFile ? (
+                    'Continue'
                   ) : (
-                    profileImageFile ? 'Continue' : 'Choose Photo'
+                    'Choose Photo'
                   )}
                 </Button>
                 <Button variant="ghost" onClick={handleSkipPhoto} className="w-full">
@@ -225,9 +222,7 @@ export default function CompleteProfilePage() {
                   <input
                     type="text"
                     value={formData.display_name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, display_name: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, display_name: e.target.value })}
                     placeholder="How should we call you?"
                     className="w-full px-4 py-3 bg-surface border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-transparent text-text-primary placeholder:text-text-secondary"
                   />
@@ -242,9 +237,7 @@ export default function CompleteProfilePage() {
                     <input
                       type="text"
                       value={formData.first_name}
-                      onChange={(e) =>
-                        setFormData({ ...formData, first_name: e.target.value })
-                      }
+                      onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
                       placeholder="First name"
                       className="w-full px-4 py-3 bg-surface border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-transparent text-text-primary placeholder:text-text-secondary"
                     />
@@ -256,9 +249,7 @@ export default function CompleteProfilePage() {
                     <input
                       type="text"
                       value={formData.last_name}
-                      onChange={(e) =>
-                        setFormData({ ...formData, last_name: e.target.value })
-                      }
+                      onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
                       placeholder="Last name"
                       className="w-full px-4 py-3 bg-surface border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-transparent text-text-primary placeholder:text-text-secondary"
                     />
@@ -272,9 +263,7 @@ export default function CompleteProfilePage() {
                   </label>
                   <select
                     value={formData.gender}
-                    onChange={(e) =>
-                      setFormData({ ...formData, gender: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
                     className="w-full px-4 py-3 bg-surface border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-primary focus:border-transparent text-text-primary"
                   >
                     <option value="">Prefer not to say</option>
@@ -310,9 +299,7 @@ export default function CompleteProfilePage() {
                 </svg>
               </div>
 
-              <h1 className="text-2xl font-bold text-text-primary mb-2">
-                You&apos;re all set!
-              </h1>
+              <h1 className="text-2xl font-bold text-text-primary mb-2">You&apos;re all set!</h1>
               <p className="text-text-secondary mb-8">
                 Your profile is complete. Start exploring TabooTV!
               </p>
@@ -331,13 +318,17 @@ export default function CompleteProfilePage() {
                       />
                     ) : (
                       <span className="text-2xl font-bold text-white">
-                        {(formData.display_name || formData.first_name || 'U').charAt(0).toUpperCase()}
+                        {(formData.display_name || formData.first_name || 'U')
+                          .charAt(0)
+                          .toUpperCase()}
                       </span>
                     )}
                   </div>
                   <div className="text-left">
                     <p className="font-semibold text-text-primary">
-                      {formData.display_name || `${formData.first_name} ${formData.last_name}`.trim() || 'User'}
+                      {formData.display_name ||
+                        `${formData.first_name} ${formData.last_name}`.trim() ||
+                        'User'}
                     </p>
                     <p className="text-sm text-text-secondary">{user?.email}</p>
                   </div>

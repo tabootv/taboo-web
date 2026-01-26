@@ -3,13 +3,7 @@
 import { ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import {
-  LayoutDashboard,
-  Video,
-  Film,
-  MessageSquare,
-  ChevronRight,
-} from 'lucide-react';
+import { LayoutDashboard, Video, Film, MessageSquare, ChevronRight } from 'lucide-react';
 
 interface StudioLayoutProps {
   children: ReactNode;
@@ -80,9 +74,7 @@ export function StudioLayout({ children }: StudioLayoutProps) {
             <nav className="flex items-center gap-2 text-sm">
               {breadcrumbs.map((crumb, index) => (
                 <div key={crumb.href} className="flex items-center gap-2">
-                  {index > 0 && (
-                    <ChevronRight className="w-4 h-4 text-text-secondary" />
-                  )}
+                  {index > 0 && <ChevronRight className="w-4 h-4 text-text-secondary" />}
                   {index === breadcrumbs.length - 1 ? (
                     <span className="text-white font-medium">{crumb.label}</span>
                   ) : (
@@ -100,7 +92,8 @@ export function StudioLayout({ children }: StudioLayoutProps) {
             {/* Quick Navigation */}
             <div className="hidden md:flex items-center gap-1">
               {navigationItems.map((item) => {
-                const isActive = pathname === item.href ||
+                const isActive =
+                  pathname === item.href ||
                   (item.href !== '/studio' && pathname.startsWith(item.href));
                 const Icon = item.icon;
 
@@ -125,9 +118,7 @@ export function StudioLayout({ children }: StudioLayoutProps) {
       </div>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {children}
-      </main>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">{children}</main>
     </div>
   );
 }

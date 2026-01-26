@@ -1,4 +1,9 @@
-import { getComprehensiveEarningsData, type GroupBy, type V2Commission, type V2Payout } from '@/lib/firstpromoter/client';
+import {
+  getComprehensiveEarningsData,
+  type GroupBy,
+  type V2Commission,
+  type V2Payout,
+} from '@/shared/lib/firstpromoter/client';
 import { getRequiredEnv } from '@/shared/lib/config/env';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
@@ -145,7 +150,10 @@ function mergeFunnelData(
   v2Reports: V2ReportResponse | null
 ): EarningsResponse['series'] {
   // Create a map of V2 funnel data by normalized date
-  const funnelMap = new Map<string, { clicks: number; signups: number; customers: number; revenue: number }>();
+  const funnelMap = new Map<
+    string,
+    { clicks: number; signups: number; customers: number; revenue: number }
+  >();
 
   if (v2Reports?.sub_data) {
     for (const item of v2Reports.sub_data) {
@@ -202,12 +210,11 @@ export async function GET(request: NextRequest) {
     const apiUrl = getRequiredEnv('NEXT_PUBLIC_API_URL');
 
     const userResponse = await fetch(`${apiUrl}/me`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/json',
-        },
-      }
-    );
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+      },
+    });
 
     if (!userResponse.ok) {
       return NextResponse.json({ error: 'Failed to verify user' }, { status: 401 });
@@ -234,24 +241,23 @@ export async function GET(request: NextRequest) {
     }
 
     // Fetch comprehensive data from FirstPromoter API (V2 for everything)
-    const { profile, series, filteredStats, recentCommissions, payoutHistory, v2Reports } = await getComprehensiveEarningsData({
-      promoterId,
-      startDate,
-      endDate,
-      groupBy,
-    });
+    const { profile, series, filteredStats, recentCommissions, payoutHistory, v2Reports } =
+      await getComprehensiveEarningsData({
+        promoterId,
+        startDate,
+        endDate,
+        groupBy,
+      });
 
     if (!profile) {
       return NextResponse.json({ error: 'Promoter not found' }, { status: 404 });
     }
 
     // Calculate conversion rates
-    const clickToSignup = profile.stats.clicks > 0
-      ? (profile.stats.signups / profile.stats.clicks) * 100
-      : 0;
-    const signupToCustomer = profile.stats.signups > 0
-      ? (profile.stats.customers / profile.stats.signups) * 100
-      : 0;
+    const clickToSignup =
+      profile.stats.clicks > 0 ? (profile.stats.signups / profile.stats.clicks) * 100 : 0;
+    const signupToCustomer =
+      profile.stats.signups > 0 ? (profile.stats.customers / profile.stats.signups) * 100 : 0;
 
     const response: EarningsResponse = {
       promoter: {

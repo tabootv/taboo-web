@@ -2,7 +2,7 @@
 
 import { useToggleFollowCreator } from '@/api/mutations';
 import { usePrefetch } from '@/hooks/use-prefetch';
-import { getCreatorRoute } from '@/lib/utils';
+import { getCreatorRoute } from '@/shared/utils/formatting';
 import type { Creator } from '@/types';
 import { Check, Loader2, Video } from 'lucide-react';
 import Image from 'next/image';
@@ -44,15 +44,17 @@ export function CreatorCard({ creator }: CreatorCardProps) {
     'Follow'
   );
 
-  const buttonClassName = `btn btn-sm min-w-24 justify-center transition-all ${isFollowing
-    ? 'bg-transparent border border-white/30 text-white/80 hover:border-white/50 hover:text-white hover:bg-white/5'
-    : 'btn-primary'
-    }`;
+  const buttonClassName = `btn btn-sm min-w-24 justify-center transition-all ${
+    isFollowing
+      ? 'bg-transparent border border-white/30 text-white/80 hover:border-white/50 hover:text-white hover:bg-white/5'
+      : 'btn-primary'
+  }`;
 
-  const mobileButtonClassName = `btn btn-sm w-[93%] mx-auto my-[15px] min-w-[120px] justify-center transition-all ${isFollowing
-    ? 'bg-transparent border border-white/30 text-white/80 hover:border-white/50 hover:text-white hover:bg-white/5'
-    : 'btn-primary'
-    }`;
+  const mobileButtonClassName = `btn btn-sm w-[93%] mx-auto my-[15px] min-w-[120px] justify-center transition-all ${
+    isFollowing
+      ? 'bg-transparent border border-white/30 text-white/80 hover:border-white/50 hover:text-white hover:bg-white/5'
+      : 'btn-primary'
+  }`;
 
   return (
     <div className="creator-card-bg h-full">

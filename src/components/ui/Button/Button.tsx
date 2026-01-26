@@ -1,15 +1,9 @@
 'use client';
 
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/utils/formatting';
 import type { ButtonSize, ButtonVariant } from '@/types';
 import NextLink from 'next/link';
-import {
-  AnchorHTMLAttributes,
-  ButtonHTMLAttributes,
-  ComponentProps,
-  forwardRef,
-  Ref,
-} from 'react';
+import { AnchorHTMLAttributes, ButtonHTMLAttributes, ComponentProps, forwardRef, Ref } from 'react';
 
 type BaseButtonProps = {
   variant?: ButtonVariant;
@@ -44,18 +38,7 @@ function isExternalLink(href: string | undefined): href is string {
 }
 
 export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonProps>(
-  (
-    {
-      className,
-      variant = 'primary',
-      size = 'md',
-      href,
-      external,
-      children,
-      ...props
-    },
-    ref
-  ) => {
+  ({ className, variant = 'primary', size = 'md', href, external, children, ...props }, ref) => {
     const baseStyles =
       'inline-flex items-center justify-center rounded-full font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50';
 

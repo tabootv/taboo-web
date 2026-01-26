@@ -1,5 +1,5 @@
-import { CreatorCardSkeleton } from '@/components/creator';
-import { PageHeader } from '@/components/ui';
+import { CreatorCardSkeleton } from '@/components/creator/CreatorCardSkeleton';
+import { PageHeader } from '@/components/ui/page-header';
 
 export default function CreatorsPageLoading() {
   return (
@@ -18,4 +18,3 @@ export default function CreatorsPageLoading() {
     </div>
   );
 }
-

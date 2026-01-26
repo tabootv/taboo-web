@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { Flame, Trash2 } from 'lucide-react';
-import { videoClient } from '@/api/client';
+import { videoClient } from '@/api/client/video.client';
 import type { Video } from '@/types';
 
 interface LikeDislikeButtonGroupProps {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useSeriesDetail } from '@/api/queries';
+import { useSeriesDetail } from '@/api/queries/series.queries';
 import type { Video } from '@/types';
 import { useSeriesPlayerHandlers } from '../hooks/use-series-player-handlers';
 import { SeriesBreadcrumb } from './series-breadcrumb';
@@ -76,4 +76,3 @@ export function SeriesPlayerContent({
     </div>
   );
 }
-

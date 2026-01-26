@@ -1,7 +1,7 @@
 'use client';
 
 import { Clock } from 'lucide-react';
-import { formatDuration } from '@/lib/utils';
+import { formatDuration } from '@/shared/utils/formatting';
 
 interface SeriesEpisodeIndicatorProps {
   currentEpisodeIndex: number;
@@ -30,4 +30,3 @@ export function SeriesEpisodeIndicator({
     </div>
   );
 }
-

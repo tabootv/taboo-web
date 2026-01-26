@@ -1,4 +1,4 @@
-import { CreatorProfileSkeleton } from '@/components/creator';
+import { CreatorProfileSkeleton } from '@/components/creator/CreatorProfileSkeleton';
 
 export default function CreatorProfilePageLoading() {
   return <CreatorProfileSkeleton />;

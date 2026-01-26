@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/utils/formatting';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { ReactNode } from 'react';
@@ -63,8 +63,7 @@ export function PageHeader({
   const BackButton = () => {
     if (!backHref && !onBack) return null;
 
-    const buttonClasses =
-      'p-2 rounded-xl hover:bg-white/10 transition-colors flex-shrink-0';
+    const buttonClasses = 'p-2 rounded-xl hover:bg-white/10 transition-colors flex-shrink-0';
 
     if (onBack) {
       return (
@@ -86,9 +85,7 @@ export function PageHeader({
       <div className="flex items-start gap-4">
         <BackButton />
 
-        {icon && (
-          <div className="p-3 rounded-xl bg-white/5 shrink-0">{icon}</div>
-        )}
+        {icon && <div className="p-3 rounded-xl bg-white/5 shrink-0">{icon}</div>}
 
         <div className="flex-1 min-w-0">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -97,9 +94,7 @@ export function PageHeader({
               {subtitle && <p className="body-base mt-1">{subtitle}</p>}
             </div>
 
-            {actions && (
-              <div className={cn('shrink-0', classNameActions)}>{actions}</div>
-            )}
+            {actions && <div className={cn('shrink-0', classNameActions)}>{actions}</div>}
           </div>
         </div>
       </div>

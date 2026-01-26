@@ -1,6 +1,6 @@
 'use client';
 
-import { postsClient as postsApi } from '@/api/client';
+import { postsClient as postsApi } from '@/api/client/posts.client';
 import type { Post } from '@/types';
 import { Flame, MessageCircle } from 'lucide-react';
 import { useState } from 'react';

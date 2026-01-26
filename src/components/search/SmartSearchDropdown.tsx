@@ -5,8 +5,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useHiddenComponentByPage } from '@/hooks';
 import { useDebounce } from '@/hooks/use-debounce';
 import { useMixedSearch } from '@/hooks/useMixedSearch';
-import { cn, formatCompactNumber, getCreatorRoute } from '@/lib/utils';
-import { detectCountry } from '@/lib/utils/search-utils';
+import { cn, formatCompactNumber, getCreatorRoute } from '@/shared/utils/formatting';
+import { detectCountry } from '@/shared/utils/search-utils';
 import type { Creator, Video } from '@/types';
 import { Film, Search } from 'lucide-react';
 import Image from 'next/image';
@@ -117,7 +117,6 @@ function CreatorResultItem({
     </div>
   );
 }
-
 
 export function SmartSearchDropdown({ className }: SmartSearchDropdownProps) {
   const router = useRouter();
@@ -319,9 +318,7 @@ export function SmartSearchDropdown({ className }: SmartSearchDropdownProps) {
                           closeDropdown();
                         }}
                       >
-                        <span className="text-sm">
-                          See all videos →
-                        </span>
+                        <span className="text-sm">See all videos →</span>
                       </div>
                     )}
                   </>

@@ -34,9 +34,7 @@ export function MobileRecentSearches({
           className="w-full flex items-center gap-3 px-2 py-3 rounded-lg hover:bg-hover transition-colors group"
         >
           <Clock className="w-5 h-5 text-text-secondary flex-shrink-0" />
-          <span className="flex-1 text-left text-text-primary truncate">
-            {search.query}
-          </span>
+          <span className="flex-1 text-left text-text-primary truncate">{search.query}</span>
           <button
             onClick={(e) => onRemove(e, search.query)}
             className="p-1.5 opacity-0 group-hover:opacity-100 hover:bg-surface rounded-full transition-all"
@@ -48,4 +46,3 @@ export function MobileRecentSearches({
     </div>
   );
 }
-

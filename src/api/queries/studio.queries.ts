@@ -5,7 +5,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { studioClient } from '../client';
+import { studioClient } from '../client/studio.client';
 
 /**
  * Hook to fetch studio dashboard
@@ -39,4 +39,3 @@ export function useStudioShorts(page = 1) {
     staleTime: 1000 * 60 * 10, // 10 minutes
   });
 }
-

@@ -5,9 +5,9 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Check, Crown, Star, X, Sparkles } from 'lucide-react';
 import { WhopCheckoutEmbed } from '@whop/checkout/react';
-import { subscriptionsClient as subscriptionsApi } from '@/api/client';
+import { subscriptionsClient as subscriptionsApi } from '@/api/client/subscriptions.client';
 import type { Plan } from '@/types';
-import { useAuthStore } from '@/lib/stores';
+import { useAuthStore } from '@/shared/stores/auth-store';
 import { toast } from 'sonner';
 
 const DEFAULT_BENEFITS = [
@@ -80,8 +80,12 @@ export function ChoosePlanContent() {
   }, []);
 
   // API returns name like "monthly usd" or "yearly usd", not interval field
-  const monthlyPlan = plans.find((p) => p.name?.toLowerCase().includes('monthly') || p.interval === 'monthly');
-  const yearlyPlan = plans.find((p) => p.name?.toLowerCase().includes('yearly') || p.interval === 'yearly');
+  const monthlyPlan = plans.find(
+    (p) => p.name?.toLowerCase().includes('monthly') || p.interval === 'monthly'
+  );
+  const yearlyPlan = plans.find(
+    (p) => p.name?.toLowerCase().includes('yearly') || p.interval === 'yearly'
+  );
   const activePlan = selectedPlan === 'monthly' ? monthlyPlan : yearlyPlan;
 
   // Calculate yearly savings
@@ -188,7 +192,8 @@ export function ChoosePlanContent() {
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: 'radial-gradient(ellipse at center top, rgba(171, 0, 19, 0.15) 0%, transparent 60%)',
+            background:
+              'radial-gradient(ellipse at center top, rgba(171, 0, 19, 0.15) 0%, transparent 60%)',
           }}
         />
 
@@ -213,7 +218,9 @@ export function ChoosePlanContent() {
               }}
             >
               <Sparkles style={{ width: 14, height: 14, color: '#ab0013' }} />
-              <span style={{ fontSize: 12, fontWeight: 500, color: '#ab0013' }}>Premium Access</span>
+              <span style={{ fontSize: 12, fontWeight: 500, color: '#ab0013' }}>
+                Premium Access
+              </span>
             </div>
 
             <h1
@@ -243,7 +250,8 @@ export function ChoosePlanContent() {
           <div
             style={{
               position: 'relative',
-              background: 'linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
+              background:
+                'linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
               borderRadius: 12,
               border: '1px solid rgba(255,255,255,0.08)',
               overflow: 'hidden',
@@ -322,7 +330,8 @@ export function ChoosePlanContent() {
                 </div>
                 {selectedPlan === 'yearly' && (
                   <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, marginTop: 4 }}>
-                    {monthlyEquivalent.symbol}{monthlyEquivalent.amount}/mo
+                    {monthlyEquivalent.symbol}
+                    {monthlyEquivalent.amount}/mo
                   </p>
                 )}
               </div>
@@ -369,16 +378,27 @@ export function ChoosePlanContent() {
                 <span>Start free trial</span>
               </button>
 
-              <p className="text-center" style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, marginTop: 12 }}>
-                3 days free, then {selectedPlan === 'monthly'
+              <p
+                className="text-center"
+                style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, marginTop: 12 }}
+              >
+                3 days free, then{' '}
+                {selectedPlan === 'monthly'
                   ? `${monthlyPrice.symbol}${monthlyPrice.amount}/mo`
-                  : `${yearlyPrice.symbol}${yearlyPrice.amount}/yr`}. Cancel anytime.
+                  : `${yearlyPrice.symbol}${yearlyPrice.amount}/yr`}
+                . Cancel anytime.
               </p>
 
               {!isAuthenticated && (
-                <p className="text-center" style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, marginTop: 8 }}>
+                <p
+                  className="text-center"
+                  style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, marginTop: 8 }}
+                >
                   Have an account?{' '}
-                  <Link href="/sign-in" style={{ color: '#ab0013', fontWeight: 500, textDecoration: 'none' }}>
+                  <Link
+                    href="/sign-in"
+                    style={{ color: '#ab0013', fontWeight: 500, textDecoration: 'none' }}
+                  >
                     Sign in
                   </Link>
                 </p>
@@ -397,13 +417,19 @@ export function ChoosePlanContent() {
           </div>
 
           {/* Footer links */}
-          <p className="text-center" style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 12 }}>
+          <p
+            className="text-center"
+            style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 12 }}
+          >
             By subscribing, you agree to our{' '}
             <Link href="/terms" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none' }}>
               Terms
             </Link>{' '}
             &{' '}
-            <Link href="/privacy" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none' }}>
+            <Link
+              href="/privacy"
+              style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none' }}
+            >
               Privacy
             </Link>
           </p>
@@ -424,7 +450,8 @@ export function ChoosePlanContent() {
           <div
             className="relative w-full max-w-lg overflow-hidden"
             style={{
-              background: 'linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
+              background:
+                'linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
               borderRadius: 16,
               border: '1px solid rgba(255,255,255,0.08)',
             }}
@@ -435,7 +462,9 @@ export function ChoosePlanContent() {
               style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
             >
               <div>
-                <h2 style={{ fontSize: 18, fontWeight: 600, color: '#fff' }}>Complete Your Purchase</h2>
+                <h2 style={{ fontSize: 18, fontWeight: 600, color: '#fff' }}>
+                  Complete Your Purchase
+                </h2>
                 <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>
                   {selectedPlan === 'monthly' ? 'Monthly' : 'Yearly'} Plan
                 </p>
@@ -470,10 +499,10 @@ export function ChoosePlanContent() {
                 fallback={
                   <div className="flex items-center justify-center h-[400px]">
                     <div className="text-center">
-                      <div
-                        className="w-8 h-8 mx-auto mb-3 rounded-full border-2 border-elevated border-t-red-primary animate-spin"
-                      />
-                      <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>Loading checkout...</p>
+                      <div className="w-8 h-8 mx-auto mb-3 rounded-full border-2 border-elevated border-t-red-primary animate-spin" />
+                      <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>
+                        Loading checkout...
+                      </p>
                     </div>
                   </div>
                 }

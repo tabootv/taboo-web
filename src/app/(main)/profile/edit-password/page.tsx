@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Lock, Eye, EyeOff, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui';
-import { profileClient as profileApi } from '@/api/client';
+import { Button } from '@/components/ui/button';
+import { profileClient as profileApi } from '@/api/client/profile.client';
 import { toast } from 'sonner';
 
 export default function EditPasswordPage() {
@@ -60,7 +60,10 @@ export default function EditPasswordPage() {
       router.push('/profile/settings');
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
-      setError(err.response?.data?.message || 'Failed to update password. Please check your current password.');
+      setError(
+        err.response?.data?.message ||
+          'Failed to update password. Please check your current password.'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -78,9 +81,7 @@ export default function EditPasswordPage() {
           Back to Settings
         </Link>
         <h1 className="text-2xl font-bold text-text-primary">Change Password</h1>
-        <p className="text-text-secondary mt-1">
-          Update your password to keep your account secure
-        </p>
+        <p className="text-text-secondary mt-1">Update your password to keep your account secure</p>
       </div>
 
       {/* Form */}
@@ -94,7 +95,10 @@ export default function EditPasswordPage() {
 
         {/* Current Password */}
         <div>
-          <label htmlFor="current-password" className="block text-sm font-medium text-text-primary mb-2">
+          <label
+            htmlFor="current-password"
+            className="block text-sm font-medium text-text-primary mb-2"
+          >
             Current Password
           </label>
           <div className="relative">
@@ -119,7 +123,10 @@ export default function EditPasswordPage() {
 
         {/* New Password */}
         <div>
-          <label htmlFor="new-password" className="block text-sm font-medium text-text-primary mb-2">
+          <label
+            htmlFor="new-password"
+            className="block text-sm font-medium text-text-primary mb-2"
+          >
             New Password
           </label>
           <div className="relative">
@@ -165,7 +172,10 @@ export default function EditPasswordPage() {
 
         {/* Confirm Password */}
         <div>
-          <label htmlFor="confirm-password" className="block text-sm font-medium text-text-primary mb-2">
+          <label
+            htmlFor="confirm-password"
+            className="block text-sm font-medium text-text-primary mb-2"
+          >
             Confirm New Password
           </label>
           <div className="relative">
@@ -187,7 +197,9 @@ export default function EditPasswordPage() {
             </button>
           </div>
           {confirmPassword.length > 0 && (
-            <div className={`mt-2 flex items-center gap-2 text-sm ${passwordsMatch ? 'text-green-500' : 'text-red-500'}`}>
+            <div
+              className={`mt-2 flex items-center gap-2 text-sm ${passwordsMatch ? 'text-green-500' : 'text-red-500'}`}
+            >
               {passwordsMatch ? (
                 <>
                   <CheckCircle className="w-4 h-4" />
@@ -205,12 +217,7 @@ export default function EditPasswordPage() {
 
         {/* Actions */}
         <div className="flex gap-3 pt-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => router.back()}
-            className="flex-1"
-          >
+          <Button type="button" variant="outline" onClick={() => router.back()} className="flex-1">
             Cancel
           </Button>
           <Button

@@ -1,4 +1,4 @@
-import { useCreatorsListPublic } from '@/api/queries';
+import { useCreatorsListPublic } from '@/api/queries/creators.queries';
 import type { Creator } from '@/types';
 import { useMemo } from 'react';
 

@@ -88,11 +88,7 @@ export function ContentGrid({
     return classes.join(' ');
   };
 
-  return (
-    <div className={`${getGridClasses()} ${gapSizes[gap]} ${className}`}>
-      {children}
-    </div>
-  );
+  return <div className={`${getGridClasses()} ${gapSizes[gap]} ${className}`}>{children}</div>;
 }
 
 export default ContentGrid;

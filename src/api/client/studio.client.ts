@@ -165,4 +165,3 @@ export const studioClient = {
     return data;
   },
 };
-

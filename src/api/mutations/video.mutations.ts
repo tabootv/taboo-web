@@ -7,7 +7,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { videoClient } from '../client';
+import { videoClient } from '../client/video.client';
 import { queryKeys } from '../query-keys';
 import type { MeResponse, Video } from '../types';
 
@@ -27,9 +27,10 @@ export function useToggleLike() {
       });
 
       const previousVideo = queryClient.getQueryData<Video>(queryKeys.videos.detail(videoId));
-      const previousSeriesPlay = queryClient.getQueryData<{ video: Video }>(
-        [...queryKeys.series.detail(videoId), 'play']
-      );
+      const previousSeriesPlay = queryClient.getQueryData<{ video: Video }>([
+        ...queryKeys.series.detail(videoId),
+        'play',
+      ]);
 
       const currentHasLiked = previousVideo?.has_liked ?? previousSeriesPlay?.video?.has_liked;
       const newLikedState = !currentHasLiked;
@@ -46,17 +47,14 @@ export function useToggleLike() {
       }
 
       if (previousSeriesPlay?.video) {
-        queryClient.setQueryData<{ video: Video }>(
-          [...queryKeys.series.detail(videoId), 'play'],
-          {
-            ...previousSeriesPlay,
-            video: {
-              ...previousSeriesPlay.video,
-              has_liked: newLikedState,
-              likes_count: newLikesCount,
-            },
-          }
-        );
+        queryClient.setQueryData<{ video: Video }>([...queryKeys.series.detail(videoId), 'play'], {
+          ...previousSeriesPlay,
+          video: {
+            ...previousSeriesPlay.video,
+            has_liked: newLikedState,
+            likes_count: newLikesCount,
+          },
+        });
       }
 
       return { previousVideo, previousSeriesPlay };

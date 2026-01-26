@@ -5,8 +5,8 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import type { CourseListFilters } from '../client';
-import { coursesClient } from '../client';
+import type { CourseListFilters } from '../client/courses.client';
+import { coursesClient } from '../client/courses.client';
 import { queryKeys } from '../query-keys';
 
 /**
@@ -69,4 +69,3 @@ export function useCoursePlay(uuid: string | null | undefined) {
     staleTime: 1000 * 60 * 30, // 30 minutes
   });
 }
-

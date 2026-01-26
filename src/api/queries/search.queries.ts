@@ -5,7 +5,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { searchClient } from '../client';
+import { searchClient } from '../client/search.client';
 import { queryKeys } from '../query-keys';
 
 /**
@@ -20,4 +20,3 @@ export function useSearch(query: string | null | undefined, page = 1) {
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }
-

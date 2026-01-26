@@ -15,7 +15,7 @@ import {
   Loader2,
   Check,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/utils/formatting';
 
 export interface QualityOption {
   label: string;
@@ -64,10 +64,7 @@ export function CustomVideoPlayer({
   const [playbackRate, setPlaybackRate] = useState(1);
 
   // Quality options including original source
-  const allQualities: QualityOption[] = [
-    { label: 'Auto', url: src, height: 0 },
-    ...qualities,
-  ];
+  const allQualities: QualityOption[] = [{ label: 'Auto', url: src, height: 0 }, ...qualities];
 
   // Format time to MM:SS or HH:MM:SS
   const formatTime = (seconds: number): string => {
@@ -108,18 +105,27 @@ export function CustomVideoPlayer({
   }, []);
 
   // Seek video
-  const handleSeek = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (!videoRef.current || !progressRef.current) return;
-    const rect = progressRef.current.getBoundingClientRect();
-    const percent = (e.clientX - rect.left) / rect.width;
-    videoRef.current.currentTime = percent * duration;
-  }, [duration]);
+  const handleSeek = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!videoRef.current || !progressRef.current) return;
+      const rect = progressRef.current.getBoundingClientRect();
+      const percent = (e.clientX - rect.left) / rect.width;
+      videoRef.current.currentTime = percent * duration;
+    },
+    [duration]
+  );
 
   // Skip forward/backward
-  const skip = useCallback((seconds: number) => {
-    if (!videoRef.current) return;
-    videoRef.current.currentTime = Math.max(0, Math.min(duration, videoRef.current.currentTime + seconds));
-  }, [duration]);
+  const skip = useCallback(
+    (seconds: number) => {
+      if (!videoRef.current) return;
+      videoRef.current.currentTime = Math.max(
+        0,
+        Math.min(duration, videoRef.current.currentTime + seconds)
+      );
+    },
+    [duration]
+  );
 
   // Toggle fullscreen
   const toggleFullscreen = useCallback(async () => {
@@ -462,7 +468,9 @@ export function CustomVideoPlayer({
                   className="p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
                   title="Settings"
                 >
-                  <Settings className={cn('w-5 h-5 transition-transform', showSettings && 'rotate-45')} />
+                  <Settings
+                    className={cn('w-5 h-5 transition-transform', showSettings && 'rotate-45')}
+                  />
                 </button>
 
                 {/* Settings Menu */}
@@ -482,7 +490,9 @@ export function CustomVideoPlayer({
                               : 'text-text-primary hover:bg-white/5'
                           )}
                         >
-                          <span>{q.label} {q.height > 0 && `(${q.height}p)`}</span>
+                          <span>
+                            {q.label} {q.height > 0 && `(${q.height}p)`}
+                          </span>
                           {currentQuality === q.url && <Check className="w-4 h-4" />}
                         </button>
                       ))}
@@ -531,11 +541,7 @@ export function CustomVideoPlayer({
                 className="p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
                 title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
               >
-                {isFullscreen ? (
-                  <Minimize className="w-5 h-5" />
-                ) : (
-                  <Maximize className="w-5 h-5" />
-                )}
+                {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
               </button>
             </div>
           </div>

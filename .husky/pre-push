@@ -1,0 +1,16 @@
+echo "Running pre-push checks..."
+
+# Clean type-check (remove cache for accurate results matching CI)
+echo "Type checking..."
+rm -f tsconfig.tsbuildinfo
+npm run type-check
+
+# Full lint check (not just staged files)
+echo "Linting..."
+npm run lint
+
+# Format check
+echo "Checking formatting..."
+npm run format:check
+
+echo "All pre-push checks passed!"

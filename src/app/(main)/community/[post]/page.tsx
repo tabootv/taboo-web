@@ -1,22 +1,26 @@
 'use client';
 
-import { useAddPostComment, useDeletePost, useLikePost } from '@/api/mutations';
-import { usePost, usePostComments } from '@/api/queries';
-import { Avatar, Button, LoadingScreen, Spinner } from '@/components/ui';
+import { useAddPostComment, useLikePost } from '@/api/mutations';
+import { usePost, usePostComments } from '@/api/queries/posts.queries';
+import { Avatar } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { LoadingScreen, Spinner } from '@/components/ui/spinner';
 import { ImageLightbox } from '@/components/ui/image-lightbox';
-import { useAuthStore } from '@/lib/stores';
-import { getCreatorRoute } from '@/lib/utils';
+import { useAuthStore } from '@/shared/stores/auth-store';
+import { getCreatorRoute } from '@/shared/utils/formatting';
 import { ArrowLeft, Flag, Heart, MessageCircle, MoreHorizontal, Send, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { use, useEffect, useState } from 'react';
+import { use, useEffect, useState, useTransition } from 'react';
 import { toast } from 'sonner';
+import { deletePostAction } from '../_actions';
 
 export default function SinglePostPage({ params }: { params: Promise<{ post: string }> }) {
   const { post: postId } = use(params);
   const router = useRouter();
   const { user, isAuthenticated } = useAuthStore();
+  const [isPending, startTransition] = useTransition();
   const postIdNum = Number(postId);
   const { data: post, isLoading } = usePost(Number.isNaN(postIdNum) ? null : postIdNum);
   const { data: commentsData, isLoading: isLoadingComments } = usePostComments(
@@ -25,7 +29,6 @@ export default function SinglePostPage({ params }: { params: Promise<{ post: str
   );
   const likePost = useLikePost();
   const addComment = useAddPostComment();
-  const deletePost = useDeletePost();
   const [showMenu, setShowMenu] = useState(false);
   const [newComment, setNewComment] = useState('');
   const comments = commentsData?.data || [];
@@ -56,14 +59,14 @@ export default function SinglePostPage({ params }: { params: Promise<{ post: str
 
   const handleDelete = () => {
     if (!post) return;
-    deletePost.mutate(post.id, {
-      onSuccess: () => {
+    startTransition(async () => {
+      const result = await deletePostAction(post.id);
+      if (result.success) {
         toast.success('Post deleted');
         router.push('/community');
-      },
-      onError: () => {
+      } else {
         toast.error('Failed to delete post');
-      },
+      }
     });
   };
 
@@ -111,10 +114,7 @@ export default function SinglePostPage({ params }: { params: Promise<{ post: str
 
       <div className="bg-surface rounded-xl border border-border p-6">
         <div className="flex items-start justify-between mb-4">
-          <Link
-            href={getCreatorRoute(channel?.handler)}
-            className="flex items-center gap-3 group"
-          >
+          <Link href={getCreatorRoute(channel?.handler)} className="flex items-center gap-3 group">
             <Avatar
               src={channel?.dp || post.user?.dp || null}
               alt={channel?.name || post.user?.display_name || ''}
@@ -148,10 +148,11 @@ export default function SinglePostPage({ params }: { params: Promise<{ post: str
                   {isOwner && (
                     <button
                       onClick={handleDelete}
-                      className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-500 hover:bg-hover transition-colors"
+                      disabled={isPending}
+                      className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-500 hover:bg-hover transition-colors disabled:opacity-50"
                     >
                       <Trash2 className="w-4 h-4" />
-                      Delete
+                      {isPending ? 'Deleting...' : 'Delete'}
                     </button>
                   )}
                   <button className="flex items-center gap-2 w-full px-4 py-2 text-sm text-text-secondary hover:bg-hover hover:text-text-primary transition-colors">
@@ -179,7 +180,11 @@ export default function SinglePostPage({ params }: { params: Promise<{ post: str
                 >
                   <Image
                     src={post.media[0]?.original_url || ''}
-                    alt=""
+                    alt={
+                      post.caption
+                        ? `Post image: ${post.caption.substring(0, 100)}`
+                        : 'Community post image'
+                    }
                     fill
                     className="object-cover"
                   />
@@ -192,7 +197,16 @@ export default function SinglePostPage({ params }: { params: Promise<{ post: str
                       onClick={() => handleImageClick(index)}
                       className="relative aspect-square cursor-pointer hover:opacity-90 transition-opacity"
                     >
-                      <Image src={media.original_url || ''} alt="" fill className="object-cover" />
+                      <Image
+                        src={media.original_url || ''}
+                        alt={
+                          post.caption
+                            ? `Post image ${index + 1}: ${post.caption.substring(0, 50)}`
+                            : `Community post image ${index + 1}`
+                        }
+                        fill
+                        className="object-cover"
+                      />
                       {index === 3 && post.media && post.media.length > 4 && (
                         <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                           <span className="text-white text-xl font-bold">
@@ -217,12 +231,12 @@ export default function SinglePostPage({ params }: { params: Promise<{ post: str
           </>
         )}
 
-
         <div className="flex items-center gap-6 pt-4 border-t border-border">
           <button
             onClick={handleLike}
-            className={`flex items-center gap-2 transition-colors ${post.has_liked ? 'text-red-primary' : 'text-text-secondary hover:text-red-primary'
-              }`}
+            className={`flex items-center gap-2 transition-colors ${
+              post.has_liked ? 'text-red-primary' : 'text-text-secondary hover:text-red-primary'
+            }`}
           >
             <Heart className={`w-6 h-6 ${post.has_liked ? 'fill-current' : ''}`} />
             <span className="font-medium">{post.likes_count || 0}</span>

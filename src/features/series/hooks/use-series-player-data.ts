@@ -1,6 +1,6 @@
 'use client';
-
-import { useMe, useSeriesDetail, useSeriesPlay } from '@/api/queries';
+import { useMe } from '@/api/queries/auth.queries';
+import { useSeriesDetail, useSeriesPlay } from '@/api/queries/series.queries';
 
 export function useSeriesPlayerData(seriesId: string, videoUuid: string) {
   const { data: playData, isLoading: isLoadingPlay } = useSeriesPlay(videoUuid);
@@ -30,4 +30,3 @@ export function useSeriesPlayerData(seriesId: string, videoUuid: string) {
     seriesData,
   };
 }
-

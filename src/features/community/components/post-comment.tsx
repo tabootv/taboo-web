@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { ThumbsUp, Reply, Send } from 'lucide-react';
-import { postsClient as postsApi } from '@/api/client';
+import { postsClient as postsApi } from '@/api/client/posts.client';
 import type { PostComment as PostCommentType } from '@/types';
 
 interface PostCommentProps {

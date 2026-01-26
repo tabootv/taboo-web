@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import Image from 'next/image';
 import { X } from 'lucide-react';
-import { postsClient as postsApi } from '@/api/client';
+import { postsClient as postsApi } from '@/api/client/posts.client';
 import type { Post } from '@/types';
 import { toast } from 'sonner';
 

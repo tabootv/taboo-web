@@ -33,48 +33,68 @@ const extractArray = <T>(data: unknown, key?: string): T[] => {
 };
 
 export const homeClient = {
-  getBanners: async (): Promise<Banner[]> => {
-    const data = await apiClient.get<{ banners?: Banner[]; data?: Banner[] }>('/home/banners');
+  getBanners: async (serverToken?: string): Promise<Banner[]> => {
+    const data = await apiClient.get<{ banners?: Banner[]; data?: Banner[] }>(
+      '/home/banners',
+      serverToken ? { serverToken } : undefined
+    );
     return extractArray<Banner>(data, 'banners');
   },
 
-  getFeaturedVideos: async (): Promise<Video[]> => {
-    const data = await apiClient.get<{ videos?: Video[]; data?: Video[] }>('/home/featured-videos');
-    return extractArray<Video>(data, 'videos');
-  },
-
-  getShortVideos: async (): Promise<Video[]> => {
-    const data = await apiClient.get<{ videos?: Video[]; data?: Video[] }>('/home/short-videos');
-    return extractArray<Video>(data, 'videos');
-  },
-
-  getShortVideosV2: async (): Promise<Video[]> => {
-    const data = await apiClient.get<{ videos?: Video[]; data?: Video[] }>('/v2/home/short-videos');
-    return extractArray<Video>(data, 'videos');
-  },
-
-  getRecommendedVideos: async (): Promise<Video[]> => {
+  getFeaturedVideos: async (serverToken?: string): Promise<Video[]> => {
     const data = await apiClient.get<{ videos?: Video[]; data?: Video[] }>(
-      '/home/recommended-videos'
+      '/home/featured-videos',
+      serverToken ? { serverToken } : undefined
     );
     return extractArray<Video>(data, 'videos');
   },
 
-  getSeries: async (): Promise<Series[]> => {
-    const data = await apiClient.get<{ series?: Series[]; data?: Series[] }>('/home/series');
+  getShortVideos: async (serverToken?: string): Promise<Video[]> => {
+    const data = await apiClient.get<{ videos?: Video[]; data?: Video[] }>(
+      '/home/short-videos',
+      serverToken ? { serverToken } : undefined
+    );
+    return extractArray<Video>(data, 'videos');
+  },
+
+  getShortVideosV2: async (serverToken?: string): Promise<Video[]> => {
+    const data = await apiClient.get<{ videos?: Video[]; data?: Video[] }>(
+      '/v2/home/short-videos',
+      serverToken ? { serverToken } : undefined
+    );
+    return extractArray<Video>(data, 'videos');
+  },
+
+  getRecommendedVideos: async (serverToken?: string): Promise<Video[]> => {
+    const data = await apiClient.get<{ videos?: Video[]; data?: Video[] }>(
+      '/home/recommended-videos',
+      serverToken ? { serverToken } : undefined
+    );
+    return extractArray<Video>(data, 'videos');
+  },
+
+  getSeries: async (serverToken?: string): Promise<Series[]> => {
+    const data = await apiClient.get<{ series?: Series[]; data?: Series[] }>(
+      '/home/series',
+      serverToken ? { serverToken } : undefined
+    );
     return extractArray<Series>(data, 'series');
   },
 
-  getCourses: async (): Promise<Course[]> => {
-    const data = await apiClient.get<{ courses?: Course[]; data?: Course[] }>('/home/courses');
+  getCourses: async (serverToken?: string): Promise<Course[]> => {
+    const data = await apiClient.get<{ courses?: Course[]; data?: Course[] }>(
+      '/home/courses',
+      serverToken ? { serverToken } : undefined
+    );
     return extractArray<Course>(data, 'courses');
   },
 
-  getCreators: async (): Promise<Creator[]> => {
+  getCreators: async (serverToken?: string): Promise<Creator[]> => {
     const data = await apiClient.get<{ creators?: { data?: Creator[] }; data?: Creator[] }>(
       '/creators',
       {
         params: { per_page: 20 },
+        ...(serverToken ? { serverToken } : {}),
       }
     );
     return data.creators?.data || data.data || [];

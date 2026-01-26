@@ -5,7 +5,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Play } from 'lucide-react';
-import { formatDuration, getSeriesRoute } from '@/lib/utils';
+import { formatDuration, getSeriesRoute } from '@/shared/utils/formatting';
 import type { Video, Series } from '@/types';
 
 interface TopResultPreviewProps {
@@ -14,22 +14,15 @@ interface TopResultPreviewProps {
 }
 
 export function TopResultPreview({ result, onClose }: TopResultPreviewProps) {
-  const href = 'videos_count' in result
-    ? getSeriesRoute(result.id, result.title)
-    : `/videos/${result.id}`;
+  const href =
+    'videos_count' in result ? getSeriesRoute(result.id, result.title) : `/videos/${result.id}`;
 
-  const thumbnail = ('thumbnail_webp' in result && result.thumbnail_webp) ||
-    result.thumbnail ||
-    '';
+  const thumbnail = ('thumbnail_webp' in result && result.thumbnail_webp) || result.thumbnail || '';
 
   return (
     <div className="hidden lg:block w-80 flex-shrink-0">
       <h3 className="text-sm font-medium text-text-secondary mb-3">Top Result</h3>
-      <Link
-        href={href}
-        onClick={onClose}
-        className="block group"
-      >
+      <Link href={href} onClick={onClose} className="block group">
         <div className="relative aspect-video rounded-xl overflow-hidden bg-surface">
           {thumbnail && (
             <Image
@@ -50,16 +43,10 @@ export function TopResultPreview({ result, onClose }: TopResultPreviewProps) {
 
           {/* Info */}
           <div className="absolute bottom-0 left-0 right-0 p-4">
-            <h4 className="font-bold text-white text-lg line-clamp-2">
-              {result.title}
-            </h4>
+            <h4 className="font-bold text-white text-lg line-clamp-2">{result.title}</h4>
             <div className="flex items-center gap-2 text-sm text-gray-300 mt-1">
-              {'channel' in result && result.channel?.name && (
-                <span>{result.channel.name}</span>
-              )}
-              {'videos_count' in result && (
-                <span>{result.videos_count} episodes</span>
-              )}
+              {'channel' in result && result.channel?.name && <span>{result.channel.name}</span>}
+              {'videos_count' in result && <span>{result.videos_count} episodes</span>}
               {'duration' in result && result.duration && (
                 <span>{formatDuration(result.duration)}</span>
               )}
@@ -67,12 +54,9 @@ export function TopResultPreview({ result, onClose }: TopResultPreviewProps) {
           </div>
         </div>
         {'description' in result && result.description && (
-          <p className="text-sm text-text-secondary mt-3 line-clamp-2">
-            {result.description}
-          </p>
+          <p className="text-sm text-text-secondary mt-3 line-clamp-2">{result.description}</p>
         )}
       </Link>
     </div>
   );
 }
-

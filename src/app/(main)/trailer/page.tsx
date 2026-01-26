@@ -1,11 +1,12 @@
 'use client';
-
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { X, Loader2 } from 'lucide-react';
-import { seriesClient as seriesApi, coursesClient as coursesApi } from '@/api/client';
-import { VideoPlayer } from '@/features/video';
-import { Button, LoadingScreen } from '@/components/ui';
+import { seriesClient as seriesApi } from '@/api/client/series.client';
+import { coursesClient as coursesApi } from '@/api/client/courses.client';
+import { VideoPlayer } from '@/features/video/components/video-player';
+import { Button } from '@/components/ui/button';
+import { LoadingScreen } from '@/components/ui/spinner';
 
 function TrailerContent() {
   const searchParams = useSearchParams();
@@ -92,11 +93,7 @@ function TrailerContent() {
       {/* Video Player */}
       <div className="w-full h-screen flex items-center justify-center">
         <div className="w-full max-w-6xl aspect-video">
-          <VideoPlayer
-            url_720={trailerUrl}
-            autoplay={true}
-            className="w-full h-full"
-          />
+          <VideoPlayer url_720={trailerUrl} autoplay={true} className="w-full h-full" />
         </div>
       </div>
     </div>

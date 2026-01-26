@@ -1,7 +1,7 @@
 'use client';
 
-import { VideoComments } from '@/features/video';
-import { useSeriesDetail } from '@/api/queries';
+import { VideoComments } from '@/features/video/components/video-comments';
+import { useSeriesDetail } from '@/api/queries/series.queries';
 import type { Video } from '@/types';
 import { useSeriesPlayerHandlers } from '../hooks/use-series-player-handlers';
 import { SeriesChannelAndActions } from './series-channel-and-actions';
@@ -82,4 +82,3 @@ export function SeriesPlayerMainContent({
     </div>
   );
 }
-

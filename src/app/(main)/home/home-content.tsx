@@ -1,16 +1,14 @@
 'use client';
 
-import {
-  BannerSlider,
-  CreatorsSection,
-  EndOfContentMessage,
-  FeaturedSection,
-  HomeSeriesSection,
-  HomeShortsSection,
-  RecommendedSection,
-} from '@/components/home';
+import { BannerSlider } from './_components/banner-slider';
+import { CreatorsSection } from './_components/creators';
+import { EndOfContentMessage } from './_components/end-of-content-message';
+import { FeaturedSection } from './_components/featured';
+import { HomeSeriesSection } from './_components/home-series';
+import { HomeShortsSection } from './_components/home-shorts';
+import { RecommendedSection } from './_components/recommended';
 import { useCallback } from 'react';
-import type { HomePageData } from '@/lib/api/home-data';
+import type { HomePageData } from '@/shared/lib/api/home-data';
 import { useEffect, useState } from 'react';
 import { PlaylistsInfiniteScroll } from './playlists-infinite-scroll';
 
@@ -52,9 +50,7 @@ export function HomeContent({ initialData }: HomeContentProps) {
           onLastPageReached={setHasReachedEnd}
         />
 
-        {hasReachedEnd && (
-          <EndOfContentMessage onScrollToTop={handleScrollToTop} />
-        )}
+        {hasReachedEnd && <EndOfContentMessage onScrollToTop={handleScrollToTop} />}
       </div>
     </>
   );

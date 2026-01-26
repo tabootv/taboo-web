@@ -1,4 +1,4 @@
-import type { WatchlistItemType } from '@/lib/stores/watchlist-store';
+import type { WatchlistItemType } from '@/shared/stores/watchlist-store';
 
 export const filterCategories: Array<{ id: WatchlistItemType | 'all'; name: string }> = [
   { id: 'all', name: 'All' },
@@ -6,4 +6,3 @@ export const filterCategories: Array<{ id: WatchlistItemType | 'all'; name: stri
   { id: 'series', name: 'Series' },
   { id: 'course', name: 'Courses' },
 ];
-

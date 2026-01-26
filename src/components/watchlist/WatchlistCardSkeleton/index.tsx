@@ -16,4 +16,3 @@ export function WatchlistCardSkeleton() {
     </div>
   );
 }
-

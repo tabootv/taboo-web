@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useCreators } from '@/api/queries/home.queries';
 import { useMapVideos } from '@/api/queries/public.queries';
 import { useDebounce } from './use-debounce';
-import { calculateSimilarity, detectCountry, getCountryCode } from '@/lib/utils/search-utils';
+import { calculateSimilarity, detectCountry, getCountryCode } from '@/shared/utils/search-utils';
 import type { Creator, Video } from '@/types';
 
 type MapVideo = {
@@ -43,11 +43,10 @@ export function useMixedSearch(query: string): UseMixedSearchResult {
 
   const filteredVideos = useMemo(() => {
     if (!debouncedQuery || debouncedQuery.length < 3) return [];
-    return searchVideos
-      .filter((v) => {
-        const isShort = v.short || v.is_short || v.type === 'short';
-        return !isShort;
-      });
+    return searchVideos.filter((v) => {
+      const isShort = v.short || v.is_short || v.type === 'short';
+      return !isShort;
+    });
   }, [searchVideos, debouncedQuery]);
 
   const allCreatorsRef = useRef(allCreators);

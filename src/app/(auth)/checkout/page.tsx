@@ -1,13 +1,13 @@
 'use client';
-
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Crown, Check, CreditCard, Lock, AlertCircle } from 'lucide-react';
-import { subscriptionsClient as subscriptionsApi } from '@/api/client';
+import { subscriptionsClient as subscriptionsApi } from '@/api/client/subscriptions.client';
 import type { Plan } from '@/types';
-import { useAuthStore } from '@/lib/stores';
-import { Button, LoadingScreen } from '@/components/ui';
+import { useAuthStore } from '@/shared/stores/auth-store';
+import { Button } from '@/components/ui/button';
+import { LoadingScreen } from '@/components/ui/spinner';
 import { Logo } from '@/components/ui/logo';
 import { toast } from 'sonner';
 
@@ -58,7 +58,6 @@ function CheckoutForm() {
       // 2. Redirect to Stripe
       // 3. Handle webhook for successful payment
       // 4. Update subscription status
-
     } catch (err) {
       console.error('Subscription failed:', err);
       setError('Failed to process subscription. Please try again.');
@@ -142,7 +141,9 @@ function CheckoutForm() {
 
               {/* Features */}
               <div className="py-6 border-b border-border">
-                <h4 className="text-sm font-medium text-text-secondary mb-4">What&apos;s included:</h4>
+                <h4 className="text-sm font-medium text-text-secondary mb-4">
+                  What&apos;s included:
+                </h4>
                 <ul className="space-y-3">
                   {features.map((feature, index) => (
                     <li key={index} className="flex items-center gap-3 text-sm text-text-secondary">
@@ -159,7 +160,9 @@ function CheckoutForm() {
               <div className="pt-6">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-text-secondary">Subtotal</span>
-                  <span className="text-text-primary">{formatPrice(plan.price, plan.currency)}</span>
+                  <span className="text-text-primary">
+                    {formatPrice(plan.price, plan.currency)}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center mb-4">
                   <span className="text-text-secondary">Trial Period</span>
@@ -170,7 +173,8 @@ function CheckoutForm() {
                   <span className="text-2xl font-bold text-text-primary">$0.00</span>
                 </div>
                 <p className="text-xs text-text-secondary mt-2">
-                  You&apos;ll be charged {formatPrice(plan.price, plan.currency)} after your 3-day trial ends
+                  You&apos;ll be charged {formatPrice(plan.price, plan.currency)} after your 3-day
+                  trial ends
                 </p>
               </div>
             </div>
@@ -214,9 +218,7 @@ function CheckoutForm() {
               {/* Card Details Placeholder */}
               <div className="mb-6 p-4 bg-hover rounded-lg text-center">
                 <Lock className="w-8 h-8 text-text-secondary mx-auto mb-2" />
-                <p className="text-sm text-text-secondary">
-                  Secure payment powered by Stripe
-                </p>
+                <p className="text-sm text-text-secondary">Secure payment powered by Stripe</p>
                 <p className="text-xs text-text-secondary mt-1">
                   Card details will be collected securely
                 </p>

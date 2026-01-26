@@ -5,7 +5,7 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { creatorsClient } from '../client';
+import { creatorsClient } from '../client/creators.client';
 import type { CreatorListResponse, FollowResponse } from '../client/creators.client';
 import { queryKeys } from '../query-keys';
 import type { Creator } from '../types';
@@ -88,10 +88,14 @@ export function useToggleFollowCreator() {
             data: oldData.data.map((c) =>
               c.id === Number(creatorId)
                 ? {
-                  ...c,
-                  ...(updatedCreator.following !== undefined && { following: updatedCreator.following }),
-                  ...(updatedCreator.followers_count !== undefined && { followers_count: updatedCreator.followers_count }),
-                }
+                    ...c,
+                    ...(updatedCreator.following !== undefined && {
+                      following: updatedCreator.following,
+                    }),
+                    ...(updatedCreator.followers_count !== undefined && {
+                      followers_count: updatedCreator.followers_count,
+                    }),
+                  }
                 : c
             ),
           };
@@ -103,7 +107,9 @@ export function useToggleFollowCreator() {
         queryClient.setQueryData<Creator>(queryKeys.creators.detail(creatorId), {
           ...detailData,
           ...(updatedCreator.following !== undefined && { following: updatedCreator.following }),
-          ...(updatedCreator.followers_count !== undefined && { followers_count: updatedCreator.followers_count }),
+          ...(updatedCreator.followers_count !== undefined && {
+            followers_count: updatedCreator.followers_count,
+          }),
         });
       }
     },

@@ -3,8 +3,8 @@
 import { ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useSeriesDetail } from '@/api/queries';
-import { getSeriesRoute } from '@/lib/utils';
+import { useSeriesDetail } from '@/api/queries/series.queries';
+import { getSeriesRoute } from '@/shared/utils/formatting';
 import type { Video } from '@/types';
 import { PlayerEpisodeCard } from './player-episode-card';
 
@@ -35,7 +35,12 @@ export function SeriesPlayerSidebar({
       >
         <div className="relative w-16 h-9 rounded-lg overflow-hidden shrink-0">
           {seriesData.thumbnail && (
-            <Image src={seriesData.thumbnail} alt={seriesData.title} fill className="object-cover" />
+            <Image
+              src={seriesData.thumbnail}
+              alt={seriesData.title}
+              fill
+              className="object-cover"
+            />
           )}
         </div>
         <div className="flex-1 min-w-0">
@@ -77,4 +82,3 @@ export function SeriesPlayerSidebar({
     </div>
   );
 }
-

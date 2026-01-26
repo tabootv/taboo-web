@@ -4,9 +4,9 @@
 
 import Image from 'next/image';
 import { Film, Play, BookOpen, Users } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { highlightMatch } from '@/lib/utils/highlightMatch';
-import { formatCompactNumber } from '@/lib/utils';
+import { cn } from '@/shared/utils/formatting';
+import { highlightMatch } from '@/shared/utils/highlightMatch';
+import { formatCompactNumber } from '@/shared/utils/formatting';
 import type { Video, Series, Creator } from '@/types';
 
 type ResultItem =
@@ -52,12 +52,8 @@ export function SearchResultItem({
           )}
         </div>
         <div className="flex-1 text-left min-w-0">
-          <p className="text-text-primary truncate">
-            {highlightMatch(item.data.title, query)}
-          </p>
-          <p className="text-sm text-text-secondary truncate">
-            {item.data.channel?.name}
-          </p>
+          <p className="text-text-primary truncate">{highlightMatch(item.data.title, query)}</p>
+          <p className="text-sm text-text-secondary truncate">{item.data.channel?.name}</p>
         </div>
         <Film className="w-4 h-4 text-text-secondary flex-shrink-0" />
       </button>
@@ -84,9 +80,7 @@ export function SearchResultItem({
           )}
         </div>
         <div className="flex-1 text-left min-w-0">
-          <p className="text-text-primary truncate">
-            {highlightMatch(item.data.title, query)}
-          </p>
+          <p className="text-text-primary truncate">{highlightMatch(item.data.title, query)}</p>
           <p className="text-sm text-text-secondary">Short</p>
         </div>
         <Play className="w-4 h-4 text-text-secondary flex-shrink-0" />
@@ -105,21 +99,12 @@ export function SearchResultItem({
       >
         <div className="relative w-16 h-10 rounded overflow-hidden bg-black flex-shrink-0">
           {item.data.thumbnail && (
-            <Image
-              src={item.data.thumbnail}
-              alt={item.data.title}
-              fill
-              className="object-cover"
-            />
+            <Image src={item.data.thumbnail} alt={item.data.title} fill className="object-cover" />
           )}
         </div>
         <div className="flex-1 text-left min-w-0">
-          <p className="text-text-primary truncate">
-            {highlightMatch(item.data.title, query)}
-          </p>
-          <p className="text-sm text-text-secondary">
-            {item.data.videos_count} episodes
-          </p>
+          <p className="text-text-primary truncate">{highlightMatch(item.data.title, query)}</p>
+          <p className="text-sm text-text-secondary">{item.data.videos_count} episodes</p>
         </div>
         <BookOpen className="w-4 h-4 text-text-secondary flex-shrink-0" />
       </button>
@@ -137,18 +122,11 @@ export function SearchResultItem({
       >
         <div className="relative w-10 h-10 rounded-full overflow-hidden bg-surface flex-shrink-0">
           {item.data.dp && (
-            <Image
-              src={item.data.dp}
-              alt={item.data.name}
-              fill
-              className="object-cover"
-            />
+            <Image src={item.data.dp} alt={item.data.name} fill className="object-cover" />
           )}
         </div>
         <div className="flex-1 text-left min-w-0">
-          <p className="text-text-primary truncate">
-            {highlightMatch(item.data.name, query)}
-          </p>
+          <p className="text-text-primary truncate">{highlightMatch(item.data.name, query)}</p>
           <p className="text-sm text-text-secondary">
             {formatCompactNumber(item.data.subscribers_count ?? 0)} subscribers
           </p>
@@ -160,4 +138,3 @@ export function SearchResultItem({
 
   return null;
 }
-

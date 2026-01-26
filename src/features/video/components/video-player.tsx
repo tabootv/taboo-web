@@ -32,7 +32,9 @@ export function VideoPlayer({
 
   if (!src) {
     return (
-      <div className={`relative bg-black aspect-video rounded-lg overflow-hidden flex items-center justify-center ${className}`}>
+      <div
+        className={`relative bg-black aspect-video rounded-lg overflow-hidden flex items-center justify-center ${className}`}
+      >
         <p className="text-white/60 text-sm">No video source available</p>
       </div>
     );

@@ -1,11 +1,17 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
+import {
+  cn,
+  formatCompactNumber,
+  formatDuration,
+  getCreatorRoute,
+  getSeriesRoute,
+} from '@/shared/utils/formatting';
+import { Check, MoreHorizontal, Play, Plus } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Play, Plus, MoreHorizontal, Check } from 'lucide-react';
-import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
-import { cn, formatDuration, formatCompactNumber, getCreatorRoute, getSeriesRoute } from '@/lib/utils';
+import { useRef, useState } from 'react';
 
 interface PosterCardProps {
   id: string;

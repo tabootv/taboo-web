@@ -5,8 +5,8 @@
  */
 
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
-import type { VideoListFilters } from '../client';
-import { videoClient } from '../client';
+import type { VideoListFilters } from '../client/video.client';
+import { videoClient } from '../client/video.client';
 import { queryKeys } from '../query-keys';
 import type { Video } from '../types';
 
@@ -153,9 +153,10 @@ export function useVideos(
       }
 
       if (filters?.sort_by) {
-        listFilters.sort_by = filters.sort_by === 'latest'
-          ? 'newest'
-          : (filters.sort_by as 'trending' | 'newest' | 'oldest' | 'longest' | 'shortest');
+        listFilters.sort_by =
+          filters.sort_by === 'latest'
+            ? 'newest'
+            : (filters.sort_by as 'trending' | 'newest' | 'oldest' | 'longest' | 'shortest');
       }
 
       const response = await videoClient.list(listFilters);

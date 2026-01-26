@@ -5,10 +5,10 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Search } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui';
+import { cn } from '@/shared/utils/formatting';
+import { Button } from '@/components/ui/button';
 import { mainNavigation } from '../constants/navigation-constants';
-import { useAuthStore } from '@/lib/stores';
+import { useAuthStore } from '@/shared/stores/auth-store';
 
 interface NavbarMobileMenuProps {
   isOpen: boolean;
@@ -85,4 +85,3 @@ export function NavbarMobileMenu({
     </div>
   );
 }
-

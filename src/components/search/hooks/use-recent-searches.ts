@@ -3,7 +3,10 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { MAX_RECENT_SEARCHES, RECENT_SEARCHES_KEY } from '@/components/search/constants/search-constants';
+import {
+  MAX_RECENT_SEARCHES,
+  RECENT_SEARCHES_KEY,
+} from '@/components/search/constants/search-constants';
 
 /**
  * Get recent searches from localStorage
@@ -82,4 +85,3 @@ export function useRecentSearches() {
     clearRecentSearches,
   };
 }
-

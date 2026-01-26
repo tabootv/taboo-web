@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { MediaCardThumbnail } from './components/MediaCardThumbnail';
 import { MediaCardContent } from './components/MediaCardContent';
-import { getSeriesRoute } from '@/lib/utils';
+import { getSeriesRoute } from '@/shared/utils/formatting';
 
 export interface MediaCardProps {
   /** Unique identifier */
@@ -122,8 +122,8 @@ export function MediaCard({
     type === 'series'
       ? getSeriesRoute(_id, title)
       : type === 'short'
-      ? `/shorts/${uuid}`
-      : `/videos/${uuid}`;
+        ? `/shorts/${uuid}`
+        : `/videos/${uuid}`;
 
   // Aspect ratio based on type
   const aspectRatio = type === 'short' ? 'aspect-[9/16]' : 'aspect-video';

@@ -1,15 +1,15 @@
 'use client';
-
 import { useEffect, useState, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Plus, Play, Edit, Trash2, Eye, ThumbsUp, Clock, MoreVertical } from 'lucide-react';
 import type { Video } from '@/types';
-import { Button, LoadingScreen, Spinner } from '@/components/ui';
-import { formatCompactNumber, formatDuration, formatRelativeTime } from '@/lib/utils';
-import { useAuthStore } from '@/lib/stores';
+import { Button } from '@/components/ui/button';
+import { LoadingScreen, Spinner } from '@/components/ui/spinner';
+import { formatCompactNumber, formatDuration, formatRelativeTime } from '@/shared/utils/formatting';
+import { useAuthStore } from '@/shared/stores/auth-store';
 import { toast } from 'sonner';
-import { apiClient } from '@/api/client';
+import { apiClient } from '@/api/client/base-client';
 
 export default function ContentVideosPage() {
   const { user } = useAuthStore();
@@ -36,7 +36,9 @@ export default function ContentVideosPage() {
         current_page?: number;
         last_page?: number;
       }
-      const response = await apiClient.get<VideosResponse>('/contents/videos', { params: { page: pageNum } });
+      const response = await apiClient.get<VideosResponse>('/contents/videos', {
+        params: { page: pageNum },
+      });
       const newVideos = response.videos?.data || response.data || [];
 
       if (reset) {
@@ -151,11 +153,7 @@ export default function ContentVideosPage() {
       ) : (
         <div className="space-y-4">
           {videosList.map((video) => (
-            <VideoCard
-              key={video.uuid}
-              video={video}
-              onDelete={() => handleDelete(video)}
-            />
+            <VideoCard key={video.uuid} video={video} onDelete={() => handleDelete(video)} />
           ))}
         </div>
       )}

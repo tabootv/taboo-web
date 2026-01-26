@@ -4,9 +4,9 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Lock, AlertCircle, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui';
+import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/ui/logo';
-import { apiClient } from '@/api/client';
+import { apiClient } from '@/api/client/base-client';
 import { toast } from 'sonner';
 
 export default function ConfirmPasswordPage() {
@@ -68,7 +68,10 @@ export default function ConfirmPasswordPage() {
             )}
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-text-primary mb-2">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-text-primary mb-2"
+              >
                 Password
               </label>
               <div className="relative">
@@ -86,7 +89,13 @@ export default function ConfirmPasswordPage() {
             </div>
 
             <Button type="submit" disabled={isLoading} className="w-full btn-premium">
-              {isLoading ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Confirming...</> : 'Confirm'}
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" /> Confirming...
+                </>
+              ) : (
+                'Confirm'
+              )}
             </Button>
           </form>
         </div>

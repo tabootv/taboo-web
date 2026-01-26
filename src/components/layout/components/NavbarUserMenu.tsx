@@ -5,9 +5,10 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Bell, User, LogOut, Settings, Bookmark, Clapperboard } from 'lucide-react';
-import { Avatar, Button } from '@/components/ui';
-import { cn } from '@/lib/utils';
-import { useAuthStore } from '@/lib/stores';
+import { Avatar } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/shared/utils/formatting';
+import { useAuthStore } from '@/shared/stores/auth-store';
 import { useUserMenu } from '../hooks/use-user-menu';
 
 interface NavbarUserMenuProps {
@@ -42,7 +43,9 @@ export function NavbarUserMenu({ isSearchExpanded }: NavbarUserMenuProps) {
     <div
       className={cn(
         'flex items-center gap-2 transition-all duration-300',
-        isSearchExpanded ? 'w-0 opacity-0 overflow-hidden lg:opacity-100 lg:w-auto lg:overflow-visible' : 'opacity-100 w-auto'
+        isSearchExpanded
+          ? 'w-0 opacity-0 overflow-hidden lg:opacity-100 lg:w-auto lg:overflow-visible'
+          : 'opacity-100 w-auto'
       )}
     >
       {/* Notifications */}
@@ -59,7 +62,12 @@ export function NavbarUserMenu({ isSearchExpanded }: NavbarUserMenuProps) {
           onClick={toggleUserMenu}
           className="flex items-center gap-2 p-1 rounded-sm hover:bg-hover transition-colors"
         >
-          <Avatar src={user?.dp ?? null} alt={user?.display_name} size="sm" fallback={user?.display_name} />
+          <Avatar
+            src={user?.dp ?? null}
+            alt={user?.display_name}
+            size="sm"
+            fallback={user?.display_name}
+          />
         </button>
 
         {/* Dropdown */}
@@ -118,4 +126,3 @@ export function NavbarUserMenu({ isSearchExpanded }: NavbarUserMenuProps) {
     </div>
   );
 }
-

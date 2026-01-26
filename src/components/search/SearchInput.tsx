@@ -9,7 +9,6 @@ interface SearchInputProps {
 }
 
 export function SearchInput({ className }: SearchInputProps) {
-  
   const router = useRouter();
   const [query, setQuery] = useState('');
 
@@ -17,7 +16,7 @@ export function SearchInput({ className }: SearchInputProps) {
     e.preventDefault();
     const trimmed = query.trim();
     if (trimmed) {
-      router.push(`/search?q=${encodeURIComponent(trimmed)}`);
+      router.push(`/searches?q=${encodeURIComponent(trimmed)}`);
     }
   };
 

@@ -2,9 +2,6 @@ import { getRequiredEnv } from '@/shared/lib/config/env';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
-const FIRSTPROMOTER_API_KEY = getRequiredEnv('FIRSTPROMOTER_API_KEY');
-const FIRSTPROMOTER_V2_ACCOUNT_ID = getRequiredEnv('FIRSTPROMOTER_V2_ACCOUNT_ID');
-
 // Temporary mapping of user emails to FirstPromoter promoter IDs
 const PROMOTER_ID_MAP: Record<string, number> = {
   'arab@taboo.tv': 10448915,
@@ -40,6 +37,8 @@ export interface PromoterReportResponse {
 
 export async function GET(request: NextRequest) {
   try {
+    const FIRSTPROMOTER_API_KEY = getRequiredEnv('FIRSTPROMOTER_API_KEY');
+    const FIRSTPROMOTER_V2_ACCOUNT_ID = getRequiredEnv('FIRSTPROMOTER_V2_ACCOUNT_ID');
     const cookieStore = await cookies();
     const token = cookieStore.get('tabootv_token')?.value;
 
@@ -53,7 +52,6 @@ export async function GET(request: NextRequest) {
     const startDate = searchParams.get('start_date') || getDefaultStartDate();
     const endDate = searchParams.get('end_date') || new Date().toISOString();
 
-    const { getRequiredEnv } = await import('@/shared/lib/config/env');
     const apiUrl = getRequiredEnv('NEXT_PUBLIC_API_URL');
 
     const userResponse = await fetch(`${apiUrl}/me`, {
@@ -192,7 +190,7 @@ function getMockReportData(
   const start = new Date(startDate);
   const end = new Date(endDate);
 
-  let current = new Date(start);
+  const current = new Date(start);
   while (current <= end) {
     data.push({
       date: current.toISOString().split('T')[0] ?? '',

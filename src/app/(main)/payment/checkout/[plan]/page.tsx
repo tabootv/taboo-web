@@ -1,13 +1,13 @@
 'use client';
-
 import { useEffect, useState, use, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, ExternalLink, Check, Loader2, CreditCard } from 'lucide-react';
-import { subscriptionsClient as subscriptions } from '@/api/client';
+import { subscriptionsClient as subscriptions } from '@/api/client/subscriptions.client';
 import type { Plan } from '@/types';
-import { useAuthStore } from '@/lib/stores';
-import { Button, LoadingScreen } from '@/components/ui';
+import { useAuthStore } from '@/shared/stores/auth-store';
+import { Button } from '@/components/ui/button';
+import { LoadingScreen } from '@/components/ui/spinner';
 import { toast } from 'sonner';
 
 /**
@@ -85,7 +85,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ plan: strin
           return;
         }
         // Wait 2 seconds between polls
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, 2000));
       }
       // If still not subscribed after polling, show message
       toast.info('Payment received. Your subscription will be active shortly.');
@@ -166,7 +166,6 @@ export default function CheckoutPage({ params }: { params: Promise<{ plan: strin
         <ArrowLeft className="w-5 h-5" />
         Back to plans
       </Link>
-
       <div className="grid md:grid-cols-2 gap-8">
         {/* Order Summary */}
         <div className="bg-surface rounded-xl border border-border p-6">
@@ -201,7 +200,12 @@ export default function CheckoutPage({ params }: { params: Promise<{ plan: strin
               <div className="flex items-center justify-between mb-2">
                 <span className="text-text-secondary">Subtotal</span>
                 <span className="text-text-primary">
-                  ${plan.price} / {plan.interval === 'yearly' ? 'year' : plan.interval === 'lifetime' ? 'one-time' : 'month'}
+                  ${plan.price} /{' '}
+                  {plan.interval === 'yearly'
+                    ? 'year'
+                    : plan.interval === 'lifetime'
+                      ? 'one-time'
+                      : 'month'}
                 </span>
               </div>
               {plan.interval === 'yearly' && (
@@ -281,9 +285,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ plan: strin
               <p className="text-text-secondary mb-4">
                 Online checkout is not available for this plan.
               </p>
-              <p className="text-sm text-text-secondary">
-                Please contact support for assistance.
-              </p>
+              <p className="text-sm text-text-secondary">Please contact support for assistance.</p>
             </div>
           )}
         </div>

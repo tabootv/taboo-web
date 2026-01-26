@@ -31,12 +31,9 @@ export const shortsClient = {
    */
   list: async (filters?: ShortsListFilters): Promise<PaginatedResponse<ShortVideo>> => {
     try {
-      const data = await apiClient.get<{ videos?: PaginatedResponse<ShortVideo> }>(
-        '/v2/shorts',
-        {
-          params: filters,
-        }
-      );
+      const data = await apiClient.get<{ videos?: PaginatedResponse<ShortVideo> }>('/v2/shorts', {
+        params: filters,
+      });
 
       const shortsData = data.videos || data;
 
@@ -126,10 +123,7 @@ export const shortsClient = {
   /**
    * Get comments for a short
    */
-  getComments: async (
-    uuid: string,
-    page = 1
-  ): Promise<PaginatedResponse<Comment>> => {
+  getComments: async (uuid: string, page = 1): Promise<PaginatedResponse<Comment>> => {
     const data = await apiClient.get<{
       comments?: PaginatedResponse<Comment>;
     }>(`/v2/shorts/${uuid}/comments`, {

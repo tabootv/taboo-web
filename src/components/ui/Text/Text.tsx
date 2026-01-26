@@ -1,5 +1,5 @@
 import { HTMLAttributes, forwardRef } from 'react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/utils/formatting';
 import type { TextVariant } from '@/types';
 
 export interface TextProps extends HTMLAttributes<HTMLParagraphElement> {
@@ -16,13 +16,7 @@ export const Text = forwardRef<HTMLParagraphElement, TextProps>(
       lead: 'text-xl leading-8',
     };
 
-    return (
-      <Component
-        ref={ref}
-        className={cn(variants[variant], className)}
-        {...props}
-      />
-    );
+    return <Component ref={ref} className={cn(variants[variant], className)} {...props} />;
   }
 );
 

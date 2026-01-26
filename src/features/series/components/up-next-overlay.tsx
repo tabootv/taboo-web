@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { cn, formatDuration } from '@/lib/utils';
+import { cn, formatDuration } from '@/shared/utils/formatting';
 import type { Video } from '@/types';
 import Image from 'next/image';
 import { Play } from 'lucide-react';

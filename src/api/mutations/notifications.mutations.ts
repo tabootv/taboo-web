@@ -5,7 +5,7 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { notificationsClient } from '../client';
+import { notificationsClient } from '../client/notifications.client';
 import { queryKeys } from '../query-keys';
 import type { Notification } from '../types';
 
@@ -23,9 +23,7 @@ export function useMarkAllNotificationsRead() {
       await queryClient.cancelQueries({ queryKey: queryKeys.notifications.list() });
 
       // Snapshot previous value
-      const previousData = queryClient.getQueryData<Notification[]>(
-        queryKeys.notifications.list()
-      );
+      const previousData = queryClient.getQueryData<Notification[]>(queryKeys.notifications.list());
 
       // Optimistically mark all as read
       if (previousData) {
@@ -110,14 +108,14 @@ export function useDeleteNotification() {
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.notifications.list() });
       const previous = queryClient.getQueryData<Notification[]>(queryKeys.notifications.list());
-      
+
       if (previous) {
         queryClient.setQueryData<Notification[]>(
           queryKeys.notifications.list(),
           previous.filter((n) => n.id !== id)
         );
       }
-      
+
       return { previous };
     },
     onError: (_err, _id, context) => {
@@ -130,4 +128,3 @@ export function useDeleteNotification() {
     },
   });
 }
-

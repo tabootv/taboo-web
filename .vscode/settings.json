@@ -1,3 +1,33 @@
 {
-    "claudeCode.useTerminal": false
+  "claudeCode.useTerminal": false,
+
+  // TypeScript auto-import preferences - prefer direct imports over barrel files
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "typescript.preferences.importModuleSpecifierEnding": "minimal",
+  "typescript.preferences.autoImportFileExcludePatterns": [
+    "**/node_modules/**",
+    "**/src/**/index.ts",
+    "**/src/**/index.tsx"
+  ],
+
+  // JavaScript auto-import preferences (for .js/.jsx files if any)
+  "javascript.preferences.importModuleSpecifier": "non-relative",
+  "javascript.preferences.importModuleSpecifierEnding": "minimal",
+  "javascript.preferences.autoImportFileExcludePatterns": [
+    "**/node_modules/**",
+    "**/src/**/index.ts",
+    "**/src/**/index.tsx"
+  ],
+
+  // Auto-organize imports on save
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit"
+  },
+
+  // Prefer path aliases
+  "typescript.preferences.includePackageJsonAutoImports": "auto",
+
+  // Suggest imports from specific modules (direct paths)
+  "typescript.suggest.autoImports": true,
+  "javascript.suggest.autoImports": true
 }

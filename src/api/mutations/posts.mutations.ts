@@ -6,7 +6,7 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { postsClient } from '../client';
+import { postsClient } from '../client/posts.client';
 import { queryKeys } from '../query-keys';
 import type { Post } from '../types';
 

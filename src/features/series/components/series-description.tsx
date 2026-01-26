@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/utils/formatting';
 
 interface SeriesDescriptionProps {
   description: string;
@@ -37,4 +37,3 @@ export function SeriesDescription({
     </button>
   );
 }
-

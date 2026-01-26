@@ -32,9 +32,12 @@ export const subscriptionsClient = {
    * Get plans filtered by country (for regional pricing)
    */
   getPlansByCountry: async (country?: string): Promise<Plan[]> => {
-    const data = await apiClient.get<{ plans?: Plan[]; data?: Plan[] } | Plan[]>('/plans/by-country', {
-      params: { country } as Record<string, unknown>,
-    });
+    const data = await apiClient.get<{ plans?: Plan[]; data?: Plan[] } | Plan[]>(
+      '/plans/by-country',
+      {
+        params: { country } as Record<string, unknown>,
+      }
+    );
     if (Array.isArray(data)) return data;
     if (data && typeof data === 'object') {
       if ('plans' in data && Array.isArray(data.plans)) return data.plans;
@@ -129,4 +132,3 @@ export const subscriptionsClient = {
     return data.data;
   },
 };
-

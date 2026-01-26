@@ -11,6 +11,7 @@ export const STORAGE_KEYS = {
 
 export const PLAYER_CONFIG = {
   CONTROLS_HIDE_DELAY: 3000,
+  FEEDBACK_DISPLAY_MS: 800,
   STREAMING: {
     BUFFERING_GOAL: 15,
     REBUFFERING_GOAL: 3,
@@ -21,6 +22,6 @@ export const PLAYER_CONFIG = {
     REBUFFERING_GOAL: 1,
     BUFFER_BEHIND: 5,
     MAX_HEIGHT: 720,
+    THROTTLE_MS: 150,
   },
 } as const;
-

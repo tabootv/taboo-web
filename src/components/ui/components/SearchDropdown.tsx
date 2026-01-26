@@ -3,7 +3,7 @@
  */
 
 import { Spinner } from '@/components/ui/spinner';
-import { cn, getCreatorRoute, getSeriesRoute } from '@/lib/utils';
+import { cn, getCreatorRoute, getSeriesRoute } from '@/shared/utils/formatting';
 import type { Creator, Series, Video } from '@/types';
 import { ArrowUpRight, BookOpen, Clock, Film, Play, TrendingUp, Users, X } from 'lucide-react';
 import Image from 'next/image';

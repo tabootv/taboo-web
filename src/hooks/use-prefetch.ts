@@ -13,4 +13,3 @@ export function usePrefetch() {
 
   return { prefetchRoute };
 }
-

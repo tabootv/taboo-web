@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/utils/formatting';
 
 interface LogoProps {
   className?: string;
@@ -71,7 +71,7 @@ export function Logo({ className, size = 'md', linkTo = '/home' }: LogoProps) {
 
   if (linkTo) {
     return (
-      <Link href={linkTo} className="inline-block">
+      <Link href={linkTo} className="inline-block" aria-label="TabooTV Home">
         {logo}
       </Link>
     );

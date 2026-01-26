@@ -1,8 +1,8 @@
 'use client';
 
-import { searchClient as searchApi } from '@/api/client';
+import { searchClient as searchApi } from '@/api/client/search.client';
 import { useDebounce } from '@/hooks';
-import { cn, getCreatorRoute, getSeriesRoute } from '@/lib/utils';
+import { cn, getCreatorRoute, getSeriesRoute } from '@/shared/utils/formatting';
 import type { Creator, Series, Video } from '@/types';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -245,10 +245,10 @@ export function SearchBar({ className }: { className?: string }) {
 
   const hasResults = Boolean(
     results &&
-      (results.videos.length > 0 ||
-        results.shorts.length > 0 ||
-        results.series.length > 0 ||
-        results.creators.length > 0)
+    (results.videos.length > 0 ||
+      results.shorts.length > 0 ||
+      results.series.length > 0 ||
+      results.creators.length > 0)
   );
 
   const showDropdown = !!(isOpen && (recentSearches.length > 0 || query.trim()));

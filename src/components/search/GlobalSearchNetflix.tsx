@@ -1,22 +1,11 @@
 'use client';
 
-import {
-  useState,
-  useRef,
-  useEffect,
-  useCallback,
-  forwardRef,
-  useImperativeHandle,
-} from 'react';
+import { useState, useRef, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  Search,
-  X,
-  Loader2,
-} from 'lucide-react';
-import { cn, getCreatorRoute, getSeriesRoute } from '@/lib/utils';
+import { Search, X, Loader2 } from 'lucide-react';
+import { cn, getCreatorRoute, getSeriesRoute } from '@/shared/utils/formatting';
 import { useDebounce } from '@/hooks';
-import { searchClient as searchApi } from '@/api/client';
+import { searchClient as searchApi } from '@/api/client/search.client';
 import type { Video, Series, Creator } from '@/types';
 import { useRecentSearches } from './hooks/use-recent-searches';
 import { RecentSearches } from './components/RecentSearches';

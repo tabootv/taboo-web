@@ -2,7 +2,7 @@
 
 import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
-import { getSeriesRoute } from '@/lib/utils';
+import { getSeriesRoute } from '@/shared/utils/formatting';
 
 interface SeriesBreadcrumbProps {
   seriesId: string;
@@ -36,4 +36,3 @@ export function SeriesBreadcrumb({
     </nav>
   );
 }
-

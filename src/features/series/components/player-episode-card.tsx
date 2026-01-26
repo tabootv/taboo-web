@@ -3,7 +3,7 @@
 import { CheckCircle, Play } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { cn, formatDuration, getSeriesPlayRoute } from '@/lib/utils';
+import { cn, formatDuration, getSeriesPlayRoute } from '@/shared/utils/formatting';
 import type { Video } from '@/types';
 
 interface PlayerEpisodeCardProps {
@@ -92,4 +92,3 @@ export function PlayerEpisodeCard({
     </Link>
   );
 }
-

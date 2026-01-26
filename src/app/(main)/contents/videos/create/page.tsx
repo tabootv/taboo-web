@@ -5,10 +5,10 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, Upload, X, Film, AlertCircle, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui';
-import { useAuthStore } from '@/lib/stores';
+import { Button } from '@/components/ui/button';
+import { useAuthStore } from '@/shared/stores/auth-store';
 import { toast } from 'sonner';
-import { apiClient } from '@/api/client';
+import { apiClient } from '@/api/client/base-client';
 
 export default function CreateVideoPage() {
   const router = useRouter();
@@ -128,9 +128,7 @@ export default function CreateVideoPage() {
 
         {/* Video Upload */}
         <div>
-          <label className="block text-sm font-medium text-text-primary mb-2">
-            Video File *
-          </label>
+          <label className="block text-sm font-medium text-text-primary mb-2">Video File *</label>
           {videoPreview ? (
             <div className="relative aspect-video rounded-lg overflow-hidden bg-black">
               <video src={videoPreview} controls className="w-full h-full" />
@@ -166,9 +164,7 @@ export default function CreateVideoPage() {
 
         {/* Thumbnail */}
         <div>
-          <label className="block text-sm font-medium text-text-primary mb-2">
-            Thumbnail
-          </label>
+          <label className="block text-sm font-medium text-text-primary mb-2">Thumbnail</label>
           {thumbnailPreview ? (
             <div className="relative w-64 aspect-video rounded-lg overflow-hidden">
               <Image src={thumbnailPreview} alt="Thumbnail" fill className="object-cover" />

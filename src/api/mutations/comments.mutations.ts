@@ -46,9 +46,7 @@ export function useToggleCommentLike(
               return {
                 ...comment,
                 has_liked: !comment.has_liked,
-                likes_count: comment.has_liked
-                  ? comment.likes_count - 1
-                  : comment.likes_count + 1,
+                likes_count: comment.has_liked ? comment.likes_count - 1 : comment.likes_count + 1,
               };
             }
             // Also check nested replies

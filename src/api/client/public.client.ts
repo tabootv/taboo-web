@@ -35,7 +35,7 @@ export interface MapVideosFilters extends Record<string, unknown> {
 export interface MapVideosPaginatedResponse {
   videos: Video[];
   pagination: {
-    current_page: number
+    current_page: number;
     from: number;
     last_page: number;
     per_page: number;
@@ -85,7 +85,7 @@ export const publicClient = {
         per_page: data.per_page || perPage,
         total: data.total || videos.length,
         from: 0,
-        to: 0
+        to: 0,
       },
     };
   },
