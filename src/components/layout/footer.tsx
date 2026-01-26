@@ -7,7 +7,7 @@ import Link from 'next/link';
 
 const footerLinks = [
   { name: 'Customer support', href: 'https://taboo.tv/contact-us' },
-  { name: 'Terms and conditions', href: 'https://taboo.tv/terms-&-conditions' },
+  { name: 'Terms and conditions', href: 'https://taboo.tv/terms-conditions' },
   { name: 'Privacy policy', href: 'https://taboo.tv/privacy-policy' },
   { name: 'Refund policy', href: 'https://taboo.tv/refund-policy' },
 ];

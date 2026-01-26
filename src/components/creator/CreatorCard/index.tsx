@@ -1,10 +1,10 @@
 'use client';
 
-import { useToggleFollowCreator } from '@/api/mutations';
+import { CreatorFollowButton } from '@/components/creator/CreatorFollowButton';
 import { usePrefetch } from '@/hooks/use-prefetch';
 import { getCreatorRoute } from '@/shared/utils/formatting';
 import type { Creator } from '@/types';
-import { Check, Loader2, Video } from 'lucide-react';
+import { Video } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -14,47 +14,7 @@ interface CreatorCardProps {
 
 export function CreatorCard({ creator }: CreatorCardProps) {
   const { prefetchRoute } = usePrefetch();
-  const toggleFollowMutation = useToggleFollowCreator();
   const href = getCreatorRoute(creator.handler);
-
-  // Derive state directly from prop - no local state
-  const isFollowing = creator.following ?? false;
-  const isPending = toggleFollowMutation.isPending;
-
-  const handleFollow = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (isPending) return;
-
-    toggleFollowMutation.mutate({
-      creatorId: creator.id,
-      currentFollowing: isFollowing,
-    });
-  };
-
-  const buttonContent = isPending ? (
-    <Loader2 className="w-4 h-4 animate-spin" />
-  ) : isFollowing ? (
-    <>
-      <Check className="w-4 h-4 mr-1" />
-      Following
-    </>
-  ) : (
-    'Follow'
-  );
-
-  const buttonClassName = `btn btn-sm min-w-24 justify-center transition-all ${
-    isFollowing
-      ? 'bg-transparent border border-white/30 text-white/80 hover:border-white/50 hover:text-white hover:bg-white/5'
-      : 'btn-primary'
-  }`;
-
-  const mobileButtonClassName = `btn btn-sm w-[93%] mx-auto my-[15px] min-w-[120px] justify-center transition-all ${
-    isFollowing
-      ? 'bg-transparent border border-white/30 text-white/80 hover:border-white/50 hover:text-white hover:bg-white/5'
-      : 'btn-primary'
-  }`;
 
   return (
     <div className="creator-card-bg h-full">
@@ -105,14 +65,7 @@ export function CreatorCard({ creator }: CreatorCardProps) {
               </div>
 
               <div className="hidden md:block">
-                <button
-                  onClick={handleFollow}
-                  aria-pressed={isFollowing}
-                  disabled={isPending}
-                  className={buttonClassName}
-                >
-                  {buttonContent}
-                </button>
+                <CreatorFollowButton creator={creator} size="sm" />
               </div>
             </div>
 
@@ -123,14 +76,11 @@ export function CreatorCard({ creator }: CreatorCardProps) {
         </div>
 
         <div className="md:hidden">
-          <button
-            onClick={handleFollow}
-            aria-pressed={isFollowing}
-            disabled={isPending}
-            className={mobileButtonClassName}
-          >
-            {buttonContent}
-          </button>
+          <CreatorFollowButton
+            creator={creator}
+            size="sm"
+            className="w-[93%] mx-auto my-[15px] min-w-[120px]"
+          />
         </div>
       </Link>
     </div>

@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/shared/utils/formatting';
 import { useAuthStore } from '@/shared/stores/auth-store';
 import { useUserMenu } from '../hooks/use-user-menu';
+import { useNotifications } from '@/api/queries/notifications.queries';
+import { useMemo } from 'react';
 
 interface NavbarUserMenuProps {
   isSearchExpanded: boolean;
@@ -19,6 +21,12 @@ export function NavbarUserMenu({ isSearchExpanded }: NavbarUserMenuProps) {
   const router = useRouter();
   const { user, isAuthenticated, logout } = useAuthStore();
   const { isUserMenuOpen, toggleMenu: toggleUserMenu, closeMenu: closeUserMenu } = useUserMenu();
+  const { data: notificationsList = [] } = useNotifications();
+
+  const unreadCount = useMemo(() => {
+    const allNotifications = Array.isArray(notificationsList) ? notificationsList.flat() : [];
+    return allNotifications.filter((n) => n && !n.read_at).length;
+  }, [notificationsList]);
 
   const handleLogout = async () => {
     await logout();
@@ -54,6 +62,11 @@ export function NavbarUserMenu({ isSearchExpanded }: NavbarUserMenuProps) {
         className="relative p-2 rounded-sm text-text-secondary hover:bg-hover hover:text-text-primary transition-colors"
       >
         <Bell className="w-5 h-5" />
+        {unreadCount > 0 && (
+          <span className="absolute top-1 right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-semibold text-white bg-red-primary rounded-full">
+            {unreadCount > 99 ? '99+' : unreadCount}
+          </span>
+        )}
       </Link>
 
       {/* User Menu */}

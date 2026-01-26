@@ -1,8 +1,11 @@
 'use client';
 
+import { CreatorFollowButton } from '@/components/creator/CreatorFollowButton';
 import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
 import { cn } from '@/shared/utils/formatting';
+import { ChevronRight, Users } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import type { CreatorHeaderProps } from './types';
 
 export function CreatorHeader({
@@ -39,6 +42,27 @@ export function CreatorHeader({
           }}
         />
       </div>
+
+      <nav
+        className={cn(
+          'absolute top-4 left-4 z-20',
+          'flex items-center gap-2',
+          'px-4 py-2 rounded-xl',
+          'bg-white/5 backdrop-blur-sm',
+          'border border-white/10',
+          'text-sm'
+        )}
+      >
+        <Users className="w-4 h-4 text-red-primary" />
+        <Link
+          href="/creators"
+          className="text-white/60 hover:text-white transition-colors duration-200"
+        >
+          Creators
+        </Link>
+        <ChevronRight className="w-4 h-4 text-white/40" />
+        <span className="text-white/80 truncate max-w-[150px]">{creator.name}</span>
+      </nav>
 
       <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 flex justify-center">
         <div className="max-w-2xl text-center flex flex-col items-center">
@@ -79,19 +103,22 @@ export function CreatorHeader({
             </p>
           )}
 
-          {stats.length > 0 && (
-            <div className="flex items-center justify-center flex-wrap gap-1 mb-4 text-sm text-white/70">
-              {stats.map((stat, idx) => (
-                <span key={stat.key} className="inline-flex items-center gap-1.5">
-                  <span className="text-[#AB0113] flex">{stat.icon}</span>
-                  <span>
-                    {stat.value} {stat.label}
-                  </span>
-                  {idx < stats.length - 1 && <span className="text-white/40 mx-2">•</span>}
+          <div
+            className={cn(
+              'flex items-center justify-center flex-wrap gap-1 mb-4 text-sm text-white/70 min-h-6',
+              stats.length === 0 && 'invisible'
+            )}
+          >
+            {stats.map((stat, idx) => (
+              <span key={stat.key} className="inline-flex items-center gap-1.5">
+                <span className="text-[#AB0113] flex">{stat.icon}</span>
+                <span>
+                  {stat.value} {stat.label}
                 </span>
-              ))}
-            </div>
-          )}
+                {idx < stats.length - 1 && <span className="text-white/40 mx-2">•</span>}
+              </span>
+            ))}
+          </div>
 
           {socialLinks.length > 0 && (
             <div className="flex items-center justify-center gap-3 mb-6">
@@ -117,20 +144,7 @@ export function CreatorHeader({
             </div>
           )}
 
-          {/* <Button
-            href={checkoutUrl}
-            external={true}
-            className={cn(
-              'px-7 py-3.5',
-              'bg-[#AB0113] text-white',
-              'text-sm font-semibold rounded-lg',
-              'transition-all duration-200',
-              'hover:scale-105 hover:shadow-[0_6px_20px_rgba(171,0,19,0.35)]',
-              'relative z-10'
-            )}
-          >
-            Start watching on Taboo
-          </Button> */}
+          <CreatorFollowButton creator={creator} size="lg" />
         </div>
       </div>
     </section>
