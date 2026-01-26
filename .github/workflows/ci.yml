@@ -52,6 +52,9 @@ jobs:
 
       - name: Build application
         run: npm run build
+        env:
+          FIRSTPROMOTER_API_KEY: ${{ secrets.FIRSTPROMOTER_API_KEY }}
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
