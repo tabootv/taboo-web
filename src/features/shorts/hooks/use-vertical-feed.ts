@@ -77,7 +77,7 @@ export function useVerticalFeed({
   const lastInitialIndexRef = useRef(initialIndex);
 
   // Fire onIndexChange via effect (not inside state updaters - React anti-pattern)
-  const onIndexChangeRef = useRef<UseVerticalFeedOptions['onIndexChange']>();
+  const onIndexChangeRef = useRef<UseVerticalFeedOptions['onIndexChange']>(undefined);
 
   // Keep ref in sync with latest callback without updating during render
   useEffect(() => {
