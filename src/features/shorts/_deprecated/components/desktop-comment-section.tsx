@@ -14,6 +14,19 @@ interface DesktopCommentSectionProps {
   video: Video | null;
 }
 
+interface Comment {
+  uuid?: string;
+  id?: string | number;
+  user?: {
+    dp?: string;
+    name?: string;
+  };
+  created_at: string;
+  content?: string;
+  body?: string;
+  replies?: Comment[];
+}
+
 export function DesktopCommentSection({ video }: DesktopCommentSectionProps) {
   const { user } = useAuthStore();
   const { showComments, toggleComments, commentList, appendComment } = useShortsStore();
@@ -104,7 +117,7 @@ export function DesktopCommentSection({ video }: DesktopCommentSectionProps) {
 }
 
 // Single comment component
-function SingleComment({ comment }: { comment: any }) {
+function SingleComment({ comment }: { comment: Comment }) {
   return (
     <div className="flex gap-3">
       {comment.user?.dp ? (
@@ -128,7 +141,7 @@ function SingleComment({ comment }: { comment: any }) {
         {/* Replies */}
         {comment.replies && comment.replies.length > 0 && (
           <div className="mt-4 pl-4 border-l border-white/10 space-y-4">
-            {comment.replies.map((reply: any) => (
+            {comment.replies.map((reply: Comment) => (
               <SingleComment key={reply.uuid || reply.id} comment={reply} />
             ))}
           </div>

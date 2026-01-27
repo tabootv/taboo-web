@@ -14,6 +14,19 @@ interface MobileCommentSectionProps {
   video: Video | null;
 }
 
+interface Comment {
+  uuid?: string;
+  id?: string | number;
+  user?: {
+    dp?: string;
+    name?: string;
+  };
+  created_at: string;
+  content?: string;
+  body?: string;
+  replies?: Comment[];
+}
+
 export function MobileCommentSection({ video }: MobileCommentSectionProps) {
   const { user } = useAuthStore();
   const { showComments, toggleComments, commentList, appendComment } = useShortsStore();
@@ -118,7 +131,7 @@ export function MobileCommentSection({ video }: MobileCommentSectionProps) {
 }
 
 // Mobile single comment component
-function MobileComment({ comment }: { comment: any }) {
+function MobileComment({ comment }: { comment: Comment }) {
   return (
     <div className="flex gap-2 px-2">
       {comment.user?.dp ? (
@@ -146,7 +159,7 @@ function MobileComment({ comment }: { comment: any }) {
         {/* Replies */}
         {comment.replies && comment.replies.length > 0 && (
           <div className="mt-2 pl-3 border-l border-white/10 space-y-2">
-            {comment.replies.map((reply: any) => (
+            {comment.replies.map((reply: Comment) => (
               <MobileComment key={reply.uuid || reply.id} comment={reply} />
             ))}
           </div>

@@ -69,8 +69,17 @@ export function useShortsFeed(options: UseShortsFeedOptions = {}): UseShortsFeed
     error: initialError,
     isFetched: initialFetched,
   } = useQuery({
-    queryKey: queryKeys.shorts.detail(initialUuid!),
-    queryFn: () => shortsClient.get(initialUuid!),
+    queryKey: queryKeys.shorts.detail(initialUuid || ''),
+    queryFn: async () => {
+      if (!initialUuid) {
+        throw new Error('Initial UUID is required');
+      }
+      const result = await shortsClient.get(initialUuid);
+      if (result === null || result === undefined) {
+        throw new Error(`Short with UUID ${initialUuid} not found`);
+      }
+      return result;
+    },
     enabled: !!initialUuid,
     staleTime: 1000 * 60 * 30, // 30 minutes
     gcTime: 1000 * 60 * 60, // 1 hour

@@ -80,7 +80,8 @@
       "Bash(node --version:*)",
       "Bash(npm:*)",
       "Bash(act:*)",
-      "Bash(gh extension:*)"
+      "Bash(gh extension:*)",
+      "Bash(pnpm type-check:*)"
     ],
     "deny": [],
     "ask": []

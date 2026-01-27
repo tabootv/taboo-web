@@ -3,7 +3,9 @@
 import { NavigationProgress } from '@/components/navigation/NavigationProgress';
 import { AppSidebar } from '@/components/sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { useHiddenComponentByPage } from '@/hooks/use-hidden-component-page';
 import { useAuthStore } from '@/shared/stores/auth-store';
+import { cn } from '@/shared/utils/formatting';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { Toaster } from 'sonner';
@@ -20,6 +22,7 @@ export function MainLayout({ children, showFooter = true }: MainLayoutProps) {
   const pathname = usePathname();
   const router = useRouter();
   const PIP_RETURN_URL_KEY = 'tabootv_pip_return_url';
+  const isShorts = useHiddenComponentByPage(['shorts']);
 
   // Check auth state on mount
   useEffect(() => {
@@ -70,8 +73,8 @@ export function MainLayout({ children, showFooter = true }: MainLayoutProps) {
         <TopHeader />
 
         {/* Main content area */}
-        <div className="pt-14">
-          <main>{children}</main>
+        <div className={cn(isShorts ? 'pt-14' : '')}>
+          {children}
           {showFooter && <Footer />}
         </div>
 

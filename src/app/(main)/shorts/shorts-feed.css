@@ -1,0 +1,364 @@
+/* Shorts Feed CSS - Translated from Vue PostFeed.vue */
+
+/* Main container - full viewport, no scroll */
+.shorts-feed-container {
+  height: calc(100dvh - 56px); /* Account for h-14 header (56px) */
+  overflow: hidden;
+  background: #000;
+  overscroll-behavior: none;
+  touch-action: none;
+}
+
+/* Posts wrapper - transforms for navigation */
+.shorts-posts-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* Individual slide */
+.short-slide {
+  height: calc(100dvh - 56px); /* Account for h-14 header (56px) */
+  width: 100%;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  content-visibility: auto;
+  contain-intrinsic-size: 0 calc(100dvh - 56px);
+}
+
+/* Spacer for windowed rendering */
+.short-slide-spacer {
+  flex-shrink: 0;
+  width: 100%;
+  pointer-events: none;
+}
+
+/* Animation classes from Vue pattern */
+.short-slide.prev {
+  transform: scale(0.9);
+  opacity: 0;
+  transition:
+    transform 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.8s ease;
+}
+
+.short-slide.next {
+  transform: scale(0.9);
+  opacity: 0;
+  transition:
+    transform 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.8s ease;
+}
+
+.short-slide.hidden {
+  visibility: hidden;
+  pointer-events: none;
+  content-visibility: auto;
+}
+
+.short-slide.active {
+  transform: scale(1);
+  opacity: 1;
+}
+
+/* Content animation on active */
+.short-slide.active .short-info-animated {
+  transform: translateY(0);
+  opacity: 1;
+  transition: all 0.5s ease;
+}
+
+.short-slide:not(.active) .short-info-animated {
+  transform: translateY(20px);
+  opacity: 0;
+}
+
+/* Gradient overlays */
+.short-gradient-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 300px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.short-gradient-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.6), transparent);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Content positioning */
+.short-content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20px;
+  padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  z-index: 3;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+/* Video container */
+.short-video-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.short-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Slide inner container - base styles for all screen sizes */
+.short-slide-inner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Video wrapper - base styles for all screen sizes */
+.short-video-wrapper {
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+
+/* Desktop: centered 9:16 aspect ratio */
+@media (min-width: 768px) {
+  .short-video-wrapper {
+    width: auto;
+    max-height: 100%;
+    aspect-ratio: 9/16;
+  }
+}
+
+/* Mobile: full width */
+@media (max-width: 767px) {
+  .short-info-animated {
+    padding-right: 60px;
+  }
+
+  .short-gradient-top {
+    display: block;
+  }
+}
+
+/* Action buttons styling */
+.short-action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.short-action-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 0;
+}
+
+.short-action-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.short-action-button:hover .short-action-icon {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.short-action-button span {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+/* Progress bar */
+.short-progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  z-index: 20;
+}
+
+.short-progress-fill {
+  height: 100%;
+  background: white;
+  transition: width 0.1s linear;
+}
+
+/* Play/Pause icon animation */
+.short-play-icon-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.short-play-icon {
+  width: 80px;
+  height: 80px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: scale-in 0.3s ease-out;
+}
+
+@keyframes scale-in {
+  from {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Heart animation for double-tap */
+.short-heart-animation {
+  position: absolute;
+  pointer-events: none;
+  z-index: 50;
+}
+
+@keyframes heart-pop {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+.animate-heart-pop {
+  animation: heart-pop 1s ease-out forwards;
+}
+
+/* Navigation buttons (desktop) */
+.shorts-navigation {
+  position: absolute;
+  right: 32px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 50;
+}
+
+@media (min-width: 768px) {
+  .shorts-navigation {
+    display: flex;
+  }
+}
+
+.shorts-nav-button {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: white;
+}
+
+.shorts-nav-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.shorts-nav-button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Loading indicator */
+.shorts-loading-more {
+  position: absolute;
+  bottom: 96px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+}
+
+/* Top controls area */
+.short-top-controls {
+  position: absolute;
+  right: 16px;
+  top: 64px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 20;
+}
+
+@media (min-width: 768px) {
+  .short-top-controls {
+    top: 16px;
+  }
+}
