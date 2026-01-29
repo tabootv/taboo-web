@@ -1,204 +1,201 @@
-# AGENTS.md
+# TabooTV Context – Three-Layer Architecture
 
-> Context file for AI assistants (Claude Code, Cursor, Copilot, etc.)
+> **AI Assistant Context File** – Optimized for progressive disclosure. Load additional docs only when needed.
 
-## Project Overview
+---
 
-**TabooTV** - Premium video streaming platform frontend
+## Identity & Mission
 
-- **Stack**: Next.js 16, React 19, TypeScript, Tailwind CSS 4
-- **State**: TanStack Query (server), Zustand (client)
-- **Video**: Shaka Player for HLS streaming
-- **Backend**: Laravel API (proxied via Next.js rewrites)
+**TabooTV** is a premium video streaming platform frontend (Next.js 16, React 19). We build high-quality UI for HLS video playback, shorts feeds, series collections, and creator studios.
+
+**Your role:** Write TypeScript/React code that follows our patterns, maintains consistency, and respects the design system. When uncertain, ask clarifying questions before implementing.
+
+---
+
+## Tech Stack (Essentials)
+
+| Tech | Version | Purpose |
+|------|---------|---------|
+| **Next.js** | 16.1.1 | App Router, Server Components |
+| **React** | 19.2.0 | UI components |
+| **TypeScript** | 5.x | Type safety |
+| **Tailwind CSS** | 4.x | Styling (via `cn()` utility) |
+| **TanStack Query** | 5.90.12 | Server state (caching, mutations) |
+| **Zustand** | 5.0.9 | Client state (stores) |
+
+---
 
 ## Commands
 
 ```bash
-npm run dev          # Development server (port 3000)
-npm run build        # Production build
-npm run start        # Start production server
-npm run lint         # ESLint (--max-warnings=0)
-npm run lint:fix     # ESLint with auto-fix
-npm run format       # Prettier formatting
-npm run type-check   # TypeScript check (tsc --noEmit)
-npm run test         # Unit tests (Vitest)
+npm run dev         # Dev server (port 3000)
+npm run build       # Production build
+npm run test        # Unit tests (Vitest)
+npm run lint        # ESLint check
+npm run type-check  # TypeScript check
 ```
 
-## Code Style
+---
 
-- **Icons**: lucide-react
-- **Styling**: Tailwind CSS with `cn()` utility from `@/shared/utils/formatting`
-- **Path alias**: `@/` maps to `src/`
-- **Components**: Server Components by default, `'use client'` when needed
-
-## Architecture
-
-### Directory Structure
+## Directory Map
 
 ```
 src/
-├── app/              # Next.js App Router (routes + colocated components)
-│   ├── (main)/       # Main app pages with navbar
-│   │   └── [route]/
-│   │       ├── page.tsx
-│   │       ├── _components/   # Route-specific components
-│   │       └── _actions.ts    # Route-specific server actions
-│   ├── (auth)/       # Auth pages (sign-in, register, plans)
-│   └── studio/       # Creator studio pages (direct route, no group)
-├── api/              # TanStack Query API layer
-│   ├── client/       # Domain-specific HTTP clients
-│   ├── queries/      # Query hooks (useVideo, useSeriesList, etc.)
-│   ├── mutations/    # Mutation hooks (useToggleLike, etc.)
-│   └── query-keys.ts # Centralized query key factories
-├── components/
-│   ├── ui/           # Shadcn primitives + custom components
-│   ├── layout/       # Navbar, Footer, Sidebar
-│   └── [domain]/     # Shared domain components
-├── features/         # Feature modules (video, shorts, series, etc.)
-│   └── [feature]/
-│       ├── components/
-│       └── hooks/
+├── app/              # Routes (App Router)
+│   ├── (main)/       # Pages with navbar
+│   ├── (auth)/       # Auth pages
+│   └── studio/       # Creator studio
+├── api/              # TanStack Query layer
+│   ├── queries/      # Fetch hooks
+│   ├── mutations/    # Update hooks
+│   └── query-keys.ts # Key factories
+├── components/       # UI & layout
+│   ├── ui/           # Shadcn/design system
+│   └── layout/       # Navbar, footer, etc.
+├── features/         # Feature modules (video, shorts, etc.)
 ├── hooks/            # Shared custom hooks
-├── shared/           # Consolidated utilities
-│   ├── stores/       # Zustand stores (auth, shorts, sidebar)
-│   ├── utils/        # Utility functions (formatting, routes, etc.)
-│   └── lib/          # Library instances (design-tokens, validations)
+├── shared/
+│   ├── stores/       # Zustand stores
+│   ├── utils/        # Utilities (cn(), formatting)
+│   └── lib/          # Design tokens, validations
 └── types/            # TypeScript interfaces
 ```
 
-### Content Types
+---
 
-- **Videos**: Long-form HLS streaming with quality selection
-- **Shorts**: TikTok-style vertical videos (V2 API: `/v2/shorts`)
-- **Series**: Multi-episode collections with Netflix-style layout
-- **Courses**: Educational content with progress tracking
-- **Posts**: Community feed with text/images
+## Core Patterns
 
-### API Patterns
+### Components
+- **Server Components by default** – Add `'use client'` only when needed (hooks, interactivity)
+- **Colocated structure** – Route-specific components in `_components/` folder
+- **Design system usage** – Import from `@/components/ui` (PageHeader, MediaCard, etc.)
 
-```tsx
-// Query hooks for data fetching
-import { useVideo, useVideoList } from '@/api/queries/video.queries';
-const { data, isLoading } = useVideo(id);
+### State Management
+- **TanStack Query** – For server state (data fetching, caching, mutations)
+  - Hooks: `useVideo(id)`, `useVideoList()`, `useToggleLike()`
+  - Mutations: `useToggleLike.mutate(videoId)`
+  - See: `docs/agents/api-design.md`
 
-// Mutation hooks for actions (with optimistic updates)
-import { useToggleLike } from '@/api/mutations/video.mutations';
-const toggleLike = useToggleLike();
-toggleLike.mutate(videoId);
+- **Zustand stores** – For client state (UI, preferences)
+  - Import: `import { useAuthStore } from '@/shared/stores/auth-store'`
+  - See: `docs/agents/state-management.md`
 
-// Direct client calls (non-component code)
-import { videoClient } from '@/api/client/video.client';
-const data = await videoClient.getVideo(id);
-```
+### Server Actions
+- Colocated in `_actions.ts` files next to routes
+- Examples: `(auth)/sign-in/_actions.ts`, `studio/upload/video/_actions.ts`
+- See: `docs/agents/server-actions.md`
 
-### Server Actions (Colocated)
+### Styling
+- Use **Tailwind CSS** with `cn()` utility from `@/shared/utils/formatting`
+- Design tokens in `src/shared/lib/design-tokens.ts`
+- Primary brand color: `#ab0013` (hover: `#d4001a`)
+- See: `docs/agents/styling.md`
 
-```tsx
-// Auth actions in route-specific locations
-import { loginAction } from '@/app/(auth)/sign-in/_actions';
-import { registerAction } from '@/app/(auth)/register/_actions';
+---
 
-// Profile actions
-import { updateProfileAction } from '@/app/(main)/profile/edit/_actions';
+## When to Read Layer 2 Docs
 
-// Upload actions
-import { uploadVideoAction } from '@/app/studio/upload/video/_actions';
-```
+Load specialized docs **when working on that specific area**:
 
-### Public API: Map Videos
+| Task | Read |
+|------|------|
+| **Building components** | `docs/agents/styling.md` |
+| **Fetching data / API calls** | `docs/agents/api-design.md` |
+| **Writing tests** | `docs/agents/testing.md` |
+| **Refactoring code** | `docs/agents/refactoring.md` |
+| **Auth / protected routes** | `docs/agents/authentication.md` |
+| **Zustand stores / client state** | `docs/agents/state-management.md` |
+| **Server actions** | `docs/agents/server-actions.md` |
+| **Video, Shorts, Series, Courses, Posts specs** | `docs/agents/content-types.md` |
+| **Backend API / database schema** | `docs/agents/database.md` |
 
-**Endpoint:** `GET /api/public/map-videos`
+---
 
-Returns paginated public videos optimized for maps/listings.
+## Critical Rules (Apply Always)
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `per_page` | int | Videos per page (default: 20) |
-| `types` | string | `videos`, `series`, `courses`, `shorts` |
-| `search` | string | Smart search (min 3 chars, accent-insensitive) |
-| `creators` | array | Filter by channel IDs |
-| `countries` | array | Filter by country names/IDs |
-| `auth` | bool | Include user progress/watchlist/likes |
-| `compact` | bool | Return `channel_id` only (performance) |
+1. **Type everything** – No `any` types; use `unknown` if necessary
+2. **Use path aliases** – `@/` maps to `src/` (e.g., `@/components/ui`)
+3. **Preserve design tokens** – Don't hardcode colors; use Tailwind classes or design-tokens.ts
+4. **Optimize for Core Web Vitals** – See: `.agents/skills/vercel-react-best-practices/AGENTS.md`
+5. **Follow naming conventions**:
+   - Components: PascalCase
+   - Functions/hooks: camelCase
+   - Constants: SCREAMING_SNAKE_CASE
+   - Files: kebab-case (except components)
+6. **Icon library** – Use `lucide-react` for all icons
+7. **Environment variables** – Copy `.env.local.example` to `.env.local` for local dev
 
-**Search fields:** title, description, channel, country, tags (relevance-ordered)
+---
 
-**Related:** `app/Actions/Public/PublicMapVideoList.php`
+## Agent Skills Registry
 
-### Zustand Store Usage
+**Agent Skills** are specialized knowledge modules that automate development tasks. Invoke a skill when you need expertise in that domain.
 
-```tsx
-import { useAuthStore } from '@/shared/stores/auth-store';
-const { user, isAuthenticated } = useAuthStore();
-```
+### How to Use Skills
 
-### Hooks Usage
+When you see a trigger keyword, mention the skill name:
+- "I need to refactor this" → Use **refactoring-patterns** skill
+- "Type this function" → Use **typescript-patterns** skill
+- "Fix the bundle size" → Use **bundling-optimization** skill
 
-```tsx
-// All shared hooks from centralized location
-import { useDebounce, useFeature, useIsMobile } from '@/hooks';
-```
+### Available Skills
 
-## Design System
+| Skill | Triggers | What It Does |
+|-------|----------|-----------|
+| **refactoring-patterns** | "Refactor", "Simplify", "Extract logic", "Too complex" | Extract functions/components, improve code clarity, reduce complexity |
+| **api-integration** | "Create API client", "Write query hook", "Fetch data", "Handle errors" | TanStack Query patterns, API clients, error handling, type safety |
+| **ui-components** | "Build component", "Design page", "Styling issue", "Make accessible" | Tailwind CSS, design tokens, shadcn integration, responsive design |
+| **testing** | "Write tests", "Mock API", "Test fixtures", "Coverage" | Vitest patterns, component testing, fixtures, mocking with MSW |
+| **typescript-patterns** | "Fix TS error", "Type this", "Strict mode", "Create generic" | Type safety, utility types, generics, type guards, interfaces |
+| **bundling-optimization** | "Bundle too large", "Code splitting", "Lazy load", "Analyze bundle" | Code splitting, lazy loading, dynamic imports, performance optimization |
+| **code-organization** | "Where does this go?", "Module structure", "Circular dependency" | Feature modules, boundaries, file structure, dependency management |
+| **linting-practices** | "ESLint error", "Fix lint", "Pre-commit checks" | Linting, Prettier, type-checking, code quality gates |
+| **clean-code** | "Simplify", "Better naming", "Remove duplication" | Pragmatic coding standards, DRY, KISS, YAGNI, SRP |
+| **component-refactoring** | "Component too complex", "High complexity score" | Advanced component splitting, hook extraction, complexity reduction |
+| **vercel-react-best-practices** | "Performance optimization", "React best practices" | Core Web Vitals, Vercel engineering standards, React patterns |
+| **commit-work** | "Create commit", "Commit message", "Stage changes" | Git workflow, conventional commits, reviewing changes |
 
-- **Primary Red**: `#ab0013` (hover: `#d4001a`)
-- **Background**: `#000000`
-- **Surface**: `#0d0d0d`
-- **Text Primary**: `#e6e7ea`
-- **Text Secondary**: `#9aa0a6`
+---
 
-### Typography Classes
+## For Deep Research
 
-- `title-hero` - Hero titles (36-48px)
-- `title-page` - Page titles (24-30px)
-- `title-section` - Section titles (18-20px)
-- `body-large`, `body-base`, `body-small` - Body text
+When you need comprehensive reference material (rare):
 
-### Component Library
+| Topic | Location |
+|-------|----------|
+| **Full architecture** | `docs/reference/architecture.md` |
+| **Complete design system** | `docs/reference/design-system-complete.md` |
+| **All available skills** | `docs/reference/skills.md` |
+| **Component library reference** | `docs/reference/components-library.md` |
 
-```tsx
-import { PageHeader, FilterChips, MediaCard, ContentGrid } from '@/components/ui';
+---
 
-<PageHeader title="Videos" subtitle="Browse all" actions={<FilterChips ... />} />
-<ContentGrid variant="media">
-  {videos.map(v => <MediaCard key={v.id} type="video" {...v} />)}
-</ContentGrid>
-```
-
-### Atmospheric Backgrounds
-
-```tsx
-<div className="series-page-atmosphere min-h-screen">
-  <div className="series-atmosphere-bg" />
-  {/* Content */}
-</div>
-```
-
-## Authentication
-
-- **Token**: Stored in cookies (`tabootv_token`)
-- **Middleware**: `src/middleware.ts` protects routes
-- **401**: Redirects to `/sign-in`
-- **403 (subscription)**: Redirects to `/plans`
-
-## Key Files
-
-| Purpose | Location |
-|---------|----------|
-| Design System Guide | `docs/DESIGN_SYSTEM.md` |
-| Full Project Context | `docs/PROJECT_CONTEXT.md` |
-| Design Tokens | `src/shared/lib/design-tokens.ts` |
-| Query Keys | `src/api/query-keys.ts` |
-| Auth Store | `src/shared/stores/auth-store.ts` |
-| Video Player | `src/features/video/components/shaka-player/index.tsx` |
-| Formatting Utils | `src/shared/utils/formatting.ts` |
-
-## Environment Variables
+## Setup & First Run
 
 ```bash
-NEXT_PUBLIC_API_URL=https://app.taboo.tv/api  # or https://beta.taboo.tv/api
-# Firebase config for OAuth
-# Laravel Reverb config for WebSockets
+# Install dependencies
+npm install
+
+# Copy environment file
+cp .env.local.example .env.local
+
+# Start dev server
+npm run dev
+# Open http://localhost:3000
 ```
 
-Copy `.env.local.example` to `.env.local` for local development.
+**Backend:** Connects to Laravel API via `NEXT_PUBLIC_API_URL` environment variable.
+
+---
+
+## Need Help?
+
+- **"How do I...?"** → Check the Layer 2 docs (see "When to Read" table above)
+- **"What's the pattern for...?"** → Check AGENTS.md (this file) or relevant Layer 2 doc
+- **"Show me an example"** → Search `src/` for similar implementation
+- **"Full context needed"** → Load the Layer 3 reference docs
+
+---
+
+*Architecture: Three-Layer Progressive Disclosure (v1.0)*  
+*Last updated: January 2026*
