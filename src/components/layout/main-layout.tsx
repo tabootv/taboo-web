@@ -1,6 +1,6 @@
 'use client';
 
-import { NavigationProgress } from '@/components/navigation/NavigationProgress';
+import { NavigationProgress } from '@/components/layout/navigation/NavigationProgress';
 import { AppSidebar } from '@/components/sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { useHiddenComponentByPage } from '@/hooks/use-hidden-component-page';
