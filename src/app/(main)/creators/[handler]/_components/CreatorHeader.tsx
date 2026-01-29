@@ -1,6 +1,6 @@
 'use client';
 
-import { CreatorFollowButton } from '@/components/creator/CreatorFollowButton';
+import { CreatorFollowButton } from '@/features/creator/components/CreatorFollowButton';
 import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
 import { cn } from '@/shared/utils/formatting';
 import { ChevronRight, Users } from 'lucide-react';

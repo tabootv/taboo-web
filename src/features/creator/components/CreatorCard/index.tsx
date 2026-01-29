@@ -1,6 +1,6 @@
 'use client';
 
-import { CreatorFollowButton } from '@/components/creator/CreatorFollowButton';
+import { CreatorFollowButton } from '@/features/creator/components/CreatorFollowButton';
 import { usePrefetch } from '@/hooks/use-prefetch';
 import { getCreatorRoute } from '@/shared/utils/formatting';
 import type { Creator } from '@/types';

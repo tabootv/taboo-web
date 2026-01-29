@@ -1,8 +1,8 @@
 'use client';
 
 import { useCreatorsList } from '@/api/queries/creators.queries';
-import { CreatorCard } from '@/components/creator/CreatorCard';
-import { CreatorCardSkeleton } from '@/components/creator/CreatorCardSkeleton';
+import { CreatorCard } from '@/features/creator/components/CreatorCard';
+import { CreatorCardSkeleton } from '@/features/creator/components/CreatorCardSkeleton';
 import { PageHeader } from '@/components/ui/page-header';
 import { Rss, Star, Users } from 'lucide-react';
 import Link from 'next/link';
