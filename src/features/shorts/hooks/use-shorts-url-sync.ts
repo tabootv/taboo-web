@@ -20,9 +20,11 @@ export interface UseShortsUrlSyncOptions {
  * - Updates URL when currentIndex changes
  * - Handles browser back/forward via popstate
  * - Emits 'shorts:navigate' event for external navigation
+ * - Skips first update if already on correct deep link path
  */
 export function useShortsUrlSync({ shorts, currentIndex, enabled }: UseShortsUrlSyncOptions) {
   const previousUuidRef = useRef<string | null>(null);
+  const isFirstUpdateRef = useRef(true);
 
   // Update URL when index changes
   useEffect(() => {
@@ -30,6 +32,18 @@ export function useShortsUrlSync({ shorts, currentIndex, enabled }: UseShortsUrl
 
     const currentUuid = shorts[currentIndex]?.uuid;
     if (currentUuid && currentUuid !== previousUuidRef.current) {
+      // On first update, check if URL already matches the current short
+      // This prevents overwriting the deep link URL during initial load
+      if (isFirstUpdateRef.current) {
+        isFirstUpdateRef.current = false;
+        const currentPath = window.location.pathname;
+        if (currentPath === `/shorts/${currentUuid}`) {
+          // URL already correct, just update refs without changing URL
+          previousUuidRef.current = currentUuid;
+          return;
+        }
+      }
+
       window.history.replaceState(
         { shortIndex: currentIndex, shortUuid: currentUuid },
         '',

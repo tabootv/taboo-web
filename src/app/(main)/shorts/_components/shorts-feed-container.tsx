@@ -31,6 +31,7 @@ export function ShortsFeedContainer({ initialUuid }: ShortsFeedContainerProps) {
     hasNextPage,
     fetchNextPage,
     error,
+    initialError,
     hasFetched,
     refetch,
   } = useShortsFeed(initialUuid ? { initialUuid } : {});
@@ -106,6 +107,31 @@ export function ShortsFeedContainer({ initialUuid }: ShortsFeedContainerProps) {
           <Loader2 className="w-10 h-10 text-red-primary animate-spin" />
           <p className="text-white/60 text-sm">Loading shorts...</p>
         </div>
+      </div>
+    );
+  }
+
+  // Deep link error - specific short not found but we have other shorts to show
+  if (initialError && initialUuid && shorts.length > 0) {
+    // Show a toast notification but continue with the feed
+    // The user can browse other available shorts
+  }
+
+  // Deep link error - specific short not found and no other shorts available
+  if (initialError && initialUuid && shorts.length === 0 && hasFetched) {
+    return (
+      <div className="fixed top-14 left-0 right-0 bottom-0 bg-black flex flex-col items-center justify-center gap-4 z-30 lg:left-[72px]">
+        <Video className="w-16 h-16 text-white/30 mb-2" />
+        <p className="text-white font-medium text-lg">Short not found</p>
+        <p className="text-white/50 text-sm text-center px-4">
+          This short may have been removed or is no longer available.
+        </p>
+        <button
+          onClick={() => router.push('/shorts')}
+          className="mt-2 px-6 py-2.5 bg-red-primary text-white rounded-full font-medium hover:bg-red-primary/80 transition-colors"
+        >
+          Browse Shorts
+        </button>
       </div>
     );
   }

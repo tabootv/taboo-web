@@ -9,10 +9,11 @@
  * - Merges initial short with paginated feed
  * - Deduplicates videos in the merged list
  * - Supports infinite scroll via fetchNextPage
+ * - Seeds detail query cache for reactive updates
  */
 
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useEffect } from 'react';
 import { shortsClient } from '@/api/client/shorts.client';
 import { queryKeys } from '@/api/query-keys';
 import type { ShortVideo, PaginatedResponse } from '@/api/types';
@@ -47,6 +48,8 @@ interface UseShortsFeedReturn {
   isFetchingNextPage: boolean;
   /** Error from either query */
   error: Error | null;
+  /** Error from initial short query (for deep link failures) */
+  initialError: Error | null;
   /** Fetch next page of shorts */
   fetchNextPage: () => void;
   /** Refetch all data */
@@ -67,6 +70,7 @@ export function useShortsFeed(options: UseShortsFeedOptions = {}): UseShortsFeed
     data: initialShort,
     isLoading: isLoadingInitial,
     error: initialError,
+    isSuccess: initialSuccess,
     isFetched: initialFetched,
   } = useQuery({
     queryKey: queryKeys.shorts.detail(initialUuid || ''),
@@ -86,7 +90,8 @@ export function useShortsFeed(options: UseShortsFeedOptions = {}): UseShortsFeed
   });
 
   // Fetch paginated feed
-  // Start immediately if no initialUuid, or wait for initial to load
+  // Start immediately if no initialUuid, or wait for initial to succeed
+  // If initial fails, we still load the feed so user can browse other shorts
   const feedEnabled = !initialUuid || initialFetched;
 
   const {
@@ -113,7 +118,8 @@ export function useShortsFeed(options: UseShortsFeedOptions = {}): UseShortsFeed
   const { shorts, initialIndex } = useMemo(() => {
     const feedShorts = feedPages?.pages.flatMap((p) => p.data) ?? [];
 
-    if (initialShort) {
+    // Only include initial short if it was successfully fetched
+    if (initialShort && initialSuccess) {
       // Check if initial short is already in the feed
       const existingIndex = feedShorts.findIndex((s) => s.uuid === initialShort.uuid);
 
@@ -143,12 +149,19 @@ export function useShortsFeed(options: UseShortsFeedOptions = {}): UseShortsFeed
       }
     }
 
-    // No initial short - just use feed
+    // No initial short or initial failed - just use feed
     return {
       shorts: feedShorts,
       initialIndex: 0,
     };
-  }, [feedPages, initialShort]);
+  }, [feedPages, initialShort, initialSuccess]);
+
+  // Seed detail query cache for each short to enable reactive updates
+  useEffect(() => {
+    shorts.forEach((short) => {
+      queryClient.setQueryData(queryKeys.shorts.detail(short.uuid), short);
+    });
+  }, [shorts, queryClient]);
 
   // Wrapper for fetchNextPage that handles edge cases
   const fetchNextPage = useCallback(() => {
@@ -183,6 +196,7 @@ export function useShortsFeed(options: UseShortsFeedOptions = {}): UseShortsFeed
     hasNextPage,
     isFetchingNextPage,
     error,
+    initialError: initialError as Error | null,
     fetchNextPage,
     refetch,
     hasFetched,

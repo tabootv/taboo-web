@@ -5,7 +5,7 @@
  * - GET /v2/shorts → PaginatedResponse<ShortVideo>
  * - GET /v2/shorts/{uuid} → ShortVideo
  * - GET /v2/shorts/{uuid}/comments → PaginatedResponse<Comment>
- * - POST /v2/shorts/{uuid}/toggle-like → LikeResponse
+ * - POST /videos/{uuid}/like-toggle → LikeResponse
  * - POST /v2/shorts/{uuid}/toggle-bookmark → BookmarkResponse
  */
 
@@ -136,7 +136,7 @@ export const shortsClient = {
    * Toggle like on a short
    */
   toggleLike: async (uuid: string): Promise<LikeResponse> => {
-    return await apiClient.post<LikeResponse>(`/v2/shorts/${uuid}/toggle-like`);
+    return await apiClient.post<LikeResponse>(`/videos/${uuid}/toggle-like`);
   },
 
   /**
