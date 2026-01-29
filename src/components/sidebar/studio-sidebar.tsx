@@ -13,6 +13,7 @@ import {
   SidebarRail,
   SidebarSeparator,
   SidebarTrigger,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import {
   ArrowLeft,
@@ -37,6 +38,13 @@ const studioNavigation = [
 
 export function StudioSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
+  const { isMobile, setOpenMobile } = useSidebar();
+
+  const handleNavClick = () => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
 
   const isActive = (href: string) => {
     if (href === '/studio') {
@@ -84,7 +92,7 @@ export function StudioSidebar({ ...props }: React.ComponentProps<typeof Sidebar>
                 return (
                   <SidebarMenuItem key={item.name}>
                     <SidebarMenuButton asChild isActive={active} tooltip={item.name}>
-                      <Link href={item.href}>
+                      <Link href={item.href} onClick={handleNavClick}>
                         <item.icon className={active ? 'text-red-primary' : ''} />
                         <span>{item.name}</span>
                       </Link>
@@ -103,7 +111,7 @@ export function StudioSidebar({ ...props }: React.ComponentProps<typeof Sidebar>
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Back to Taboo">
-                  <Link href="/home">
+                  <Link href="/home" onClick={handleNavClick}>
                     <ArrowLeft />
                     <span>Back to Taboo</span>
                   </Link>

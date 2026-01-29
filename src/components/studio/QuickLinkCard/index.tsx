@@ -13,18 +13,18 @@ interface QuickLinkCardProps {
 export function QuickLinkCard({ href, icon: Icon, title, description }: QuickLinkCardProps) {
   return (
     <Link href={href} className="group">
-      <Card className="transition-all hover:scale-[1.01] hover:border-white/20">
-        <CardContent className="p-5 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-11 h-11 rounded-xl bg-white/5 group-hover:bg-[#ab0013]/20 transition-colors flex items-center justify-center">
-              <Icon className="w-5 h-5 text-white/40 group-hover:text-[#ab0013] transition-colors" />
+      <Card className="bg-[#131315] border-white/6 transition-all hover:scale-[1.01] hover:border-white/10">
+        <CardContent className="p-4 sm:p-5 flex items-center justify-between">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white/5 group-hover:bg-[#ab0013]/20 transition-colors flex items-center justify-center">
+              <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-white/40 group-hover:text-[#ab0013] transition-colors" />
             </div>
             <div>
-              <h3 className="font-semibold text-white">{title}</h3>
-              <p className="text-sm text-white/40">{description}</p>
+              <h3 className="font-semibold text-white text-sm sm:text-base">{title}</h3>
+              <p className="text-xs sm:text-sm text-white/40">{description}</p>
             </div>
           </div>
-          <ChevronRight className="w-5 h-5 text-white/30 group-hover:text-white/60 transition-colors" />
+          <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-white/30 group-hover:text-white/60 transition-colors" />
         </CardContent>
       </Card>
     </Link>

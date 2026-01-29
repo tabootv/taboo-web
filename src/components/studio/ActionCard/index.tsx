@@ -14,7 +14,7 @@ interface ActionCardProps {
 export function ActionCard({ href, icon: Icon, title, description }: ActionCardProps) {
   return (
     <Link href={href} className="group">
-      <Card className="transition-all hover:scale-[1.02] hover:border-white/20">
+      <Card className="bg-[#131315] border-white/6 transition-all hover:scale-[1.02] hover:border-white/10">
         <CardContent className="p-5">
           <div className="flex items-center justify-between mb-4">
             <div className="w-12 h-12 rounded-xl bg-[#ab0013]/20 flex items-center justify-center group-hover:bg-[#ab0013]/30 transition-colors">

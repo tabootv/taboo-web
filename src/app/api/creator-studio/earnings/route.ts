@@ -120,7 +120,57 @@ function safeParseDateToString(dateStr: string): string | null {
       return dateStr;
     }
 
-    // Try to parse the date
+    // Handle ISO format with time (2025-12-23T00:00:00.000Z)
+    if (/^\d{4}-\d{2}-\d{2}T/.test(dateStr)) {
+      return dateStr.split('T')[0] ?? null;
+    }
+
+    // Handle "Week X, YYYY" format - convert to start of that week (Sunday)
+    const weekMatch = dateStr.match(/^Week\s+(\d+),?\s*(\d{4})$/i);
+    if (weekMatch) {
+      const [, weekNum, year] = weekMatch;
+      // Calculate the start date of the week (Sunday to match groupRewardsByPeriod)
+      const jan1 = new Date(parseInt(year!, 10), 0, 1);
+      const daysToAdd = (parseInt(weekNum!, 10) - 1) * 7;
+      const weekStart = new Date(jan1.getTime() + daysToAdd * 24 * 60 * 60 * 1000);
+      // Adjust to Sunday (getDay() returns 0 for Sunday)
+      const dayOfWeek = weekStart.getDay();
+      weekStart.setDate(weekStart.getDate() - dayOfWeek);
+      return weekStart.toISOString().split('T')[0] ?? null;
+    }
+
+    // Handle "Month YYYY" or "YYYY-MM" format
+    const monthYearMatch = dateStr.match(/^(\w+)\s+(\d{4})$/);
+    if (monthYearMatch) {
+      const [, month, year] = monthYearMatch;
+      const date = new Date(`${month} 1, ${year}`);
+      if (!isNaN(date.getTime())) {
+        return date.toISOString().split('T')[0] ?? null;
+      }
+    }
+
+    // Handle "YYYY-MM" format
+    const yearMonthMatch = dateStr.match(/^(\d{4})-(\d{2})$/);
+    if (yearMonthMatch) {
+      return `${yearMonthMatch[1]}-${yearMonthMatch[2]}-01`;
+    }
+
+    // Handle "YYYY" format (for yearly grouping)
+    const yearOnlyMatch = dateStr.match(/^(\d{4})$/);
+    if (yearOnlyMatch) {
+      return `${yearOnlyMatch[1]}-01-01`;
+    }
+
+    // Handle "Mon DD, YYYY" format (e.g., "Jan 15, 2025")
+    const monthDayYearMatch = dateStr.match(/^(\w{3})\s+(\d{1,2}),?\s*(\d{4})$/);
+    if (monthDayYearMatch) {
+      const date = new Date(dateStr);
+      if (!isNaN(date.getTime())) {
+        return date.toISOString().split('T')[0] ?? null;
+      }
+    }
+
+    // Try to parse the date normally
     const parsedDate = new Date(dateStr);
 
     // Check if the date is valid
@@ -138,18 +188,72 @@ function safeParseDateToString(dateStr: string): string | null {
 }
 
 /**
+ * Group commissions by period to derive customers per day/week/month
+ */
+function groupCommissionsByPeriod(
+  commissions: V2Commission[],
+  groupBy: GroupBy
+): Map<string, number> {
+  const customersByPeriod = new Map<string, Set<number>>();
+
+  for (const commission of commissions) {
+    if (!commission.created_at || !commission.referral?.id) continue;
+
+    const date = new Date(commission.created_at);
+    let key: string;
+
+    switch (groupBy) {
+      case 'day':
+        key = date.toISOString().split('T')[0] ?? '';
+        break;
+      case 'week': {
+        const weekStart = new Date(date);
+        weekStart.setDate(date.getDate() - date.getDay());
+        key = weekStart.toISOString().split('T')[0] ?? '';
+        break;
+      }
+      case 'month':
+        key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-01`;
+        break;
+      case 'year':
+        key = `${date.getFullYear()}-01-01`;
+        break;
+      default:
+        key = date.toISOString().split('T')[0] ?? '';
+    }
+
+    if (!customersByPeriod.has(key)) {
+      customersByPeriod.set(key, new Set());
+    }
+    customersByPeriod.get(key)!.add(commission.referral.id);
+  }
+
+  // Convert Sets to counts
+  const result = new Map<string, number>();
+  customersByPeriod.forEach((referralSet, period) => {
+    result.set(period, referralSet.size);
+  });
+
+  return result;
+}
+
+/**
  * Merge earnings data from rewards with funnel metrics from V2 Reports API
+ * Falls back to deriving customers from commissions when V2 sub_data is empty
  */
 function mergeFunnelData(
   earningsSeries: RewardDataPoint[],
-  v2Reports: V2ReportResponse | null
+  v2Reports: V2ReportResponse | null,
+  commissions: V2Commission[],
+  groupBy: GroupBy
 ): EarningsResponse['series'] {
   // Create a map of V2 funnel data by normalized date
   const funnelMap = new Map<string, { clicks: number; signups: number; customers: number; revenue: number }>();
 
+  // Check if V2 sub_data has meaningful customer data
+  let hasCustomerDataInSubData = false;
   if (v2Reports?.sub_data) {
     for (const item of v2Reports.sub_data) {
-      // V2 API returns dates in various formats - safely parse them
       const normalizedDate = safeParseDateToString(item.period);
 
       if (normalizedDate) {
@@ -159,20 +263,46 @@ function mergeFunnelData(
           customers: item.data.customers_count || 0,
           revenue: item.data.revenue_amount || 0,
         });
+
+        if (item.data.customers_count > 0) {
+          hasCustomerDataInSubData = true;
+        }
       }
     }
   }
 
-  // Get all unique dates from both sources
+  // If V2 sub_data doesn't have customer data, derive from commissions
+  let commissionsCustomerMap: Map<string, number> | null = null;
+  if (!hasCustomerDataInSubData && commissions.length > 0) {
+    commissionsCustomerMap = groupCommissionsByPeriod(commissions, groupBy);
+  }
+
+  // Create a map of earnings data by date for faster lookup
+  const earningsMap = new Map<string, RewardDataPoint>();
+  earningsSeries.forEach((item) => earningsMap.set(item.date, item));
+
+  // Get all unique dates from all sources
   const allDates = new Set<string>();
   earningsSeries.forEach((item) => allDates.add(item.date));
   funnelMap.forEach((_, date) => allDates.add(date));
+  // Also add dates from commissions-derived customers
+  if (commissionsCustomerMap) {
+    commissionsCustomerMap.forEach((_, date) => allDates.add(date));
+  }
+
+  // If we have no dates from any source, return empty array
+  if (allDates.size === 0) {
+    return [];
+  }
 
   // Merge data for each date
   const mergedData = Array.from(allDates)
     .map((date) => {
-      const earningsData = earningsSeries.find((e) => e.date === date);
+      const earningsData = earningsMap.get(date);
       const funnelData = funnelMap.get(date);
+      // Use commission-derived customers as fallback when funnelData has no customers
+      const commissionsCustomers = commissionsCustomerMap?.get(date) || 0;
+      const customers = funnelData?.customers || commissionsCustomers;
 
       return {
         period: date,
@@ -181,7 +311,7 @@ function mergeFunnelData(
         count: earningsData?.count || 0,
         clicks: funnelData?.clicks || 0,
         signups: funnelData?.signups || 0,
-        customers: funnelData?.customers || 0,
+        customers,
       };
     })
     .sort((a, b) => a.period.localeCompare(b.period));
@@ -234,7 +364,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Fetch comprehensive data from FirstPromoter API (V2 for everything)
-    const { profile, series, filteredStats, recentCommissions, payoutHistory, v2Reports } = await getComprehensiveEarningsData({
+    const { profile, series, filteredStats, recentCommissions, allCommissions, payoutHistory, v2Reports } = await getComprehensiveEarningsData({
       promoterId,
       startDate,
       endDate,
@@ -292,7 +422,7 @@ export async function GET(request: NextRequest) {
         clickToSignup: Math.round(clickToSignup * 100) / 100,
         signupToCustomer: Math.round(signupToCustomer * 100) / 100,
       },
-      series: mergeFunnelData(series, v2Reports),
+      series: mergeFunnelData(series, v2Reports, allCommissions, groupBy),
       recentCommissions: recentCommissions.map((c: V2Commission) => ({
         id: c.id,
         status: c.status,

@@ -22,26 +22,26 @@ export default function StudioSettingsPage() {
   return (
     <div className="pt-6 lg:pt-8 max-w-4xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-white">Settings</h1>
-        <p className="text-white/40">Manage your channel settings</p>
+        <h1 className="text-2xl font-semibold text-foreground">Settings</h1>
+        <p className="text-muted-foreground">Manage your channel settings</p>
       </div>
 
       <div className="space-y-6">
         {/* Channel Profile */}
         <Card>
           <CardContent className="p-6">
-            <h2 className="font-semibold text-white mb-4 flex items-center gap-2">
-              <User className="w-5 h-5 text-[#ab0013]" />
+            <h2 className="font-semibold text-foreground mb-4 flex items-center gap-2">
+              <User className="w-5 h-5 text-red-primary" />
               Channel Profile
             </h2>
 
             {/* Avatar */}
             <div className="flex items-center gap-4 mb-6">
-              <div className="relative w-20 h-20 rounded-full overflow-hidden ring-2 ring-[#ab0013]/50">
+              <div className="relative w-20 h-20 rounded-full overflow-hidden ring-2 ring-red-primary/50">
                 {channel?.dp ? (
                   <Image src={channel.dp} alt={channel.name} fill className="object-cover" />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-[#ab0013] to-[#7a000e] flex items-center justify-center">
+                  <div className="w-full h-full bg-gradient-to-br from-red-primary to-red-deep flex items-center justify-center">
                     <span className="text-2xl font-bold text-white">
                       {channel?.name?.charAt(0).toUpperCase() || 'U'}
                     </span>
@@ -53,31 +53,31 @@ export default function StudioSettingsPage() {
                   <Camera className="w-4 h-4 mr-2" />
                   Change Avatar
                 </Button>
-                <p className="text-xs text-white/40">JPG, PNG up to 5MB</p>
+                <p className="text-xs text-muted-foreground">JPG, PNG up to 5MB</p>
               </div>
             </div>
 
             {/* Channel Name */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-white mb-2">Channel Name</label>
+              <label className="block text-sm font-medium text-foreground mb-2">Channel Name</label>
               <input
                 type="text"
                 value={channelName}
                 onChange={(e) => setChannelName(e.target.value)}
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/40 focus:outline-none focus:border-[#ab0013] transition-colors"
+                className="w-full px-4 py-3 bg-secondary border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-red-primary transition-colors"
               />
             </div>
 
             {/* Channel Description */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-white mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 Channel Description
               </label>
               <textarea
                 value={channelDescription}
                 onChange={(e) => setChannelDescription(e.target.value)}
                 rows={4}
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/40 focus:outline-none focus:border-[#ab0013] transition-colors resize-none"
+                className="w-full px-4 py-3 bg-secondary border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-red-primary transition-colors resize-none"
                 placeholder="Tell viewers about your channel"
               />
             </div>
@@ -89,8 +89,8 @@ export default function StudioSettingsPage() {
         {/* Notifications */}
         <Card>
           <CardContent className="p-6">
-            <h2 className="font-semibold text-white mb-4 flex items-center gap-2">
-              <Bell className="w-5 h-5 text-[#ab0013]" />
+            <h2 className="font-semibold text-foreground mb-4 flex items-center gap-2">
+              <Bell className="w-5 h-5 text-red-primary" />
               Notifications
             </h2>
 
@@ -117,8 +117,8 @@ export default function StudioSettingsPage() {
         {/* Privacy */}
         <Card>
           <CardContent className="p-6">
-            <h2 className="font-semibold text-white mb-4 flex items-center gap-2">
-              <Shield className="w-5 h-5 text-[#ab0013]" />
+            <h2 className="font-semibold text-foreground mb-4 flex items-center gap-2">
+              <Shield className="w-5 h-5 text-red-primary" />
               Privacy
             </h2>
 
@@ -140,8 +140,8 @@ export default function StudioSettingsPage() {
         {/* Advanced */}
         <Card>
           <CardContent className="p-6">
-            <h2 className="font-semibold text-white mb-4 flex items-center gap-2">
-              <Settings className="w-5 h-5 text-[#ab0013]" />
+            <h2 className="font-semibold text-foreground mb-4 flex items-center gap-2">
+              <Settings className="w-5 h-5 text-red-primary" />
               Advanced
             </h2>
 
@@ -178,13 +178,13 @@ function ToggleSetting({
   return (
     <label className="flex items-center justify-between cursor-pointer">
       <div>
-        <p className="text-white font-medium">{title}</p>
-        <p className="text-sm text-white/40">{description}</p>
+        <p className="text-foreground font-medium">{title}</p>
+        <p className="text-sm text-muted-foreground">{description}</p>
       </div>
       <button
         type="button"
         onClick={() => setChecked(!checked)}
-        className={`relative w-12 h-6 rounded-full transition-colors ${checked ? 'bg-[#ab0013]' : 'bg-white/20'}`}
+        className={`relative w-12 h-6 rounded-full transition-colors ${checked ? 'bg-red-primary' : 'bg-muted-foreground/30'}`}
       >
         <span
           className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${checked ? 'left-7' : 'left-1'}`}

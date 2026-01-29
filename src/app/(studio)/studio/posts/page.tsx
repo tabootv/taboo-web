@@ -164,8 +164,8 @@ export default function CreatePostPage() {
   return (
     <div className="p-6 lg:p-8 max-w-2xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-white">Create Post</h1>
-        <p className="text-white/40">Share an update with your community</p>
+        <h1 className="text-2xl font-semibold text-foreground">Create Post</h1>
+        <p className="text-muted-foreground">Share an update with your community</p>
 
         <ContentTypeSelector />
       </div>
@@ -175,11 +175,11 @@ export default function CreatePostPage() {
           <CardContent className="p-6">
             {/* Author Info */}
             <div className="flex items-center gap-3 mb-4">
-              <div className="relative w-12 h-12 rounded-full overflow-hidden ring-2 ring-[#ab0013]/50">
+              <div className="relative w-12 h-12 rounded-full overflow-hidden ring-2 ring-red-primary/50">
                 {channel?.dp ? (
                   <Image src={channel.dp} alt={channel.name} fill className="object-cover" />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-[#ab0013] to-[#7a000e] flex items-center justify-center">
+                  <div className="w-full h-full bg-gradient-to-br from-red-primary to-red-deep flex items-center justify-center">
                     <span className="text-lg font-bold text-white">
                       {channel?.name?.charAt(0).toUpperCase() || 'U'}
                     </span>
@@ -187,8 +187,8 @@ export default function CreatePostPage() {
                 )}
               </div>
               <div>
-                <p className="font-medium text-white">{channel?.name}</p>
-                <p className="text-sm text-white/40">Posting as creator</p>
+                <p className="font-medium text-foreground">{channel?.name}</p>
+                <p className="text-sm text-muted-foreground">Posting as creator</p>
               </div>
             </div>
 
@@ -198,14 +198,14 @@ export default function CreatePostPage() {
               onChange={(e) => setCaption(e.target.value)}
               placeholder="What's on your mind?"
               rows={5}
-              className="w-full bg-transparent text-white placeholder:text-white/40 resize-none focus:outline-none text-lg rounded-2xl p-4"
+              className="w-full bg-transparent text-foreground placeholder:text-muted-foreground resize-none focus:outline-none text-lg rounded-2xl p-4"
               maxLength={2000}
               autoFocus
             />
 
             <div className="flex justify-end mt-2">
               <span
-                className={`text-xs ${caption.length > 1800 ? 'text-yellow-500' : 'text-white/40'}`}
+                className={`text-xs ${caption.length > 1800 ? 'text-yellow-500' : 'text-muted-foreground'}`}
               >
                 {caption.length}/2000
               </span>
@@ -248,18 +248,18 @@ export default function CreatePostPage() {
 
             {/* Audio Preview */}
             {audioPreview && (
-              <div className="mt-4 p-4 rounded-xl bg-white/5 border border-white/10">
+              <div className="mt-4 p-4 rounded-xl bg-secondary border border-border">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    <Mic className="w-5 h-5 text-[#ab0013]" />
-                    <span className="text-sm text-white">{audio?.name}</span>
+                    <Mic className="w-5 h-5 text-red-primary" />
+                    <span className="text-sm text-foreground">{audio?.name}</span>
                   </div>
                   <button
                     type="button"
                     onClick={removeAudio}
-                    className="p-1 rounded-full hover:bg-white/10 transition-colors"
+                    className="p-1 rounded-full hover:bg-accent transition-colors"
                   >
-                    <X className="w-4 h-4 text-white/40" />
+                    <X className="w-4 h-4 text-muted-foreground" />
                   </button>
                 </div>
                 <audio src={audioPreview} controls className="w-full" />
@@ -267,14 +267,14 @@ export default function CreatePostPage() {
             )}
 
             {/* Media Actions */}
-            <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
+            <div className="mt-6 pt-4 border-t border-border flex items-center justify-between">
               <div className="flex gap-2">
                 <label
-                  className={`p-3 rounded-xl hover:bg-white/10 transition-colors cursor-pointer ${
+                  className={`p-3 rounded-xl hover:bg-accent transition-colors cursor-pointer ${
                     images.length >= 4 ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
                 >
-                  <ImageIcon className="w-5 h-5 text-white/40" />
+                  <ImageIcon className="w-5 h-5 text-muted-foreground" />
                   <input
                     ref={imageInputRef}
                     type="file"
@@ -287,11 +287,11 @@ export default function CreatePostPage() {
                   />
                 </label>
                 <label
-                  className={`p-3 rounded-xl hover:bg-white/10 transition-colors cursor-pointer ${
+                  className={`p-3 rounded-xl hover:bg-accent transition-colors cursor-pointer ${
                     audio ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
                 >
-                  <Mic className="w-5 h-5 text-white/40" />
+                  <Mic className="w-5 h-5 text-muted-foreground" />
                   <input
                     ref={audioInputRef}
                     type="file"
@@ -303,7 +303,7 @@ export default function CreatePostPage() {
                   />
                 </label>
               </div>
-              <div className="flex items-center gap-2 text-xs text-white/40">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 {images.length > 0 && <span>{images.length}/4 images</span>}
                 {audio && <span>1 audio</span>}
               </div>

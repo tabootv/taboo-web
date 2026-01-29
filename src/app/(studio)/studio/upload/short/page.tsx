@@ -224,19 +224,19 @@ export default function UploadShortPage() {
   return (
     <div className="pt-6 lg:pt-8 max-w-4xl mx-auto">
       <div className="mb-8">
-        <p className="text-xs uppercase tracking-[0.2em] text-white/50">Creator studio</p>
+        <p className="text-xs uppercase tracking-[0.2em] text-white/60">Creator studio</p>
         <h1 className="text-3xl font-bold text-white">Upload a Short</h1>
-        <p className="text-white/50">Quick, vertical drops with the same Taboo polish.</p>
+        <p className="text-white/60">Quick, vertical drops with the same Taboo polish.</p>
 
         <ContentTypeSelector />
       </div>
 
       {/* Tips Banner */}
-      <Card className="mb-6 border border-white/10 bg-gradient-to-r from-black via-[#120508] to-[#1a0b0c] shadow-[0_18px_50px_rgba(0,0,0,0.45)]">
+      <Card className="mb-6 bg-[#131315] border-white/6">
         <CardContent className="p-4">
           <div className="flex gap-4 items-center">
-            <div className="p-3 rounded-xl bg-red-primary/15 border border-red-primary/30 h-fit">
-              <Smartphone className="w-5 h-5 text-red-primary" />
+            <div className="p-3 rounded-xl bg-[#ab0013]/15 border border-[#ab0013]/30 h-fit">
+              <Smartphone className="w-5 h-5 text-[#ab0013]" />
             </div>
             <div className="flex-1">
               <h3 className="font-semibold text-white mb-1">Shorts that pop</h3>
@@ -256,21 +256,21 @@ export default function UploadShortPage() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Video Upload */}
-          <Card className="border border-white/10 bg-surface">
+          <Card className="bg-[#131315] border-white/6">
             <CardContent className="p-6">
               <h2 className="font-semibold text-white mb-4 flex items-center gap-2">
-                <Film className="w-5 h-5 text-red-primary" />
+                <Film className="w-5 h-5 text-[#ab0013]" />
                 Short Video
               </h2>
 
               {!videoFile ? (
                 <label className="block cursor-pointer">
-                  <div className="border-2 border-dashed border-white/15 rounded-xl p-12 text-center hover:border-red-primary/40 hover:bg-red-primary/5 transition-all">
+                  <div className="border-2 border-dashed border-white/10 rounded-xl p-12 text-center hover:border-[#ab0013]/40 hover:bg-[#ab0013]/5 transition-all">
                     <Upload className="w-12 h-12 text-white/40 mx-auto mb-4" />
                     <p className="text-white font-medium mb-2">
                       Drag and drop your short video here
                     </p>
-                    <p className="text-white/40 text-sm mb-4">or click to browse</p>
+                    <p className="text-white/60 text-sm mb-4">or click to browse</p>
                     <p className="text-xs text-white/40">
                       Vertical video (9:16) recommended • Up to 60 seconds • Max 500MB
                     </p>
@@ -306,7 +306,7 @@ export default function UploadShortPage() {
                   </div>
                   <div className="flex-1">
                     <p className="text-white font-medium mb-2">{videoFile.name}</p>
-                    <p className="text-sm text-white/40 mb-4">
+                    <p className="text-sm text-white/60 mb-4">
                       {(videoFile.size / 1024 / 1024).toFixed(1)} MB
                     </p>
                     <div className="mt-4">
@@ -330,8 +330,8 @@ export default function UploadShortPage() {
                           </button>
                         </div>
                       ) : (
-                        <label className="w-24 aspect-[9/16] border-2 border-dashed border-white/20 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-red-primary/40 transition-all">
-                          <ImageIcon className="w-5 h-5 text-red-primary/80 mb-1" />
+                        <label className="w-24 aspect-[9/16] border-2 border-dashed border-white/10 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-[#ab0013]/40 transition-all">
+                          <ImageIcon className="w-5 h-5 text-[#ab0013]/80 mb-1" />
                           <span className="text-xs text-white/40">Add</span>
                           <input
                             ref={thumbnailInputRef}
@@ -350,7 +350,7 @@ export default function UploadShortPage() {
           </Card>
 
           {/* Details */}
-          <Card>
+          <Card className="bg-[#131315] border-white/6">
             <CardContent className="p-6">
               <h2 className="font-semibold text-white mb-4">Details</h2>
               <div className="space-y-4">
@@ -359,7 +359,7 @@ export default function UploadShortPage() {
                   name="title"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>
+                      <FormLabel className="text-white">
                         Title <span className="text-[#ab0013]">*</span>
                       </FormLabel>
                       <FormControl>
@@ -367,7 +367,7 @@ export default function UploadShortPage() {
                           {...field}
                           type="text"
                           placeholder="Enter short title"
-                          className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/40 focus:outline-none focus:border-purple-500 transition-colors"
+                          className="w-full px-4 py-3 bg-white/5 border border-white/6 rounded-xl text-white placeholder:text-white/40 focus:outline-none focus:border-[#ab0013] transition-colors"
                           maxLength={100}
                         />
                       </FormControl>
@@ -384,13 +384,13 @@ export default function UploadShortPage() {
                   name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Description</FormLabel>
+                      <FormLabel className="text-white">Description</FormLabel>
                       <FormControl>
                         <textarea
                           {...field}
                           placeholder="Add a description"
                           rows={3}
-                          className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/40 focus:outline-none focus:border-purple-500 transition-colors resize-none"
+                          className="w-full px-4 py-3 bg-white/5 border border-white/6 rounded-xl text-white placeholder:text-white/40 focus:outline-none focus:border-[#ab0013] transition-colors resize-none"
                           maxLength={500}
                         />
                       </FormControl>
@@ -407,7 +407,7 @@ export default function UploadShortPage() {
                   name="tags"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="flex items-center gap-2">
+                      <FormLabel className="flex items-center gap-2 text-white">
                         <Tag className="w-4 h-4" /> Tags
                       </FormLabel>
                       <FormControl>
@@ -415,7 +415,7 @@ export default function UploadShortPage() {
                           {...field}
                           type="text"
                           placeholder="Add tags (comma separated)"
-                          className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/40 focus:outline-none focus:border-purple-500 transition-colors"
+                          className="w-full px-4 py-3 bg-white/5 border border-white/6 rounded-xl text-white placeholder:text-white/40 focus:outline-none focus:border-[#ab0013] transition-colors"
                         />
                       </FormControl>
                       <FormMessage />
@@ -427,7 +427,7 @@ export default function UploadShortPage() {
           </Card>
 
           {/* Visibility */}
-          <Card>
+          <Card className="bg-[#131315] border-white/6">
             <CardContent className="p-6">
               <h2 className="font-semibold text-white mb-4">Visibility</h2>
               <FormField
@@ -437,24 +437,24 @@ export default function UploadShortPage() {
                   <FormItem>
                     <FormControl>
                       <div className="flex gap-4">
-                        <label className="flex-1 flex items-center gap-3 p-4 rounded-xl bg-white/5 cursor-pointer hover:bg-white/10 transition-colors">
+                        <label className={`flex-1 flex items-center gap-3 p-4 rounded-xl cursor-pointer transition-colors ${field.value === 'public' ? 'bg-white/10 border border-[#ab0013]/50' : 'bg-white/5 border border-white/6 hover:bg-white/10'}`}>
                           <input
                             type="radio"
                             checked={field.value === 'public'}
                             onChange={() => field.onChange('public')}
-                            className="w-4 h-4 accent-purple-500"
+                            className="w-4 h-4 accent-[#ab0013]"
                           />
-                          <Globe className="w-5 h-5 text-white/40" />
+                          <Globe className="w-5 h-5 text-white/60" />
                           <span className="text-white font-medium">Public</span>
                         </label>
-                        <label className="flex-1 flex items-center gap-3 p-4 rounded-xl bg-white/5 cursor-pointer hover:bg-white/10 transition-colors">
+                        <label className={`flex-1 flex items-center gap-3 p-4 rounded-xl cursor-pointer transition-colors ${field.value === 'private' ? 'bg-white/10 border border-[#ab0013]/50' : 'bg-white/5 border border-white/6 hover:bg-white/10'}`}>
                           <input
                             type="radio"
                             checked={field.value === 'private'}
                             onChange={() => field.onChange('private')}
-                            className="w-4 h-4 accent-purple-500"
+                            className="w-4 h-4 accent-[#ab0013]"
                           />
-                          <Lock className="w-5 h-5 text-white/40" />
+                          <Lock className="w-5 h-5 text-white/60" />
                           <span className="text-white font-medium">Private</span>
                         </label>
                       </div>
@@ -463,7 +463,7 @@ export default function UploadShortPage() {
                 )}
               />
 
-              <div className="mt-6 pt-6 border-t border-white/10">
+              <div className="mt-6 pt-6 border-t border-white/6">
                 <FormField
                   control={form.control}
                   name="isNsfw"
@@ -473,14 +473,14 @@ export default function UploadShortPage() {
                         <label className="flex items-center justify-between cursor-pointer">
                           <div>
                             <p className="text-white font-medium">Age-restricted (18+)</p>
-                            <p className="text-sm text-white/40">
+                            <p className="text-sm text-white/60">
                               Not suitable for younger audiences
                             </p>
                           </div>
                           <button
                             type="button"
                             onClick={() => field.onChange(!field.value)}
-                            className={`relative w-12 h-6 rounded-full transition-colors ${field.value ? 'bg-purple-500' : 'bg-white/20'}`}
+                            className={`relative w-12 h-6 rounded-full transition-colors ${field.value ? 'bg-[#ab0013]' : 'bg-white/10'}`}
                           >
                             <span
                               className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${field.value ? 'left-7' : 'left-1'}`}
@@ -497,19 +497,19 @@ export default function UploadShortPage() {
 
           {/* Upload Progress */}
           {isUploading && (
-            <Card>
+            <Card className="bg-[#131315] border-white/6">
               <CardContent className="p-6">
                 <div className="flex items-center gap-3 mb-4">
-                  <Loader2 className="w-5 h-5 text-purple-400 animate-spin" />
+                  <Loader2 className="w-5 h-5 text-[#ab0013] animate-spin" />
                   <span className="text-white font-medium">Uploading short...</span>
                 </div>
                 <div className="h-2 bg-white/10 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-purple-500 transition-all duration-300"
+                    className="h-full bg-[#ab0013] transition-all duration-300"
                     style={{ width: `${uploadProgress}%` }}
                   />
                 </div>
-                <p className="mt-2 text-sm text-white/40">{uploadProgress}% complete</p>
+                <p className="mt-2 text-sm text-white/60">{uploadProgress}% complete</p>
               </CardContent>
             </Card>
           )}
@@ -531,7 +531,7 @@ export default function UploadShortPage() {
             <Button
               type="submit"
               disabled={!videoFile || !title?.trim() || isUploading}
-              className="min-w-[140px] bg-purple-600 hover:bg-purple-700"
+              className="min-w-[140px]"
             >
               {isUploading ? (
                 <>

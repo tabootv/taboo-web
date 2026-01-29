@@ -37,7 +37,7 @@ export function StudioHeader() {
 
   return (
     <header className="fixed top-0 left-0 right-0 h-14 bg-black border-b border-black z-[999]">
-      <div className="flex items-center justify-between h-full pr-4">
+      <div className="flex items-center justify-between h-full px-2 sm:px-4">
         <div className="flex items-center">
           <div className="w-12 h-14 flex items-center justify-center shrink-0">
             <button
@@ -49,20 +49,24 @@ export function StudioHeader() {
             </button>
           </div>
 
-          <Logo size="md" linkTo="/home" />
+          <Logo size="sm" linkTo="/home" className="sm:hidden" />
+          <Logo size="md" linkTo="/home" className="hidden sm:block" />
 
-          <span className="text-xs font-medium text-red-primary px-2 py-0.5 bg-red-primary/10 rounded ml-1">
+          <span className="text-[10px] sm:text-xs font-medium text-red-primary px-1.5 sm:px-2 py-0.5 bg-red-primary/10 rounded ml-1">
             Studio
           </span>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-2 px-4 py-2 bg-red-primary hover:bg-red-hover text-white rounded-lg font-medium text-sm transition-colors">
+              <button
+                className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-red-primary hover:bg-red-hover text-white rounded-lg font-medium text-xs sm:text-sm transition-colors"
+                aria-label="Create"
+              >
                 <Upload className="w-4 h-4" />
                 <span className="hidden sm:inline">Create</span>
-                <ChevronDown className="w-4 h-4" />
+                <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">

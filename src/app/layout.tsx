@@ -21,6 +21,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
+    url: 'https://taboo.tv',
     siteName: 'TabooTV',
     title: 'TabooTV',
     description: 'Your destination for premium video content, courses, and community.',
@@ -29,6 +30,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'TabooTV',
     description: 'Your destination for premium video content, courses, and community.',
+    creator: '@TabooTV',
   },
   robots: {
     index: true,
@@ -57,6 +59,19 @@ export default function RootLayout({
         <ErrorBoundary>
           <QueryProvider>{children}</QueryProvider>
         </ErrorBoundary>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'Organization',
+              name: 'Taboo.tv',
+              url: 'https://taboo.tv',
+              // TODO: Replace with actual logo URL
+              logo: 'https://taboo.tv/file.svg',
+            }),
+          }}
+        />
       </body>
     </html>
   );

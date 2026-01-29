@@ -605,6 +605,40 @@ export async function getCommissionsList(
 }
 
 /**
+ * Get ALL commissions for a date range (handles pagination)
+ */
+export async function getAllCommissions(
+  promoterId: number,
+  startDate: string,
+  endDate: string
+): Promise<V2Commission[]> {
+  const allCommissions: V2Commission[] = [];
+  let page = 1;
+  const perPage = 100;
+
+  try {
+    while (true) {
+      const { commissions } = await getCommissionsList(promoterId, {
+        page,
+        perPage,
+        startDate,
+        endDate,
+      });
+
+      if (commissions.length === 0) break;
+      allCommissions.push(...commissions);
+
+      if (commissions.length < perPage) break;
+      page++;
+    }
+  } catch (error) {
+    console.error('FirstPromoter getAllCommissions exception:', error);
+  }
+
+  return allCommissions;
+}
+
+/**
  * Get referrals list from V2 API (with pagination)
  */
 export async function getReferralsList(
@@ -677,15 +711,11 @@ export async function getPayoutsList(
  * Get comprehensive earnings data with all V2 API data
  */
 export async function getComprehensiveEarningsData(params: ReportParams) {
-  const [profileV2, rewards, v2Reports, commissions, payouts] = await Promise.all([
+  const [profileV2, rewards, v2Reports, allCommissions, payouts] = await Promise.all([
     getPromoterProfileV2(params.promoterId),
     getRewardsList(params.promoterId),
     getPromoterReports(params.promoterId, params.startDate, params.endDate, params.groupBy),
-    getCommissionsList(params.promoterId, {
-      perPage: 10,
-      startDate: params.startDate,
-      endDate: params.endDate,
-    }),
+    getAllCommissions(params.promoterId, params.startDate, params.endDate),
     getPayoutsList(params.promoterId, { perPage: 10 }),
   ]);
 
@@ -737,7 +767,8 @@ export async function getComprehensiveEarningsData(params: ReportParams) {
     profile,
     series,
     filteredStats,
-    recentCommissions: commissions.commissions,
+    recentCommissions: allCommissions.slice(0, 10),
+    allCommissions, // All commissions for deriving customers per period
     payoutHistory: payouts,
     v2Reports,
   };

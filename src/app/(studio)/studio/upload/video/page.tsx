@@ -222,8 +222,8 @@ export default function UploadVideoPage() {
   return (
     <div className="pt-6 lg:pt-8 max-w-4xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-white">Upload Video</h1>
-        <p className="text-white/40">Share your content with your audience</p>
+        <h1 className="text-2xl font-semibold text-foreground">Upload Video</h1>
+        <p className="text-muted-foreground">Share your content with your audience</p>
 
         <ContentTypeSelector />
       </div>
@@ -233,18 +233,18 @@ export default function UploadVideoPage() {
           {/* Video Upload */}
           <Card>
             <CardContent className="p-6">
-              <h2 className="font-semibold text-white mb-4 flex items-center gap-2">
-                <FileVideo className="w-5 h-5 text-[#ab0013]" />
+              <h2 className="font-semibold text-foreground mb-4 flex items-center gap-2">
+                <FileVideo className="w-5 h-5 text-red-primary" />
                 Video File
               </h2>
 
               {!videoFile ? (
                 <label className="block cursor-pointer">
-                  <div className="border-2 border-dashed border-white/20 rounded-xl p-12 text-center hover:border-[#ab0013]/50 hover:bg-[#ab0013]/5 transition-all">
-                    <Upload className="w-12 h-12 text-white/40 mx-auto mb-4" />
-                    <p className="text-white font-medium mb-2">Drag and drop your video here</p>
-                    <p className="text-white/40 text-sm mb-4">or click to browse</p>
-                    <p className="text-xs text-white/40">MP4, MOV, AVI up to 2GB</p>
+                  <div className="border-2 border-dashed border-border rounded-xl p-12 text-center hover:border-red-primary/50 hover:bg-red-primary/5 transition-all">
+                    <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-foreground font-medium mb-2">Drag and drop your video here</p>
+                    <p className="text-muted-foreground text-sm mb-4">or click to browse</p>
+                    <p className="text-xs text-muted-foreground">MP4, MOV, AVI up to 2GB</p>
                   </div>
                   <input
                     ref={videoInputRef}
@@ -273,7 +273,7 @@ export default function UploadVideoPage() {
                   >
                     <X className="w-4 h-4 text-white" />
                   </button>
-                  <p className="mt-3 text-sm text-white/40">
+                  <p className="mt-3 text-sm text-muted-foreground">
                     {videoFile.name} ({(videoFile.size / 1024 / 1024).toFixed(1)} MB)
                   </p>
                 </div>
@@ -284,8 +284,8 @@ export default function UploadVideoPage() {
           {/* Thumbnail */}
           <Card>
             <CardContent className="p-6">
-              <h2 className="font-semibold text-white mb-4 flex items-center gap-2">
-                <ImageIcon className="w-5 h-5 text-[#ab0013]" />
+              <h2 className="font-semibold text-foreground mb-4 flex items-center gap-2">
+                <ImageIcon className="w-5 h-5 text-red-primary" />
                 Thumbnail
               </h2>
               <div className="flex gap-4 items-start">
@@ -308,9 +308,9 @@ export default function UploadVideoPage() {
                     </button>
                   </div>
                 ) : (
-                  <label className="w-48 aspect-video border-2 border-dashed border-white/20 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-[#ab0013]/50 hover:bg-[#ab0013]/5 transition-all">
-                    <ImageIcon className="w-6 h-6 text-white/40 mb-2" />
-                    <span className="text-xs text-white/40">Add thumbnail</span>
+                  <label className="w-48 aspect-video border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-red-primary/50 hover:bg-red-primary/5 transition-all">
+                    <ImageIcon className="w-6 h-6 text-muted-foreground mb-2" />
+                    <span className="text-xs text-muted-foreground">Add thumbnail</span>
                     <input
                       ref={thumbnailInputRef}
                       type="file"
@@ -320,7 +320,7 @@ export default function UploadVideoPage() {
                     />
                   </label>
                 )}
-                <p className="text-sm text-white/40 flex-1">
+                <p className="text-sm text-muted-foreground flex-1">
                   Upload a custom thumbnail or we'll generate one from your video. Recommended:
                   1280x720 (16:9)
                 </p>
@@ -331,7 +331,7 @@ export default function UploadVideoPage() {
           {/* Details */}
           <Card>
             <CardContent className="p-6">
-              <h2 className="font-semibold text-white mb-4">Details</h2>
+              <h2 className="font-semibold text-foreground mb-4">Details</h2>
               <div className="space-y-4">
                 <FormField
                   control={form.control}
@@ -339,20 +339,20 @@ export default function UploadVideoPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        Title <span className="text-[#ab0013]">*</span>
+                        Title <span className="text-red-primary">*</span>
                       </FormLabel>
                       <FormControl>
                         <input
                           {...field}
                           type="text"
                           placeholder="Enter video title"
-                          className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/40 focus:outline-none focus:border-[#ab0013] transition-colors"
+                          className="w-full px-4 py-3 bg-white/5 border border-white/6 rounded-xl text-white placeholder:text-white/40 focus:outline-none focus:border-[#ab0013] transition-colors"
                           maxLength={100}
                         />
                       </FormControl>
                       <div className="flex justify-between">
                         <FormMessage />
-                        <p className="text-xs text-white/40">{field.value?.length || 0}/100</p>
+                        <p className="text-xs text-muted-foreground">{field.value?.length || 0}/100</p>
                       </div>
                     </FormItem>
                   )}
@@ -369,13 +369,13 @@ export default function UploadVideoPage() {
                           {...field}
                           placeholder="Tell viewers about your video"
                           rows={4}
-                          className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/40 focus:outline-none focus:border-[#ab0013] transition-colors resize-none"
+                          className="w-full px-4 py-3 bg-white/5 border border-white/6 rounded-xl text-white placeholder:text-white/40 focus:outline-none focus:border-[#ab0013] transition-colors resize-none"
                           maxLength={5000}
                         />
                       </FormControl>
                       <div className="flex justify-between">
                         <FormMessage />
-                        <p className="text-xs text-white/40">{field.value?.length || 0}/5000</p>
+                        <p className="text-xs text-muted-foreground">{field.value?.length || 0}/5000</p>
                       </div>
                     </FormItem>
                   )}
@@ -394,7 +394,7 @@ export default function UploadVideoPage() {
                           {...field}
                           type="text"
                           placeholder="Add tags separated by commas"
-                          className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/40 focus:outline-none focus:border-[#ab0013] transition-colors"
+                          className="w-full px-4 py-3 bg-white/5 border border-white/6 rounded-xl text-white placeholder:text-white/40 focus:outline-none focus:border-[#ab0013] transition-colors"
                         />
                       </FormControl>
                       <FormMessage />
@@ -408,7 +408,7 @@ export default function UploadVideoPage() {
           {/* Visibility */}
           <Card>
             <CardContent className="p-6">
-              <h2 className="font-semibold text-white mb-4">Visibility</h2>
+              <h2 className="font-semibold text-foreground mb-4">Visibility</h2>
               <FormField
                 control={form.control}
                 name="visibility"
@@ -416,27 +416,27 @@ export default function UploadVideoPage() {
                   <FormItem>
                     <FormControl>
                       <div className="space-y-3">
-                        <label className="flex items-center gap-3 p-4 rounded-xl bg-white/5 cursor-pointer hover:bg-white/10 transition-colors">
+                        <label className={`flex items-center gap-3 p-4 rounded-xl cursor-pointer transition-colors ${field.value === 'public' ? 'bg-white/10 border border-[#ab0013]/50' : 'bg-white/5 border border-white/6 hover:bg-white/10'}`}>
                           <input
                             type="radio"
                             checked={field.value === 'public'}
                             onChange={() => field.onChange('public')}
                             className="w-4 h-4 accent-[#ab0013]"
                           />
-                          <Globe className="w-5 h-5 text-white/40" />
+                          <Globe className="w-5 h-5 text-white/60" />
                           <div>
                             <p className="text-white font-medium">Public</p>
                             <p className="text-sm text-white/40">Everyone can watch this video</p>
                           </div>
                         </label>
-                        <label className="flex items-center gap-3 p-4 rounded-xl bg-white/5 cursor-pointer hover:bg-white/10 transition-colors">
+                        <label className={`flex items-center gap-3 p-4 rounded-xl cursor-pointer transition-colors ${field.value === 'private' ? 'bg-white/10 border border-[#ab0013]/50' : 'bg-white/5 border border-white/6 hover:bg-white/10'}`}>
                           <input
                             type="radio"
                             checked={field.value === 'private'}
                             onChange={() => field.onChange('private')}
                             className="w-4 h-4 accent-[#ab0013]"
                           />
-                          <Lock className="w-5 h-5 text-white/40" />
+                          <Lock className="w-5 h-5 text-white/60" />
                           <div>
                             <p className="text-white font-medium">Private</p>
                             <p className="text-sm text-white/40">Only you can watch this video</p>
@@ -448,7 +448,7 @@ export default function UploadVideoPage() {
                 )}
               />
 
-              <div className="mt-6 pt-6 border-t border-white/10">
+              <div className="mt-6 pt-6 border-t border-white/6">
                 <FormField
                   control={form.control}
                   name="isNsfw"
@@ -465,7 +465,7 @@ export default function UploadVideoPage() {
                           <button
                             type="button"
                             onClick={() => field.onChange(!field.value)}
-                            className={`relative w-12 h-6 rounded-full transition-colors ${field.value ? 'bg-[#ab0013]' : 'bg-white/20'}`}
+                            className={`relative w-12 h-6 rounded-full transition-colors ${field.value ? 'bg-[#ab0013]' : 'bg-white/10'}`}
                           >
                             <span
                               className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${field.value ? 'left-7' : 'left-1'}`}
@@ -485,16 +485,16 @@ export default function UploadVideoPage() {
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center gap-3 mb-4">
-                  <Loader2 className="w-5 h-5 text-[#ab0013] animate-spin" />
-                  <span className="text-white font-medium">Uploading video...</span>
+                  <Loader2 className="w-5 h-5 text-red-primary animate-spin" />
+                  <span className="text-foreground font-medium">Uploading video...</span>
                 </div>
-                <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                <div className="h-2 bg-secondary rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-[#ab0013] transition-all duration-300"
+                    className="h-full bg-red-primary transition-all duration-300"
                     style={{ width: `${uploadProgress}%` }}
                   />
                 </div>
-                <p className="mt-2 text-sm text-white/40">{uploadProgress}% complete</p>
+                <p className="mt-2 text-sm text-muted-foreground">{uploadProgress}% complete</p>
               </CardContent>
             </Card>
           )}

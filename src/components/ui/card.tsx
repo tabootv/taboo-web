@@ -9,26 +9,17 @@ function Card({ className, children, ...props }: React.ComponentProps<"div">) {
       className={cn(
         // Shape
         "relative rounded-2xl overflow-hidden",
-        // Background gradient matching Framer style
-        "bg-gradient-to-b from-white/[0.05] to-white/[0.02]",
+        // Background
+        "bg-[#131315]",
         // Border
-        "border border-white/[0.08]",
-        // Hover effects
-        "transition-all duration-300 ease-out",
-        "hover:-translate-y-2 hover:scale-[1.02]",
-        "hover:shadow-[0_20px_40px_rgba(171,0,19,0.25)]",
+        "border border-white/[0.06]",
         // Layout
         "flex flex-col text-card-foreground",
         className
       )}
       {...props}
     >
-      {/* Hover gradient overlay */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center_top,rgba(171,0,19,0.1)_0%,transparent_70%)] opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-      {/* Content */}
-      <div className="relative z-10 flex flex-col h-full">
-        {children}
-      </div>
+      {children}
     </div>
   )
 }
