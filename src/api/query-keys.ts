@@ -108,4 +108,13 @@ export const queryKeys = {
     list: (filters?: Record<string, unknown>) => [...queryKeys.playlists.lists(), filters] as const,
     detail: (id: string | number) => [...queryKeys.playlists.all, 'detail', String(id)] as const,
   },
+  studio: {
+    all: ['studio'] as const,
+    dashboard: () => [...queryKeys.studio.all, 'dashboard'] as const,
+    videos: (page?: number) => [...queryKeys.studio.all, 'videos', page] as const,
+    shorts: (page?: number) => [...queryKeys.studio.all, 'shorts', page] as const,
+    mapStats: (creatorId: string | number) =>
+      [...queryKeys.studio.all, 'mapStats', String(creatorId)] as const,
+    iframeToken: () => [...queryKeys.studio.all, 'iframeToken'] as const,
+  },
 } as const;
