@@ -1,7 +1,8 @@
 'use client';
 
-import { UploadForm, SHORT_UPLOAD_CONFIG, ShortsTipsBanner } from '../../_components/UploadForm';
+import { UploadWizard } from '../_components/UploadWizard';
+import { SHORT_CONFIG } from '../_config/short.config';
 
 export default function UploadShortPage() {
-  return <UploadForm config={SHORT_UPLOAD_CONFIG} tipsBanner={<ShortsTipsBanner />} />;
+  return <UploadWizard config={SHORT_CONFIG} />;
 }

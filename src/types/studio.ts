@@ -149,3 +149,38 @@ export interface StudioVideosListResponse {
     total: number;
   };
 }
+
+/**
+ * Prepare Bunny Upload Types
+ * For direct TUS uploads bypassing server action body limit
+ */
+export interface PrepareBunnyUploadPayload {
+  title: string;
+  description?: string | undefined;
+  short?: boolean | undefined;
+  location?: string | undefined;
+  country_id?: number | undefined;
+  latitude?: number | undefined;
+  longitude?: number | undefined;
+  is_adult_content?: boolean | undefined;
+  tags?: number[] | undefined;
+  thumbnail_path?: string | undefined;
+  publish_mode?: 'none' | 'auto' | 'scheduled' | undefined;
+  scheduled_at?: string | undefined;
+}
+
+export interface PrepareBunnyUploadResponse {
+  message: string;
+  video_id: number;
+  video_uuid: string;
+  bunny_video_id: string;
+  upload_config: {
+    endpoint: string;
+    headers: {
+      AuthorizationSignature: string;
+      AuthorizationExpire: number;
+      LibraryId: string | number;
+      VideoId: string;
+    };
+  };
+}

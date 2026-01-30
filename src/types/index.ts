@@ -138,6 +138,8 @@ export type {
   StudioCourseListItem,
   StudioCourseDetail,
   StudioVideosListResponse,
+  PrepareBunnyUploadPayload,
+  PrepareBunnyUploadResponse,
 } from './studio';
 
 // Earnings Types (FirstPromoter Integration)

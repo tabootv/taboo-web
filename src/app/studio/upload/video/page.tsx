@@ -1,7 +1,8 @@
 'use client';
 
-import { UploadForm, VIDEO_UPLOAD_CONFIG } from '../../_components/UploadForm';
+import { UploadWizard } from '../_components/UploadWizard';
+import { VIDEO_CONFIG } from '../_config/video.config';
 
 export default function UploadVideoPage() {
-  return <UploadForm config={VIDEO_UPLOAD_CONFIG} />;
+  return <UploadWizard config={VIDEO_CONFIG} />;
 }

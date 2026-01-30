@@ -8,12 +8,15 @@
  * - POST /studio/videos → StudioUploadVideoResponse
  * - POST /studio/shorts → StudioUploadShortResponse
  * - POST /studio/posts → StudioCreatePostResponse
+ * - POST /videos/prepare-bunny-upload → PrepareBunnyUploadResponse
  * - DELETE /studio/videos/{id} → { success: boolean }
  * - DELETE /studio/shorts/{id} → { success: boolean }
  */
 
 import type {
   ApiResponse,
+  PrepareBunnyUploadPayload,
+  PrepareBunnyUploadResponse,
   StudioCreatePostPayload,
   StudioCreatePostResponse,
   StudioDashboardResponse,
@@ -162,6 +165,21 @@ export const studioClient = {
    */
   deleteShort: async (videoId: number): Promise<{ success: boolean }> => {
     const data = await apiClient.delete<{ success: boolean }>(`/studio/shorts/${videoId}`);
+    return data;
+  },
+
+  /**
+   * Prepare a video upload and get TUS credentials
+   * This bypasses the server action 2MB body limit by only sending metadata
+   * The actual video file is uploaded directly to Bunny via TUS
+   */
+  prepareBunnyUpload: async (
+    payload: PrepareBunnyUploadPayload
+  ): Promise<PrepareBunnyUploadResponse> => {
+    const data = await apiClient.post<PrepareBunnyUploadResponse>(
+      '/videos/prepare-bunny-upload',
+      payload
+    );
     return data;
   },
 };
