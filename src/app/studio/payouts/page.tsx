@@ -1,42 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { AlertCircle, RefreshCw, Loader2 } from 'lucide-react';
+import { useEarnings } from '@/api/queries/earnings.queries';
+import { useFirstPromoterIframeToken } from '@/api/queries/firstpromoter.queries';
 import { Button } from '@/components/ui/button';
+import { AlertCircle, Loader2, RefreshCw } from 'lucide-react';
+import { EarningsCard } from '../_components/EarningsCard';
 
-const FIRSTPROMOTER_DOMAIN = 'payouts.taboo.tv';
+export default function PayoutsPage() {
+  const { data: iframeUrl, isLoading, error, refetch } = useFirstPromoterIframeToken();
 
-export default function EarningsPage() {
-  const [iframeUrl, setIframeUrl] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchIframeToken = async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch('/api/creator/firstpromoter/iframe-token');
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to load earnings dashboard');
-      }
-
-      // Build iframe URL with the access token
-      const url = `https://${FIRSTPROMOTER_DOMAIN}/iframe?tk=${data.access_token}`;
-      setIframeUrl(url);
-    } catch (err) {
-      console.error('Failed to get iframe token:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load earnings dashboard');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchIframeToken();
-  }, []);
+  const { data: earningsData } = useEarnings('30d', 'day');
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -47,7 +20,7 @@ export default function EarningsPage() {
             <h1 className="text-2xl lg:text-3xl font-bold">Earnings Dashboard</h1>
           </div>
           <Button
-            onClick={fetchIframeToken}
+            onClick={() => refetch()}
             variant="outline"
             size="sm"
             className="border-white/20 text-white hover:bg-white/10"
@@ -55,6 +28,10 @@ export default function EarningsPage() {
             <RefreshCw className="w-4 h-4 mr-2" />
             Refresh
           </Button>
+        </div>
+
+        <div className="mb-6">
+          <EarningsCard data={earningsData} showPeriodEarnings={false} showAllTimeEarnings />
         </div>
 
         {isLoading && (
@@ -73,9 +50,11 @@ export default function EarningsPage() {
                 <AlertCircle className="w-8 h-8 text-red-500" />
               </div>
               <p className="text-white/80 mb-2">Unable to load earnings dashboard</p>
-              <p className="text-white/50 text-sm mb-4">{error}</p>
+              <p className="text-white/50 text-sm mb-4">
+                {error instanceof Error ? error.message : 'An error occurred'}
+              </p>
               <Button
-                onClick={fetchIframeToken}
+                onClick={() => refetch()}
                 variant="outline"
                 className="border-white/20 text-white hover:bg-white/10"
               >
