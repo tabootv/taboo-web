@@ -107,6 +107,7 @@ Load specialized docs **when working on that specific area**:
 | **Zustand stores / client state** | `docs/agents/state-management.md` |
 | **Server actions** | `docs/agents/server-actions.md` |
 | **Video, Shorts, Series, Courses, Posts specs** | `docs/agents/content-types.md` |
+| **Upload API / Bunny.net TUS** | `docs/agents/upload-api.md` |
 | **Backend API / database schema** | `docs/agents/database.md` |
 
 ---
