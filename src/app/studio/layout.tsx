@@ -2,6 +2,7 @@
 
 import { StudioSidebar } from '@/components/sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import { StudioHeader } from '@/features/creator-studio';
 import { useAuthStore } from '@/shared/stores/auth-store';
 import { cn } from '@/shared/utils/formatting';
@@ -45,12 +46,14 @@ export default function StudioLayout({ children }: { children: React.ReactNode }
   }
 
   return (
-    <SidebarProvider defaultOpen={false}>
-      <StudioSidebar />
-      <SidebarInset className="min-h-screen bg-background">
-        <StudioContent>{children}</StudioContent>
-      </SidebarInset>
-    </SidebarProvider>
+    <TooltipProvider delayDuration={300}>
+      <SidebarProvider defaultOpen={false}>
+        <StudioSidebar />
+        <SidebarInset className="min-h-screen bg-background">
+          <StudioContent>{children}</StudioContent>
+        </SidebarInset>
+      </SidebarProvider>
+    </TooltipProvider>
   );
 }
 

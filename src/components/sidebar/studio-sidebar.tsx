@@ -18,6 +18,7 @@ import {
   ArrowLeft,
   BarChart3,
   DollarSign,
+  Film,
   LayoutDashboard,
   Settings,
   Upload,
@@ -28,6 +29,7 @@ import { usePathname } from 'next/navigation';
 
 const studioNavigation = [
   { name: 'Dashboard', href: '/studio', icon: LayoutDashboard },
+  { name: 'Content', href: '/studio/content', icon: Film },
   { name: 'Upload', href: '/studio/upload/video', icon: Upload },
   { name: 'Analytics', href: '/studio/analytics', icon: BarChart3 },
   { name: 'Earnings', href: '/studio/earnings', icon: DollarSign },
@@ -41,6 +43,10 @@ export function StudioSidebar({ ...props }: React.ComponentProps<typeof Sidebar>
   const isActive = (href: string) => {
     if (href === '/studio') {
       return pathname === '/studio';
+    }
+    // For Content, match content path
+    if (href === '/studio/content') {
+      return pathname.startsWith('/studio/content');
     }
     // For Upload, match any upload path or posts
     if (href === '/studio/upload/video') {
