@@ -81,7 +81,13 @@
       "Bash(npm:*)",
       "Bash(act:*)",
       "Bash(gh extension:*)",
-      "Bash(pnpm type-check:*)"
+      "Bash(pnpm type-check:*)",
+      "Bash(git worktree add:*)",
+      "Bash(git worktree:*)",
+      "Bash(git fetch:*)",
+      "Bash(npx next build:*)",
+      "Bash(npx next lint)",
+      "Bash(npx next lint:*)"
     ],
     "deny": [],
     "ask": []
