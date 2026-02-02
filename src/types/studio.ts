@@ -107,6 +107,12 @@ export interface StudioVideoListItem {
   created_at: string;
   published_at?: string;
   status?: string;
+  /** Video is currently being processed by Bunny */
+  processing?: boolean;
+  /** Bunny processing status: 0=queued, 1=processing, 2=encoding, 3=finished, 4=failed */
+  bunny_status?: number;
+  /** Processing progress percentage (0-100) */
+  progress?: number;
 }
 
 export type StudioVideoDetail = StudioVideoListItem;
@@ -150,6 +156,16 @@ export interface StudioVideosListResponse {
   };
 }
 
+export interface StudioPostsListResponse {
+  posts: StudioPostListItem[];
+  pagination: {
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+  };
+}
+
 /**
  * Prepare Bunny Upload Types
  * For direct TUS uploads bypassing server action body limit
@@ -182,5 +198,65 @@ export interface PrepareBunnyUploadResponse {
       LibraryId: string | number;
       VideoId: string;
     };
+  };
+}
+
+/**
+ * Content Management Types
+ * Extended types for the Content Management Hub
+ */
+
+export type ContentVisibility = 'public' | 'private' | 'unlisted' | 'scheduled' | 'draft';
+export type ProcessingStatus = 'uploading' | 'processing' | 'ready' | 'failed';
+
+export interface StudioContentListItem {
+  id: number;
+  uuid: string;
+  title: string;
+  description?: string;
+  thumbnail_url?: string;
+  visibility: ContentVisibility;
+  scheduled_at?: string;
+  processing_status: ProcessingStatus;
+  restrictions?: string[];
+  views_count: number;
+  comments_count: number;
+  likes_count: number;
+  likes_ratio: number;
+  created_at: string;
+  published_at?: string;
+  duration?: number;
+}
+
+export interface UpdateVideoMetadataPayload {
+  title?: string;
+  description?: string;
+  tags?: number[];
+  is_adult_content?: boolean;
+  country_id?: number;
+  location?: string;
+  latitude?: number;
+  longitude?: number;
+  thumbnail_path?: string;
+}
+
+export interface UpdateVisibilityPayload {
+  visibility: ContentVisibility;
+  scheduled_at?: string;
+}
+
+export interface UpdateVideoResponse {
+  success: boolean;
+  video?: StudioVideoListItem;
+  errors?: Record<string, string[]>;
+}
+
+export interface StudioContentListResponse {
+  videos: StudioContentListItem[];
+  pagination: {
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
   };
 }

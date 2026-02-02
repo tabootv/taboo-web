@@ -31,9 +31,11 @@ export interface VideoListFilters {
   short?: boolean;
   is_short?: boolean;
   type?: string;
+  types?: string;
   published?: boolean;
   order?: 'asc' | 'desc';
   channel_id?: number;
+  creator_id?: number;
   tag_ids?: number[];
   country_id?: string[];
   sort_by?: 'trending' | 'newest' | 'oldest' | 'longest' | 'shortest';
@@ -127,6 +129,11 @@ export const videoClient = {
     // Add creator filter by channel_id
     if (filters?.channel_id !== undefined) {
       params.channel_id = filters.channel_id;
+    }
+
+    // Add creator filter by user_id (creator_id)
+    if (filters?.creator_id !== undefined) {
+      params.creator_id = filters.creator_id;
     }
 
     // Add tag filter - send as array

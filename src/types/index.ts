@@ -138,8 +138,17 @@ export type {
   StudioCourseListItem,
   StudioCourseDetail,
   StudioVideosListResponse,
+  StudioPostsListResponse,
   PrepareBunnyUploadPayload,
   PrepareBunnyUploadResponse,
+  // Content Management Hub types
+  ContentVisibility,
+  ProcessingStatus,
+  StudioContentListItem,
+  StudioContentListResponse,
+  UpdateVideoMetadataPayload,
+  UpdateVisibilityPayload,
+  UpdateVideoResponse,
 } from './studio';
 
 // Earnings Types (FirstPromoter Integration)

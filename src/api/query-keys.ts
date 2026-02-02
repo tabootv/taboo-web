@@ -111,8 +111,12 @@ export const queryKeys = {
   studio: {
     all: ['studio'] as const,
     dashboard: () => [...queryKeys.studio.all, 'dashboard'] as const,
-    videos: (page?: number) => [...queryKeys.studio.all, 'videos', page] as const,
-    shorts: (page?: number) => [...queryKeys.studio.all, 'shorts', page] as const,
+    videos: (creatorId?: number, page?: number, filters?: Record<string, unknown>) =>
+      [...queryKeys.studio.all, 'videos', creatorId, page, filters] as const,
+    shorts: (creatorId?: number, page?: number, filters?: Record<string, unknown>) =>
+      [...queryKeys.studio.all, 'shorts', creatorId, page, filters] as const,
+    posts: (channelId?: number, page?: number) =>
+      [...queryKeys.studio.all, 'posts', channelId, page] as const,
     mapStats: (creatorId: string | number) =>
       [...queryKeys.studio.all, 'mapStats', String(creatorId)] as const,
     iframeToken: () => [...queryKeys.studio.all, 'iframeToken'] as const,

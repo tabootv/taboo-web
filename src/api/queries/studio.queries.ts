@@ -4,10 +4,21 @@
  * TanStack Query hooks for studio-related data fetching
  */
 
-import { useQuery } from '@tanstack/react-query';
-import { studioClient } from '../client/studio.client';
-import { queryKeys } from '../query-keys';
+import { shortsClient } from '@/api/client/shorts.client';
 import { countryNameToCode, getFlagEmoji, TOTAL_COUNTRIES } from '@/shared/utils/iso-country';
+import { useQuery } from '@tanstack/react-query';
+import { creatorsClient } from '../client/creators.client';
+import { studioClient } from '../client/studio.client';
+import { videoClient } from '../client/video.client';
+import { queryKeys } from '../query-keys';
+import type {
+  Post,
+  StudioPostListItem,
+  StudioPostsListResponse,
+  StudioVideoListItem,
+  StudioVideosListResponse,
+  Video,
+} from '../types';
 
 type MapVideo = {
   id?: string | number;
@@ -35,23 +46,178 @@ export function useStudioDashboard() {
 }
 
 /**
- * Hook to fetch creator's videos
+ * Transform Video from external API to StudioVideoListItem format
  */
-export function useStudioVideos(page = 1) {
+function transformVideoToStudioItem(video: Video): StudioVideoListItem {
+  const item: StudioVideoListItem = {
+    id: video.id!,
+    uuid: video.uuid,
+    title: video.title,
+    created_at: video.published_at || new Date().toISOString(),
+    likes_count: video.likes_count,
+    comments_count: video.comments_count,
+  };
+
+  // Only set optional properties if they have values (exactOptionalPropertyTypes)
+  if (video.description) item.description = video.description;
+  const thumbnail = video.thumbnail || video.card_thumbnail;
+  if (thumbnail) item.thumbnail_url = thumbnail;
+  if (video.views_count !== undefined) item.views_count = video.views_count;
+  if (video.duration !== undefined) item.duration = video.duration;
+  if (video.published_at) item.published_at = video.published_at;
+  item.status = video.published_at ? 'published' : 'draft';
+
+  return item;
+}
+
+/**
+ * Transform Post from external API to StudioPostListItem format
+ */
+function transformPostToStudioItem(post: Post): StudioPostListItem {
+  const item: StudioPostListItem = {
+    id: post.id,
+    uuid: post.uuid,
+    body: post.caption,
+    created_at: post.created_at,
+  };
+
+  // Only set optional properties if they have values (exactOptionalPropertyTypes)
+  if (post.published_at) item.published_at = post.published_at;
+  if (post.likes_count !== undefined) item.likes_count = post.likes_count;
+  if (post.comments_count !== undefined) item.comments_count = post.comments_count;
+
+  return item;
+}
+
+export interface ContentFilters {
+  status?: 'all' | 'processing' | 'published' | 'private' | 'unlisted';
+  sortBy?: 'newest' | 'oldest';
+  [key: string]: unknown;
+}
+
+/**
+ * Hook to fetch creator's videos using external REST API
+ * @param creatorId - The user ID of the creator (user.id)
+ * @param page - Page number for pagination
+ * @param filters - Optional filter parameters (status, sortBy)
+ */
+export function useStudioVideos(
+  creatorId: number | undefined,
+  page = 1,
+  filters: ContentFilters = {}
+) {
   return useQuery({
-    queryKey: queryKeys.studio.videos(page),
-    queryFn: () => studioClient.getVideos(page),
+    queryKey: queryKeys.studio.videos(creatorId, page, filters),
+    queryFn: async (): Promise<StudioVideosListResponse> => {
+      const response = await videoClient.list({
+        // channel_id: creatorId!,
+        short: false,
+        page,
+        per_page: 20,
+        sort_by: filters.sortBy || 'newest',
+        // Map status to API params
+        ...(filters.status === 'published' && { published: true }),
+        ...(filters.status === 'private' && { visibility: 'private' }),
+        ...(filters.status === 'unlisted' && { visibility: 'unlisted' }),
+      });
+
+      // Client-side filter for 'processing' if API doesn't support
+      let videos = response.data.map(transformVideoToStudioItem);
+      if (filters.status === 'processing') {
+        videos = videos.filter(
+          (v) => v.processing || (v.bunny_status !== undefined && v.bunny_status < 3)
+        );
+      }
+
+      return {
+        videos,
+        pagination: {
+          current_page: response.current_page,
+          last_page: response.last_page,
+          per_page: response.per_page,
+          total: response.total,
+        },
+      };
+    },
+    enabled: !!creatorId,
     staleTime: 1000 * 60 * 10, // 10 minutes
   });
 }
 
 /**
- * Hook to fetch creator's shorts
+ * Hook to fetch creator's shorts using external REST API
+ * @param creatorId - The user ID of the creator (user.id)
+ * @param page - Page number for pagination
+ * @param filters - Optional filter parameters (status, sortBy)
  */
-export function useStudioShorts(page = 1) {
+export function useStudioShorts(
+  creatorId: number | undefined,
+  page = 1,
+  filters: ContentFilters = {}
+) {
   return useQuery({
-    queryKey: queryKeys.studio.shorts(page),
-    queryFn: () => studioClient.getShorts(page),
+    queryKey: queryKeys.studio.shorts(creatorId, page, filters),
+    queryFn: async (): Promise<StudioVideosListResponse> => {
+      const response = await shortsClient.list({
+        creator_id: creatorId!,
+        short: true,
+        page,
+        per_page: 20,
+        sort_by: filters.sortBy || 'newest',
+        types: 'shorts',
+        // Map status to API params
+        ...(filters.status === 'published' && { published: true }),
+        ...(filters.status === 'private' && { visibility: 'private' }),
+        ...(filters.status === 'unlisted' && { visibility: 'unlisted' }),
+      });
+
+      // Client-side filter for 'processing' if API doesn't support
+      let videos = response.data.map(transformVideoToStudioItem);
+      if (filters.status === 'processing') {
+        videos = videos.filter(
+          (v) => v.processing || (v.bunny_status !== undefined && v.bunny_status < 3)
+        );
+      }
+
+      return {
+        videos,
+        pagination: {
+          current_page: response.current_page,
+          last_page: response.last_page,
+          per_page: response.per_page,
+          total: response.total,
+        },
+      };
+    },
+    enabled: !!creatorId,
+    staleTime: 1000 * 60 * 10, // 10 minutes
+  });
+}
+
+/**
+ * Hook to fetch creator's posts using external REST API
+ * @param channelId - The channel ID (user.channel.id)
+ * @param page - Page number for pagination
+ */
+export function useStudioPosts(channelId: number | undefined, page = 1) {
+  return useQuery({
+    queryKey: queryKeys.studio.posts(channelId, page),
+    queryFn: async (): Promise<StudioPostsListResponse> => {
+      const response = await creatorsClient.getPosts(channelId!, {
+        sort_by: 'latest',
+      });
+
+      return {
+        posts: response.data.map(transformPostToStudioItem),
+        pagination: {
+          current_page: response.current_page,
+          last_page: response.last_page,
+          per_page: response.per_page,
+          total: response.total,
+        },
+      };
+    },
+    enabled: !!channelId,
     staleTime: 1000 * 60 * 10, // 10 minutes
   });
 }

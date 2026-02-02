@@ -9,6 +9,9 @@
  * - POST /studio/shorts → StudioUploadShortResponse
  * - POST /studio/posts → StudioCreatePostResponse
  * - POST /videos/prepare-bunny-upload → PrepareBunnyUploadResponse
+ * - PATCH /studio/videos/{id} → UpdateVideoResponse
+ * - PATCH /studio/videos/{id}/visibility → UpdateVideoResponse
+ * - PATCH /studio/shorts/{id}/visibility → UpdateVideoResponse
  * - DELETE /studio/videos/{id} → { success: boolean }
  * - DELETE /studio/shorts/{id} → { success: boolean }
  */
@@ -17,14 +20,19 @@ import type {
   ApiResponse,
   PrepareBunnyUploadPayload,
   PrepareBunnyUploadResponse,
+  StudioContentListResponse,
   StudioCreatePostPayload,
   StudioCreatePostResponse,
   StudioDashboardResponse,
+  StudioPostsListResponse,
   StudioUploadShortPayload,
   StudioUploadShortResponse,
   StudioUploadVideoPayload,
   StudioUploadVideoResponse,
   StudioVideosListResponse,
+  UpdateVideoMetadataPayload,
+  UpdateVideoResponse,
+  UpdateVisibilityPayload,
 } from '../types';
 import { apiClient } from './base-client';
 
@@ -39,9 +47,10 @@ export const studioClient = {
 
   /**
    * Get list of creator's videos
+   * @deprecated Use videoClient.list() with creator_id filter instead
    */
   getVideos: async (page = 1): Promise<StudioVideosListResponse> => {
-    const data = await apiClient.get<ApiResponse<StudioVideosListResponse>>('/studio/videos', {
+    const data = await apiClient.get<ApiResponse<StudioVideosListResponse>>('/videos', {
       params: { page } as Record<string, unknown>,
     });
     return data.data;
@@ -49,9 +58,21 @@ export const studioClient = {
 
   /**
    * Get list of creator's shorts
+   * @deprecated Use videoClient.list() with creator_id and short=true filters instead
    */
   getShorts: async (page = 1): Promise<StudioVideosListResponse> => {
     const data = await apiClient.get<ApiResponse<StudioVideosListResponse>>('/studio/shorts', {
+      params: { page } as Record<string, unknown>,
+    });
+    return data.data;
+  },
+
+  /**
+   * Get list of creator's posts
+   * @deprecated Use creatorsClient.getPosts() with channel ID instead
+   */
+  getPosts: async (page = 1): Promise<StudioPostsListResponse> => {
+    const data = await apiClient.get<ApiResponse<StudioPostsListResponse>>('/studio/posts', {
       params: { page } as Record<string, unknown>,
     });
     return data.data;
@@ -169,6 +190,14 @@ export const studioClient = {
   },
 
   /**
+   * Delete a post
+   */
+  deletePost: async (postId: number): Promise<{ success: boolean }> => {
+    const data = await apiClient.delete<{ success: boolean }>(`/posts/${postId}`);
+    return data;
+  },
+
+  /**
    * Prepare a video upload and get TUS credentials
    * This bypasses the server action 2MB body limit by only sending metadata
    * The actual video file is uploaded directly to Bunny via TUS
@@ -181,5 +210,55 @@ export const studioClient = {
       payload
     );
     return data;
+  },
+
+  /**
+   * Update video metadata (title, description, tags, etc.)
+   */
+  updateVideoMetadata: async (
+    videoId: number,
+    payload: UpdateVideoMetadataPayload
+  ): Promise<UpdateVideoResponse> => {
+    const data = await apiClient.patch<UpdateVideoResponse>(`/studio/videos/${videoId}`, payload);
+    return data;
+  },
+
+  /**
+   * Update video visibility
+   */
+  updateVideoVisibility: async (
+    videoId: number,
+    payload: UpdateVisibilityPayload
+  ): Promise<UpdateVideoResponse> => {
+    const data = await apiClient.patch<UpdateVideoResponse>(
+      `/studio/videos/${videoId}/visibility`,
+      payload
+    );
+    return data;
+  },
+
+  /**
+   * Update short visibility
+   */
+  updateShortVisibility: async (
+    videoId: number,
+    payload: UpdateVisibilityPayload
+  ): Promise<UpdateVideoResponse> => {
+    const data = await apiClient.patch<UpdateVideoResponse>(
+      `/studio/shorts/${videoId}/visibility`,
+      payload
+    );
+    return data;
+  },
+
+  /**
+   * Get content list for content management hub
+   */
+  getContent: async (type: 'video' | 'short', page = 1): Promise<StudioContentListResponse> => {
+    const endpoint = type === 'short' ? '/studio/shorts' : '/studio/videos';
+    const data = await apiClient.get<ApiResponse<StudioContentListResponse>>(endpoint, {
+      params: { page } as Record<string, unknown>,
+    });
+    return data.data;
   },
 };
