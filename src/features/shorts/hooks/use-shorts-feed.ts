@@ -12,11 +12,11 @@
  * - Seeds detail query cache for reactive updates
  */
 
-import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useMemo, useCallback, useEffect } from 'react';
 import { shortsClient } from '@/api/client/shorts.client';
 import { queryKeys } from '@/api/query-keys';
-import type { ShortVideo, PaginatedResponse } from '@/api/types';
+import type { PaginatedResponse, ShortVideo } from '@/api/types';
+import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useCallback, useEffect, useMemo } from 'react';
 
 interface UseShortsFeedOptions {
   /**
@@ -65,7 +65,6 @@ export function useShortsFeed(options: UseShortsFeedOptions = {}): UseShortsFeed
   const { initialUuid, perPage = 10 } = options;
   const queryClient = useQueryClient();
 
-  // Fetch initial short when deep linking
   const {
     data: initialShort,
     isLoading: isLoadingInitial,
@@ -109,35 +108,28 @@ export function useShortsFeed(options: UseShortsFeedOptions = {}): UseShortsFeed
     getNextPageParam: (lastPage: PaginatedResponse<ShortVideo>) =>
       lastPage.current_page < lastPage.last_page ? lastPage.current_page + 1 : undefined,
     initialPageParam: 1,
-    staleTime: 1000 * 60 * 10, // 10 minutes
-    gcTime: 1000 * 60 * 30, // 30 minutes
+    staleTime: 1000 * 60 * 10,
+    gcTime: 1000 * 60 * 30,
     enabled: feedEnabled,
   });
 
-  // Merge initial short with feed, deduplicating
   const { shorts, initialIndex } = useMemo(() => {
     const feedShorts = feedPages?.pages.flatMap((p) => p.data) ?? [];
 
-    // Only include initial short if it was successfully fetched
     if (initialShort && initialSuccess) {
-      // Check if initial short is already in the feed
       const existingIndex = feedShorts.findIndex((s) => s.uuid === initialShort.uuid);
 
       if (existingIndex === -1) {
-        // Initial short not in feed - prepend it
         return {
           shorts: [initialShort as ShortVideo, ...feedShorts],
           initialIndex: 0,
         };
       } else if (existingIndex === 0) {
-        // Initial short is already first - use feed as-is
         return {
           shorts: feedShorts,
           initialIndex: 0,
         };
       } else {
-        // Initial short is in feed but not first - reorder
-        // Remove from current position and prepend
         const reordered = [
           initialShort as ShortVideo,
           ...feedShorts.filter((s) => s.uuid !== initialShort.uuid),
@@ -149,28 +141,24 @@ export function useShortsFeed(options: UseShortsFeedOptions = {}): UseShortsFeed
       }
     }
 
-    // No initial short or initial failed - just use feed
     return {
       shorts: feedShorts,
       initialIndex: 0,
     };
   }, [feedPages, initialShort, initialSuccess]);
 
-  // Seed detail query cache for each short to enable reactive updates
   useEffect(() => {
     shorts.forEach((short) => {
       queryClient.setQueryData(queryKeys.shorts.detail(short.uuid), short);
     });
   }, [shorts, queryClient]);
 
-  // Wrapper for fetchNextPage that handles edge cases
   const fetchNextPage = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) {
       fetchNextPageRaw();
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPageRaw]);
 
-  // Refetch all data
   const refetch = useCallback(() => {
     if (initialUuid) {
       queryClient.invalidateQueries({ queryKey: queryKeys.shorts.detail(initialUuid) });
@@ -178,13 +166,10 @@ export function useShortsFeed(options: UseShortsFeedOptions = {}): UseShortsFeed
     refetchFeed();
   }, [initialUuid, refetchFeed, queryClient]);
 
-  // Combined loading state - loading if either is loading initially
   const isLoading = isLoadingInitial || (isLoadingFeed && !feedFetched);
 
-  // Combined error
   const error = (initialError as Error | null) || (feedError as Error | null);
 
-  // Has fetched - true when we have data
   const hasFetched = feedFetched || (!!initialUuid && initialFetched);
 
   return {

@@ -22,7 +22,6 @@ export function ShortsFeedContainer({ initialUuid }: ShortsFeedContainerProps) {
   const { isAuthenticated } = useAuthStore();
   const { setShowComments } = useShortsStore();
 
-  // Data fetching - reuse existing API layer
   const {
     shorts,
     initialIndex,
@@ -36,7 +35,6 @@ export function ShortsFeedContainer({ initialUuid }: ShortsFeedContainerProps) {
     refetch,
   } = useShortsFeed(initialUuid ? { initialUuid } : {});
 
-  // Core navigation - NEW hook (translated from Vue)
   const {
     currentIndex,
     transform,
@@ -49,21 +47,18 @@ export function ShortsFeedContainer({ initialUuid }: ShortsFeedContainerProps) {
     itemCount: shorts.length,
     initialIndex,
     onIndexChange: (index) => {
-      // Preload more when near end
       if (index >= shorts.length - 3 && hasNextPage && !isFetchingNextPage) {
         fetchNextPage();
       }
     },
   });
 
-  // URL synchronization - NEW simplified hook
   useShortsUrlSync({
     shorts,
     currentIndex,
     enabled: !isLoading && shorts.length > 0,
   });
 
-  // Keyboard shortcuts - NEW dedicated hook
   useShortsKeyboard({
     currentUuid: shorts[currentIndex]?.uuid,
     goToNext,
@@ -71,22 +66,18 @@ export function ShortsFeedContainer({ initialUuid }: ShortsFeedContainerProps) {
     enabled: !isLoading && shorts.length > 0,
   });
 
-  // Close comments when switching videos
   useEffect(() => {
     setShowComments(false);
   }, [currentIndex, setShowComments]);
 
-  // Windowing: only render visible slides + buffer (like React Native FlatList)
   const windowedSlides = useMemo(() => {
     if (shorts.length === 0) return { slides: [], startSpacer: 0, endSpacer: 0 };
 
-    // Calculate visible range: prev, current, next, next+1 (buffer of 2 ahead)
     const bufferBefore = 1;
     const bufferAfter = 2;
     const startIndex = Math.max(0, currentIndex - bufferBefore);
     const endIndex = Math.min(shorts.length - 1, currentIndex + bufferAfter);
 
-    // Get slides in visible range
     const visibleSlides = shorts.slice(startIndex, endIndex + 1).map((video, relativeIndex) => ({
       video,
       index: startIndex + relativeIndex,
@@ -99,7 +90,6 @@ export function ShortsFeedContainer({ initialUuid }: ShortsFeedContainerProps) {
     };
   }, [shorts, currentIndex]);
 
-  // Loading state
   if (isLoading && shorts.length === 0) {
     return (
       <div className="fixed top-14 left-0 right-0 bottom-0 bg-black flex items-center justify-center z-30 lg:left-[72px]">
@@ -111,13 +101,9 @@ export function ShortsFeedContainer({ initialUuid }: ShortsFeedContainerProps) {
     );
   }
 
-  // Deep link error - specific short not found but we have other shorts to show
   if (initialError && initialUuid && shorts.length > 0) {
-    // Show a toast notification but continue with the feed
-    // The user can browse other available shorts
   }
 
-  // Deep link error - specific short not found and no other shorts available
   if (initialError && initialUuid && shorts.length === 0 && hasFetched) {
     return (
       <div className="fixed top-14 left-0 right-0 bottom-0 bg-black flex flex-col items-center justify-center gap-4 z-30 lg:left-[72px]">
@@ -136,7 +122,6 @@ export function ShortsFeedContainer({ initialUuid }: ShortsFeedContainerProps) {
     );
   }
 
-  // Error state
   if (error && shorts.length === 0) {
     return (
       <div className="fixed top-14 left-0 right-0 bottom-0 bg-black flex flex-col items-center justify-center gap-4 z-30 lg:left-[72px]">
@@ -168,7 +153,6 @@ export function ShortsFeedContainer({ initialUuid }: ShortsFeedContainerProps) {
     );
   }
 
-  // Empty state
   if (shorts.length === 0 && hasFetched) {
     return (
       <div className="fixed top-14 left-0 right-0 bottom-0 bg-black flex flex-col items-center justify-center gap-4 z-30 lg:left-[72px]">
@@ -207,9 +191,7 @@ export function ShortsFeedContainer({ initialUuid }: ShortsFeedContainerProps) {
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
       {...containerProps}
     >
-      {/* Posts wrapper with CSS transform */}
       <div className="shorts-posts-wrapper" style={{ transform }}>
-        {/* Spacer for slides before visible window */}
         {windowedSlides.startSpacer > 0 && (
           <div
             className="short-slide-spacer"
@@ -218,7 +200,6 @@ export function ShortsFeedContainer({ initialUuid }: ShortsFeedContainerProps) {
           />
         )}
 
-        {/* Render only visible slides + buffer */}
         {windowedSlides.slides.map(({ video, index }) => (
           <ShortSlide
             key={video.uuid}
@@ -229,7 +210,6 @@ export function ShortsFeedContainer({ initialUuid }: ShortsFeedContainerProps) {
           />
         ))}
 
-        {/* Spacer for slides after visible window */}
         {windowedSlides.endSpacer > 0 && (
           <div
             className="short-slide-spacer"
@@ -239,7 +219,6 @@ export function ShortsFeedContainer({ initialUuid }: ShortsFeedContainerProps) {
         )}
       </div>
 
-      {/* Navigation buttons - Desktop only */}
       <ShortsNavigation
         onPrevious={goToPrevious}
         onNext={goToNext}
@@ -247,7 +226,6 @@ export function ShortsFeedContainer({ initialUuid }: ShortsFeedContainerProps) {
         canGoNext={currentIndex < shorts.length - 1}
       />
 
-      {/* Loading more indicator */}
       {isFetchingNextPage && (
         <div className="shorts-loading-more">
           <Loader2 className="w-6 h-6 text-white animate-spin" />
