@@ -415,8 +415,10 @@
    Base Styles
    ============================================ */
 
-html {
-  scroll-behavior: smooth;
+@media (prefers-reduced-motion: no-preference) {
+  html:focus-within {
+    scroll-behavior: smooth;
+  }
 }
 
 body {
@@ -3388,4 +3390,15 @@ section:has(.vertical-series-card:hover) {
 [data-slot='sidebar-gap'],
 [data-slot='sidebar-separator'] {
   border: none !important;
+}
+
+/* ============================================
+   Performance Optimizations
+   ============================================ */
+
+/* Content visibility optimization for playlist rails
+   Improves rendering performance by skipping layout for off-screen content */
+.playlist-rail {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 280px; /* Match approximate rail height */
 }
