@@ -21,6 +21,8 @@ export interface Comment {
   replies?: Comment[];
   created_at: string;
   updated_at: string;
+  /** Flag for optimistic (pending) comments */
+  _optimistic?: boolean;
 }
 
 export interface CommentsResponse {

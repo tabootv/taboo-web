@@ -151,26 +151,6 @@ export function useToggleBookmark() {
   });
 }
 
-export function useAddComment() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({
-      videoId,
-      content,
-      parentId,
-    }: {
-      videoId: string | number;
-      content: string;
-      parentId?: number;
-    }) => videoClient.addComment(videoId, content, parentId),
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.videos.comments(variables.videoId) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.videos.detail(variables.videoId) });
-    },
-  });
-}
-
 /**
  * Hook to toggle autoplay preference with optimistic update
  */
