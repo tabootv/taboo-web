@@ -287,6 +287,113 @@ return (
 
 ---
 
+## Comments API Reference
+
+TabooTV has three distinct comment systems:
+- **Video Comments** - Long-form videos (cursor-based pagination)
+- **Short Video Comments** - Shorts (page-based pagination)
+- **Post Comments** - Community posts (includes like/dislike counts)
+
+### Video Comments
+
+**List Comments:**
+```http
+GET /api/videos/{video:uuid}/comments-list?cursor={cursor}
+```
+Returns cursor-paginated comments (20 per page) with nested replies.
+
+**Create Comment:**
+```http
+POST /api/videos/{video:uuid}/comment
+Content-Type: application/json
+
+{ "content": "Comment text", "parent_id": null }
+```
+- `content`: Required, 1-1500 characters
+- `parent_id`: Optional, for replies
+
+**Delete Comment:**
+```http
+DELETE /api/videos/{comment:uuid}/delete
+```
+Users can only delete their own comments.
+
+**Like/Dislike Toggle:**
+```http
+POST /api/comments/{comment:uuid}/like-toggle
+POST /api/comments/{comment:uuid}/dislike-toggle
+```
+Toggle state transitions: No interaction ↔ Liked ↔ Disliked
+
+### Short Video Comments
+
+**List Comments:**
+```http
+GET /api/v2/shorts/{uuid}/comments?page=1&per_page=20
+```
+Uses page-based pagination. Max 3 replies loaded per comment.
+
+For create/like/delete, use the standard video comment endpoints (shorts share the Comment model).
+
+### Post Comments
+
+**List Comments:**
+```http
+GET /api/post-comments/posts/{post}
+```
+Returns comments with `likes_count`, `dislikes_count`, `replies_count`.
+
+**Create Comment:**
+```http
+POST /api/post-comments/posts/{post}
+{ "content": "Comment text", "parent_id": null }
+```
+- `parent_id` must reference a top-level comment (nested replies not allowed)
+
+**Get Replies:**
+```http
+GET /api/post-comments/{postComment}/replies
+```
+
+**Like/Dislike Toggle:**
+```http
+POST /api/post-comments/{postComment}/like-toggle
+POST /api/post-comments/{postComment}/dislike-toggle
+```
+
+**Delete Comment:**
+```http
+DELETE /api/post-comments/{postComment:uuid}/delete
+```
+
+### Comment TypeScript Interfaces
+
+```typescript
+interface VideoComment {
+  id: number;
+  uuid: string;
+  content: string;
+  parent_id: number | null;
+  user_id: number;
+  video_id: number;
+  is_creator: boolean;
+  has_liked: boolean;
+  has_disliked: boolean;
+  created_at: string;  // Human-readable: "2 hours ago"
+  user: UserResource;
+  replies?: VideoComment[];
+}
+
+interface PostComment extends VideoComment {
+  post_id: number;
+  replies_count: number;
+  likes_count: number;
+  dislikes_count: number;
+}
+```
+
+---
+
 ## Reference
 
 - **Query hooks:** `src/api/queries/*.queries.ts`

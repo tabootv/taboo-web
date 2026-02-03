@@ -199,3 +199,142 @@ Common errors:
 - `src/app/studio/upload/_hooks/use-upload-progress.ts` - TUS progress hook
 - `src/app/studio/upload/_actions.ts` - Server actions
 - `src/api/client/studio.client.ts` - API client methods
+
+---
+
+## Video Management
+
+### Video Listing (Creator's Own)
+
+**Endpoint:** `GET /contents/videos` (Web, Inertia)
+
+Returns all videos owned by authenticated user, including drafts and processing videos.
+- Includes drafts, processing, and published
+- Only long-form videos (`short = false`)
+- Ordered by newest first (50 per page)
+
+### Update Video
+
+**Endpoint:** `PUT /contents/video/{video}/edit`
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `title` | string | **Yes** | Video title |
+| `description` | string | **Yes** | Video description |
+| `country` | integer | **Yes** | Country ID |
+| `published` | boolean | **Yes** | Publish status |
+| `thumbnail` | file | No | New thumbnail image |
+| `tags` | array | No | Array of tag IDs |
+| `is_adult_content` | boolean | No | Sensitive content flag |
+| `publish_mode` | string | No | `none`, `auto`, or `scheduled` |
+| `scheduled_at` | datetime | No | Required if `publish_mode=scheduled` |
+
+### Delete Video
+
+**Endpoint:** `DELETE /contents/video/{video}/delete`
+
+Authorization: User must own the video. Returns error "You are not the owner of this video" if unauthorized.
+
+---
+
+## Bunny Processing Status
+
+Videos uploaded to Bunny.net are processed automatically. The backend tracks status via webhooks.
+
+### Status Codes
+
+| Status | Code | Description | Playable? |
+|--------|------|-------------|-----------|
+| Queued | 0 | Waiting for processing | No |
+| Processing | 1 | Analyzing video | No |
+| Encoding | 2 | Encoding in progress | No |
+| **Finished** | **3** | All resolutions complete | **Yes** |
+| **Resolution Finished** | **4** | At least one resolution ready | **Yes** |
+| Failed | 5 | Processing failed | No |
+| PresignedUploadStarted | 6 | TUS upload started | No |
+| PresignedUploadFinished | 7 | TUS upload completed | No |
+| PresignedUploadFailed | 8 | TUS upload failed | No |
+| CaptionsGenerated | 9 | AI captions generated | Yes |
+
+### Video Lifecycle
+
+```
+DRAFT → UPLOADING → PROCESSING → PLAYABLE (4) → READY (3) → PUBLISHED
+```
+
+- **Status 4 (Resolution Finished):** At least one resolution complete, video can start playing
+- **Status 3 (Finished):** All resolutions encoded, S3 backup dispatched
+
+### Database Fields
+
+```typescript
+interface VideoProcessingFields {
+  bunny_status: number;              // 0-10 status code
+  bunny_encode_progress: number;     // 0-100 percentage
+  bunny_available_resolutions: string; // "360p,720p,1080p"
+  bunny_hls_url: string;             // HLS playlist URL
+  processing: boolean;               // true while processing
+}
+```
+
+---
+
+## Posts Upload
+
+### Create Post
+
+**Endpoint:** `POST /api/posts/`
+
+Creates a community post with optional media.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `caption` | string | **Yes** | Post text content |
+| `post_image` | file[] | No | Multiple images allowed |
+| `post_audio` | file[] | No | Audio files (max 10MB, m4a/aac) |
+| `location` | string | No | Location name |
+| `latitude` | numeric | No | Location latitude |
+| `longitude` | numeric | No | Location longitude |
+
+**Authorization:** User must have a channel (creator status).
+
+**Media Handling:**
+- **Images:** Converted to WebP (quality: 90), stored in S3
+- **Audio:** Stored directly, formats: `audio/mp4`, `audio/x-m4a`, `audio/aac`
+
+**Response:**
+```json
+{
+  "status": true,
+  "data": {
+    "post": {
+      "id": 123,
+      "caption": "Post content",
+      "likes_count": 0,
+      "comments_count": 0,
+      "post_image": ["https://cloudfront-signed-url..."],
+      "post_audio": false
+    }
+  },
+  "message": "Post created successfully"
+}
+```
+
+---
+
+## Chunked Upload (Legacy)
+
+The legacy chunked upload system is available as fallback. Files are split into 7MB chunks.
+
+### Flow
+
+1. **Initialize:** `POST /temp_media/get-uuid` → Returns `media_uuid`
+2. **Upload Chunks:** `POST /temp_media/upload` with `media_uuid`, `index`, `chunk`
+3. **Check Status:** `GET /temp_media/{uuid}/status` → `merge_status`: pending|processing|completed|failed
+4. **Store Video:** `POST /contents/videos/store` with `video: media_uuid`
+5. **Cancel:** `DELETE /temp_media/{uuid}` (optional)
+
+### Chunk Configuration
+- Chunk size: 7MB
+- Parallel uploads: 5 concurrent
+- Retry: 3 attempts with exponential backoff
