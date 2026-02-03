@@ -56,6 +56,10 @@ interface UseShortsFeedReturn {
   refetch: () => void;
   /** Whether we have any data loaded */
   hasFetched: boolean;
+  /** Whether the initial short has been merged (or no merge needed) */
+  isInitialMerged: boolean;
+  /** Whether ready for URL sync (initial short at position 0 or no initial needed) */
+  isReadyForUrlSync: boolean;
 }
 
 /**
@@ -84,14 +88,16 @@ export function useShortsFeed(options: UseShortsFeedOptions = {}): UseShortsFeed
       return result;
     },
     enabled: !!initialUuid,
-    staleTime: 1000 * 60 * 30, // 30 minutes
+    staleTime: 0, // Always fetch fresh data on deep link navigation
     gcTime: 1000 * 60 * 60, // 1 hour
+    refetchOnMount: 'always', // Force network request on each navigation
   });
 
   // Fetch paginated feed
   // Start immediately if no initialUuid, or wait for initial to succeed
   // If initial fails, we still load the feed so user can browse other shorts
-  const feedEnabled = !initialUuid || initialFetched;
+  // Require initialSuccess to prevent cached feed data from rendering before fresh initial short arrives
+  const feedEnabled = !initialUuid || (initialFetched && initialSuccess);
 
   const {
     data: feedPages,
@@ -147,6 +153,15 @@ export function useShortsFeed(options: UseShortsFeedOptions = {}): UseShortsFeed
     };
   }, [feedPages, initialShort, initialSuccess]);
 
+  // True only when initial short is validated at position 0 (or no initial needed)
+  // This prevents URL sync from activating before the merge is ACTUALLY complete
+  const isReadyForUrlSync = useMemo(() => {
+    if (!initialUuid) return true; // No deep link, ready immediately
+    if (!initialSuccess) return false; // Still loading initial
+    if (shorts.length === 0) return false; // No shorts yet
+    return shorts[0]?.uuid === initialUuid; // Validate merge is correct
+  }, [initialUuid, initialSuccess, shorts]);
+
   useEffect(() => {
     shorts.forEach((short) => {
       queryClient.setQueryData(queryKeys.shorts.detail(short.uuid), short);
@@ -172,6 +187,9 @@ export function useShortsFeed(options: UseShortsFeedOptions = {}): UseShortsFeed
 
   const hasFetched = feedFetched || (!!initialUuid && initialFetched);
 
+  // True when initial short has been merged OR no initial short was requested
+  const isInitialMerged = !initialUuid || initialSuccess;
+
   return {
     shorts,
     initialIndex,
@@ -185,5 +203,7 @@ export function useShortsFeed(options: UseShortsFeedOptions = {}): UseShortsFeed
     fetchNextPage,
     refetch,
     hasFetched,
+    isInitialMerged,
+    isReadyForUrlSync,
   };
 }

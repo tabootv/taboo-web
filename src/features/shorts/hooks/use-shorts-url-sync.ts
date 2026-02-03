@@ -10,6 +10,8 @@ export interface UseShortsUrlSyncOptions {
   currentIndex: number;
   /** Whether URL sync is enabled */
   enabled: boolean;
+  /** Initial UUID from deep link (for validation) */
+  initialUuid?: string | undefined;
 }
 
 /**
@@ -22,15 +24,37 @@ export interface UseShortsUrlSyncOptions {
  * - Emits 'shorts:navigate' event for external navigation
  * - Skips first update if already on correct deep link path
  */
-export function useShortsUrlSync({ shorts, currentIndex, enabled }: UseShortsUrlSyncOptions) {
+export function useShortsUrlSync({
+  shorts,
+  currentIndex,
+  enabled,
+  initialUuid,
+}: UseShortsUrlSyncOptions) {
   const previousUuidRef = useRef<string | null>(null);
   const isFirstUpdateRef = useRef(true);
+  const prevInitialUuidRef = useRef(initialUuid);
+
+  // Reset refs when initialUuid changes (for navigation between deep links)
+  useEffect(() => {
+    if (prevInitialUuidRef.current !== initialUuid) {
+      isFirstUpdateRef.current = true;
+      previousUuidRef.current = null;
+      prevInitialUuidRef.current = initialUuid;
+    }
+  }, [initialUuid]);
 
   // Update URL when index changes
   useEffect(() => {
     if (!enabled || shorts.length === 0) return;
 
     const currentUuid = shorts[currentIndex]?.uuid;
+
+    // Safety guard: if we're supposed to show a specific initial short but it's not at position 0,
+    // don't update the URL - the merge hasn't completed correctly yet
+    if (initialUuid && currentIndex === 0 && shorts[0]?.uuid !== initialUuid) {
+      return;
+    }
+
     if (currentUuid && currentUuid !== previousUuidRef.current) {
       // On first update, check if URL already matches the current short
       // This prevents overwriting the deep link URL during initial load
@@ -51,7 +75,7 @@ export function useShortsUrlSync({ shorts, currentIndex, enabled }: UseShortsUrl
       );
       previousUuidRef.current = currentUuid;
     }
-  }, [currentIndex, shorts, enabled]);
+  }, [currentIndex, shorts, enabled, initialUuid]);
 
   // Handle browser back/forward navigation
   useEffect(() => {

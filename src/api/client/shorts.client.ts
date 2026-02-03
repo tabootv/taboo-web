@@ -3,14 +3,13 @@
  *
  * API Endpoints:
  * - GET /v2/shorts → PaginatedResponse<ShortVideo>
- * - GET /v2/shorts/{uuid} → ShortVideo
+ * - GET /v2/shorts/{uuid} → { videos: PaginatedResponse<ShortVideo> }
  * - GET /v2/shorts/{uuid}/comments → PaginatedResponse<Comment>
  * - POST /videos/{uuid}/like-toggle → LikeResponse
  * - POST /v2/shorts/{uuid}/toggle-bookmark → BookmarkResponse
  */
 
 import type {
-  ApiResponse,
   BookmarkResponse,
   Comment,
   LikeResponse,
@@ -23,6 +22,13 @@ export interface ShortsListFilters extends Record<string, unknown> {
   page?: number;
   per_page?: number;
   creator?: number;
+}
+
+interface ShortDetailApiResponse {
+  message?: string;
+  videos?: PaginatedResponse<ShortVideo>;
+  video?: ShortVideo;
+  data?: ShortVideo;
 }
 
 export const shortsClient = {
@@ -113,8 +119,24 @@ export const shortsClient = {
    */
   get: async (uuid: string): Promise<ShortVideo | null> => {
     try {
-      const data = await apiClient.get<ApiResponse<ShortVideo>>(`/v2/shorts/${uuid}`);
-      return data.data;
+      const data = await apiClient.get<ShortDetailApiResponse>(`/v2/shorts/${uuid}`);
+
+      // Primary: paginated response { videos: { data: [ShortVideo] } }
+      if (data.videos?.data?.[0]) {
+        return data.videos.data[0];
+      }
+
+      // Fallback: direct video property
+      if (data.video) {
+        return data.video;
+      }
+
+      // Fallback: ApiResponse<ShortVideo> format
+      if (data.data && typeof data.data === 'object' && 'uuid' in data.data) {
+        return data.data as ShortVideo;
+      }
+
+      return null;
     } catch {
       return null;
     }

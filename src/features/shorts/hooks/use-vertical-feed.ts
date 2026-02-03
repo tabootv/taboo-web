@@ -281,6 +281,9 @@ export function useVerticalFeed({
         });
       } else if (initialIndexChanged) {
         // Initial index changed (e.g., new deep link) - apply it
+        // Reset scroll state to allow immediate index update without debounce blocking
+        isScrollingRef.current = false;
+        setIsTransitioning(false);
         lastInitialIndexRef.current = initialIndex;
         setCurrentIndex((prevIndex) => {
           return prevIndex !== initialIndex ? initialIndex : prevIndex;

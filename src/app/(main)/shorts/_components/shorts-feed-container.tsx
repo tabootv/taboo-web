@@ -9,7 +9,7 @@ import { useShortsStore } from '@/shared/stores/shorts-store';
 import { Loader2, LogIn, Video } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ShortSlide } from './short-slide';
 import { ShortsNavigation } from './shorts-navigation';
 
@@ -22,6 +22,12 @@ export function ShortsFeedContainer({ initialUuid }: ShortsFeedContainerProps) {
   const { isAuthenticated } = useAuthStore();
   const { setShowComments } = useShortsStore();
 
+  // Hydration guard: prevent URL sync during SSR/hydration mismatch
+  const [isHydrated, setIsHydrated] = useState(false);
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
   const {
     shorts,
     initialIndex,
@@ -33,6 +39,7 @@ export function ShortsFeedContainer({ initialUuid }: ShortsFeedContainerProps) {
     initialError,
     hasFetched,
     refetch,
+    isReadyForUrlSync,
   } = useShortsFeed(initialUuid ? { initialUuid } : {});
 
   const {
@@ -56,7 +63,8 @@ export function ShortsFeedContainer({ initialUuid }: ShortsFeedContainerProps) {
   useShortsUrlSync({
     shorts,
     currentIndex,
-    enabled: !isLoading && shorts.length > 0,
+    enabled: !isLoading && shorts.length > 0 && isReadyForUrlSync && isHydrated,
+    initialUuid,
   });
 
   useShortsKeyboard({
@@ -101,7 +109,16 @@ export function ShortsFeedContainer({ initialUuid }: ShortsFeedContainerProps) {
     );
   }
 
-  if (initialError && initialUuid && shorts.length > 0) {
+  // Still merging initial short - show loading to prevent flash of wrong content
+  if (initialUuid && !isReadyForUrlSync && !initialError) {
+    return (
+      <div className="fixed top-14 left-0 right-0 bottom-0 bg-black flex items-center justify-center z-30 lg:left-[72px]">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-10 h-10 text-red-primary animate-spin" />
+          <p className="text-white/60 text-sm">Loading shorts...</p>
+        </div>
+      </div>
+    );
   }
 
   if (initialError && initialUuid && shorts.length === 0 && hasFetched) {
