@@ -2,7 +2,7 @@
  * Series API Client
  *
  * API Endpoints:
- * - GET /home/series → Series[]
+ * - GET /series → { message, series[], pagination }
  * - GET /series/{id}/trailer → Series
  * - GET /series/{uuid}/play → { video, videos, series }
  */
@@ -10,67 +10,75 @@
 import type { PaginatedResponse, Series, Video } from '../types';
 import { apiClient } from './base-client';
 
+export interface SeriesListFilters {
+  page?: number;
+  sort_by?: string;
+  channel_id?: number;
+  per_page?: number;
+  category_ids?: number[];
+}
+
 export const seriesClient = {
-  list: async (params?: {
-    page?: number;
-    sort_by?: string;
-    category_ids?: number[];
-  }): Promise<Series[]> => {
-    const data = await apiClient.get<{ series?: { data?: Series[] } | Series[] }>(
-      '/home/series',
-      params ? { params } : undefined
-    );
-    const seriesData = data.series;
-    if (Array.isArray(seriesData)) return seriesData;
-    if (typeof seriesData === 'object' && seriesData !== null && 'data' in seriesData) {
-      return Array.isArray(seriesData.data) ? seriesData.data : [];
-    }
-    return [];
-  },
+  list: async (filters?: SeriesListFilters): Promise<PaginatedResponse<Series>> => {
+    const params: Record<string, unknown> = {};
+    if (filters?.page) params.page = filters.page;
+    if (filters?.sort_by) params.sort_by = filters.sort_by;
+    if (filters?.channel_id) params.channel_id = filters.channel_id;
+    if (filters?.per_page) params.per_page = filters.per_page;
+    if (filters?.category_ids) params.category_ids = filters.category_ids;
 
-  getAll: async (page = 1, perPage = 12): Promise<PaginatedResponse<Series>> => {
-    const data = await apiClient.get<{ series?: PaginatedResponse<Series> | Series[] }>(
-      '/home/series',
-      {
-        params: { page, per_page: perPage },
-      }
-    );
+    const data = await apiClient.get<{
+      message?: string;
+      series?: Series[];
+      pagination?: { total: number; per_page: number; current_page: number; last_page: number };
+    }>('/series', Object.keys(params).length > 0 ? { params } : undefined);
 
-    const seriesResponse = data.series;
+    const seriesArray = data.series || [];
+    const pagination = data.pagination;
 
-    if (seriesResponse && 'data' in seriesResponse && Array.isArray(seriesResponse.data)) {
-      return {
-        data: seriesResponse.data,
-        current_page: seriesResponse.current_page || page,
-        last_page: seriesResponse.last_page || 1,
-        per_page: seriesResponse.per_page || perPage,
-        total: seriesResponse.total || 0,
-        first_page_url: seriesResponse.first_page_url || '',
-        from: seriesResponse.from || null,
-        last_page_url: seriesResponse.last_page_url || '',
-        links: seriesResponse.links || [],
-        next_page_url: seriesResponse.next_page_url || null,
-        path: seriesResponse.path || '',
-        prev_page_url: seriesResponse.prev_page_url || null,
-        to: seriesResponse.to || null,
-      };
-    }
-
-    const seriesArray = Array.isArray(seriesResponse) ? seriesResponse : [];
     return {
       data: seriesArray,
-      current_page: 1,
-      last_page: 1,
-      per_page: perPage,
-      total: seriesArray.length,
+      current_page: pagination?.current_page || filters?.page || 1,
+      last_page: pagination?.last_page || 1,
+      per_page: pagination?.per_page || filters?.per_page || 30,
+      total: pagination?.total || seriesArray.length,
       first_page_url: '',
-      from: null,
+      from: seriesArray.length > 0 ? 1 : null,
       last_page_url: '',
       links: [],
       next_page_url: null,
       path: '',
       prev_page_url: null,
-      to: null,
+      to: seriesArray.length > 0 ? seriesArray.length : null,
+    };
+  },
+
+  getAll: async (page = 1, perPage = 12): Promise<PaginatedResponse<Series>> => {
+    const data = await apiClient.get<{
+      message?: string;
+      series?: Series[];
+      pagination?: { total: number; per_page: number; current_page: number; last_page: number };
+    }>('/series', {
+      params: { page, per_page: perPage },
+    });
+
+    const seriesArray = data.series || [];
+    const pagination = data.pagination;
+
+    return {
+      data: seriesArray,
+      current_page: pagination?.current_page || page,
+      last_page: pagination?.last_page || 1,
+      per_page: pagination?.per_page || perPage,
+      total: pagination?.total || seriesArray.length,
+      first_page_url: '',
+      from: seriesArray.length > 0 ? 1 : null,
+      last_page_url: '',
+      links: [],
+      next_page_url: null,
+      path: '',
+      prev_page_url: null,
+      to: seriesArray.length > 0 ? seriesArray.length : null,
     };
   },
 

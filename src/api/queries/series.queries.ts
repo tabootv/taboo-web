@@ -4,22 +4,36 @@
  * TanStack Query hooks for series-related data fetching
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import type { SeriesListFilters } from '../client/series.client';
 import { seriesClient } from '../client/series.client';
 import { queryKeys } from '../query-keys';
 
 /**
  * Hook to fetch list of series
  */
-export function useSeriesList(params?: {
-  page?: number;
-  sort_by?: string;
-  category_ids?: number[];
-}) {
+export function useSeriesList(params?: SeriesListFilters) {
   return useQuery({
-    queryKey: queryKeys.series.list(params),
+    queryKey: queryKeys.series.list(params as Record<string, unknown>),
     queryFn: () => seriesClient.list(params),
     staleTime: 1000 * 60 * 10, // 10 minutes
+  });
+}
+
+/**
+ * Hook to fetch series with infinite scroll
+ *
+ * Stale time: 10 minutes
+ */
+export function useSeriesListInfinite(filters?: SeriesListFilters) {
+  return useInfiniteQuery({
+    queryKey: [...queryKeys.series.list(filters as Record<string, unknown>), 'infinite'],
+    queryFn: ({ pageParam = 1 }) => seriesClient.list({ ...filters, page: pageParam }),
+    getNextPageParam: (lastPage) =>
+      lastPage.current_page < lastPage.last_page ? lastPage.current_page + 1 : undefined,
+    initialPageParam: 1,
+    staleTime: 1000 * 60 * 10, // 10 minutes
+    gcTime: 1000 * 60 * 30, // 30 minutes
   });
 }
 
