@@ -1,6 +1,10 @@
 'use client';
 
 import { useCallback, useState } from 'react';
+import {
+  getBufferConfigForSpeed,
+  RESILIENT_SPEED_CHANGE_CONFIG,
+} from '../../../constants/player-constants';
 import type { QualityTrack, ShakaPlayerInstance } from '../types';
 
 interface UseQualityManagementReturn {
@@ -13,7 +17,11 @@ interface UseQualityManagementReturn {
     quality: QualityTrack | null,
     shakaRef: React.RefObject<ShakaPlayerInstance | null>
   ) => void;
-  changePlaybackSpeed: (speed: number, videoRef: React.RefObject<HTMLVideoElement | null>) => void;
+  changePlaybackSpeed: (
+    speed: number,
+    videoRef: React.RefObject<HTMLVideoElement | null>,
+    shakaRef: React.RefObject<ShakaPlayerInstance | null>
+  ) => void;
 }
 
 export function useQualityManagement(): UseQualityManagementReturn {
@@ -74,10 +82,48 @@ export function useQualityManagement(): UseQualityManagementReturn {
   );
 
   const changePlaybackSpeed = useCallback(
-    (speed: number, videoRef: React.RefObject<HTMLVideoElement | null>) => {
-      if (!videoRef.current) return;
-      videoRef.current.playbackRate = speed;
-      setPlaybackSpeed(speed);
+    (
+      speed: number,
+      videoRef: React.RefObject<HTMLVideoElement | null>,
+      shakaRef: React.RefObject<ShakaPlayerInstance | null>
+    ) => {
+      const video = videoRef.current;
+      const player = shakaRef.current;
+      if (!video) return;
+
+      const bufferConfig = getBufferConfigForSpeed(speed);
+
+      // Configure Shaka Player buffer BEFORE changing rate
+      // Higher speeds consume buffer faster, so we need larger buffers
+      if (player) {
+        // Apply larger rebuffering goal during speed change to prevent freezing
+        const rebufferingGoal = Math.max(
+          bufferConfig.rebufferingGoal,
+          RESILIENT_SPEED_CHANGE_CONFIG.REBUFFERING_GOAL_ON_SPEED_CHANGE
+        );
+
+        player.configure({
+          streaming: {
+            bufferingGoal: bufferConfig.bufferingGoal,
+            rebufferingGoal,
+          },
+        });
+      }
+
+      // Store current time for "Flush & Seek"
+      const currentTime = video.currentTime;
+
+      // Change playback rate
+      video.playbackRate = speed;
+
+      // Perform micro-seek to force Shaka to re-anchor the stream
+      // This prevents freezing on videos with poorly positioned MOOV atoms
+      requestAnimationFrame(() => {
+        video.currentTime = currentTime + RESILIENT_SPEED_CHANGE_CONFIG.FLUSH_SEEK_OFFSET;
+      });
+
+      // Update state outside render loop to avoid potential race conditions
+      queueMicrotask(() => setPlaybackSpeed(speed));
     },
     []
   );

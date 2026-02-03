@@ -13,6 +13,7 @@ interface VideoPlayerProps {
   onProgress?: (progress: number) => void;
   onEnded?: () => void;
   className?: string;
+  isBunnyVideo?: boolean | undefined;
 }
 
 export function VideoPlayer({
@@ -26,6 +27,7 @@ export function VideoPlayer({
   onProgress,
   onEnded,
   className = '',
+  isBunnyVideo = false,
 }: VideoPlayerProps) {
   // Determine the best source URL: prefer HLS, then highest quality MP4
   const src = hls_url || url_1440 || url_1080 || url_720 || url_480;
@@ -48,6 +50,7 @@ export function VideoPlayer({
       onProgress={onProgress}
       onEnded={onEnded}
       className={className}
+      isBunnyVideo={isBunnyVideo}
     />
   );
 }

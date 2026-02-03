@@ -94,6 +94,7 @@ export default function ShowVideoPage({ params }: { params: Promise<{ id: string
             url_720={video.url_720 ?? null}
             url_480={video.url_480 ?? null}
             className="w-full h-full"
+            isBunnyVideo={video.is_bunny_video}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">

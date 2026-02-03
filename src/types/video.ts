@@ -40,6 +40,7 @@ export interface Video {
   url_480?: string;
   url_hls?: string;
   hls_url?: string;
+  is_bunny_video?: boolean;
   humans_publish_at?: string;
   channel: Channel;
   series_id?: number;

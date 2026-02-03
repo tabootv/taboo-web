@@ -27,6 +27,7 @@ interface ShakaPlayerProps {
   onSeek?: ((time: number) => void) | undefined;
   onEnded?: (() => void) | undefined;
   className?: string | undefined;
+  isBunnyVideo?: boolean | undefined;
 }
 
 export function ShakaPlayer({
@@ -40,6 +41,7 @@ export function ShakaPlayer({
   onSeek,
   onEnded,
   className = '',
+  isBunnyVideo = false,
 }: ShakaPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const previewVideoRef = useRef<HTMLVideoElement>(null);
@@ -153,9 +155,9 @@ export function ShakaPlayer({
 
   const handleChangePlaybackSpeed = useCallback(
     (speed: number) => {
-      changePlaybackSpeed(speed, videoRef);
+      changePlaybackSpeed(speed, videoRef, shakaRef);
     },
-    [changePlaybackSpeed, videoRef]
+    [changePlaybackSpeed, videoRef, shakaRef]
   );
 
   const playVideoByThumbnail = useCallback(() => {
@@ -310,6 +312,7 @@ export function ShakaPlayer({
           previewImage={previewImage}
           thumbnail={thumbnail}
           progressRef={progressRef}
+          isBunnyVideo={isBunnyVideo}
           togglePlay={togglePlay}
           toggleMute={toggleMute}
           toggleFullscreen={toggleFullscreen}

@@ -145,6 +145,7 @@ export default function CoursePlayerPage({
                 url_480={currentVideo.url_480 || null}
                 autoplay={autoplayEnabled}
                 onEnded={handleVideoEnded}
+                isBunnyVideo={currentVideo.is_bunny_video}
               />
             </div>
 

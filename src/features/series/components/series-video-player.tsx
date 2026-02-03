@@ -43,6 +43,7 @@ export function SeriesVideoPlayer({
         url_480={currentVideo.url_480 || null}
         autoplay={shouldAutoplay}
         onEnded={onEnded}
+        isBunnyVideo={currentVideo.is_bunny_video}
       />
       {showUpNext && nextVideo && (
         <UpNextOverlay

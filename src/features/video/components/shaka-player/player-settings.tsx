@@ -15,6 +15,7 @@ interface PlayerSettingsProps {
   selectedQuality: QualityTrack | null;
   isAutoQuality: boolean;
   playbackSpeed: number;
+  isBunnyVideo?: boolean | undefined;
   onSelectQuality: (quality: QualityTrack | null) => void;
   onChangePlaybackSpeed: (speed: number) => void;
 }
@@ -28,6 +29,7 @@ export function PlayerSettings({
   selectedQuality,
   isAutoQuality,
   playbackSpeed,
+  isBunnyVideo,
   onSelectQuality,
   onChangePlaybackSpeed,
 }: PlayerSettingsProps) {
@@ -68,18 +70,20 @@ export function PlayerSettings({
                 </div>
               </button>
             )}
-            <button
-              onClick={() => setSettingsPanel('speed')}
-              className="w-full px-4 py-3 flex items-center justify-between hover:bg-white/10 transition-colors"
-            >
-              <span className="text-white text-sm">Playback speed</span>
-              <div className="flex items-center gap-2 text-white/70">
-                <span className="text-sm">
-                  {playbackSpeed === 1 ? 'Normal' : `${playbackSpeed}x`}
-                </span>
-                <ChevronRight className="w-4 h-4" />
-              </div>
-            </button>
+            {isBunnyVideo && (
+              <button
+                onClick={() => setSettingsPanel('speed')}
+                className="w-full px-4 py-3 flex items-center justify-between hover:bg-white/10 transition-colors"
+              >
+                <span className="text-white text-sm">Playback speed</span>
+                <div className="flex items-center gap-2 text-white/70">
+                  <span className="text-sm">
+                    {playbackSpeed === 1 ? 'Normal' : `${playbackSpeed}x`}
+                  </span>
+                  <ChevronRight className="w-4 h-4" />
+                </div>
+              </button>
+            )}
           </div>
         )}
 

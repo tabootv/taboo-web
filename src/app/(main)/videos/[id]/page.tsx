@@ -265,6 +265,7 @@ export default function VideoPage() {
                 url_480={video.url_480 || null}
                 autoplay={autoplayEnabled}
                 onEnded={handleVideoEnded}
+                isBunnyVideo={video.is_bunny_video}
               />
             </div>
 

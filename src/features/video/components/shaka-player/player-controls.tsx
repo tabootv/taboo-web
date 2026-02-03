@@ -38,6 +38,7 @@ interface PlayerControlsProps {
   seekPreview: SeekPreviewType | null;
   previewImage: string | null;
   thumbnail?: string | undefined;
+  isBunnyVideo?: boolean | undefined;
 
   progressRef: React.RefObject<HTMLDivElement | null>;
 
@@ -72,6 +73,7 @@ export function PlayerControls({
   seekPreview,
   previewImage,
   thumbnail,
+  isBunnyVideo,
   progressRef,
   togglePlay,
   toggleMute,
@@ -222,38 +224,42 @@ export function PlayerControls({
           </div>
 
           <div className="flex items-center gap-1">
-            <div className="relative">
-              <button
-                onClick={() => {
-                  setShowSettings(!showSettings);
-                  setSettingsPanel('main');
-                }}
-                className={cn(
-                  'p-2 text-white hover:bg-white/10 rounded-lg transition-all',
-                  showSettings && 'bg-white/10'
-                )}
-              >
-                <Settings
+            {/* Only show settings button if there are options (quality or speed) */}
+            {(availableQualities.length > 0 || isBunnyVideo) && (
+              <div className="relative">
+                <button
+                  onClick={() => {
+                    setShowSettings(!showSettings);
+                    setSettingsPanel('main');
+                  }}
                   className={cn(
-                    'w-5 h-5 transition-transform duration-300',
-                    showSettings && 'rotate-90'
+                    'p-2 text-white hover:bg-white/10 rounded-lg transition-all',
+                    showSettings && 'bg-white/10'
                   )}
-                />
-              </button>
+                >
+                  <Settings
+                    className={cn(
+                      'w-5 h-5 transition-transform duration-300',
+                      showSettings && 'rotate-90'
+                    )}
+                  />
+                </button>
 
-              <PlayerSettings
-                showSettings={showSettings}
-                settingsPanel={settingsPanel}
-                setSettingsPanel={setSettingsPanel}
-                setShowSettings={setShowSettings}
-                availableQualities={availableQualities}
-                selectedQuality={selectedQuality}
-                isAutoQuality={isAutoQuality}
-                playbackSpeed={playbackSpeed}
-                onSelectQuality={onSelectQuality}
-                onChangePlaybackSpeed={onChangePlaybackSpeed}
-              />
-            </div>
+                <PlayerSettings
+                  showSettings={showSettings}
+                  settingsPanel={settingsPanel}
+                  setSettingsPanel={setSettingsPanel}
+                  setShowSettings={setShowSettings}
+                  availableQualities={availableQualities}
+                  selectedQuality={selectedQuality}
+                  isAutoQuality={isAutoQuality}
+                  playbackSpeed={playbackSpeed}
+                  isBunnyVideo={isBunnyVideo}
+                  onSelectQuality={onSelectQuality}
+                  onChangePlaybackSpeed={onChangePlaybackSpeed}
+                />
+              </div>
+            )}
 
             {isPiPSupported && (
               <button

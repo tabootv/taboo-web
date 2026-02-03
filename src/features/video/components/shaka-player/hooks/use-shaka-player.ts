@@ -1,7 +1,11 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { PLAYER_CONFIG, STORAGE_KEYS } from '../../../constants/player-constants';
+import {
+  PLAYER_CONFIG,
+  STALL_RECOVERY_CONFIG,
+  STORAGE_KEYS,
+} from '../../../constants/player-constants';
 import type { ShakaModule, ShakaPlayerInstance } from '../types';
 
 const VOLUME_STORAGE_KEY = STORAGE_KEYS.VOLUME;
@@ -275,10 +279,23 @@ export function useShakaPlayer({
     [previewVideoRef, isPreviewReady]
   );
 
-  // Video event listeners
+  // Video event listeners with stall detection and recovery
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
+
+    // Stall detection state
+    let stallCheckInterval: ReturnType<typeof setInterval> | null = null;
+    let lastPlaybackPosition = 0;
+    let stallStartTime: number | null = null;
+    let recoveryAttempts = 0;
+
+    const clearStallInterval = () => {
+      if (stallCheckInterval) {
+        clearInterval(stallCheckInterval);
+        stallCheckInterval = null;
+      }
+    };
 
     const handlePlay = () => {
       setIsPlaying(true);
@@ -300,11 +317,64 @@ export function useShakaPlayer({
         setBuffered((video.buffered.end(video.buffered.length - 1) / video.duration) * 100);
       }
     };
-    const handleWaiting = () => setIsBuffering(true);
-    const handleCanPlay = () => setIsBuffering(false);
+
+    const handleWaiting = () => {
+      setIsBuffering(true);
+      stallStartTime = Date.now();
+
+      // Start monitoring for extended stalls
+      if (!stallCheckInterval) {
+        stallCheckInterval = setInterval(() => {
+          if (video.paused || video.ended) {
+            clearStallInterval();
+            return;
+          }
+
+          const currentPosition = video.currentTime;
+          if (currentPosition === lastPlaybackPosition && stallStartTime) {
+            const stallDuration = Date.now() - stallStartTime;
+            if (
+              stallDuration > STALL_RECOVERY_CONFIG.STALL_DETECTION_THRESHOLD_MS &&
+              recoveryAttempts < STALL_RECOVERY_CONFIG.MAX_RECOVERY_ATTEMPTS
+            ) {
+              // Recovery: small seek to force buffer refresh
+              console.warn(
+                `[ShakaPlayer] Extended stall detected (${stallDuration}ms), attempting recovery ${recoveryAttempts + 1}/${STALL_RECOVERY_CONFIG.MAX_RECOVERY_ATTEMPTS}`
+              );
+              video.currentTime = currentPosition + STALL_RECOVERY_CONFIG.RECOVERY_SEEK_OFFSET;
+              recoveryAttempts++;
+              stallStartTime = Date.now(); // Reset stall timer after recovery attempt
+            }
+          }
+          lastPlaybackPosition = currentPosition;
+        }, STALL_RECOVERY_CONFIG.STALL_CHECK_INTERVAL_MS);
+      }
+    };
+
+    const handleCanPlay = () => {
+      setIsBuffering(false);
+      stallStartTime = null;
+      recoveryAttempts = 0;
+      clearStallInterval();
+    };
+
     const handleEnded = () => {
       setIsPlaying(false);
+      clearStallInterval();
       onEnded?.();
+    };
+
+    const handleStalled = () => {
+      // 'stalled' event fires when the browser is trying to fetch data but none is available
+      // Start monitoring if not already
+      if (!stallStartTime) {
+        stallStartTime = Date.now();
+      }
+    };
+
+    const handleRateChange = () => {
+      // Reset recovery attempts when rate changes, as buffer config should have been updated
+      recoveryAttempts = 0;
     };
 
     video.addEventListener('play', handlePlay);
@@ -315,6 +385,8 @@ export function useShakaPlayer({
     video.addEventListener('waiting', handleWaiting);
     video.addEventListener('canplay', handleCanPlay);
     video.addEventListener('ended', handleEnded);
+    video.addEventListener('stalled', handleStalled);
+    video.addEventListener('ratechange', handleRateChange);
     video.addEventListener('enterpictureinpicture', onEnterPiP);
     video.addEventListener('leavepictureinpicture', onLeavePiP);
 
@@ -327,8 +399,11 @@ export function useShakaPlayer({
       video.removeEventListener('waiting', handleWaiting);
       video.removeEventListener('canplay', handleCanPlay);
       video.removeEventListener('ended', handleEnded);
+      video.removeEventListener('stalled', handleStalled);
+      video.removeEventListener('ratechange', handleRateChange);
       video.removeEventListener('enterpictureinpicture', onEnterPiP);
       video.removeEventListener('leavepictureinpicture', onLeavePiP);
+      clearStallInterval();
     };
   }, [videoRef, onProgress, onPlay, onPause, onEnded, onEnterPiP, onLeavePiP]);
 
