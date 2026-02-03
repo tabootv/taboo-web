@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import type { Video } from '@/types';
 import { MediaPreviewModal } from './media-preview-modal';
-import { PlaylistRail } from './PlaylistRail';
+import { PlaylistRail } from './playlist-rail';
 import { usePlaylistsPagination } from './hooks/use-playlists-pagination';
 import { usePlaylistVideos } from './hooks/use-playlist-videos';
 

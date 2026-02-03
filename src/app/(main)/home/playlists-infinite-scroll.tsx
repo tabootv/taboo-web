@@ -1,24 +1,16 @@
 'use client';
 
 import { playlistsClient as playlistsApi } from '@/api/client/playlists.client';
+import { useHomePlaylistsInfinite } from '@/api/queries/home.queries';
 import { MediaPreviewModal } from './_components/media-preview-modal';
-import { RailCard } from './_components/rail-card';
-import { RailRow } from './_components/rail-row';
-import type { HomePageData } from '@/shared/lib/api/home-data';
+import { PlaylistRail, type PlaylistWithVideos } from './_components/playlist-rail';
 import type { Playlist, Video } from '@/types';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { AlertCircle, RefreshCw } from 'lucide-react';
 
 // ============================================
 // Types
 // ============================================
-
-interface PlaylistWithVideos extends Omit<Playlist, 'videos'> {
-  videos: { data: Video[] };
-  _videosLoaded: boolean;
-  videos_current_page: number;
-  videos_last_page: number | null;
-  videos_loading: boolean;
-}
 
 interface PlaylistsInfiniteScrollProps {
   initialPlaylists: Playlist[];
@@ -27,35 +19,97 @@ interface PlaylistsInfiniteScrollProps {
   onLastPageReached?: (isLast: boolean) => void;
 }
 
+// ============================================
+// Error Retry Component
+// ============================================
+
+interface ErrorRetryProps {
+  message: string;
+  onRetry: () => void;
+}
+
+function ErrorRetry({ message, onRetry }: ErrorRetryProps) {
+  return (
+    <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
+      <AlertCircle className="w-10 h-10 text-red-400 mb-3" />
+      <p className="text-text-secondary mb-4">{message}</p>
+      <button
+        onClick={onRetry}
+        className="flex items-center gap-2 px-4 py-2 bg-surface hover:bg-surface-hover rounded-lg text-white transition-colors"
+      >
+        <RefreshCw className="w-4 h-4" />
+        Try Again
+      </button>
+    </div>
+  );
+}
+
+// ============================================
+// Main Component
+// ============================================
+
 export function PlaylistsInfiniteScroll({
   initialPlaylists,
   initialCursor,
   isInitialLastPage,
   onLastPageReached,
 }: PlaylistsInfiniteScrollProps) {
-  const hasInitialData = initialPlaylists && initialPlaylists.length > 0;
+  // TanStack Query for playlists pagination
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isError, refetch } =
+    useHomePlaylistsInfinite({
+      initialPlaylists,
+      initialCursor,
+      isInitialLastPage,
+    });
 
-  const [playlistsList, setPlaylistsList] = useState<PlaylistWithVideos[]>(() =>
-    initialPlaylists.map((p) => ({
-      ...p,
-      videos: { data: (p.videos as unknown as { data: Video[] })?.data || [] },
-      _videosLoaded: Boolean((p.videos as unknown as { data: Video[] })?.data?.length),
-      videos_current_page: 1,
-      videos_last_page: null,
-      videos_loading: false,
-    }))
-  );
+  // Local state for video loading within playlists
+  const [playlistVideosState, setPlaylistVideosState] = useState<
+    Map<number, { currentPage: number; lastPage: number | null; loading: boolean; videos: Video[] }>
+  >(() => new Map());
 
-  const [cursor, setCursor] = useState<number | null>(hasInitialData ? initialCursor : 1);
-  const [isLastPage, setIsLastPage] = useState(hasInitialData ? isInitialLastPage : false);
-  const [isLoading, setIsLoading] = useState(!hasInitialData);
-  const didInitialFetch = useRef(hasInitialData);
   const [previewVideo, setPreviewVideo] = useState<Video | null>(null);
 
+  // Refs for intersection observers
   const sentinelRef = useRef<HTMLDivElement>(null);
-  const observerRef = useRef<IntersectionObserver | null>(null);
-  const isLoadingRef = useRef(false);
-  const playlistObserversRef = useRef<Map<number, IntersectionObserver>>(new Map());
+  const mainObserverRef = useRef<IntersectionObserver | null>(null);
+  const playlistObserverRef = useRef<IntersectionObserver | null>(null);
+  const loadedPlaylistIds = useRef(new Set<number>());
+
+  // ============================================
+  // Derived Data
+  // ============================================
+
+  // Transform query data into the format needed for rendering
+  const pages = data?.pages;
+  const playlistsList = useMemo<PlaylistWithVideos[]>(() => {
+    if (!pages) return [];
+
+    const allPlaylists: PlaylistWithVideos[] = [];
+    const seenIds = new Set<number>();
+
+    for (const page of pages) {
+      for (const p of page.playlists) {
+        if (seenIds.has(p.id)) continue;
+        seenIds.add(p.id);
+
+        const videosData = (p.videos as unknown as { data: Video[] })?.data || [];
+        const localState = playlistVideosState.get(p.id);
+
+        allPlaylists.push({
+          ...p,
+          videos: { data: localState?.videos ?? videosData },
+          _videosLoaded: Boolean(videosData.length > 0) || Boolean(localState?.videos?.length),
+          videos_current_page: localState?.currentPage ?? 1,
+          videos_last_page: localState?.lastPage ?? null,
+          videos_loading: localState?.loading ?? false,
+        });
+      }
+    }
+
+    return allPlaylists;
+  }, [pages, playlistVideosState]);
+
+  const isLastPage = !hasNextPage;
 
   // ============================================
   // Handlers
@@ -69,114 +123,89 @@ export function PlaylistsInfiniteScroll({
     setPreviewVideo(null);
   }, []);
 
-  const loadMorePlaylists = useCallback(async () => {
-    // Guards
-    if (isLoadingRef.current) return;
-    if (isLastPage) return;
-    if (cursor === null) return;
+  const fetchPlaylistVideos = useCallback(
+    async (playlistId: number, page = 1) => {
+      // Check if already loading
+      const currentState = playlistVideosState.get(playlistId);
+      if (currentState?.loading) return;
 
-    isLoadingRef.current = true;
-    setIsLoading(true);
-
-    try {
-      const response = await fetch(`/api/home/playlists?cursor=${cursor ?? ''}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch playlists');
-      }
-      const result: HomePageData = await response.json();
-
-      const newPlaylists: PlaylistWithVideos[] = result.playlists.map((p) => ({
-        ...p,
-        videos: { data: (p.videos as unknown as { data: Video[] })?.data || [] },
-        _videosLoaded: Boolean((p.videos as unknown as { data: Video[] })?.data?.length),
-        videos_current_page: 1,
-        videos_last_page: null,
-        videos_loading: false,
-      }));
-
-      setPlaylistsList((prev) => {
-        const existingIds = new Set(prev.map((p) => p.id));
-        const uniqueNew = newPlaylists.filter((p) => !existingIds.has(p.id));
-        return [...prev, ...uniqueNew];
+      setPlaylistVideosState((prev) => {
+        const newMap = new Map(prev);
+        const existing = newMap.get(playlistId);
+        newMap.set(playlistId, {
+          currentPage: existing?.currentPage ?? 1,
+          lastPage: existing?.lastPage ?? null,
+          loading: true,
+          videos: existing?.videos ?? [],
+        });
+        return newMap;
       });
 
-      setCursor(result.nextCursor);
-      setIsLastPage(result.isLastPage);
-    } catch (error) {
-      console.error('Error loading more playlists:', error);
-    } finally {
-      setIsLoading(false);
-      isLoadingRef.current = false;
-    }
-  }, [cursor, isLastPage]);
+      try {
+        const response = await playlistsApi.get(playlistId, page);
+        const videosData = response.videos?.data || [];
 
-  const fetchPlaylistVideos = useCallback(async (playlist: PlaylistWithVideos, page = 1) => {
-    if (!playlist || playlist.videos_loading) return;
+        setPlaylistVideosState((prev) => {
+          const newMap = new Map(prev);
+          const existing = newMap.get(playlistId);
+          newMap.set(playlistId, {
+            currentPage: response.videos?.current_page || page,
+            lastPage: response.videos?.last_page || null,
+            loading: false,
+            videos: page === 1 ? videosData : [...(existing?.videos ?? []), ...videosData],
+          });
+          return newMap;
+        });
+      } catch {
+        setPlaylistVideosState((prev) => {
+          const newMap = new Map(prev);
+          const existing = newMap.get(playlistId);
+          if (existing) {
+            newMap.set(playlistId, { ...existing, loading: false });
+          }
+          return newMap;
+        });
+      }
+    },
+    [playlistVideosState]
+  );
 
-    setPlaylistsList((prev) =>
-      prev.map((p) => (p.id === playlist.id ? { ...p, videos_loading: true } : p))
-    );
-
-    try {
-      const response = await playlistsApi.get(playlist.id, page);
-      const videosData = response.videos?.data || [];
-
-      setPlaylistsList((prev) =>
-        prev.map((p) => {
-          if (p.id !== playlist.id) return p;
-          return {
-            ...p,
-            videos: {
-              data: page === 1 ? videosData : [...p.videos.data, ...videosData],
-            },
-            videos_current_page: response.videos?.current_page || page,
-            videos_last_page: response.videos?.last_page || null,
-            _videosLoaded: true,
-            videos_loading: false,
-          };
-        })
-      );
-    } catch {
-      setPlaylistsList((prev) =>
-        prev.map((p) => (p.id === playlist.id ? { ...p, videos_loading: false } : p))
-      );
-    }
-  }, []);
+  const handleLoadMoreVideos = useCallback(
+    (playlist: PlaylistWithVideos) => {
+      if (
+        playlist.videos_current_page < (playlist.videos_last_page || 0) &&
+        !playlist.videos_loading
+      ) {
+        fetchPlaylistVideos(playlist.id, playlist.videos_current_page + 1);
+      }
+    },
+    [fetchPlaylistVideos]
+  );
 
   // ============================================
-  // Observers
+  // Effects
   // ============================================
 
+  // Notify parent when last page is reached
   useEffect(() => {
     onLastPageReached?.(isLastPage);
   }, [isLastPage, onLastPageReached]);
 
-  // Initial fetch if no server data was provided
-  useEffect(() => {
-    if (didInitialFetch.current) return;
-    didInitialFetch.current = true;
-
-    // Fetch initial playlists
-    loadMorePlaylists();
-  }, [loadMorePlaylists]);
-
   // Main sentinel observer for loading more playlists
   useEffect(() => {
-    // Cleanup previous observer
-    if (observerRef.current) {
-      observerRef.current.disconnect();
+    if (mainObserverRef.current) {
+      mainObserverRef.current.disconnect();
     }
 
-    // Don't observe if we're done
-    if (isLastPage || cursor === null) return;
+    if (isLastPage || !hasNextPage) return;
 
     const sentinel = sentinelRef.current;
     if (!sentinel) return;
 
-    observerRef.current = new IntersectionObserver(
+    mainObserverRef.current = new IntersectionObserver(
       (entries) => {
-        if (entries[0]?.isIntersecting && !isLoadingRef.current) {
-          loadMorePlaylists();
+        if (entries[0]?.isIntersecting && !isFetchingNextPage) {
+          fetchNextPage();
         }
       },
       {
@@ -186,59 +215,59 @@ export function PlaylistsInfiniteScroll({
       }
     );
 
-    observerRef.current.observe(sentinel);
+    mainObserverRef.current.observe(sentinel);
 
     return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
+      mainObserverRef.current?.disconnect();
     };
-  }, [isLastPage, cursor, loadMorePlaylists]);
+  }, [isLastPage, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  // Register observer for individual playlist to lazy-load its videos
-  const registerPlaylistObserver = useCallback(
-    (el: HTMLDivElement | null, playlistId: number) => {
-      if (!el || !playlistId) return;
+  // Single observer for lazy-loading playlist videos
+  // Uses data-playlist-id attribute to avoid stale closure issues
+  useEffect(() => {
+    if (playlistObserverRef.current) {
+      playlistObserverRef.current.disconnect();
+    }
 
-      // Already has observer
-      if (playlistObserversRef.current.has(playlistId)) return;
-
-      const playlist = playlistsList.find((p) => p.id === playlistId);
-      if (!playlist || playlist._videosLoaded) return;
-
-      const obs = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              const currentPlaylist = playlistsList.find((p) => p.id === playlistId);
-              if (currentPlaylist && !currentPlaylist._videosLoaded) {
-                fetchPlaylistVideos(currentPlaylist);
+    playlistObserverRef.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const playlistId = Number((entry.target as HTMLElement).dataset.playlistId);
+            if (playlistId && !loadedPlaylistIds.current.has(playlistId)) {
+              // Find the playlist in current data
+              const playlist = playlistsList.find((p) => p.id === playlistId);
+              if (playlist && !playlist._videosLoaded) {
+                loadedPlaylistIds.current.add(playlistId);
+                fetchPlaylistVideos(playlistId);
               }
-              obs.unobserve(entry.target);
-              playlistObserversRef.current.delete(playlistId);
             }
-          });
-        },
-        {
-          root: null,
-          rootMargin: '200px',
-          threshold: 0.1,
-        }
-      );
+          }
+        });
+      },
+      {
+        root: null,
+        rootMargin: '200px',
+        threshold: 0.1,
+      }
+    );
 
-      obs.observe(el);
-      playlistObserversRef.current.set(playlistId, obs);
-    },
-    [playlistsList, fetchPlaylistVideos]
-  );
+    // Observe all playlist containers
+    const containers = document.querySelectorAll('[data-playlist-id]');
+    containers.forEach((el) => {
+      playlistObserverRef.current?.observe(el);
+    });
 
-  // Cleanup observers on unmount
+    return () => {
+      playlistObserverRef.current?.disconnect();
+    };
+  }, [playlistsList, fetchPlaylistVideos]);
+
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
-      playlistObserversRef.current.forEach((obs) => obs.disconnect());
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
+      mainObserverRef.current?.disconnect();
+      playlistObserverRef.current?.disconnect();
     };
   }, []);
 
@@ -246,7 +275,7 @@ export function PlaylistsInfiniteScroll({
   // Render
   // ============================================
 
-  if (playlistsList.length === 0 && !isLoading) {
+  if (playlistsList.length === 0 && !isFetchingNextPage && !isError) {
     return null;
   }
 
@@ -254,33 +283,25 @@ export function PlaylistsInfiniteScroll({
     <>
       <div className="flex flex-col gap-6 md:gap-8 lg:gap-10">
         {playlistsList.map((playlist) => (
-          <div
-            key={playlist.id}
-            ref={(el) => registerPlaylistObserver(el, playlist.id)}
-            data-playlist-id={playlist.id}
-          >
+          <div key={playlist.id} data-playlist-id={playlist.id}>
             <PlaylistRail
               playlist={playlist}
               onOpenPreview={handleOpenPreview}
-              onLoadMore={() => {
-                if (
-                  playlist.videos_current_page < (playlist.videos_last_page || 0) &&
-                  !playlist.videos_loading
-                ) {
-                  fetchPlaylistVideos(playlist, playlist.videos_current_page + 1);
-                }
-              }}
+              onLoadMore={() => handleLoadMoreVideos(playlist)}
             />
           </div>
         ))}
 
+        {/* Error state */}
+        {isError && <ErrorRetry message="Failed to load playlists" onRetry={() => refetch()} />}
+
         {/* Loading indicator */}
-        {isLoading && (
+        {isFetchingNextPage && (
           <div className="text-center py-6 text-text-secondary">Loading more playlists...</div>
         )}
 
-        {/* Sentinel for infinite scroll - only rendered if not on last page */}
-        {!isLastPage && cursor !== null && (
+        {/* Sentinel for infinite scroll */}
+        {hasNextPage && (
           <div
             ref={sentinelRef}
             className="h-10 opacity-0 pointer-events-none"
@@ -292,81 +313,5 @@ export function PlaylistsInfiniteScroll({
       {/* Preview Modal */}
       <MediaPreviewModal video={previewVideo} onClose={handleClosePreview} />
     </>
-  );
-}
-
-// ============================================
-// Playlist Rail Component
-// ============================================
-
-interface PlaylistRailProps {
-  playlist: PlaylistWithVideos;
-  onOpenPreview: (video: Video) => void;
-  onLoadMore: () => void;
-}
-
-function PlaylistRail({ playlist, onOpenPreview, onLoadMore }: PlaylistRailProps) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  // Trigger load more when reaching end of rail
-  const handleScroll = useCallback(() => {
-    if (scrollRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-      if (scrollLeft >= scrollWidth - clientWidth - 100) {
-        onLoadMore();
-      }
-    }
-  }, [onLoadMore]);
-
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (el) {
-      el.addEventListener('scroll', handleScroll, { passive: true });
-      return () => el.removeEventListener('scroll', handleScroll);
-    }
-    return undefined;
-  }, [handleScroll]);
-
-  // Skeleton while videos are loading
-  if (!playlist._videosLoaded) {
-    return (
-      <section className="relative">
-        <div className="flex items-center mb-4">
-          <div className="h-7 w-48 bg-surface rounded animate-pulse" />
-        </div>
-        <div className="flex gap-4 overflow-hidden">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="flex-shrink-0 w-[200px] md:w-[280px]">
-              <div className="aspect-video rounded-lg bg-surface animate-pulse" />
-              <div className="w-3/4 h-4 bg-surface rounded animate-pulse mt-2" />
-              <div className="w-1/2 h-3 bg-surface rounded animate-pulse mt-2" />
-            </div>
-          ))}
-        </div>
-      </section>
-    );
-  }
-
-  // Empty playlist
-  if (playlist.videos.data.length === 0) {
-    return null;
-  }
-
-  return (
-    <RailRow title={playlist.description || playlist.name || 'Playlist'}>
-      {playlist.videos.data.map((video, index) => (
-        <RailCard
-          key={video.uuid || video.id}
-          video={video}
-          onOpenPreview={onOpenPreview}
-          priority={index < 4}
-        />
-      ))}
-      {playlist.videos_loading && (
-        <div className="flex-shrink-0 w-[200px] md:w-[280px] flex items-center justify-center">
-          <div className="text-sm text-text-secondary">Loading...</div>
-        </div>
-      )}
-    </RailRow>
   );
 }

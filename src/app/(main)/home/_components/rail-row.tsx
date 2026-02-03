@@ -2,7 +2,7 @@
 
 import { cn } from '@/shared/utils/formatting';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 
 interface RailRowProps {
   title: string;
@@ -16,7 +16,7 @@ interface RailRowProps {
   gap?: number;
 }
 
-export function RailRow({
+export const RailRow = memo(function RailRow({
   title,
   href,
   children,
@@ -197,4 +197,4 @@ export function RailRow({
       `}</style>
     </section>
   );
-}
+});

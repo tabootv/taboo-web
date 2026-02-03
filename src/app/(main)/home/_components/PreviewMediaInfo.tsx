@@ -1,7 +1,10 @@
 /**
  * Media information display component for preview modal
+ *
+ * Wrapped with React.memo to prevent unnecessary re-renders
  */
 
+import { memo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Plus, Check, Clock, Eye, Heart, ChevronDown } from 'lucide-react';
@@ -22,7 +25,7 @@ interface PreviewMediaInfoProps {
   onToggleDescription: () => void;
 }
 
-export function PreviewMediaInfo({
+export const PreviewMediaInfo = memo(function PreviewMediaInfo({
   video,
   saved,
   showFullDescription,
@@ -153,4 +156,4 @@ export function PreviewMediaInfo({
       )}
     </div>
   );
-}
+});

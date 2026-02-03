@@ -6,7 +6,7 @@ import type { Video } from '@/types';
 import { Check, Clock, Play, Plus } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 interface RailCardProps {
   video: Video;
@@ -49,9 +49,14 @@ export const RailCard = memo(function RailCard({
 
   const thumbnail = video.thumbnail_webp || video.thumbnail || video.card_thumbnail;
   const previewUrl = video.url_480 || video.url_720;
-  const isNew =
-    video.published_at &&
-    new Date(video.published_at).getTime() > Date.now() - 7 * 24 * 60 * 60 * 1000;
+
+  // Memoize the "new" calculation to avoid recalculating on every render
+  const isNew = useMemo(() => {
+    if (!video.published_at) return false;
+    const publishedTime = new Date(video.published_at).getTime();
+    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    return publishedTime > sevenDaysAgo;
+  }, [video.published_at]);
 
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true);

@@ -1,13 +1,18 @@
 /**
  * Individual playlist rail component
+ *
+ * Wrapped with React.memo to prevent unnecessary re-renders
+ * when parent state changes but playlist data remains the same.
  */
 
-import { useRef, useEffect, useCallback } from 'react';
+'use client';
+
+import { memo, useRef, useEffect, useCallback } from 'react';
 import { RailRow } from './rail-row';
 import { RailCard } from './rail-card';
 import type { Video } from '@/types';
 
-interface PlaylistWithVideos {
+export interface PlaylistWithVideos {
   id: number;
   name?: string;
   description?: string;
@@ -24,7 +29,11 @@ interface PlaylistRailProps {
   onLoadMore: () => void;
 }
 
-export function PlaylistRail({ playlist, onOpenPreview, onLoadMore }: PlaylistRailProps) {
+export const PlaylistRail = memo(function PlaylistRail({
+  playlist,
+  onOpenPreview,
+  onLoadMore,
+}: PlaylistRailProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Trigger load more when reaching end
@@ -48,7 +57,7 @@ export function PlaylistRail({ playlist, onOpenPreview, onLoadMore }: PlaylistRa
 
   if (!playlist._videosLoaded) {
     return (
-      <section className="relative">
+      <section className="relative playlist-rail">
         <div className="flex items-center mb-4">
           <div className="h-7 w-48 bg-surface rounded animate-pulse" />
         </div>
@@ -70,21 +79,23 @@ export function PlaylistRail({ playlist, onOpenPreview, onLoadMore }: PlaylistRa
   }
 
   return (
-    <RailRow title={playlist.description || playlist.name || 'Playlist'}>
-      {playlist.videos.data.map((video, index) => (
-        <RailCard
-          key={video.uuid || video.id}
-          video={video}
-          onOpenPreview={onOpenPreview}
-          showDate
-          priority={index < 4}
-        />
-      ))}
-      {playlist.videos_loading && (
-        <div className="flex-shrink-0 w-[200px] md:w-[280px] flex items-center justify-center">
-          <div className="text-sm text-text-secondary">Loading...</div>
-        </div>
-      )}
-    </RailRow>
+    <section className="playlist-rail">
+      <RailRow title={playlist.description || playlist.name || 'Playlist'}>
+        {playlist.videos.data.map((video, index) => (
+          <RailCard
+            key={video.uuid || video.id}
+            video={video}
+            onOpenPreview={onOpenPreview}
+            showDate
+            priority={index < 4}
+          />
+        ))}
+        {playlist.videos_loading && (
+          <div className="flex-shrink-0 w-[200px] md:w-[280px] flex items-center justify-center">
+            <div className="text-sm text-text-secondary">Loading...</div>
+          </div>
+        )}
+      </RailRow>
+    </section>
   );
-}
+});

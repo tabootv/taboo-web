@@ -96,6 +96,7 @@ export const queryKeys = {
     courses: () => [...queryKeys.home.all, 'courses'] as const,
     creators: () => [...queryKeys.home.all, 'creators'] as const,
     data: (cursor?: string | null) => [...queryKeys.home.all, 'data', cursor] as const,
+    playlists: () => [...queryKeys.home.all, 'playlists'] as const,
   },
   notifications: {
     all: ['notifications'] as const,
