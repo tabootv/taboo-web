@@ -47,7 +47,7 @@ export default function AnalyticsPage() {
     refetch: refetchEarnings,
   } = useEarnings(dateRange, groupBy);
 
-  const { data: videosData } = useStudioVideos(1);
+  const { data: videosData } = useStudioVideos({ page: 1, per_page: 100 });
   const { data: shortsData } = useStudioShorts(1);
 
   const contentStats = useMemo(() => {

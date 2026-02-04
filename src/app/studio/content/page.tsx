@@ -10,9 +10,9 @@ import {
 import { useStudioPosts, useStudioShorts, useStudioVideos } from '@/api/queries/studio.queries';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/shared/stores/auth-store';
-import type { ContentVisibility, StudioVideoListItem } from '@/types/studio';
+import type { PublicationMode, StudioVideoListItem } from '@/types/studio';
 import { Upload } from 'lucide-react';
-import { Suspense, useCallback, useState } from 'react';
+import { Suspense, useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import {
   ContentTable,
@@ -26,6 +26,11 @@ import {
 import { ContentFilterBar } from '../_components/content-table/ContentFilterBar';
 import { UploadModal } from '../upload/_components/UploadModal';
 import { useContentFilters } from './_hooks/use-content-filters';
+import {
+  deriveVideoDisplayState,
+  deriveProcessingStatus,
+  filterVideosByStatus,
+} from './_utils/video-status';
 
 interface EditVideoData {
   id: number;
@@ -33,9 +38,17 @@ interface EditVideoData {
   title: string;
   description?: string;
   tags?: number[];
+  tagNames?: string[];
   isAdultContent?: boolean;
-  visibility: 'public' | 'private' | 'unlisted';
+  visibility: 'live' | 'draft';
   isShort: boolean;
+  location?: string;
+  countryId?: number;
+  latitude?: number;
+  longitude?: number;
+  publishMode?: 'none' | 'auto' | 'scheduled';
+  scheduledAt?: string;
+  thumbnailUrl?: string;
 }
 
 function ContentPageInner() {
@@ -52,22 +65,24 @@ function ContentPageInner() {
   const creatorId = user?.id;
   const channelId = user?.channel?.id;
 
-  // Map filter types for API
-  const apiFilters = {
-    status: filters.status,
-    sortBy: filters.sortBy,
-  };
-
   const {
     data: videosData,
     isLoading: isLoadingVideos,
     refetch: refetchVideos,
-  } = useStudioVideos(creatorId, videosPage, apiFilters);
+  } = useStudioVideos({
+    page: videosPage,
+    per_page: 20,
+    types: ['videos', 'series'],
+    sort_by: filters.sortBy === 'newest' ? 'latest' : 'oldest',
+  });
   const {
     data: shortsData,
     isLoading: isLoadingShorts,
     refetch: refetchShorts,
-  } = useStudioShorts(creatorId, shortsPage, apiFilters);
+  } = useStudioShorts(creatorId, shortsPage, {
+    status: filters.status,
+    sortBy: filters.sortBy,
+  });
   const {
     data: postsData,
     isLoading: isLoadingPosts,
@@ -81,55 +96,47 @@ function ContentPageInner() {
   const updateShortVisibilityMutation = useUpdateShortVisibility();
 
   /**
-   * Map video item to processing status based on API fields
+   * Transform API video item to ContentItem for UI display
+   * Uses deriveVideoDisplayState for visibility and deriveProcessingStatus for processing
    */
-  const mapProcessingStatus = useCallback(
-    (item: StudioVideoListItem): 'uploading' | 'processing' | 'ready' | 'failed' => {
-      if (item.processing) return 'processing';
+  const transformToContentItem = useCallback((item: StudioVideoListItem): ContentItem => {
+    const result: ContentItem = {
+      id: item.id,
+      uuid: item.uuid,
+      title: item.title,
+      description: item.description,
+      thumbnail: item.thumbnail,
+      visibility: deriveVideoDisplayState(item) as Visibility,
+      scheduled_at: item.publish_schedule?.scheduled_at,
+      processing_status: deriveProcessingStatus(item),
+      restrictions: [],
+      comments_count: item.comments_count || 0,
+      likes_count: item.likes_count || 0,
+      created_at: item.created_at,
+      published_at: item.published_at,
+      duration: item.duration,
+    };
 
-      // Bunny status: 0=queued, 1=processing, 2=encoding, 3=finished, 4=failed
-      if (item.bunny_status !== undefined) {
-        if (item.bunny_status === 4) return 'failed';
-        if (item.bunny_status < 3) return 'processing';
-      }
+    // Use bunny_encode_progress if available, otherwise fall back to progress
+    const progressValue = item.bunny_encode_progress ?? item.progress;
+    if (progressValue !== undefined) {
+      result.processing_progress = progressValue;
+    }
+    return result;
+  }, []);
 
-      // Draft without published_at likely still processing
-      if (item.status === 'draft' && !item.published_at) return 'processing';
+  // Apply client-side filtering based on status filter
+  const videos: ContentItem[] = useMemo(() => {
+    const allVideos = videosData?.videos || [];
+    const filtered = filterVideosByStatus(allVideos, filters.status);
+    return filtered.map((v) => transformToContentItem(v));
+  }, [videosData?.videos, filters.status, transformToContentItem]);
 
-      return 'ready';
-    },
-    []
-  );
-
-  const transformToContentItem = useCallback(
-    (item: NonNullable<typeof videosData>['videos'][0]): ContentItem => {
-      const result: ContentItem = {
-        id: item.id,
-        uuid: item.uuid,
-        title: item.title,
-        description: item.description,
-        thumbnail_url: item.thumbnail_url,
-        visibility: (item.status === 'published' ? 'public' : 'private') as Visibility,
-        scheduled_at: undefined,
-        processing_status: mapProcessingStatus(item),
-        restrictions: [],
-        comments_count: item.comments_count || 0,
-        likes_count: item.likes_count || 0,
-        created_at: item.created_at,
-        published_at: item.published_at,
-        duration: item.duration,
-      };
-
-      if (item.progress !== undefined) {
-        result.processing_progress = item.progress;
-      }
-      return result;
-    },
-    [mapProcessingStatus]
-  );
-
-  const videos: ContentItem[] = videosData?.videos?.map((v) => transformToContentItem(v)) || [];
-  const shorts: ContentItem[] = shortsData?.videos?.map((v) => transformToContentItem(v)) || [];
+  const shorts: ContentItem[] = useMemo(() => {
+    const allShorts = shortsData?.videos || [];
+    const filtered = filterVideosByStatus(allShorts, filters.status);
+    return filtered.map((v) => transformToContentItem(v));
+  }, [shortsData?.videos, filters.status, transformToContentItem]);
 
   const posts: PostItem[] =
     postsData?.posts?.map((p) => ({
@@ -167,15 +174,14 @@ function ContentPageInner() {
 
   const handleEdit = useCallback(
     (item: ContentItem) => {
-      // Map visibility to supported edit values (convert draft/scheduled to private)
-      let editVisibility: 'public' | 'private' | 'unlisted' = 'private';
-      if (
-        item.visibility === 'public' ||
-        item.visibility === 'private' ||
-        item.visibility === 'unlisted'
-      ) {
-        editVisibility = item.visibility;
-      }
+      // Get raw StudioVideoListItem to access all fields
+      const rawVideo = (activeTab === 'shorts' ? shortsData?.videos : videosData?.videos)?.find(
+        (v) => v.id === item.id
+      );
+
+      // Map visibility to edit values (only 'live' or 'draft' for editing)
+      // Processing and scheduled states are treated as draft for editing purposes
+      const editVisibility: 'live' | 'draft' = item.visibility === 'live' ? 'live' : 'draft';
 
       // Build edit data carefully for exactOptionalPropertyTypes
       const editData: EditVideoData = {
@@ -185,11 +191,31 @@ function ContentPageInner() {
         visibility: editVisibility,
         isShort: activeTab === 'shorts',
       };
+
+      // Map optional fields from ContentItem
       if (item.description) editData.description = item.description;
+
+      // Map optional fields from raw API data
+      if (rawVideo?.tags) editData.tagNames = rawVideo.tags; // string[] from API
+      if (rawVideo?.location) editData.location = rawVideo.location;
+      if (rawVideo?.country_id) editData.countryId = rawVideo.country_id;
+      if (rawVideo?.latitude) editData.latitude = rawVideo.latitude;
+      if (rawVideo?.longitude) editData.longitude = rawVideo.longitude;
+      if (rawVideo?.thumbnail) editData.thumbnailUrl = rawVideo.thumbnail;
+
+      // Derive publish mode from schedule or visibility
+      if (rawVideo?.publish_schedule?.scheduled_at) {
+        editData.scheduledAt = rawVideo.publish_schedule.scheduled_at;
+        editData.publishMode = 'scheduled';
+      } else if (editVisibility === 'live') {
+        editData.publishMode = 'auto';
+      } else {
+        editData.publishMode = 'none';
+      }
 
       setEditingVideo(editData);
     },
-    [activeTab]
+    [activeTab, videosData?.videos, shortsData?.videos]
   );
 
   const handleDelete = useCallback(
@@ -214,7 +240,16 @@ function ContentPageInner() {
   const handleVisibilityChange = useCallback(
     async (item: ContentItem, visibility: Visibility) => {
       const isShort = activeTab === 'shorts';
-      const payload = { visibility: visibility as ContentVisibility };
+
+      // Map UI visibility to API publish_mode
+      const publishModeMap: Record<Visibility, PublicationMode> = {
+        live: 'auto',
+        draft: 'none',
+        scheduled: 'scheduled',
+        processing: 'none', // Processing videos default to draft mode
+      };
+
+      const payload = { publish_mode: publishModeMap[visibility] };
 
       try {
         if (isShort) {
@@ -230,7 +265,9 @@ function ContentPageInner() {
           });
           refetchVideos();
         }
-        toast.success(`Visibility updated to ${visibility}`);
+
+        const visibilityLabel = visibility === 'live' ? 'Published' : 'Saved as draft';
+        toast.success(visibilityLabel);
       } catch {
         toast.error('Failed to update visibility');
       }

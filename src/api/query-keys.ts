@@ -112,8 +112,27 @@ export const queryKeys = {
   studio: {
     all: ['studio'] as const,
     dashboard: () => [...queryKeys.studio.all, 'dashboard'] as const,
-    videos: (creatorId?: number, page?: number, filters?: Record<string, unknown>) =>
-      [...queryKeys.studio.all, 'videos', creatorId, page, filters] as const,
+    videos: (params?: {
+      page?: number;
+      per_page?: number;
+      types?: string[];
+      series_ids?: number[];
+      countries_ids?: number[];
+      sort_by?: string;
+    }) => {
+      // Normalize for consistent cache keys (sort arrays)
+      const key = params
+        ? {
+            page: params.page ?? 1,
+            per_page: params.per_page ?? 20,
+            types: params.types?.slice().sort().join(','),
+            series_ids: params.series_ids?.slice().sort().join(','),
+            countries_ids: params.countries_ids?.slice().sort().join(','),
+            sort_by: params.sort_by ?? 'latest',
+          }
+        : {};
+      return [...queryKeys.studio.all, 'videos', key] as const;
+    },
     shorts: (creatorId?: number, page?: number, filters?: Record<string, unknown>) =>
       [...queryKeys.studio.all, 'shorts', creatorId, page, filters] as const,
     posts: (channelId?: number, page?: number) =>

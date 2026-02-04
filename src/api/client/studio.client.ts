@@ -29,12 +29,34 @@ import type {
   StudioUploadShortResponse,
   StudioUploadVideoPayload,
   StudioUploadVideoResponse,
+  StudioVideoListItem,
   StudioVideosListResponse,
+  StudioVideosQueryParams,
   UpdateVideoMetadataPayload,
   UpdateVideoResponse,
   UpdateVisibilityPayload,
 } from '../types';
 import { apiClient } from './base-client';
+
+/**
+ * Normalize query params - convert arrays to CSV strings
+ * API expects: ids=1,2,3 not ids[]=1&ids[]=2
+ */
+function normalizeStudioVideoParams(params: StudioVideosQueryParams): Record<string, unknown> {
+  const normalized: Record<string, unknown> = {
+    page: params.page ?? 1,
+    per_page: Math.min(params.per_page ?? 20, 100),
+    sort_by: params.sort_by ?? 'latest',
+  };
+
+  if (params.ids?.length) normalized.ids = params.ids.join(',');
+  if (params.countries?.length) normalized.countries = params.countries.join(',');
+  if (params.countries_ids?.length) normalized.countries_ids = params.countries_ids.join(',');
+  if (params.series_ids?.length) normalized.series_ids = params.series_ids.join(',');
+  if (params.types?.length) normalized.types = params.types.join(',');
+
+  return normalized;
+}
 
 export const studioClient = {
   /**
@@ -46,14 +68,27 @@ export const studioClient = {
   },
 
   /**
-   * Get list of creator's videos
-   * @deprecated Use videoClient.list() with creator_id filter instead
+   * Get list of creator's videos with advanced filtering
    */
-  getVideos: async (page = 1): Promise<StudioVideosListResponse> => {
-    const data = await apiClient.get<ApiResponse<StudioVideosListResponse>>('/videos', {
-      params: { page } as Record<string, unknown>,
-    });
-    return data.data;
+  getVideos: async (params: StudioVideosQueryParams = {}): Promise<StudioVideosListResponse> => {
+    const normalizedParams = normalizeStudioVideoParams(params);
+
+    const response = await apiClient.get<{
+      videos?: StudioVideoListItem[];
+      data?: StudioVideoListItem[];
+      pagination?: { current_page: number; last_page: number; per_page: number; total: number };
+    }>('/studio/videos', { params: normalizedParams });
+
+    // Handle both response shapes (videos or data field)
+    const videos = response.videos || response.data || [];
+    const pagination = response.pagination || {
+      current_page: params.page ?? 1,
+      last_page: 1,
+      per_page: params.per_page ?? 20,
+      total: videos.length,
+    };
+
+    return { videos, pagination };
   },
 
   /**
