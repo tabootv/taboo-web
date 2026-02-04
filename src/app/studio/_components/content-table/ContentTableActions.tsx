@@ -9,13 +9,16 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { cn } from '@/shared/utils/formatting';
 import { Download, MoreVertical, Pencil, Play, Share2, Trash2 } from 'lucide-react';
-import { toast } from 'sonner';
 import Link from 'next/link';
+import { toast } from 'sonner';
+import type { Visibility } from './VisibilityDropdown';
 
 interface ContentTableActionsProps {
   videoUuid: string;
   isShort: boolean;
+  visibility: Visibility;
   onEdit: () => void;
   onDelete: () => void;
   className?: string;
@@ -24,6 +27,7 @@ interface ContentTableActionsProps {
 export function ContentTableActions({
   videoUuid,
   isShort,
+  visibility,
   onEdit,
   onDelete,
   className,
@@ -73,7 +77,11 @@ export function ContentTableActions({
               variant="ghost"
               size="icon-sm"
               asChild
-              className="text-text-tertiary hover:text-text-primary"
+              className={cn(
+                'text-text-tertiary hover:text-text-primary',
+                visibility !== 'live' ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''
+              )}
+              disabled={visibility !== 'live'}
             >
               <Link href={videoUrl} target="_blank">
                 <Play className="w-4 h-4" />
@@ -99,7 +107,13 @@ export function ContentTableActions({
             <TooltipContent>More options</TooltipContent>
           </Tooltip>
           <DropdownMenuContent align="end" className="w-40">
-            <DropdownMenuItem onClick={handleShare}>
+            <DropdownMenuItem
+              onClick={handleShare}
+              disabled={visibility !== 'live'}
+              className={cn(
+                visibility !== 'live' ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''
+              )}
+            >
               <Share2 className="w-4 h-4 mr-2" />
               Share
             </DropdownMenuItem>

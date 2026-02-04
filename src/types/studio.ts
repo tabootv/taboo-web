@@ -94,12 +94,47 @@ export interface StudioCreatePostResponse {
   errors?: Record<string, string[]>;
 }
 
+/**
+ * Bunny CDN processing status codes
+ * Only 0-3 are valid statuses returned by the API
+ */
+export type BunnyStatus = 0 | 1 | 2 | 3;
+
+/**
+ * Bunny status descriptions:
+ * 0 = Queued - Video is waiting to be processed
+ * 1 = Processing - Video is being processed
+ * 2 = Encoding - Video is being encoded into multiple resolutions
+ * 3 = Finished - Video processing is complete and ready for playback
+ */
+
+/**
+ * Publish schedule for scheduled videos
+ */
+export interface PublishSchedule {
+  scheduled_at: string;
+}
+
+/**
+ * Publication mode as used by the API
+ * - 'none': Draft - not published, no schedule
+ * - 'auto': Live - published immediately
+ * - 'scheduled': Scheduled - will publish at scheduled_at time
+ */
+export type PublicationMode = 'none' | 'auto' | 'scheduled';
+
+/**
+ * Video display state for UI rendering
+ * Derived from API fields (published, publish_schedule, bunny_status)
+ */
+export type VideoDisplayState = 'live' | 'draft' | 'scheduled' | 'processing';
+
 export interface StudioVideoListItem {
   id: number;
   uuid: string;
   title: string;
   description?: string;
-  thumbnail_url?: string;
+  thumbnail?: string;
   views_count?: number;
   likes_count?: number;
   comments_count?: number;
@@ -107,12 +142,36 @@ export interface StudioVideoListItem {
   created_at: string;
   published_at?: string;
   status?: string;
+  /** Whether the video is published (live) */
+  published?: boolean;
   /** Video is currently being processed by Bunny */
   processing?: boolean;
-  /** Bunny processing status: 0=queued, 1=processing, 2=encoding, 3=finished, 4=failed */
-  bunny_status?: number;
+  /** Bunny processing status: 0=queued, 1=processing, 2=encoding, 3=finished */
+  bunny_status?: BunnyStatus;
   /** Processing progress percentage (0-100) */
   progress?: number;
+  /** Bunny encoding progress percentage */
+  bunny_encode_progress?: number;
+  /** Available video resolutions (comma-separated, e.g., "720p,1080p") */
+  bunny_available_resolutions?: string;
+  /** Whether the video is hosted on Bunny CDN */
+  is_bunny_video?: boolean;
+  /** Whether this is a short video */
+  short?: boolean;
+  /** Scheduled publication info */
+  publish_schedule?: PublishSchedule | null;
+  /** Location name */
+  location?: string;
+  /** Country name */
+  country?: string;
+  /** Country ID */
+  country_id?: number;
+  /** Latitude coordinate */
+  latitude?: number;
+  /** Longitude coordinate */
+  longitude?: number;
+  /** Tags associated with the video */
+  tags?: string[];
 }
 
 export type StudioVideoDetail = StudioVideoListItem;
@@ -206,8 +265,16 @@ export interface PrepareBunnyUploadResponse {
  * Extended types for the Content Management Hub
  */
 
-export type ContentVisibility = 'public' | 'private' | 'unlisted' | 'scheduled' | 'draft';
-export type ProcessingStatus = 'uploading' | 'processing' | 'ready' | 'failed';
+/**
+ * Content visibility state for UI display
+ * Aligned with VideoDisplayState for consistency
+ */
+export type ContentVisibility = 'live' | 'draft' | 'scheduled' | 'processing';
+
+/**
+ * Processing status for videos being uploaded/encoded
+ */
+export type ProcessingStatus = 'uploading' | 'processing' | 'ready';
 
 export interface StudioContentListItem {
   id: number;
@@ -240,8 +307,12 @@ export interface UpdateVideoMetadataPayload {
   thumbnail_path?: string;
 }
 
+/**
+ * Payload for updating video visibility/publication status
+ * Uses publish_mode to match API expectations
+ */
 export interface UpdateVisibilityPayload {
-  visibility: ContentVisibility;
+  publish_mode: PublicationMode;
   scheduled_at?: string;
 }
 
@@ -259,4 +330,36 @@ export interface StudioContentListResponse {
     per_page: number;
     total: number;
   };
+}
+
+/**
+ * Content type enum for studio video listing
+ */
+export type StudioVideoContentType = 'videos' | 'series' | 'courses' | 'shorts';
+
+/**
+ * Sort options for studio video listing
+ */
+export type StudioVideoSortBy = 'latest' | 'oldest';
+
+/**
+ * Query parameters for GET /api/studio/videos
+ */
+export interface StudioVideosQueryParams {
+  /** Page number. Default: 1 */
+  page?: number;
+  /** Items per page. Default: 20, Max: 100 */
+  per_page?: number;
+  /** Filter by specific video IDs */
+  ids?: number[];
+  /** Filter by country names */
+  countries?: string[];
+  /** Filter by country IDs */
+  countries_ids?: number[];
+  /** Filter by series IDs */
+  series_ids?: number[];
+  /** Filter by content types. Default: ['videos', 'series'] */
+  types?: StudioVideoContentType[];
+  /** Sort order. Default: 'latest' */
+  sort_by?: StudioVideoSortBy;
 }

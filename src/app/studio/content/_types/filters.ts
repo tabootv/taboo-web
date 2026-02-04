@@ -1,4 +1,4 @@
-export type VideoStatusFilter = 'all' | 'processing' | 'published' | 'private' | 'unlisted';
+export type VideoStatusFilter = 'all' | 'processing' | 'published' | 'draft' | 'scheduled';
 export type VideoSortOption = 'newest' | 'oldest';
 
 export interface ContentFilters {
@@ -10,8 +10,8 @@ export const STATUS_OPTIONS = [
   { id: 'all', label: 'All' },
   { id: 'processing', label: 'Processing' },
   { id: 'published', label: 'Published' },
-  { id: 'private', label: 'Private' },
-  { id: 'unlisted', label: 'Unlisted' },
+  { id: 'draft', label: 'Drafts' },
+  { id: 'scheduled', label: 'Scheduled' },
 ] as const;
 
 export const SORT_OPTIONS = [

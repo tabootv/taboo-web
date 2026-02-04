@@ -1,7 +1,5 @@
 'use client';
 
-import { useState } from 'react';
-import { ChevronDown, Globe, Lock, EyeOff, Calendar, Loader2 } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,8 +8,17 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/shared/utils/formatting';
+import { Calendar, ChevronDown, Globe, Loader2, Lock } from 'lucide-react';
+import { useState } from 'react';
 
-export type Visibility = 'public' | 'private' | 'unlisted' | 'scheduled' | 'draft';
+/**
+ * Visibility states aligned with API publication modes:
+ * - 'live': published (publish_mode: 'auto')
+ * - 'draft': not published, no schedule (publish_mode: 'none')
+ * - 'scheduled': not published, has schedule (publish_mode: 'scheduled')
+ * - 'processing': video is being processed by Bunny CDN
+ */
+export type Visibility = 'live' | 'draft' | 'scheduled' | 'processing';
 
 interface VisibilityDropdownProps {
   visibility: Visibility;
@@ -24,23 +31,17 @@ const visibilityConfig: Record<
   Visibility,
   { icon: typeof Globe; label: string; color: string; description: string }
 > = {
-  public: {
+  live: {
     icon: Globe,
-    label: 'Public',
+    label: 'Live',
     color: 'text-green-500',
     description: 'Everyone can see this video',
   },
-  private: {
+  draft: {
     icon: Lock,
-    label: 'Private',
+    label: 'Draft',
     color: 'text-text-tertiary',
-    description: 'Only you can see this video',
-  },
-  unlisted: {
-    icon: EyeOff,
-    label: 'Unlisted',
-    color: 'text-amber-500',
-    description: 'Anyone with the link can see',
+    description: 'Not published yet',
   },
   scheduled: {
     icon: Calendar,
@@ -48,11 +49,11 @@ const visibilityConfig: Record<
     color: 'text-blue-500',
     description: 'Will publish at scheduled time',
   },
-  draft: {
-    icon: Lock,
-    label: 'Draft',
-    color: 'text-text-secondary',
-    description: 'Not published yet',
+  processing: {
+    icon: Loader2,
+    label: 'Processing',
+    color: 'text-amber-500',
+    description: 'Video is being processed',
   },
 };
 
@@ -125,21 +126,26 @@ export function VisibilityDropdown({
         </TooltipContent>
       </Tooltip>
       <DropdownMenuContent align="start" className="w-48">
-        {(Object.entries(visibilityConfig) as [Visibility, typeof config][])
-          .filter(([key]) => key !== 'draft' && key !== 'scheduled')
-          .map(([key, { icon: ItemIcon, label, color, description }]) => (
-            <DropdownMenuItem
-              key={key}
-              onClick={() => handleVisibilityChange(key)}
-              className="flex items-start gap-3 py-2"
-            >
-              <ItemIcon className={cn('w-4 h-4 mt-0.5 shrink-0', color)} />
-              <div>
-                <p className={cn('text-sm font-medium', color)}>{label}</p>
-                <p className="text-xs text-text-tertiary">{description}</p>
-              </div>
-            </DropdownMenuItem>
-          ))}
+        <DropdownMenuItem
+          onClick={() => handleVisibilityChange('live')}
+          className="flex items-start gap-3 py-2"
+        >
+          <Globe className={cn('w-4 h-4 mt-0.5 shrink-0', visibilityConfig.live.color)} />
+          <div>
+            <p className={cn('text-sm font-medium', visibilityConfig.live.color)}>Publish Now</p>
+            <p className="text-xs text-text-tertiary">Make video visible to everyone</p>
+          </div>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => handleVisibilityChange('draft')}
+          className="flex items-start gap-3 py-2"
+        >
+          <Lock className={cn('w-4 h-4 mt-0.5 shrink-0', visibilityConfig.draft.color)} />
+          <div>
+            <p className={cn('text-sm font-medium', visibilityConfig.draft.color)}>Save as Draft</p>
+            <p className="text-xs text-text-tertiary">Hide video from public</p>
+          </div>
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

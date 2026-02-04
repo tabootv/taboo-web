@@ -149,6 +149,15 @@ export type {
   UpdateVideoMetadataPayload,
   UpdateVisibilityPayload,
   UpdateVideoResponse,
+  // Video listing query params
+  StudioVideoContentType,
+  StudioVideoSortBy,
+  StudioVideosQueryParams,
+  // New API-aligned types
+  BunnyStatus,
+  PublishSchedule,
+  PublicationMode,
+  VideoDisplayState,
 } from './studio';
 
 // Earnings Types (FirstPromoter Integration)

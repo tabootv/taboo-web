@@ -13,10 +13,10 @@ export interface ContentItem {
   uuid: string;
   title: string;
   description: string | undefined;
-  thumbnail_url: string | undefined;
+  thumbnail: string | undefined;
   visibility: Visibility;
   scheduled_at: string | undefined;
-  processing_status: 'uploading' | 'processing' | 'ready' | 'failed';
+  processing_status: 'uploading' | 'processing' | 'ready';
 
   processing_progress?: number;
   restrictions: string[];
@@ -90,13 +90,6 @@ function ProcessingBadge({
           {progress !== undefined ? `Processing ${progress}%` : 'Processing'}
         </span>
       );
-    case 'failed':
-      return (
-        <span className="inline-flex items-center gap-1 text-xs text-red-400">
-          <AlertCircle className="w-3 h-3" />
-          Failed
-        </span>
-      );
     case 'ready':
     default:
       return null;
@@ -158,9 +151,9 @@ export function ContentTableRow({
                   isShort ? 'w-14 h-[78px]' : 'w-28 h-16'
                 )}
               >
-                {item.thumbnail_url ? (
+                {item.thumbnail ? (
                   <Image
-                    src={item.thumbnail_url}
+                    src={item.thumbnail}
                     alt={item.title}
                     fill
                     className="object-cover"
@@ -193,12 +186,8 @@ export function ContentTableRow({
 
             <div className="min-w-0 flex-1">
               <h3 className="text-sm font-medium text-text-primary line-clamp-1">{item.title}</h3>
-              {item.description ? (
+              {item.description && (
                 <p className="text-xs text-text-tertiary line-clamp-1 mt-0.5">{item.description}</p>
-              ) : (
-                <button className="text-xs text-blue-400 hover:text-blue-300 mt-0.5">
-                  Add description
-                </button>
               )}
 
               <div
@@ -210,6 +199,7 @@ export function ContentTableRow({
                 <ContentTableActions
                   videoUuid={item.uuid}
                   isShort={isShort}
+                  visibility={item.visibility}
                   onEdit={() => onEdit(item)}
                   onDelete={() => setShowDeleteDialog(true)}
                 />
