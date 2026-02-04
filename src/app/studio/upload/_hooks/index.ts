@@ -13,3 +13,4 @@ export {
   type UseUploadProgressReturn,
   type UploadProgressState,
 } from './use-upload-progress';
+export { useBeforeunloadWarning } from './use-beforeunload-warning';

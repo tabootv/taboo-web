@@ -1,5 +1,7 @@
 import { ErrorBoundary } from '@/shared/components/error-boundary';
 import { QueryProvider } from '@/shared/components/providers/query-provider';
+import { UploadProvider } from '@/shared/components/providers/upload-provider';
+import { GlobalUploadIndicator } from '@/shared/components/upload/GlobalUploadIndicator';
 import type { Metadata, Viewport } from 'next';
 import { Figtree } from 'next/font/google';
 import './globals.css';
@@ -89,7 +91,12 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
         />
         <ErrorBoundary>
-          <QueryProvider>{children}</QueryProvider>
+          <QueryProvider>
+            <UploadProvider>
+              {children}
+              <GlobalUploadIndicator />
+            </UploadProvider>
+          </QueryProvider>
         </ErrorBoundary>
       </body>
     </html>

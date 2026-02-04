@@ -1,30 +1,36 @@
 'use client';
 
-import { useEffect, useCallback, useState, useRef } from 'react';
-import { createPortal } from 'react-dom';
-import {
-  X,
-  Lock,
-  Loader2,
-  Upload as UploadIcon,
-  Film,
-  Clapperboard,
-  Check,
-  Tag,
-  AlertTriangle,
-  FileText,
-  Zap,
-  Calendar,
-  Clock,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/shared/utils/formatting';
 import { publicClient, type TagOption } from '@/api/client/public.client';
 import { studioClient } from '@/api/client/studio.client';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/shared/utils/formatting';
+import {
+  AlertTriangle,
+  Calendar,
+  Check,
+  Clapperboard,
+  Clock,
+  FileText,
+  Film,
+  ImageIcon,
+  Loader2,
+  Lock,
+  Pause,
+  Play,
+  RotateCcw,
+  Tag,
+  Upload as UploadIcon,
+  X,
+  Zap,
+} from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
-import { useImmediateUpload } from '../_hooks/use-immediate-upload';
-import { useCircuitBreaker } from '../_hooks/use-circuit-breaker';
 import type { PublishMode } from '../_config/types';
+import { useBeforeunloadWarning } from '../_hooks/use-beforeunload-warning';
+import { useCircuitBreaker } from '../_hooks/use-circuit-breaker';
+import { useImmediateUploadV2 } from '../_hooks/use-immediate-upload-v2';
+import { LocationPicker } from './LocationPicker';
 
 interface EditVideoData {
   id: number;
@@ -32,9 +38,20 @@ interface EditVideoData {
   title: string;
   description?: string;
   tags?: number[];
+  tagNames?: string[]; // For tag name->ID conversion
   isAdultContent?: boolean;
-  visibility: 'public' | 'private' | 'unlisted';
+  visibility: 'live' | 'draft';
   isShort: boolean;
+  // Location fields
+  location?: string;
+  countryId?: number;
+  latitude?: number;
+  longitude?: number;
+  // Publishing fields
+  publishMode?: 'none' | 'auto' | 'scheduled';
+  scheduledAt?: string;
+  // Thumbnail
+  thumbnailUrl?: string;
 }
 
 interface UploadModalProps {
@@ -47,14 +64,15 @@ interface UploadModalProps {
   editVideo?: EditVideoData;
 }
 
-type ModalStep = 'details' | 'tags' | 'content-rating' | 'thumbnail' | 'visibility';
+type ModalStep = 'details' | 'location' | 'tags' | 'content-rating' | 'thumbnail' | 'publishing';
 
 const getSteps = (isShort: boolean): { id: ModalStep; label: string }[] => [
   { id: 'details', label: 'Details' },
+  { id: 'location', label: 'Location' },
   ...(isShort ? [] : [{ id: 'tags', label: 'Tags' } as const]),
   { id: 'content-rating', label: 'Rating' },
   { id: 'thumbnail', label: 'Thumbnail' },
-  { id: 'visibility', label: 'Visibility' },
+  { id: 'publishing', label: 'Publishing' },
 ];
 
 const MIN_TAGS_FOR_VIDEO = 2;
@@ -71,7 +89,9 @@ export function UploadModal({
   const [currentStep, setCurrentStep] = useState<ModalStep>('details');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [visibility, setVisibility] = useState<'public' | 'private' | 'unlisted'>('private');
+  // Note: visibility state is maintained for hydration compatibility but
+  // publishMode is used for actual save operations
+  const [_visibility, setVisibility] = useState<'live' | 'draft'>('draft');
 
   // New metadata fields
   const [tags, setTags] = useState<number[]>([]);
@@ -85,6 +105,15 @@ export function UploadModal({
   const [availableTags, setAvailableTags] = useState<TagOption[]>([]);
   const [isLoadingTags, setIsLoadingTags] = useState(false);
   const [tagsError, setTagsError] = useState<string | null>(null);
+  const [pendingTagNames, setPendingTagNames] = useState<string[]>([]);
+
+  // Thumbnail state
+  // _thumbnailFile is stored for future upload integration (when backend endpoint is available)
+  const [_thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [thumbnailPreviewUrl, setThumbnailPreviewUrl] = useState<string | null>(null);
+  const [thumbnailSource, setThumbnailSource] = useState<'custom' | 'auto'>('auto');
+  const thumbnailInputRef = useRef<HTMLInputElement>(null);
+  const [videoPreviewUrl, setVideoPreviewUrl] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   // Ref guard to prevent multiple upload starts (fixes infinite loop)
@@ -97,12 +126,16 @@ export function UploadModal({
 
   const {
     state,
+    storeUploadId: _storeUploadId, // Available for debugging/future use
     startUpload,
     updateMetadata,
     publish,
+    pauseUpload,
+    resumeUpload,
+    retryUpload,
     // cancel is not used because we allow background upload continuation
     reset,
-  } = useImmediateUpload({
+  } = useImmediateUploadV2({
     onUploadComplete: () => {
       // Upload complete, user can now fill in details
     },
@@ -114,6 +147,10 @@ export function UploadModal({
       console.error('Upload error:', error);
     },
   });
+
+  // Warn user when closing browser during active upload
+  const isActiveUpload = ['preparing', 'uploading', 'processing'].includes(state.uploadPhase);
+  useBeforeunloadWarning(isActiveUpload);
 
   // Track renders for circuit breaker
   useEffect(() => {
@@ -136,11 +173,42 @@ export function UploadModal({
   // Initialize form fields when in edit mode
   useEffect(() => {
     if (isOpen && mode === 'edit' && editVideo) {
+      // Basic fields
       setTitle(editVideo.title);
       setDescription(editVideo.description || '');
-      setTags(editVideo.tags || []);
       setIsAdultContent(editVideo.isAdultContent || false);
       setVisibility(editVideo.visibility);
+
+      // Tags - IDs directly or queue names for resolution
+      if (editVideo.tags && editVideo.tags.length > 0) {
+        setTags(editVideo.tags);
+      } else if (editVideo.tagNames && editVideo.tagNames.length > 0) {
+        setPendingTagNames(editVideo.tagNames);
+      }
+
+      // Location fields
+      setLocation(editVideo.location || '');
+      setCountryId(editVideo.countryId ?? null);
+
+      // Publish mode - derive from data if not explicit
+      if (editVideo.publishMode) {
+        setPublishMode(editVideo.publishMode);
+      } else if (editVideo.visibility === 'live') {
+        setPublishMode('auto');
+      } else {
+        setPublishMode('none');
+      }
+
+      // Scheduled date
+      if (editVideo.scheduledAt) {
+        setScheduledAt(new Date(editVideo.scheduledAt));
+      }
+
+      // Thumbnail preview (existing URL, not blob)
+      if (editVideo.thumbnailUrl) {
+        setThumbnailPreviewUrl(editVideo.thumbnailUrl);
+        setThumbnailSource('auto'); // Mark as existing, not custom upload
+      }
     }
   }, [isOpen, mode, editVideo]);
 
@@ -160,9 +228,29 @@ export function UploadModal({
     }
   }, [isOpen, initialFile, startUpload]);
 
-  // Fetch tags when Tags step becomes active (video only)
   useEffect(() => {
-    if (currentStep === 'tags' && !isShort && availableTags.length === 0 && !isLoadingTags) {
+    if (initialFile && state.uploadPhase !== 'idle') {
+      const url = URL.createObjectURL(initialFile);
+      setVideoPreviewUrl(url);
+      return () => {
+        URL.revokeObjectURL(url);
+        setVideoPreviewUrl(null);
+      };
+    }
+    setVideoPreviewUrl(null);
+    return undefined;
+  }, [initialFile, state.uploadPhase]);
+
+  // Fetch tags when Tags step becomes active (video only) or in edit mode with pending tag names
+  useEffect(() => {
+    const shouldFetchTags =
+      (currentStep === 'tags' && !isShort && availableTags.length === 0 && !isLoadingTags) ||
+      (mode === 'edit' &&
+        pendingTagNames.length > 0 &&
+        availableTags.length === 0 &&
+        !isLoadingTags);
+
+    if (shouldFetchTags) {
       const fetchTags = async () => {
         setIsLoadingTags(true);
         setTagsError(null);
@@ -178,7 +266,18 @@ export function UploadModal({
       };
       fetchTags();
     }
-  }, [currentStep, isShort, availableTags.length, isLoadingTags]);
+  }, [currentStep, isShort, availableTags.length, isLoadingTags, mode, pendingTagNames.length]);
+
+  // Resolve tag names to IDs when tags list is available (edit mode)
+  useEffect(() => {
+    if (pendingTagNames.length > 0 && availableTags.length > 0) {
+      const resolvedIds = pendingTagNames
+        .map((name) => availableTags.find((t) => t.name.toLowerCase() === name.toLowerCase())?.id)
+        .filter((id): id is number => id !== undefined);
+      setTags(resolvedIds);
+      setPendingTagNames([]);
+    }
+  }, [pendingTagNames, availableTags]);
 
   // Update metadata when form changes (debounced)
   useEffect(() => {
@@ -222,6 +321,24 @@ export function UploadModal({
       state.uploadPhase === 'uploading' || state.uploadPhase === 'preparing';
     const isProcessing = state.uploadPhase === 'processing';
 
+    // Helper to reset thumbnail state and clean up object URL
+    // Only revoke blob URLs, not HTTP URLs (from edit mode)
+    const resetThumbnail = () => {
+      if (thumbnailPreviewUrl && thumbnailPreviewUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(thumbnailPreviewUrl);
+      }
+      setThumbnailFile(null);
+      setThumbnailPreviewUrl(null);
+      setThumbnailSource('auto');
+    };
+
+    const resetVideoPreview = () => {
+      if (videoPreviewUrl && videoPreviewUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(videoPreviewUrl);
+      }
+      setVideoPreviewUrl(null);
+    };
+
     if (isActivelyUploading || isProcessing) {
       const message = isActivelyUploading
         ? 'Upload is in progress. It will continue in the background. Close anyway?'
@@ -235,40 +352,36 @@ export function UploadModal({
       setCurrentStep('details');
       setTitle('');
       setDescription('');
-      setVisibility('private');
+      setVisibility('draft');
       setTags([]);
+      setPendingTagNames([]);
       setIsAdultContent(false);
       setLocation('');
       setCountryId(null);
       setPublishMode('none');
       setScheduledAt(null);
+      resetThumbnail();
+      resetVideoPreview();
       onClose();
       return;
     }
 
-    // For idle, complete, or error states, do full reset
     reset();
     setCurrentStep('details');
     setTitle('');
     setDescription('');
-    setVisibility('private');
+    setVisibility('draft');
     setTags([]);
+    setPendingTagNames([]);
     setIsAdultContent(false);
     setLocation('');
     setCountryId(null);
     setPublishMode('none');
     setScheduledAt(null);
+    resetThumbnail();
+    resetVideoPreview();
     onClose();
-  }, [state.uploadPhase, reset, onClose]);
-
-  // Handle backdrop click - only close if safe to do so
-  const handleBackdropClick = useCallback(() => {
-    const safeToClose = ['idle', 'complete', 'error'].includes(state.uploadPhase);
-    if (safeToClose) {
-      handleClose();
-    }
-    // During upload phases, do nothing (backdrop is locked)
-  }, [state.uploadPhase, handleClose]);
+  }, [state.uploadPhase, reset, onClose, thumbnailPreviewUrl, videoPreviewUrl]);
 
   const handleFileSelect = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -277,8 +390,8 @@ export function UploadModal({
         uploadStartedRef.current = true;
         startUpload(file);
         setTitle(file.name.replace(/\.[^/.]+$/, ''));
+        setVideoPreviewUrl(URL.createObjectURL(file));
       }
-      // Reset input so same file can be selected again
       e.target.value = '';
     },
     [startUpload]
@@ -298,31 +411,50 @@ export function UploadModal({
   );
 
   const handlePublish = useCallback(async () => {
-    await publish(visibility);
-  }, [publish, visibility]);
+    // Derive visibility from publishMode:
+    // - draft (none) → draft
+    // - publish-now (auto) → live
+    // - scheduled → live (will be scheduled server-side)
+    const derivedVisibility = publishMode === 'none' ? 'draft' : 'live';
+    await publish(derivedVisibility);
+  }, [publish, publishMode]);
 
+  // Save handler for edit mode
   // Save handler for edit mode
   const handleSaveChanges = useCallback(async () => {
     if (!editVideo) return;
 
     setIsSaving(true);
     try {
-      // Update metadata - build payload carefully for exactOptionalPropertyTypes
+      // Build complete metadata payload
       const metadataPayload: Parameters<typeof studioClient.updateVideoMetadata>[1] = {
         title,
         is_adult_content: isAdultContent,
       };
       if (description) metadataPayload.description = description;
       if (tags.length > 0) metadataPayload.tags = tags;
+      if (location) metadataPayload.location = location;
+      if (countryId) metadataPayload.country_id = countryId;
 
       await studioClient.updateVideoMetadata(editVideo.id, metadataPayload);
 
-      // Update visibility if changed
-      if (visibility !== editVideo.visibility) {
+      // Handle visibility/publish mode changes
+      const newPublishMode = publishMode;
+      const visibilityPayload: { publish_mode: typeof newPublishMode; scheduled_at?: string } = {
+        publish_mode: newPublishMode,
+      };
+      if (newPublishMode === 'scheduled' && scheduledAt) {
+        visibilityPayload.scheduled_at = scheduledAt.toISOString();
+      }
+
+      // Only update visibility if mode changed
+      const originalMode =
+        editVideo.publishMode || (editVideo.visibility === 'live' ? 'auto' : 'none');
+      if (newPublishMode !== originalMode) {
         if (editVideo.isShort) {
-          await studioClient.updateShortVisibility(editVideo.id, { visibility });
+          await studioClient.updateShortVisibility(editVideo.id, visibilityPayload);
         } else {
-          await studioClient.updateVideoVisibility(editVideo.id, { visibility });
+          await studioClient.updateVideoVisibility(editVideo.id, visibilityPayload);
         }
       }
 
@@ -335,7 +467,19 @@ export function UploadModal({
     } finally {
       setIsSaving(false);
     }
-  }, [editVideo, title, description, tags, isAdultContent, visibility, onSuccess, onClose]);
+  }, [
+    editVideo,
+    title,
+    description,
+    tags,
+    isAdultContent,
+    location,
+    countryId,
+    publishMode,
+    scheduledAt,
+    onSuccess,
+    onClose,
+  ]);
 
   const handleNext = useCallback(() => {
     const currentIndex = steps.findIndex((s) => s.id === currentStep);
@@ -363,10 +507,16 @@ export function UploadModal({
     );
   }, []);
 
-  const isLastStep = currentStep === 'visibility';
+  const isLastStep = currentStep === 'publishing';
 
   // Validation logic
   const canProceed = (() => {
+    // Edit mode: allow free navigation between tabs
+    if (mode === 'edit') {
+      return true;
+    }
+
+    // Upload mode: enforce validation
     if (currentStep === 'details') {
       return title.trim().length > 0;
     }
@@ -425,13 +575,21 @@ export function UploadModal({
                   setCurrentStep('details');
                   setTitle('');
                   setDescription('');
-                  setVisibility('private');
+                  setVisibility('draft');
                   setTags([]);
                   setIsAdultContent(false);
                   setLocation('');
                   setCountryId(null);
                   setPublishMode('none');
                   setScheduledAt(null);
+                  if (thumbnailPreviewUrl) URL.revokeObjectURL(thumbnailPreviewUrl);
+                  setThumbnailFile(null);
+                  setThumbnailPreviewUrl(null);
+                  if (videoPreviewUrl && videoPreviewUrl.startsWith('blob:')) {
+                    URL.revokeObjectURL(videoPreviewUrl);
+                  }
+                  setVideoPreviewUrl(null);
+                  setThumbnailSource('auto');
                   uploadStartedRef.current = false;
                   onClose();
                 }}
@@ -442,6 +600,10 @@ export function UploadModal({
                 onClick={() => {
                   resetCircuitBreaker();
                   reset();
+                  if (thumbnailPreviewUrl) URL.revokeObjectURL(thumbnailPreviewUrl);
+                  setThumbnailFile(null);
+                  setThumbnailPreviewUrl(null);
+                  setThumbnailSource('auto');
                   uploadStartedRef.current = false;
                 }}
                 className="bg-red-primary hover:bg-red-primary/90"
@@ -458,14 +620,8 @@ export function UploadModal({
 
   const modalContent = (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop - click behavior depends on upload state */}
-      <div
-        className={cn(
-          'fixed inset-0 bg-black/70 backdrop-blur-sm',
-          !['idle', 'complete', 'error'].includes(state.uploadPhase) && 'cursor-not-allowed'
-        )}
-        onClick={handleBackdropClick}
-      />
+      {/* Backdrop - click disabled, modal closes only via X button */}
+      <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" />
 
       {/* Modal */}
       <div className="relative z-10 w-full max-w-4xl max-h-[90vh] bg-surface border border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden">
@@ -610,6 +766,19 @@ export function UploadModal({
                   </>
                 )}
 
+                {currentStep === 'location' && (
+                  <LocationPicker
+                    value={location}
+                    countryId={countryId}
+                    onLocationChange={(newLocation, details) => {
+                      setLocation(newLocation);
+                      if (details.countryId !== undefined) {
+                        setCountryId(details.countryId);
+                      }
+                    }}
+                  />
+                )}
+
                 {currentStep === 'tags' && !isShort && (
                   <div>
                     <label className="flex items-center gap-2 text-sm font-medium text-text-primary mb-2">
@@ -738,178 +907,233 @@ export function UploadModal({
                       Thumbnail
                     </label>
                     <p className="text-sm text-text-secondary mb-4">
-                      Select or upload a picture that shows what&apos;s in your video. A good
-                      thumbnail stands out and draws viewers&apos; attention.
+                      Upload a custom thumbnail or use the auto-generated one from your video.
                     </p>
-                    <div className="grid grid-cols-3 gap-3">
-                      {[1, 2, 3].map((i) => (
-                        <div
-                          key={i}
-                          className="aspect-video bg-white/5 border border-white/10 rounded-lg flex items-center justify-center cursor-pointer hover:border-white/20 transition-colors"
-                        >
-                          <span className="text-text-tertiary text-sm">Auto #{i}</span>
-                        </div>
-                      ))}
+
+                    {/* Thumbnail source toggle */}
+                    <div className="flex gap-2 mb-4">
+                      <button
+                        type="button"
+                        onClick={() => setThumbnailSource('auto')}
+                        className={cn(
+                          'flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+                          thumbnailSource === 'auto'
+                            ? 'bg-red-primary text-white'
+                            : 'bg-white/5 border border-white/10 text-text-secondary hover:border-white/20'
+                        )}
+                      >
+                        Auto-generated
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setThumbnailSource('custom')}
+                        className={cn(
+                          'flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+                          thumbnailSource === 'custom'
+                            ? 'bg-red-primary text-white'
+                            : 'bg-white/5 border border-white/10 text-text-secondary hover:border-white/20'
+                        )}
+                      >
+                        Custom upload
+                      </button>
                     </div>
+
+                    {thumbnailSource === 'auto' ? (
+                      <div className="p-6 bg-white/5 border border-white/10 rounded-lg text-center">
+                        <ImageIcon className="w-12 h-12 text-text-tertiary mx-auto mb-3" />
+                        <p className="text-sm text-text-secondary">
+                          A thumbnail will be automatically generated from your video after
+                          processing completes.
+                        </p>
+                      </div>
+                    ) : (
+                      <div>
+                        {/* Custom thumbnail preview or upload zone */}
+                        {thumbnailPreviewUrl ? (
+                          <div className="relative">
+                            {/* eslint-disable-next-line @next/next/no-img-element -- Local blob URL preview doesn't benefit from Next.js Image optimization */}
+                            <img
+                              src={thumbnailPreviewUrl}
+                              alt="Custom thumbnail preview"
+                              className="w-full aspect-video object-cover rounded-lg border border-white/10"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setThumbnailFile(null);
+                                setThumbnailPreviewUrl(null);
+                              }}
+                              className="absolute top-2 right-2 p-1.5 bg-black/60 hover:bg-black/80 rounded-full transition-colors"
+                            >
+                              <X className="w-4 h-4 text-white" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => thumbnailInputRef.current?.click()}
+                              className="absolute bottom-2 right-2 px-3 py-1.5 bg-black/60 hover:bg-black/80 rounded-lg text-sm text-white transition-colors"
+                            >
+                              Change
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => thumbnailInputRef.current?.click()}
+                            className="w-full p-8 bg-white/5 border-2 border-dashed border-white/20 rounded-lg hover:border-red-primary/40 transition-colors group"
+                          >
+                            <UploadIcon className="w-10 h-10 text-text-tertiary mx-auto mb-3 group-hover:text-red-primary transition-colors" />
+                            <p className="text-sm text-text-primary font-medium mb-1">
+                              Click to upload thumbnail
+                            </p>
+                            <p className="text-xs text-text-tertiary">
+                              JPG, PNG, or WebP. Max 2MB. Recommended: 1280x720
+                            </p>
+                          </button>
+                        )}
+
+                        {/* Hidden file input */}
+                        <input
+                          ref={thumbnailInputRef}
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              // Validate file size (2MB max)
+                              if (file.size > 2 * 1024 * 1024) {
+                                toast.error('Thumbnail must be less than 2MB');
+                                return;
+                              }
+                              setThumbnailFile(file);
+                              // Create preview URL
+                              const url = URL.createObjectURL(file);
+                              setThumbnailPreviewUrl(url);
+                            }
+                            // Reset input so same file can be selected again
+                            e.target.value = '';
+                          }}
+                        />
+                      </div>
+                    )}
                   </div>
                 )}
 
-                {currentStep === 'visibility' && (
+                {currentStep === 'publishing' && (
                   <div>
                     <label className="block text-sm font-medium text-text-primary mb-4">
-                      Visibility
+                      How would you like to publish?
                     </label>
                     <div className="space-y-3">
                       {[
                         {
-                          value: 'public',
-                          label: 'Public',
-                          description: 'Everyone can see this video',
+                          value: 'none' as PublishMode,
+                          icon: FileText,
+                          title: 'Save as Draft',
+                          description: 'Keep private and publish later from your studio',
+                          badge: null,
                         },
                         {
-                          value: 'unlisted',
-                          label: 'Unlisted',
-                          description: 'Anyone with the link can view',
+                          value: 'auto' as PublishMode,
+                          icon: Zap,
+                          title: 'Publish Now',
+                          description: 'Make public as soon as processing completes',
+                          badge: null,
                         },
                         {
-                          value: 'private',
-                          label: 'Private',
-                          description: 'Only you can see this video',
+                          value: 'scheduled' as PublishMode,
+                          icon: Calendar,
+                          title: 'Schedule',
+                          description: 'Set a specific date and time to go public',
+                          badge:
+                            scheduledAt && publishMode === 'scheduled'
+                              ? scheduledAt.toLocaleString()
+                              : null,
                         },
-                      ].map((option) => (
-                        <label
-                          key={option.value}
-                          className={cn(
-                            'flex items-start gap-3 p-4 border rounded-lg cursor-pointer transition-colors',
-                            visibility === option.value
-                              ? 'border-red-primary bg-red-primary/10'
-                              : 'border-white/10 hover:border-white/20'
-                          )}
-                        >
-                          <input
-                            type="radio"
-                            name="visibility"
-                            value={option.value}
-                            checked={visibility === option.value}
-                            onChange={(e) => setVisibility(e.target.value as typeof visibility)}
-                            className="sr-only"
-                          />
-                          <div
+                      ].map((option) => {
+                        const Icon = option.icon;
+                        const isSelected = publishMode === option.value;
+
+                        return (
+                          <label
+                            key={option.value}
                             className={cn(
-                              'w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5',
-                              visibility === option.value ? 'border-red-primary' : 'border-white/30'
+                              'flex items-start gap-4 p-4 rounded-xl border cursor-pointer transition-all',
+                              isSelected
+                                ? 'bg-red-primary/10 border-red-primary'
+                                : 'bg-white/5 border-white/10 hover:border-red-primary/40'
                             )}
                           >
-                            {visibility === option.value && (
-                              <div className="w-2.5 h-2.5 rounded-full bg-red-primary" />
-                            )}
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-text-primary">{option.label}</p>
-                            <p className="text-xs text-text-secondary">{option.description}</p>
-                          </div>
-                        </label>
-                      ))}
+                            <input
+                              type="radio"
+                              checked={isSelected}
+                              onChange={() => setPublishMode(option.value)}
+                              className="sr-only"
+                            />
+                            <div
+                              className={cn(
+                                'w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5',
+                                isSelected ? 'border-red-primary' : 'border-white/30'
+                              )}
+                            >
+                              {isSelected && (
+                                <div className="w-2.5 h-2.5 rounded-full bg-red-primary" />
+                              )}
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <Icon
+                                  className={cn(
+                                    'w-5 h-5',
+                                    isSelected ? 'text-red-primary' : 'text-text-tertiary'
+                                  )}
+                                />
+                                <p className="text-text-primary font-medium">{option.title}</p>
+                                {option.badge && (
+                                  <span className="px-2 py-0.5 bg-red-primary/20 text-red-primary text-xs rounded-full">
+                                    {option.badge}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-sm text-text-secondary mt-1">
+                                {option.description}
+                              </p>
+                            </div>
+                          </label>
+                        );
+                      })}
                     </div>
 
-                    {/* Publishing options for videos only */}
-                    {!isShort && (
-                      <div className="mt-6">
-                        <label className="block text-sm font-medium text-text-primary mb-4">
-                          Publishing
+                    {/* Scheduled datetime picker */}
+                    {publishMode === 'scheduled' && (
+                      <div className="mt-4 p-4 rounded-xl bg-white/5 border border-white/10">
+                        <label className="flex items-center gap-2 mb-3">
+                          <Clock className="w-4 h-4 text-red-primary" />
+                          <span className="text-sm font-medium text-text-primary">
+                            Schedule Date & Time
+                          </span>
                         </label>
-                        <div className="space-y-3">
-                          {[
-                            {
-                              value: 'none' as PublishMode,
-                              icon: FileText,
-                              title: 'Save as Draft',
-                              description: 'Save now and publish later from your studio',
-                            },
-                            {
-                              value: 'auto' as PublishMode,
-                              icon: Zap,
-                              title: 'Publish Immediately',
-                              description: 'Publish as soon as processing completes',
-                            },
-                            {
-                              value: 'scheduled' as PublishMode,
-                              icon: Calendar,
-                              title: 'Schedule',
-                              description: 'Set a specific date and time to publish',
-                            },
-                          ].map((option) => {
-                            const Icon = option.icon;
-                            const isSelected = publishMode === option.value;
-
-                            return (
-                              <label
-                                key={option.value}
-                                className={cn(
-                                  'flex items-start gap-4 p-4 rounded-xl border cursor-pointer transition-all',
-                                  isSelected
-                                    ? 'bg-red-primary/10 border-red-primary'
-                                    : 'bg-white/5 border-white/10 hover:border-red-primary/40'
-                                )}
-                              >
-                                <input
-                                  type="radio"
-                                  checked={isSelected}
-                                  onChange={() => setPublishMode(option.value)}
-                                  className="sr-only"
-                                />
-                                <div
-                                  className={cn(
-                                    'w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5',
-                                    isSelected ? 'border-red-primary' : 'border-white/30'
-                                  )}
-                                >
-                                  {isSelected && (
-                                    <div className="w-2.5 h-2.5 rounded-full bg-red-primary" />
-                                  )}
-                                </div>
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2">
-                                    <Icon
-                                      className={cn(
-                                        'w-5 h-5',
-                                        isSelected ? 'text-red-primary' : 'text-text-tertiary'
-                                      )}
-                                    />
-                                    <p className="text-text-primary font-medium">{option.title}</p>
-                                  </div>
-                                  <p className="text-sm text-text-secondary mt-1">
-                                    {option.description}
-                                  </p>
-                                </div>
-                              </label>
-                            );
-                          })}
-                        </div>
-
-                        {/* Scheduled datetime picker */}
-                        {publishMode === 'scheduled' && (
-                          <div className="mt-4 p-4 rounded-xl bg-white/5 border border-white/10">
-                            <label className="flex items-center gap-2 mb-3">
-                              <Clock className="w-4 h-4 text-red-primary" />
-                              <span className="text-sm font-medium text-text-primary">
-                                Schedule Date & Time
-                              </span>
-                            </label>
-                            <input
-                              type="datetime-local"
-                              value={scheduledAt ? formatDateForInput(scheduledAt) : ''}
-                              onChange={(e) => {
-                                const date = e.target.value ? new Date(e.target.value) : null;
-                                setScheduledAt(date);
-                              }}
-                              min={getMinDateTime()}
-                              className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl text-text-primary focus:outline-none focus:border-red-primary transition-colors"
-                            />
-                          </div>
-                        )}
+                        <input
+                          type="datetime-local"
+                          value={scheduledAt ? formatDateForInput(scheduledAt) : ''}
+                          onChange={(e) => {
+                            const date = e.target.value ? new Date(e.target.value) : null;
+                            setScheduledAt(date);
+                          }}
+                          min={getMinDateTime()}
+                          className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl text-text-primary focus:outline-none focus:border-red-primary transition-colors"
+                        />
                       </div>
                     )}
+
+                    {/* Info text about visibility */}
+                    <p className="mt-4 text-xs text-text-tertiary">
+                      {publishMode === 'none'
+                        ? 'Your video will be saved as a private draft.'
+                        : publishMode === 'auto'
+                          ? 'Your video will become public once processing is complete.'
+                          : 'Your video will become public at the scheduled time.'}
+                    </p>
                   </div>
                 )}
               </div>
@@ -923,30 +1147,60 @@ export function UploadModal({
                     isShort ? 'aspect-[9/16] max-h-[300px] mx-auto' : 'aspect-video'
                   )}
                 >
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    {isShort ? (
-                      <Clapperboard className="w-12 h-12 text-text-tertiary" />
-                    ) : (
-                      <Film className="w-12 h-12 text-text-tertiary" />
-                    )}
-                  </div>
+                  {videoPreviewUrl ? (
+                    <video
+                      src={videoPreviewUrl}
+                      className="absolute inset-0 w-full h-full object-cover"
+                      controls
+                      playsInline
+                      muted
+                    />
+                  ) : mode === 'edit' && editVideo?.thumbnailUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element -- Edit thumbnail from API
+                    <img
+                      src={editVideo.thumbnailUrl}
+                      alt=""
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      {isShort ? (
+                        <Clapperboard className="w-12 h-12 text-text-tertiary" />
+                      ) : (
+                        <Film className="w-12 h-12 text-text-tertiary" />
+                      )}
+                    </div>
+                  )}
                   <div className="absolute top-2 left-2 px-2 py-1 bg-black/60 rounded text-xs text-white">
                     {isShort ? 'Short' : 'Video'}
                   </div>
                 </div>
 
-                {/* Upload Progress - only show in upload mode when not complete */}
-                {mode === 'upload' && state.uploadPhase !== 'complete' && (
+                {/* Upload Progress - show during active upload and when complete */}
+                {mode === 'upload' && state.uploadPhase !== 'idle' && (
                   <div className="p-4 bg-white/5 border border-white/10 rounded-lg">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm text-text-primary">
+                      <span className="text-sm text-text-primary flex items-center gap-2">
                         {state.uploadPhase === 'preparing' && 'Preparing...'}
                         {state.uploadPhase === 'uploading' &&
+                          !state.isPaused &&
                           `Uploading... ${state.uploadProgress}%`}
+                        {state.uploadPhase === 'uploading' && state.isPaused && (
+                          <>
+                            <Pause className="w-4 h-4 text-yellow-500" />
+                            Upload paused - Click resume to continue
+                          </>
+                        )}
                         {state.uploadPhase === 'processing' && 'Processing...'}
                         {state.uploadPhase === 'error' && 'Upload failed'}
+                        {state.uploadPhase === 'complete' && (
+                          <>
+                            <Check className="w-4 h-4 text-green-500" />
+                            Upload complete!
+                          </>
+                        )}
                       </span>
-                      {state.uploadPhase === 'uploading' && (
+                      {state.uploadPhase === 'uploading' && !state.isPaused && (
                         <span className="text-xs text-text-tertiary">
                           {formatBytes(state.bytesUploaded)} / {formatBytes(state.bytesTotal)}
                         </span>
@@ -956,21 +1210,76 @@ export function UploadModal({
                       <div
                         className={cn(
                           'h-full rounded-full transition-all duration-300',
-                          state.uploadPhase === 'error' ? 'bg-red-500' : 'bg-red-primary'
+                          state.uploadPhase === 'error'
+                            ? 'bg-red-500'
+                            : state.uploadPhase === 'complete'
+                              ? 'bg-green-500'
+                              : state.isPaused
+                                ? 'bg-yellow-500'
+                                : 'bg-red-primary'
                         )}
                         style={{ width: `${state.uploadProgress}%` }}
                       />
                     </div>
-                    {state.error && <p className="text-xs text-red-400 mt-2">{state.error}</p>}
+
+                    {/* Pause/Resume buttons */}
+                    {state.uploadPhase === 'uploading' && (
+                      <div className="flex items-center gap-2 mt-3">
+                        {state.isPaused ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={resumeUpload}
+                            className="flex items-center gap-1.5"
+                          >
+                            <Play className="w-4 h-4" />
+                            Resume
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={pauseUpload}
+                            className="flex items-center gap-1.5"
+                          >
+                            <Pause className="w-4 h-4" />
+                            Pause
+                          </Button>
+                        )}
+                      </div>
+                    )}
+
+                    {state.error && (
+                      <div className="mt-2">
+                        <p className="text-xs text-red-400">{state.error}</p>
+                        {state.uploadPhase === 'error' && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={retryUpload}
+                            className="mt-2 flex items-center gap-1.5"
+                          >
+                            <RotateCcw className="w-4 h-4" />
+                            Retry Upload
+                          </Button>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
 
                 {/* Video Link - show in upload mode after upload or in edit mode */}
                 {(state.videoUuid || (mode === 'edit' && editVideo)) && (
                   <div className="p-4 bg-white/5 border border-white/10 rounded-lg">
-                    <p className="text-xs text-text-tertiary mb-1">Video link</p>
+                    <p className="text-xs text-text-tertiary mb-1">
+                      {isShort ? 'Short' : 'Video'} Link
+                    </p>
                     <p className="text-sm text-blue-400 break-all">
-                      https://taboo.tv/watch/{state.videoUuid || editVideo?.uuid}
+                      {typeof window !== 'undefined'
+                        ? window.location.origin
+                        : 'https://app.taboo.tv'}
+                      {isShort ? '/shorts/' : '/video/'}
+                      {state.videoUuid || editVideo?.uuid}
                     </p>
                   </div>
                 )}
