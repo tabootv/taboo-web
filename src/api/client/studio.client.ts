@@ -9,6 +9,11 @@
  * - POST /studio/shorts → StudioUploadShortResponse
  * - POST /studio/posts → StudioCreatePostResponse
  * - POST /videos/prepare-bunny-upload → PrepareBunnyUploadResponse
+ * - PATCH /studio/videos/{videoUuid} → UpdateVideoResponse (unified metadata + visibility)
+ * - POST /studio/videos/{videoUuid}/toggle-hidden → ToggleHiddenResponse
+ * - DELETE /studio/videos/{videoUuid} → DeleteVideoResponse
+ *
+ * @deprecated endpoints (use UUID-based methods instead):
  * - PATCH /studio/videos/{id} → UpdateVideoResponse
  * - PATCH /studio/videos/{id}/visibility → UpdateVideoResponse
  * - PATCH /studio/shorts/{id}/visibility → UpdateVideoResponse
@@ -18,8 +23,12 @@
 
 import type {
   ApiResponse,
+  CreateSchedulePayload,
+  DeleteScheduleResponse,
+  DeleteVideoResponse,
   PrepareBunnyUploadPayload,
   PrepareBunnyUploadResponse,
+  ScheduleResponse,
   StudioContentListResponse,
   StudioCreatePostPayload,
   StudioCreatePostResponse,
@@ -32,7 +41,10 @@ import type {
   StudioVideoListItem,
   StudioVideosListResponse,
   StudioVideosQueryParams,
+  ToggleHiddenResponse,
+  UpdateSchedulePayload,
   UpdateVideoMetadataPayload,
+  UpdateVideoPayload,
   UpdateVideoResponse,
   UpdateVisibilityPayload,
 } from '../types';
@@ -209,10 +221,11 @@ export const studioClient = {
   },
 
   /**
-   * Delete a video
+   * Delete a video permanently
+   * @param videoUuid - The video's UUID (string)
    */
-  deleteVideo: async (videoId: number): Promise<{ success: boolean }> => {
-    const data = await apiClient.delete<{ success: boolean }>(`/studio/videos/${videoId}`);
+  deleteVideo: async (videoUuid: string): Promise<DeleteVideoResponse> => {
+    const data = await apiClient.delete<DeleteVideoResponse>(`/studio/videos/${videoUuid}`);
     return data;
   },
 
@@ -248,7 +261,102 @@ export const studioClient = {
   },
 
   /**
+   * Update video metadata and/or publication status (unified endpoint)
+   * Uses videoUuid (string), not numeric ID
+   * @param videoUuid - The video's UUID
+   * @param payload - UpdateVideoPayload with optional fields
+   */
+  updateVideo: async (
+    videoUuid: string,
+    payload: UpdateVideoPayload
+  ): Promise<UpdateVideoResponse> => {
+    // Handle FormData if thumbnail file is included
+    if (payload.thumbnail instanceof File) {
+      const formData = new FormData();
+      Object.entries(payload).forEach(([key, value]) => {
+        if (value !== undefined) {
+          if (key === 'tags' && Array.isArray(value)) {
+            value.forEach((tag, i) => formData.append(`tags[${i}]`, String(tag)));
+          } else if (value instanceof File) {
+            formData.append(key, value);
+          } else if (typeof value === 'boolean') {
+            formData.append(key, value ? '1' : '0');
+          } else {
+            formData.append(key, String(value));
+          }
+        }
+      });
+      const data = await apiClient.patch<UpdateVideoResponse>(
+        `/studio/videos/${videoUuid}`,
+        formData,
+        { headers: { 'Content-Type': 'multipart/form-data' } }
+      );
+      return data;
+    }
+
+    const data = await apiClient.patch<UpdateVideoResponse>(`/studio/videos/${videoUuid}`, payload);
+    return data;
+  },
+
+  /**
+   * Toggle video hidden status
+   * Hidden videos are not shown in public listings
+   * @param videoUuid - The video's UUID
+   */
+  toggleVideoHidden: async (videoUuid: string): Promise<ToggleHiddenResponse> => {
+    const data = await apiClient.post<ToggleHiddenResponse>(
+      `/studio/videos/${videoUuid}/toggle-hidden`
+    );
+    return data;
+  },
+
+  /**
+   * Create a publish schedule for a video
+   * Used to publish immediately (auto) or at a scheduled time
+   * @param videoUuid - The video's UUID
+   * @param payload - Schedule configuration
+   */
+  createSchedule: async (
+    videoUuid: string,
+    payload: CreateSchedulePayload
+  ): Promise<ScheduleResponse> => {
+    const data = await apiClient.post<ScheduleResponse>(
+      `/studio/videos/${videoUuid}/schedule`,
+      payload
+    );
+    return data;
+  },
+
+  /**
+   * Update an existing publish schedule
+   * @param videoUuid - The video's UUID
+   * @param payload - Updated schedule configuration
+   */
+  updateSchedule: async (
+    videoUuid: string,
+    payload: UpdateSchedulePayload
+  ): Promise<ScheduleResponse> => {
+    const data = await apiClient.patch<ScheduleResponse>(
+      `/studio/videos/${videoUuid}/schedule`,
+      payload
+    );
+    return data;
+  },
+
+  /**
+   * Delete a publish schedule (revert to draft)
+   * @param videoUuid - The video's UUID
+   */
+  deleteSchedule: async (videoUuid: string): Promise<DeleteScheduleResponse> => {
+    const data = await apiClient.delete<DeleteScheduleResponse>(
+      `/studio/videos/${videoUuid}/schedule`
+    );
+    return data;
+  },
+
+  /**
    * Update video metadata (title, description, tags, etc.)
+   * @deprecated Use updateVideo(videoUuid, payload) instead
    */
   updateVideoMetadata: async (
     videoId: number,
@@ -260,6 +368,7 @@ export const studioClient = {
 
   /**
    * Update video visibility
+   * @deprecated Use updateVideo(videoUuid, { publish_mode, scheduled_at }) instead
    */
   updateVideoVisibility: async (
     videoId: number,
@@ -274,6 +383,7 @@ export const studioClient = {
 
   /**
    * Update short visibility
+   * @deprecated Use updateVideo(videoUuid, { publish_mode, scheduled_at }) instead
    */
   updateShortVisibility: async (
     videoId: number,

@@ -160,6 +160,8 @@ export interface StudioVideoListItem {
   short?: boolean;
   /** Scheduled publication info */
   publish_schedule?: PublishSchedule | null;
+  /** Whether video is hidden from public listings */
+  hidden?: boolean;
   /** Location name */
   location?: string;
   /** Country name */
@@ -295,6 +297,9 @@ export interface StudioContentListItem {
   duration?: number;
 }
 
+/**
+ * @deprecated Use UpdateVideoPayload instead
+ */
 export interface UpdateVideoMetadataPayload {
   title?: string;
   description?: string;
@@ -310,16 +315,101 @@ export interface UpdateVideoMetadataPayload {
 /**
  * Payload for updating video visibility/publication status
  * Uses publish_mode to match API expectations
+ * @deprecated Use UpdateVideoPayload with publish_mode field instead
  */
 export interface UpdateVisibilityPayload {
   publish_mode: PublicationMode;
   scheduled_at?: string;
 }
 
+/**
+ * Unified payload for PATCH /api/studio/videos/{videoUuid}
+ * Combines metadata and publication settings in a single request
+ */
+export interface UpdateVideoPayload {
+  title?: string;
+  description?: string;
+  location?: string;
+  latitude?: number;
+  longitude?: number;
+  country_id?: number;
+  series_id?: number;
+  is_adult_content?: boolean;
+  featured?: boolean;
+  hidden?: boolean;
+  published_at?: string;
+  /** Array of tag SLUGS (not IDs) */
+  tags?: string[];
+  /** Thumbnail file for FormData upload */
+  thumbnail?: File;
+  publish_mode?: PublicationMode;
+  /** Required if publish_mode='scheduled' (ISO 8601 datetime) */
+  scheduled_at?: string;
+}
+
+/**
+ * Response for POST /api/studio/videos/{videoUuid}/toggle-hidden
+ */
+export interface ToggleHiddenResponse {
+  success: boolean;
+  data: {
+    hidden: boolean;
+    message: string;
+  };
+}
+
+/**
+ * Response for DELETE /api/studio/videos/{videoUuid}
+ */
+export interface DeleteVideoResponse {
+  success: boolean;
+  data: [];
+  message: string;
+}
+
 export interface UpdateVideoResponse {
   success: boolean;
   video?: StudioVideoListItem;
   errors?: Record<string, string[]>;
+}
+
+/** Payload for POST /api/studio/videos/{videoUuid}/schedule */
+export interface CreateSchedulePayload {
+  publish_mode: 'auto' | 'scheduled';
+  scheduled_at?: string; // Required if publish_mode='scheduled'
+  notify?: boolean;
+}
+
+/** Payload for PATCH /api/studio/videos/{videoUuid}/schedule */
+export interface UpdateSchedulePayload {
+  publish_mode?: 'auto' | 'scheduled';
+  scheduled_at?: string;
+  notify?: boolean;
+}
+
+/** Schedule object returned by API */
+export interface VideoPublishSchedule {
+  id: number;
+  video_id: number;
+  publish_mode: 'auto' | 'scheduled';
+  scheduled_at: string | null;
+  notify: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Response for POST/PATCH schedule endpoints */
+export interface ScheduleResponse {
+  success: boolean;
+  data: { schedule: VideoPublishSchedule };
+  message: string;
+}
+
+/** Response for DELETE schedule endpoint */
+export interface DeleteScheduleResponse {
+  success: boolean;
+  data: [];
+  message: string;
 }
 
 export interface StudioContentListResponse {

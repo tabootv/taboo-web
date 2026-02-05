@@ -16,6 +16,7 @@ export interface PublicVideosFilters extends Record<string, unknown> {
 export interface TagOption {
   id: number;
   name: string;
+  slug: string;
   count: number;
 }
 

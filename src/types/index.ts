@@ -149,6 +149,10 @@ export type {
   UpdateVideoMetadataPayload,
   UpdateVisibilityPayload,
   UpdateVideoResponse,
+  // UUID-based unified endpoint types
+  UpdateVideoPayload,
+  ToggleHiddenResponse,
+  DeleteVideoResponse,
   // Video listing query params
   StudioVideoContentType,
   StudioVideoSortBy,
@@ -158,6 +162,12 @@ export type {
   PublishSchedule,
   PublicationMode,
   VideoDisplayState,
+  // Schedule API types
+  CreateSchedulePayload,
+  UpdateSchedulePayload,
+  VideoPublishSchedule,
+  ScheduleResponse,
+  DeleteScheduleResponse,
 } from './studio';
 
 // Earnings Types (FirstPromoter Integration)

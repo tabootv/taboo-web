@@ -6,12 +6,15 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type {
+  CreateSchedulePayload,
+  PrepareBunnyUploadPayload,
   StudioCreatePostPayload,
   StudioUploadShortPayload,
   StudioUploadVideoPayload,
+  UpdateSchedulePayload,
   UpdateVideoMetadataPayload,
+  UpdateVideoPayload,
   UpdateVisibilityPayload,
-  PrepareBunnyUploadPayload,
 } from '../types';
 import { studioClient } from '../client/studio.client';
 
@@ -62,14 +65,16 @@ export function useCreateStudioPost() {
 
 /**
  * Hook to delete a video
+ * Uses UUID-based endpoint
  */
 export function useDeleteVideo() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (videoId: number) => studioClient.deleteVideo(videoId),
+    mutationFn: (videoUuid: string) => studioClient.deleteVideo(videoUuid),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['studio', 'videos'] });
+      queryClient.invalidateQueries({ queryKey: ['studio', 'shorts'] });
       queryClient.invalidateQueries({ queryKey: ['studio', 'dashboard'] });
     },
   });
@@ -109,7 +114,88 @@ export function useDeleteStudioPost() {
 }
 
 /**
+ * Hook to update video (metadata + visibility in single call)
+ * Uses UUID-based endpoint
+ */
+export function useUpdateVideo() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ videoUuid, payload }: { videoUuid: string; payload: UpdateVideoPayload }) =>
+      studioClient.updateVideo(videoUuid, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['studio', 'videos'] });
+      queryClient.invalidateQueries({ queryKey: ['studio', 'shorts'] });
+      queryClient.invalidateQueries({ queryKey: ['studio', 'dashboard'] });
+    },
+  });
+}
+
+/**
+ * Hook to toggle video hidden status
+ */
+export function useToggleVideoHidden() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (videoUuid: string) => studioClient.toggleVideoHidden(videoUuid),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['studio', 'videos'] });
+    },
+  });
+}
+
+/**
+ * Hook to create a publish schedule (publish now or scheduled)
+ */
+export function useCreateSchedule() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ videoUuid, payload }: { videoUuid: string; payload: CreateSchedulePayload }) =>
+      studioClient.createSchedule(videoUuid, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['studio', 'videos'] });
+      queryClient.invalidateQueries({ queryKey: ['studio', 'shorts'] });
+      queryClient.invalidateQueries({ queryKey: ['studio', 'dashboard'] });
+    },
+  });
+}
+
+/**
+ * Hook to update an existing publish schedule
+ */
+export function useUpdateSchedule() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ videoUuid, payload }: { videoUuid: string; payload: UpdateSchedulePayload }) =>
+      studioClient.updateSchedule(videoUuid, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['studio', 'videos'] });
+      queryClient.invalidateQueries({ queryKey: ['studio', 'shorts'] });
+    },
+  });
+}
+
+/**
+ * Hook to delete a publish schedule (revert to draft)
+ */
+export function useDeleteSchedule() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (videoUuid: string) => studioClient.deleteSchedule(videoUuid),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['studio', 'videos'] });
+      queryClient.invalidateQueries({ queryKey: ['studio', 'shorts'] });
+    },
+  });
+}
+
+/**
  * Hook to update video metadata
+ * @deprecated Use useUpdateVideo() instead
  */
 export function useUpdateVideoMetadata() {
   const queryClient = useQueryClient();
@@ -126,6 +212,7 @@ export function useUpdateVideoMetadata() {
 
 /**
  * Hook to update video visibility
+ * @deprecated Use useUpdateVideo() with publish_mode field instead
  */
 export function useUpdateVideoVisibility() {
   const queryClient = useQueryClient();
@@ -142,6 +229,7 @@ export function useUpdateVideoVisibility() {
 
 /**
  * Hook to update short visibility
+ * @deprecated Use useUpdateVideo() with publish_mode field instead
  */
 export function useUpdateShortVisibility() {
   const queryClient = useQueryClient();
