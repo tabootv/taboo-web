@@ -1,19 +1,13 @@
 import Link from 'next/link';
-import { Video, Film, MessageSquarePlus } from 'lucide-react';
+import { Video, MessageSquarePlus } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
 const QUICK_ACTIONS = [
   {
-    href: '/studio/upload/video',
+    href: '/studio/content',
     icon: Video,
-    title: 'Upload video',
-    subtitle: 'Long-form drops',
-  },
-  {
-    href: '/studio/upload/short',
-    icon: Film,
-    title: 'Upload short',
-    subtitle: 'Vertical stories',
+    title: 'Upload content',
+    subtitle: 'Videos & shorts',
   },
   {
     href: '/studio/posts',

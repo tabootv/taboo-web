@@ -16,7 +16,6 @@ import {
   ChevronDown,
   ExternalLink,
   FileText,
-  Film,
   HelpCircle,
   LogOut,
   Menu,
@@ -68,15 +67,9 @@ export function StudioHeader() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem asChild>
-                <Link href="/studio/upload/video" className="flex items-center gap-3">
+                <Link href="/studio/content" className="flex items-center gap-3">
                   <Video className="w-4 h-4" />
                   Upload Video
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/studio/upload/short" className="flex items-center gap-3">
-                  <Film className="w-4 h-4" />
-                  Upload Short
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>

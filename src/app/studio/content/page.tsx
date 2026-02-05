@@ -28,7 +28,7 @@ import {
   type Visibility,
 } from '../_components/content-table';
 import { ContentFilterBar } from '../_components/content-table/ContentFilterBar';
-import { UploadModal } from '../upload/_components/UploadModal';
+import { UploadModal } from '@/features/upload';
 import { useContentFilters } from './_hooks/use-content-filters';
 import {
   deriveVideoDisplayState,

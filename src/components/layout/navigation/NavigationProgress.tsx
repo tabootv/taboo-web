@@ -10,8 +10,7 @@ export function NavigationProgress() {
   const prevPathnameRef = useRef(pathname);
   const isShortsPage = pathname?.startsWith('/shorts');
   const isVideoPage = pathname?.startsWith('/videos/');
-  const isStudioUploadPage = pathname?.startsWith('/studio/upload');
-  const isImmersiveRoute = isShortsPage || isVideoPage || isStudioUploadPage;
+  const isImmersiveRoute = isShortsPage || isVideoPage;
 
   useEffect(() => {
     if (isImmersiveRoute) {

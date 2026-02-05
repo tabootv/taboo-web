@@ -2,7 +2,7 @@
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import type { PublishMode } from '@/app/studio/upload/_config/types';
+import type { PublishMode } from '@/features/upload/config/types';
 import { fileReferenceStore } from './file-reference-store';
 
 /**

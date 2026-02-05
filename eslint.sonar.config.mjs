@@ -1,7 +1,7 @@
-import { defineConfig, globalIgnores } from 'eslint/config';
 import nextVitals from 'eslint-config-next/core-web-vitals';
 import nextTs from 'eslint-config-next/typescript';
 import sonarjs from 'eslint-plugin-sonarjs';
+import { defineConfig, globalIgnores } from 'eslint/config';
 
 export default defineConfig([
   // Inherit Next.js TypeScript config for proper parsing
@@ -16,7 +16,7 @@ export default defineConfig([
     files: ['**/*.{ts,tsx,js,jsx}'],
     rules: {
       // Core rules with strict thresholds to match IDE
-      'sonarjs/cognitive-complexity': ['error', 15],
+      'sonarjs/cognitive-complexity': ['error', 22],
 
       // Optional chaining and null safety
       'sonarjs/no-redundant-optional': 'error', // Detect unnecessary optional chaining

@@ -1,10 +1,10 @@
 'use client';
 
-import { FileText, Film, Video } from 'lucide-react';
+import { FileText, Video } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-type ContentType = 'video' | 'short' | 'post';
+type ContentType = 'video' | 'post';
 
 interface ContentTypeItem {
   name: string;
@@ -14,14 +14,12 @@ interface ContentTypeItem {
 }
 
 const contentTypes: ContentTypeItem[] = [
-  { name: 'Video', href: '/studio/upload/video', icon: Video, type: 'video' },
-  { name: 'Short', href: '/studio/upload/short', icon: Film, type: 'short' },
+  { name: 'Video', href: '/studio/content', icon: Video, type: 'video' },
   { name: 'Post', href: '/studio/posts', icon: FileText, type: 'post' },
 ];
 
 const activeColors: Record<ContentType, string> = {
   video: 'bg-red-primary',
-  short: 'bg-red-primary',
   post: 'bg-red-primary',
 };
 
@@ -29,8 +27,7 @@ export function ContentTypeSelector() {
   const pathname = usePathname();
 
   const getActiveType = (): ContentType | null => {
-    if (pathname.includes('/upload/video')) return 'video';
-    if (pathname.includes('/upload/short')) return 'short';
+    if (pathname.includes('/content')) return 'video';
     if (pathname.includes('/posts')) return 'post';
     return null;
   };

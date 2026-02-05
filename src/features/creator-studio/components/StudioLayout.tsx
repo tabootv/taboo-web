@@ -40,13 +40,8 @@ export function StudioLayout({ children }: StudioLayoutProps) {
     const breadcrumbs = [{ label: 'Creator Studio', href: '/studio' }];
 
     if (segments.length > 1) {
-      if (segments[1] === 'upload') {
-        breadcrumbs.push({ label: 'Upload', href: '/studio' });
-        if (segments[2] === 'video') {
-          breadcrumbs.push({ label: 'Video', href: '/studio/upload/video' });
-        } else if (segments[2] === 'short') {
-          breadcrumbs.push({ label: 'Short', href: '/studio/upload/short' });
-        }
+      if (segments[1] === 'content') {
+        breadcrumbs.push({ label: 'Content', href: '/studio/content' });
       } else if (segments[1] === 'community') {
         breadcrumbs.push({ label: 'Community', href: '/studio/community' });
         if (segments[2] === 'post') {

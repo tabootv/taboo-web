@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 
 // Routes that manage their own scroll behavior
-const SCROLL_OPT_OUT_ROUTES = ['/shorts', '/studio/upload'] as const;
+const SCROLL_OPT_OUT_ROUTES = ['/shorts'] as const;
 
 function shouldOptOut(pathname: string | null): boolean {
   if (!pathname) return false;
