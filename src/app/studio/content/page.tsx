@@ -1,18 +1,22 @@
 'use client';
 
 import {
+  useCreateSchedule,
+  useDeleteSchedule,
   useDeleteShort,
   useDeleteStudioPost,
   useDeleteVideo,
-  useUpdateShortVisibility,
-  useUpdateVideoVisibility,
+  useToggleVideoHidden,
+  useUpdateSchedule,
 } from '@/api/mutations/studio.mutations';
 import { useStudioPosts, useStudioShorts, useStudioVideos } from '@/api/queries/studio.queries';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/shared/stores/auth-store';
-import type { PublicationMode, StudioVideoListItem } from '@/types/studio';
+import type { StudioVideoListItem } from '@/types/studio';
 import { Upload } from 'lucide-react';
-import { Suspense, useCallback, useMemo, useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useUploadStore } from '@/shared/stores/upload-store';
 import { toast } from 'sonner';
 import {
   ContentTable,
@@ -53,12 +57,19 @@ interface EditVideoData {
 
 function ContentPageInner() {
   const { user } = useAuthStore();
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<ContentType>('videos');
   const [videosPage, setVideosPage] = useState(1);
   const [shortsPage, setShortsPage] = useState(1);
   const [postsPage, setPostsPage] = useState(1);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [editingVideo, setEditingVideo] = useState<EditVideoData | null>(null);
+  // Resume mode: uploadId for resuming an in-progress upload
+  const [resumeUploadId, setResumeUploadId] = useState<string | null>(null);
+
+  // Track if we've processed this uploadId to prevent re-triggers
+  const processedUploadIdRef = useRef<string | null>(null);
 
   const { filters, setFilters } = useContentFilters();
 
@@ -92,8 +103,60 @@ function ContentPageInner() {
   const deleteVideoMutation = useDeleteVideo();
   const deleteShortMutation = useDeleteShort();
   const deletePostMutation = useDeleteStudioPost();
-  const updateVideoVisibilityMutation = useUpdateVideoVisibility();
-  const updateShortVisibilityMutation = useUpdateShortVisibility();
+  const createScheduleMutation = useCreateSchedule();
+  const updateScheduleMutation = useUpdateSchedule();
+  const deleteScheduleMutation = useDeleteSchedule();
+  const toggleHiddenMutation = useToggleVideoHidden();
+
+  /**
+   * Handle uploadId query parameter - opens modal for background upload
+   * Supports both in-progress (resume mode) and complete (edit mode) uploads
+   */
+  const uploadId = searchParams.get('uploadId');
+  useEffect(() => {
+    // Skip if no uploadId or already processed
+    if (!uploadId || processedUploadIdRef.current === uploadId) return;
+
+    const upload = useUploadStore.getState().getUpload(uploadId);
+    if (!upload) return;
+
+    // Mark as processed BEFORE opening modal to prevent race conditions
+    processedUploadIdRef.current = uploadId;
+
+    // Set modal open in store (prevents auto-clear)
+    useUploadStore.getState().setModalOpen(uploadId, true);
+
+    const isInProgress = ['preparing', 'uploading', 'processing'].includes(upload.phase);
+    const isComplete = upload.phase === 'complete';
+
+    if (isInProgress || upload.isStale) {
+      // Resume mode: open modal attached to existing upload
+      setResumeUploadId(uploadId);
+    } else if (isComplete && upload.videoUuid) {
+      // Edit mode: build edit data from store
+      const editData: EditVideoData = {
+        id: upload.videoId ?? 0,
+        uuid: upload.videoUuid,
+        title: upload.metadata.title,
+        visibility: 'draft',
+        isShort: upload.contentType === 'short',
+      };
+
+      // Map optional metadata fields
+      if (upload.metadata.description) editData.description = upload.metadata.description;
+      if (upload.metadata.tags?.length) editData.tags = upload.metadata.tags;
+      if (upload.metadata.location) editData.location = upload.metadata.location;
+      if (upload.metadata.countryId) editData.countryId = upload.metadata.countryId;
+      if (upload.metadata.publishMode) editData.publishMode = upload.metadata.publishMode;
+      if (upload.metadata.scheduledAt) editData.scheduledAt = upload.metadata.scheduledAt;
+
+      // Open the edit modal
+      setEditingVideo(editData);
+    }
+
+    // Clean up URL to prevent re-triggering on page refresh
+    router.replace('/studio/content', { scroll: false });
+  }, [uploadId, router]);
 
   /**
    * Transform API video item to ContentItem for UI display
@@ -109,6 +172,7 @@ function ContentPageInner() {
       visibility: deriveVideoDisplayState(item) as Visibility,
       scheduled_at: item.publish_schedule?.scheduled_at,
       processing_status: deriveProcessingStatus(item),
+      hidden: item.hidden,
       restrictions: [],
       comments_count: item.comments_count || 0,
       likes_count: item.likes_count || 0,
@@ -226,7 +290,8 @@ function ContentPageInner() {
           await deleteShortMutation.mutateAsync(item.id);
           refetchShorts();
         } else {
-          await deleteVideoMutation.mutateAsync(item.id);
+          // Use UUID-based delete endpoint
+          await deleteVideoMutation.mutateAsync(item.uuid);
           refetchVideos();
         }
         toast.success(`${isShort ? 'Short' : 'Video'} deleted successfully`);
@@ -238,47 +303,69 @@ function ContentPageInner() {
   );
 
   const handleVisibilityChange = useCallback(
-    async (item: ContentItem, visibility: Visibility) => {
-      const isShort = activeTab === 'shorts';
-
-      // Map UI visibility to API publish_mode
-      const publishModeMap: Record<Visibility, PublicationMode> = {
-        live: 'auto',
-        draft: 'none',
-        scheduled: 'scheduled',
-        processing: 'none', // Processing videos default to draft mode
-      };
-
-      const payload = { publish_mode: publishModeMap[visibility] };
+    async (item: ContentItem, visibility: Visibility, scheduledAt?: Date) => {
+      // Find the raw video to check current state
+      const rawVideo = videosData?.videos?.find((v) => v.id === item.id);
+      const hasSchedule = !!rawVideo?.publish_schedule?.scheduled_at;
+      const isPublished = rawVideo?.published === true;
 
       try {
-        if (isShort) {
-          await updateShortVisibilityMutation.mutateAsync({
-            videoId: item.id,
-            payload,
+        if (visibility === 'live' && !isPublished) {
+          // Draft -> Live: POST /schedule with auto
+          await createScheduleMutation.mutateAsync({
+            videoUuid: item.uuid,
+            payload: { publish_mode: 'auto' },
           });
-          refetchShorts();
-        } else {
-          await updateVideoVisibilityMutation.mutateAsync({
-            videoId: item.id,
-            payload,
-          });
-          refetchVideos();
+          toast.success('Published');
+        } else if (visibility === 'scheduled' && scheduledAt) {
+          if (hasSchedule) {
+            // Scheduled -> Scheduled (edit): PATCH /schedule
+            await updateScheduleMutation.mutateAsync({
+              videoUuid: item.uuid,
+              payload: { scheduled_at: scheduledAt.toISOString() },
+            });
+            toast.success('Schedule updated');
+          } else {
+            // Draft -> Scheduled: POST /schedule
+            await createScheduleMutation.mutateAsync({
+              videoUuid: item.uuid,
+              payload: { publish_mode: 'scheduled', scheduled_at: scheduledAt.toISOString() },
+            });
+            toast.success('Scheduled for publication');
+          }
         }
-
-        const visibilityLabel = visibility === 'live' ? 'Published' : 'Saved as draft';
-        toast.success(visibilityLabel);
+        // Note: Live -> Draft NOT SUPPORTED by backend (handled in UI by hiding that option)
       } catch {
         toast.error('Failed to update visibility');
       }
     },
-    [
-      activeTab,
-      updateVideoVisibilityMutation,
-      updateShortVisibilityMutation,
-      refetchVideos,
-      refetchShorts,
-    ]
+    [videosData?.videos, createScheduleMutation, updateScheduleMutation]
+  );
+
+  const handleScheduleCancel = useCallback(
+    async (item: ContentItem) => {
+      try {
+        // Scheduled -> Draft: DELETE /schedule
+        await deleteScheduleMutation.mutateAsync(item.uuid);
+        toast.success('Schedule cancelled');
+      } catch {
+        toast.error('Failed to cancel schedule');
+      }
+    },
+    [deleteScheduleMutation]
+  );
+
+  const handleToggleHidden = useCallback(
+    async (item: ContentItem) => {
+      try {
+        const response = await toggleHiddenMutation.mutateAsync(item.uuid);
+        const newState = response.data.hidden ? 'hidden from listings' : 'visible in listings';
+        toast.success(`Video is now ${newState}`);
+      } catch {
+        toast.error('Failed to toggle visibility');
+      }
+    },
+    [toggleHiddenMutation]
   );
 
   const handlePostEdit = useCallback((item: PostItem) => {
@@ -311,6 +398,7 @@ function ContentPageInner() {
 
   const handleCloseUploadModal = useCallback(() => {
     setIsUploadModalOpen(false);
+    setResumeUploadId(null);
   }, []);
 
   const handleEditSuccess = useCallback(() => {
@@ -327,7 +415,8 @@ function ContentPageInner() {
     <div className="p-6 lg:p-8">
       {/* Upload Modal */}
       <UploadModal
-        isOpen={isUploadModalOpen}
+        isOpen={isUploadModalOpen || !!resumeUploadId}
+        {...(resumeUploadId ? { resumeUploadId } : {})}
         onClose={handleCloseUploadModal}
         onSuccess={handleUploadSuccess}
       />
@@ -403,6 +492,8 @@ function ContentPageInner() {
             onEdit={handleEdit}
             onDelete={handleDelete}
             onVisibilityChange={handleVisibilityChange}
+            onScheduleCancel={handleScheduleCancel}
+            onToggleHidden={handleToggleHidden}
           />
         )}
       </div>

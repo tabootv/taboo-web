@@ -1,13 +1,14 @@
 'use client';
 
-import { useState } from 'react';
-import { AlertTriangle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { AlertTriangle, Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 interface DeleteConfirmationDialogProps {
   isOpen: boolean;
@@ -26,6 +27,12 @@ export function DeleteConfirmationDialog({
 }: DeleteConfirmationDialogProps) {
   const [isChecked, setIsChecked] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // SSR safety: only render portal after component mounts on client
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleConfirm = async () => {
     if (!isChecked) return;
@@ -46,9 +53,10 @@ export function DeleteConfirmationDialog({
     }
   };
 
-  if (!isOpen) return null;
+  // Don't render if not open or not mounted (SSR)
+  if (!isOpen || !mounted) return null;
 
-  return (
+  const dialogContent = (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={handleClose} />
@@ -105,7 +113,6 @@ export function DeleteConfirmationDialog({
           </span>
         </label>
 
-        {/* Actions */}
         <div className="flex justify-end gap-3">
           <Button variant="ghost" onClick={handleClose} disabled={isDeleting}>
             Cancel
@@ -129,9 +136,10 @@ export function DeleteConfirmationDialog({
       </div>
     </div>
   );
+
+  return createPortal(dialogContent, document.body);
 }
 
-// Inline delete confirmation for table row dropdown
 interface InlineDeleteConfirmProps {
   trigger: React.ReactNode;
   title: string;

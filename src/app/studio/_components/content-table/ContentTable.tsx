@@ -9,7 +9,7 @@ import type { Visibility } from './VisibilityDropdown';
 interface ContentTableProps {
   items: ContentItem[];
   isShort: boolean;
-  isLoading?: boolean;
+  isLoading?: boolean | undefined;
   pagination:
     | {
         currentPage: number;
@@ -18,10 +18,16 @@ interface ContentTableProps {
         perPage: number;
       }
     | undefined;
-  onPageChange?: (page: number) => void;
+  onPageChange?: ((page: number) => void) | undefined;
   onEdit: (item: ContentItem) => void;
   onDelete: (item: ContentItem) => Promise<void>;
-  onVisibilityChange: (item: ContentItem, visibility: Visibility) => Promise<void>;
+  onVisibilityChange: (
+    item: ContentItem,
+    visibility: Visibility,
+    scheduledAt?: Date
+  ) => Promise<void>;
+  onScheduleCancel?: ((item: ContentItem) => Promise<void>) | undefined;
+  onToggleHidden?: ((item: ContentItem) => Promise<void>) | undefined;
 }
 
 function EmptyState({ isShort }: { isShort: boolean }) {
@@ -150,6 +156,8 @@ export function ContentTable({
   onEdit,
   onDelete,
   onVisibilityChange,
+  onScheduleCancel,
+  onToggleHidden,
 }: ContentTableProps) {
   if (isLoading) {
     return (
@@ -190,6 +198,8 @@ export function ContentTable({
                 onEdit={onEdit}
                 onDelete={onDelete}
                 onVisibilityChange={onVisibilityChange}
+                onScheduleCancel={onScheduleCancel}
+                onToggleHidden={onToggleHidden}
               />
             ))}
           </tbody>

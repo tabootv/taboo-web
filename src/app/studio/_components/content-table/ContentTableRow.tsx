@@ -17,8 +17,10 @@ export interface ContentItem {
   visibility: Visibility;
   scheduled_at: string | undefined;
   processing_status: 'uploading' | 'processing' | 'ready';
+  /** Whether video is hidden from public listings */
+  hidden?: boolean | undefined;
 
-  processing_progress?: number;
+  processing_progress?: number | undefined;
   restrictions: string[];
   comments_count: number;
   likes_count: number;
@@ -32,7 +34,13 @@ interface ContentTableRowProps {
   isShort: boolean;
   onEdit: (item: ContentItem) => void;
   onDelete: (item: ContentItem) => Promise<void>;
-  onVisibilityChange: (item: ContentItem, visibility: Visibility) => Promise<void>;
+  onVisibilityChange: (
+    item: ContentItem,
+    visibility: Visibility,
+    scheduledAt?: Date
+  ) => Promise<void>;
+  onScheduleCancel?: ((item: ContentItem) => Promise<void>) | undefined;
+  onToggleHidden?: ((item: ContentItem) => Promise<void>) | undefined;
 }
 
 function formatNumber(num: number): string {
@@ -120,12 +128,26 @@ export function ContentTableRow({
   onEdit,
   onDelete,
   onVisibilityChange,
+  onScheduleCancel,
+  onToggleHidden,
 }: ContentTableRowProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-  const handleVisibilityChange = async (visibility: Visibility) => {
-    await onVisibilityChange(item, visibility);
+  const handleVisibilityChange = async (visibility: Visibility, scheduledAt?: Date) => {
+    await onVisibilityChange(item, visibility, scheduledAt);
+  };
+
+  const handleScheduleCancel = async () => {
+    if (onScheduleCancel) {
+      await onScheduleCancel(item);
+    }
+  };
+
+  const handleToggleHidden = async () => {
+    if (onToggleHidden) {
+      await onToggleHidden(item);
+    }
   };
 
   const handleDelete = async () => {
@@ -159,9 +181,14 @@ export function ContentTableRow({
                     className="object-cover"
                     sizes={isShort ? '56px' : '112px'}
                   />
+                ) : item.processing_status !== 'ready' ? (
+                  <div className="w-full h-full flex flex-col items-center justify-center text-text-tertiary">
+                    <Loader2 className="w-4 h-4 animate-spin mb-1" />
+                    <span className="text-[10px]">Processing</span>
+                  </div>
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-text-tertiary">
-                    No thumb
+                  <div className="w-full h-full flex items-center justify-center text-text-tertiary text-xs">
+                    No thumbnail
                   </div>
                 )}
                 {item.duration && (
@@ -212,7 +239,10 @@ export function ContentTableRow({
           <VisibilityDropdown
             visibility={item.visibility}
             scheduledAt={item.scheduled_at}
+            hidden={item.hidden}
             onVisibilityChange={handleVisibilityChange}
+            onScheduleCancel={onScheduleCancel ? handleScheduleCancel : undefined}
+            onToggleHidden={onToggleHidden ? handleToggleHidden : undefined}
             disabled={item.processing_status !== 'ready'}
           />
         </td>
