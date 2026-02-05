@@ -1,6 +1,8 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
+import { useShallow } from 'zustand/react/shallow';
 import {
   ChevronDown,
   ChevronUp,
@@ -11,9 +13,13 @@ import {
   Pause,
   Play,
   Upload,
+  Pencil,
+  RotateCcw,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { cn } from '@/shared/utils/formatting';
 import { useUploadStore, type ActiveUpload } from '@/shared/stores/upload-store';
+import { UploadProgressBar } from './UploadProgressBar';
 
 /**
  * Format bytes to human-readable string
@@ -34,6 +40,15 @@ function getPhaseInfo(upload: ActiveUpload): {
   icon: React.ReactNode;
   color: string;
 } {
+  // Check for stale uploads first (hydrated without live TUS client)
+  if (upload.isStale) {
+    return {
+      label: 'Session expired',
+      icon: <AlertTriangle className="w-4 h-4" />,
+      color: 'text-orange-500',
+    };
+  }
+
   switch (upload.phase) {
     case 'preparing':
       return {
@@ -42,7 +57,8 @@ function getPhaseInfo(upload: ActiveUpload): {
         color: 'text-blue-400',
       };
     case 'uploading':
-      if (upload.isPaused) {
+      // Only show "Paused" when phase is strictly 'uploading' (defensive guard)
+      if (upload.isPaused && upload.phase === 'uploading') {
         return {
           label: 'Paused',
           icon: <Pause className="w-4 h-4" />,
@@ -85,13 +101,36 @@ function getPhaseInfo(upload: ActiveUpload): {
  * Single upload item in the expanded list
  */
 function UploadItem({ upload }: { upload: ActiveUpload }) {
+  const router = useRouter();
   const pauseUpload = useUploadStore((state) => state.pauseUpload);
   const resumeUpload = useUploadStore((state) => state.resumeUpload);
   const removeUpload = useUploadStore((state) => state.removeUpload);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const phaseInfo = getPhaseInfo(upload);
-  const canPauseResume = upload.phase === 'uploading';
-  const canRemove = upload.phase === 'complete' || upload.phase === 'error';
+  // Disable pause/resume for stale uploads (no live TUS client)
+  const canPauseResume = upload.phase === 'uploading' && !upload.isStale;
+  const canRemove = upload.phase === 'complete' || upload.phase === 'error' || upload.isStale;
+  const canEdit = !!upload.videoUuid;
+
+  /**
+   * Handle stale upload resume - user re-selects original file
+   */
+  const handleResumeStale = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file matches original (basic check by name and size)
+    if (file.name !== upload.fileName || file.size !== upload.fileSize) {
+      toast.error('Please select the original file to resume');
+      e.target.value = '';
+      return;
+    }
+
+    // Navigate to content page with resume flag
+    router.push(`/studio/content?uploadId=${upload.id}&resume=true`);
+    e.target.value = '';
+  };
 
   return (
     <div className="p-3 border-b border-white/10 last:border-b-0">
@@ -105,18 +144,16 @@ function UploadItem({ upload }: { upload: ActiveUpload }) {
             {upload.metadata.title || upload.fileName}
           </p>
 
-          {/* Progress bar */}
-          {(upload.phase === 'uploading' || upload.phase === 'preparing') && (
+          {/* Progress bar - only show for active uploads, not stale */}
+          {(upload.phase === 'uploading' || upload.phase === 'preparing') && !upload.isStale && (
             <div className="mt-2">
-              <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-                <div
-                  className={cn(
-                    'h-full rounded-full transition-all duration-300',
-                    upload.isPaused ? 'bg-yellow-500' : 'bg-red-primary'
-                  )}
-                  style={{ width: `${upload.progress}%` }}
-                />
-              </div>
+              <UploadProgressBar
+                phase={upload.phase}
+                progress={upload.progress}
+                isPaused={upload.isPaused}
+                isStale={upload.isStale}
+                size="sm"
+              />
               <div className="flex justify-between mt-1">
                 <span className="text-xs text-text-tertiary">{phaseInfo.label}</span>
                 <span className="text-xs text-text-tertiary">
@@ -126,8 +163,33 @@ function UploadItem({ upload }: { upload: ActiveUpload }) {
             </div>
           )}
 
-          {/* Error message */}
-          {upload.error && <p className="text-xs text-red-400 mt-1 line-clamp-2">{upload.error}</p>}
+          {/* Stale session message with resume option */}
+          {upload.isStale && (
+            <div className="mt-2">
+              <p className="text-xs text-orange-500 mb-2">
+                Session expired. Re-select the original file to resume.
+              </p>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center gap-1.5 text-xs text-red-primary hover:underline"
+              >
+                <RotateCcw className="w-3 h-3" />
+                Resume upload
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="video/*"
+                className="hidden"
+                onChange={handleResumeStale}
+              />
+            </div>
+          )}
+
+          {/* Error message - only show if phase is actually 'error' (not stale errors) */}
+          {upload.phase === 'error' && upload.error && !upload.isStale && (
+            <p className="text-xs text-red-400 mt-1 line-clamp-2">{upload.error}</p>
+          )}
 
           {/* Completed status */}
           {upload.phase === 'complete' && (
@@ -135,13 +197,24 @@ function UploadItem({ upload }: { upload: ActiveUpload }) {
           )}
 
           {/* Processing status */}
-          {upload.phase === 'processing' && (
+          {upload.phase === 'processing' && !upload.isStale && (
             <p className="text-xs text-purple-400 mt-1">Processing video...</p>
           )}
         </div>
 
         {/* Actions */}
         <div className="flex items-center gap-1">
+          {/* Edit button - for uploads with videoUuid */}
+          {canEdit && (
+            <button
+              onClick={() => router.push(`/studio/content?uploadId=${upload.id}`)}
+              className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"
+              title="Edit"
+            >
+              <Pencil className="w-4 h-4 text-text-secondary" />
+            </button>
+          )}
+
           {canPauseResume && (
             <button
               onClick={() => (upload.isPaused ? resumeUpload(upload.id) : pauseUpload(upload.id))}
@@ -183,20 +256,27 @@ function UploadItem({ upload }: { upload: ActiveUpload }) {
 export function GlobalUploadIndicator() {
   const [isExpanded, setIsExpanded] = useState(false);
   const hasHydrated = useUploadStore((state) => state._hasHydrated);
-  const uploads = useUploadStore((state) => state.uploads);
+  // Use useShallow to prevent re-renders when uploads Map reference changes but contents are same
+  const uploads = useUploadStore(useShallow((state) => state.uploads));
   const clearCompleted = useUploadStore((state) => state.clearCompleted);
 
-  // Get uploads as array, excluding idle
-  const activeUploads = Array.from(uploads.values()).filter((u) => u.phase !== 'idle');
+  // Get uploads as array, excluding idle - memoized to prevent unnecessary recalcs
+  const activeUploads = useMemo(
+    () => Array.from(uploads.values()).filter((u) => u.phase !== 'idle'),
+    [uploads]
+  );
 
   // Calculate overall progress
   const uploadingCount = activeUploads.filter(
     (u) => u.phase === 'uploading' || u.phase === 'preparing'
   ).length;
 
-  const processingCount = activeUploads.filter((u) => u.phase === 'processing').length;
+  const processingCount = activeUploads.filter(
+    (u) => u.phase === 'processing' && !u.isStale
+  ).length;
   const completedCount = activeUploads.filter((u) => u.phase === 'complete').length;
-  const errorCount = activeUploads.filter((u) => u.phase === 'error').length;
+  const errorCount = activeUploads.filter((u) => u.phase === 'error' && !u.isStale).length;
+  const staleCount = activeUploads.filter((u) => u.isStale).length;
 
   // Calculate average progress of uploading items
   const uploadingItems = activeUploads.filter((u) => u.phase === 'uploading');
@@ -221,6 +301,8 @@ export function GlobalUploadIndicator() {
     statusText = `${uploadingCount} uploading`;
   } else if (processingCount > 0) {
     statusText = `${processingCount} processing`;
+  } else if (staleCount > 0) {
+    statusText = `${staleCount} expired`;
   } else if (errorCount > 0) {
     statusText = `${errorCount} failed`;
   } else if (completedCount > 0) {
@@ -229,13 +311,16 @@ export function GlobalUploadIndicator() {
 
   // Determine overall color
   let statusColor = 'bg-red-primary';
-  if (errorCount > 0 && uploadingCount === 0 && processingCount === 0) {
+  if (staleCount > 0 && uploadingCount === 0 && processingCount === 0 && errorCount === 0) {
+    statusColor = 'bg-orange-500';
+  } else if (errorCount > 0 && uploadingCount === 0 && processingCount === 0) {
     statusColor = 'bg-red-500';
   } else if (
     completedCount > 0 &&
     uploadingCount === 0 &&
     processingCount === 0 &&
-    errorCount === 0
+    errorCount === 0 &&
+    staleCount === 0
   ) {
     statusColor = 'bg-green-500';
   } else if (processingCount > 0 && uploadingCount === 0) {

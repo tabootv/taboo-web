@@ -2,35 +2,31 @@
 
 import { revalidatePath } from 'next/cache';
 import { studioClient } from '@/api/client/studio.client';
-import type { UploadType } from './_config/types';
 
 /**
- * Delete content (video or short)
+ * Delete video (uses UUID-based endpoint)
  */
-export async function deleteContentAction(
-  type: UploadType,
-  contentId: number
-): Promise<{ success: boolean }> {
-  const result =
-    type === 'video'
-      ? await studioClient.deleteVideo(contentId)
-      : await studioClient.deleteShort(contentId);
+export async function deleteVideoAction(videoUuid: string): Promise<{ success: boolean }> {
+  const result = await studioClient.deleteVideo(videoUuid);
 
   if (result.success) {
     revalidatePath('/studio');
-    revalidatePath(type === 'video' ? '/studio/videos' : '/studio/shorts');
+    revalidatePath('/studio/videos');
   }
 
   return result;
 }
 
 /**
- * Convenience wrappers
+ * Delete short (uses numeric ID - legacy endpoint)
  */
-export async function deleteVideoAction(videoId: number): Promise<{ success: boolean }> {
-  return deleteContentAction('video', videoId);
-}
-
 export async function deleteShortAction(shortId: number): Promise<{ success: boolean }> {
-  return deleteContentAction('short', shortId);
+  const result = await studioClient.deleteShort(shortId);
+
+  if (result.success) {
+    revalidatePath('/studio');
+    revalidatePath('/studio/shorts');
+  }
+
+  return result;
 }

@@ -2,7 +2,9 @@
 
 import { useCallback, useRef, useEffect } from 'react';
 import { studioClient } from '@/api/client/studio.client';
+import type { UpdateVideoPayload } from '@/api/types';
 import { useUploadStore, type ActiveUpload, type UploadPhase } from '@/shared/stores/upload-store';
+import { fileReferenceStore } from '@/shared/stores/file-reference-store';
 import type { TusUploadConfig, PublishMode } from '../_config/types';
 import { detectVideoAspectRatio, type AspectRatioResult } from './use-aspect-ratio';
 
@@ -23,12 +25,16 @@ export interface ImmediateUploadState {
   canPublish: boolean;
   isPaused: boolean;
   error: string | null;
+  modalStep: 'details' | 'location' | 'tags' | 'content-rating' | 'thumbnail' | 'publishing';
 }
 
 export interface ImmediateUploadFormData {
   title: string;
   description?: string;
+  /** Tag IDs for UI selection */
   tags?: number[];
+  /** Tag slugs for API payload */
+  tagSlugs?: string[];
   isAdultContent?: boolean;
   countryId?: number;
   location?: string;
@@ -49,6 +55,7 @@ export interface UseImmediateUploadOptions {
 export interface UseImmediateUploadReturn {
   state: ImmediateUploadState;
   storeUploadId: string | null; // ID in global store
+  storeUpload: ActiveUpload | undefined; // Current upload from store
   startUpload: (file: File) => Promise<void>;
   updateMetadata: (data: Partial<ImmediateUploadFormData>) => void;
   publish: (visibility: 'live' | 'draft') => Promise<void>;
@@ -57,6 +64,9 @@ export interface UseImmediateUploadReturn {
   retryUpload: () => void; // Manual retry after circuit breaker trips
   cancel: () => void;
   reset: () => void;
+  setModalStep: (step: ImmediateUploadState['modalStep']) => void;
+  /** Attach to an existing upload (for resume mode) */
+  attachToUpload: (uploadId: string) => ActiveUpload | null;
 }
 
 const initialState: ImmediateUploadState = {
@@ -73,6 +83,7 @@ const initialState: ImmediateUploadState = {
   canPublish: false,
   isPaused: false,
   error: null,
+  modalStep: 'details',
 };
 
 /**
@@ -163,6 +174,7 @@ export function useImmediateUploadV2({
       canPublish: upload.phase === 'complete',
       isPaused: upload.isPaused,
       error: upload.error,
+      modalStep: upload.modalStep ?? 'details',
     };
   }, [store]);
 
@@ -182,6 +194,25 @@ export function useImmediateUploadV2({
       if (!uploadId) return;
 
       const errorMsg = error.message || 'Upload failed';
+
+      // Check for 404 specifically - indicates stale/invalid upload session
+      const is404 = errorMsg.includes('404') || errorMsg.toLowerCase().includes('not found');
+      if (is404) {
+        console.warn('[Upload] 404 detected - clearing stale upload fingerprint');
+        // Clear TUS localStorage for this fingerprint to prevent future stale resumes
+        const upload = store.getUpload(uploadId);
+        if (upload?.tusFingerprint) {
+          try {
+            localStorage.removeItem(upload.tusFingerprint);
+          } catch {
+            // Ignore localStorage errors
+          }
+        }
+        // Don't retry 404 - go straight to error
+        store.setPhase(uploadId, 'error', 'Upload session expired. Please try again.');
+        onError?.('Upload session expired. Please try again.');
+        return;
+      }
 
       // Check if retryable
       if (isRetryableError(error) && store.canRetry(uploadId)) {
@@ -234,8 +265,8 @@ export function useImmediateUploadV2({
         // Auto-fill title from filename
         const titleFromFile = file.name.replace(/\.[^/.]+$/, '');
 
-        // Create upload entry in global store
-        const uploadId = store.addUpload({
+        // Check for existing upload with same file signature (deduplication)
+        const { id: uploadId, isExisting } = store.addOrFindUpload({
           videoId: null,
           videoUuid: null,
           bunnyVideoId: null,
@@ -257,6 +288,26 @@ export function useImmediateUploadV2({
         });
 
         currentUploadIdRef.current = uploadId;
+
+        // Store file reference for video preview (in-memory only)
+        fileReferenceStore.set(uploadId, file);
+
+        // Mark modal as open for this upload (prevents auto-clear)
+        store.setModalOpen(uploadId, true);
+
+        // If existing upload found, check if it's stale and handle accordingly
+        if (isExisting) {
+          const existingUpload = store.getUpload(uploadId);
+          if (existingUpload?.isStale) {
+            // Clear stale flag and re-prepare the upload
+            store.updateUpload(uploadId, { isStale: false, phase: 'preparing', error: null });
+            console.log('[Upload] Found stale upload, restarting:', uploadId);
+          } else {
+            // Non-stale existing upload - just attach to it
+            console.log('[Upload] Found existing upload, attaching:', uploadId);
+            return;
+          }
+        }
 
         // Mock mode: simulate upload progress without API calls
         if (MOCK_MODE) {
@@ -297,6 +348,7 @@ export function useImmediateUploadV2({
         const prepareResponse = await studioClient.prepareBunnyUpload({
           title: titleFromFile,
           short: detectedType === 'short',
+          publish_mode: 'none', // Force draft mode - prevents backend auto-publish job
         });
 
         store.updateUpload(uploadId, {
@@ -349,7 +401,8 @@ export function useImmediateUploadV2({
         const upload = new tus.Upload(file, {
           endpoint: tusConfig.endpoint,
           // Circuit breaker handles retries, so minimal TUS retries
-          retryDelays: [0, 1000, 2000],
+          // Reduced from [0, 1000, 2000] to fail faster on 404s
+          retryDelays: [0, 1000],
           headers: {
             AuthorizationSignature: tusConfig.headers.AuthorizationSignature,
             AuthorizationExpire: String(tusConfig.headers.AuthorizationExpire),
@@ -362,18 +415,28 @@ export function useImmediateUploadV2({
             filetype: file.type,
           },
           onError: (error: Error) => {
+            console.log('[TUS] onError:', error.message);
             handleUploadError(error);
           },
           onProgress: (bytesUploaded: number, bytesTotal: number) => {
+            const upload = store.getUpload(uploadId);
+            // Don't update progress if paused (prevents race condition with abort)
+            if (upload?.isPaused) return;
+
             const percentage = bytesTotal > 0 ? (bytesUploaded / bytesTotal) * 100 : 0;
             store.updateProgress(uploadId, Math.round(percentage), bytesUploaded);
           },
           onSuccess: () => {
+            console.log('[TUS] onSuccess:', uploadId);
+            // Clear any stale error before transitioning to processing
+            store.clearError(uploadId);
             store.setPhase(uploadId, 'processing');
             store.updateProgress(uploadId, 100, file.size);
 
             // After short delay, mark as ready
             setTimeout(() => {
+              // Clear error again before complete (defensive)
+              store.clearError(uploadId);
               store.setPhase(uploadId, 'complete');
               onUploadComplete?.(videoId, videoUuid);
             }, 500);
@@ -383,14 +446,22 @@ export function useImmediateUploadV2({
         uploadRef.current = upload;
 
         // Store fingerprint for resume capability
-        const fingerprint = `tus::${tusConfig.endpoint}::${file.name}-${file.size}-${file.lastModified}`;
+        // Include VideoId to prevent resuming stale uploads with different Bunny video IDs
+        const fingerprint = `tus::${tusConfig.headers.VideoId}::${file.name}-${file.size}-${file.lastModified}`;
         store.updateUpload(uploadId, { tusFingerprint: fingerprint });
 
         // Check for previous uploads to resume
         const previousUploads = await upload.findPreviousUploads();
         if (previousUploads.length > 0 && previousUploads[0]) {
-          console.log('[Upload] Resuming from previous upload');
-          upload.resumeFromPreviousUpload(previousUploads[0]);
+          const previousUrl = previousUploads[0].uploadUrl;
+          // Only resume if the URL contains our current VideoId
+          // This prevents 404s from attempting to resume uploads with different Bunny video IDs
+          if (previousUrl && previousUrl.includes(tusConfig.headers.VideoId)) {
+            console.log('[Upload] Resuming from previous upload');
+            upload.resumeFromPreviousUpload(previousUploads[0]);
+          } else {
+            console.log('[Upload] Previous upload found but VideoId mismatch, starting fresh');
+          }
         }
 
         upload.start();
@@ -415,6 +486,7 @@ export function useImmediateUploadV2({
       if (data.title !== undefined) storeMetadata.title = data.title;
       if (data.description !== undefined) storeMetadata.description = data.description;
       if (data.tags !== undefined) storeMetadata.tags = data.tags;
+      if (data.tagSlugs !== undefined) storeMetadata.tagSlugs = data.tagSlugs;
       if (data.isAdultContent !== undefined) storeMetadata.isAdultContent = data.isAdultContent;
       if (data.countryId !== undefined) storeMetadata.countryId = data.countryId;
       if (data.location !== undefined) storeMetadata.location = data.location;
@@ -432,7 +504,10 @@ export function useImmediateUploadV2({
   );
 
   /**
-   * Publish the video (update metadata and visibility)
+   * Publish the video (update metadata then handle publish via schedule API)
+   * Split into two API calls:
+   * 1. PATCH metadata (title, description, tags, etc.) - no publish_mode
+   * 2. POST /schedule for publish action (if publishing)
    */
   const publish = useCallback(
     async (visibility: 'live' | 'draft') => {
@@ -443,8 +518,10 @@ export function useImmediateUploadV2({
       }
 
       const upload = store.getUpload(uploadId);
-      if (!upload || !upload.videoId) {
-        onError?.('No video to publish');
+
+      // UUID GUARD: Block publish until videoUuid is ready
+      if (!upload || !upload.videoUuid) {
+        onError?.('Video not ready. Please wait for preparation to complete.');
         return;
       }
 
@@ -457,10 +534,13 @@ export function useImmediateUploadV2({
       }
 
       try {
-        // Build metadata payload
-        const metadataPayload: Record<string, unknown> = { title: upload.metadata.title };
+        // Step 1: Update metadata only (no publish_mode)
+        const metadataPayload: UpdateVideoPayload = {
+          title: upload.metadata.title,
+        };
+
+        // Optional metadata
         if (upload.metadata.description) metadataPayload.description = upload.metadata.description;
-        if (upload.metadata.tags?.length) metadataPayload.tags = upload.metadata.tags;
         if (upload.metadata.isAdultContent !== undefined)
           metadataPayload.is_adult_content = upload.metadata.isAdultContent;
         if (upload.metadata.countryId) metadataPayload.country_id = upload.metadata.countryId;
@@ -468,37 +548,44 @@ export function useImmediateUploadV2({
         if (upload.metadata.latitude) metadataPayload.latitude = upload.metadata.latitude;
         if (upload.metadata.longitude) metadataPayload.longitude = upload.metadata.longitude;
 
-        // Only include custom thumbnail path
-        if (upload.metadata.thumbnailSource === 'custom' && upload.metadata.thumbnailPath) {
-          metadataPayload.thumbnail_path = upload.metadata.thumbnailPath;
+        // TAG CONVERSION: Use slugs for API (IDs are kept in store for UI)
+        if (upload.metadata.tagSlugs?.length) {
+          metadataPayload.tags = upload.metadata.tagSlugs;
         }
 
-        // Include publish mode and scheduled time
-        if (upload.metadata.publishMode !== 'none') {
-          metadataPayload.publish_mode = upload.metadata.publishMode;
-        }
-        if (upload.metadata.publishMode === 'scheduled' && upload.metadata.scheduledAt) {
-          metadataPayload.scheduled_at = upload.metadata.scheduledAt;
-        }
+        // Update metadata first
+        await studioClient.updateVideo(upload.videoUuid, metadataPayload);
 
-        await studioClient.updateVideoMetadata(
-          upload.videoId,
-          metadataPayload as Parameters<typeof studioClient.updateVideoMetadata>[1]
-        );
-
-        // Update visibility - map UI visibility to API publish_mode
-        const publishMode = visibility === 'live' ? 'auto' : 'none';
-        const isShort = upload.contentType === 'short';
-        if (isShort) {
-          await studioClient.updateShortVisibility(upload.videoId, { publish_mode: publishMode });
-        } else {
-          await studioClient.updateVideoVisibility(upload.videoId, { publish_mode: publishMode });
+        // Step 2: Handle publish via schedule API
+        if (visibility === 'live') {
+          if (upload.metadata.publishMode === 'scheduled' && upload.metadata.scheduledAt) {
+            // Schedule for later
+            await studioClient.createSchedule(upload.videoUuid, {
+              publish_mode: 'scheduled',
+              scheduled_at: upload.metadata.scheduledAt,
+            });
+          } else {
+            // Publish now
+            await studioClient.createSchedule(upload.videoUuid, {
+              publish_mode: 'auto',
+            });
+          }
         }
+        // visibility === 'draft' -> Skip schedule call (already draft from handshake)
 
         onPublishComplete?.();
       } catch (error) {
-        const errorMsg = error instanceof Error ? error.message : 'Failed to publish';
-        onError?.(errorMsg);
+        // Graceful error handling - TUS upload continues
+        const msg = error instanceof Error ? error.message : '';
+        if (msg.includes('403') || msg.includes('authorized')) {
+          onError?.('You do not have permission to modify this video.');
+          return;
+        }
+        if (msg.includes('404') || msg.includes('not found')) {
+          onError?.('Video not found. It may have been deleted.');
+          return;
+        }
+        onError?.(msg || 'Failed to publish');
       }
     },
     [store, onError, onPublishComplete]
@@ -533,7 +620,7 @@ export function useImmediateUploadV2({
   }, [store]);
 
   /**
-   * Manual retry after circuit breaker trips
+   * Manual retry after circuit breaker trips or stale session
    * Requires explicit user action - prevents infinite loops
    */
   const retryUpload = useCallback(async () => {
@@ -541,21 +628,24 @@ export function useImmediateUploadV2({
     if (!uploadId) return;
 
     const upload = store.getUpload(uploadId);
-    if (!upload || upload.phase !== 'error') return;
+    // Allow retry for error or stale uploads
+    if (!upload || (upload.phase !== 'error' && !upload.isStale)) return;
 
-    // Reset circuit breaker
+    // Reset circuit breaker and stale flag
     store.resetCircuitBreaker(uploadId);
+    store.updateUpload(uploadId, { isStale: false });
     retryCountRef.current = 0;
 
     // Re-attempt upload
     const file = fileRef.current;
     const tusConfig = tusConfigRef.current;
 
-    if (file && tusConfig && upload.videoId && upload.videoUuid) {
+    if (file && tusConfig && upload.videoId && upload.videoUuid && !upload.isStale) {
+      // Can resume with existing TUS config (error retry, not stale)
       store.setPhase(uploadId, 'uploading');
       await startTusUpload(file, tusConfig, uploadId, upload.videoId, upload.videoUuid);
     } else if (file) {
-      // Need to re-prepare upload
+      // Need to re-prepare upload (stale session or missing config)
       store.removeUpload(uploadId);
       currentUploadIdRef.current = null;
       await startUpload(file);
@@ -574,6 +664,8 @@ export function useImmediateUploadV2({
     }
 
     if (uploadId) {
+      // Clear modal open flag before removing
+      store.setModalOpen(uploadId, false);
       store.removeUpload(uploadId);
     }
 
@@ -588,25 +680,67 @@ export function useImmediateUploadV2({
    * Reset state (keep store entry for background tracking)
    */
   const reset = useCallback(() => {
+    // Clear modal open flag before resetting
+    const uploadId = currentUploadIdRef.current;
+    if (uploadId) {
+      store.setModalOpen(uploadId, false);
+    }
+
     uploadRef.current = null;
     currentUploadIdRef.current = null;
     aspectRatioRef.current = null;
     retryCountRef.current = 0;
     fileRef.current = null;
     tusConfigRef.current = null;
-  }, []);
+  }, [store]);
+
+  /**
+   * Set modal step (persisted in store)
+   */
+  const setModalStep = useCallback(
+    (step: ImmediateUploadState['modalStep']) => {
+      const uploadId = currentUploadIdRef.current;
+      if (uploadId) {
+        store.updateModalStep(uploadId, step);
+      }
+    },
+    [store]
+  );
+
+  /**
+   * Attach to an existing upload (for resume mode)
+   * Sets currentUploadIdRef and marks modal as open
+   */
+  const attachToUpload = useCallback(
+    (uploadId: string): ActiveUpload | null => {
+      const upload = store.getUpload(uploadId);
+      if (!upload) return null;
+
+      currentUploadIdRef.current = uploadId;
+      store.setModalOpen(uploadId, true);
+      return upload;
+    },
+    [store]
+  );
 
   // Cleanup on unmount (but don't remove from store - upload continues)
   useEffect(() => {
     return () => {
+      // Clear modal open flag when component unmounts
+      const uploadId = currentUploadIdRef.current;
+      if (uploadId) {
+        // Use getState() for imperative access - doesn't trigger re-renders
+        useUploadStore.getState().setModalOpen(uploadId, false);
+      }
       // Don't cancel upload - let it continue in background
       uploadRef.current = null;
     };
-  }, []);
+  }, []); // Empty deps - only runs on unmount
 
   return {
     state,
     storeUploadId: currentUploadIdRef.current,
+    storeUpload,
     startUpload,
     updateMetadata,
     publish,
@@ -615,5 +749,7 @@ export function useImmediateUploadV2({
     retryUpload,
     cancel,
     reset,
+    setModalStep,
+    attachToUpload,
   };
 }

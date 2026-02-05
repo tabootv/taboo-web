@@ -2,6 +2,7 @@
 
 import { publicClient, type TagOption } from '@/api/client/public.client';
 import { studioClient } from '@/api/client/studio.client';
+import type { UpdateVideoPayload } from '@/api/types';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/shared/utils/formatting';
 import {
@@ -12,6 +13,7 @@ import {
   Clock,
   FileText,
   Film,
+  Globe,
   ImageIcon,
   Loader2,
   Lock,
@@ -31,6 +33,9 @@ import { useBeforeunloadWarning } from '../_hooks/use-beforeunload-warning';
 import { useCircuitBreaker } from '../_hooks/use-circuit-breaker';
 import { useImmediateUploadV2 } from '../_hooks/use-immediate-upload-v2';
 import { LocationPicker } from './LocationPicker';
+import { fileReferenceStore } from '@/shared/stores/file-reference-store';
+import { UploadProgressBar } from '@/shared/components/upload/UploadProgressBar';
+import type { ActiveUpload } from '@/shared/stores/upload-store';
 
 interface EditVideoData {
   id: number;
@@ -62,6 +67,8 @@ interface UploadModalProps {
   // Edit mode props
   mode?: 'upload' | 'edit';
   editVideo?: EditVideoData;
+  // Resume mode: ID for resuming an existing upload
+  resumeUploadId?: string;
 }
 
 type ModalStep = 'details' | 'location' | 'tags' | 'content-rating' | 'thumbnail' | 'publishing';
@@ -84,9 +91,10 @@ export function UploadModal({
   initialFile,
   mode = 'upload',
   editVideo,
+  resumeUploadId,
 }: UploadModalProps) {
   const [mounted, setMounted] = useState(false);
-  const [currentStep, setCurrentStep] = useState<ModalStep>('details');
+  // currentStep is now derived from store-backed state.modalStep
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   // Note: visibility state is maintained for hydration compatibility but
@@ -120,13 +128,16 @@ export function UploadModal({
   const uploadStartedRef = useRef(false);
   // Track metadata updates to debounce
   const metadataTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // Track if form has been hydrated for current resumeUploadId (prevents race condition)
+  const hasHydratedRef = useRef<string | null>(null);
 
   // Circuit breaker for infinite loop protection
   const { isTripped, trackRender, reset: resetCircuitBreaker, trace } = useCircuitBreaker();
 
   const {
     state,
-    storeUploadId: _storeUploadId, // Available for debugging/future use
+    storeUploadId: _storeUploadId,
+    storeUpload,
     startUpload,
     updateMetadata,
     publish,
@@ -135,6 +146,8 @@ export function UploadModal({
     retryUpload,
     // cancel is not used because we allow background upload continuation
     reset,
+    setModalStep,
+    attachToUpload,
   } = useImmediateUploadV2({
     onUploadComplete: () => {
       // Upload complete, user can now fill in details
@@ -156,6 +169,9 @@ export function UploadModal({
   useEffect(() => {
     trackRender(`modal-render-phase:${state.uploadPhase}`);
   }, [trackRender, state.uploadPhase]);
+
+  // Derive currentStep from store-backed state (persisted across modal close/reopen)
+  const currentStep = state.modalStep ?? 'details';
 
   // Compute dynamic steps based on content type
   // In edit mode, use editVideo.isShort; otherwise use detected type
@@ -211,6 +227,53 @@ export function UploadModal({
       }
     }
   }, [isOpen, mode, editVideo]);
+
+  // Resume upload mode: attach to existing upload and hydrate form
+  // Uses hasHydratedRef to prevent re-hydration race condition when debounced updates fire
+  useEffect(() => {
+    if (!isOpen || !resumeUploadId || mode === 'edit') return;
+
+    // Skip if already hydrated for this uploadId (prevents race condition with debounced metadata sync)
+    if (hasHydratedRef.current === resumeUploadId) return;
+
+    const upload = attachToUpload(resumeUploadId);
+    if (!upload) return;
+
+    // Mark as hydrated BEFORE setting state to prevent re-runs
+    hasHydratedRef.current = resumeUploadId;
+
+    // Hydrate form fields from store metadata
+    setTitle(upload.metadata.title || '');
+    setDescription(upload.metadata.description || '');
+    setTags(upload.metadata.tags || []);
+    setIsAdultContent(upload.metadata.isAdultContent || false);
+    setLocation(upload.metadata.location || '');
+    setCountryId(upload.metadata.countryId ?? null);
+    setPublishMode(upload.metadata.publishMode || 'none');
+    if (upload.metadata.scheduledAt) {
+      setScheduledAt(new Date(upload.metadata.scheduledAt));
+    }
+  }, [isOpen, resumeUploadId, mode, attachToUpload]);
+
+  // Create video preview URL from file reference (for resume mode)
+  // Note: videoPreviewUrl intentionally NOT in deps to prevent cleanup race condition
+  useEffect(() => {
+    const uploadId = resumeUploadId || _storeUploadId;
+    if (!uploadId || mode === 'edit') return;
+
+    // Check if we already have a preview URL (from initial file select)
+    if (videoPreviewUrl) return;
+
+    const file = fileReferenceStore.get(uploadId);
+    if (!file) return;
+
+    const url = URL.createObjectURL(file);
+    setVideoPreviewUrl(url);
+
+    // Cleanup only on unmount or uploadId change, not on videoPreviewUrl change
+    return () => URL.revokeObjectURL(url);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resumeUploadId, _storeUploadId, mode]);
 
   // Reset upload guard when modal closes
   useEffect(() => {
@@ -289,7 +352,18 @@ export function UploadModal({
       // to satisfy exactOptionalPropertyTypes
       const metadata: Parameters<typeof updateMetadata>[0] = { title };
       if (description) metadata.description = description;
-      if (tags.length > 0) metadata.tags = tags;
+      if (tags.length > 0) {
+        metadata.tags = tags;
+        // Convert IDs to slugs for API (store both for UI and API usage)
+        if (availableTags.length > 0) {
+          const slugs = tags
+            .map((id) => availableTags.find((t) => t.id === id)?.slug)
+            .filter((slug): slug is string => Boolean(slug));
+          if (slugs.length > 0) {
+            metadata.tagSlugs = slugs;
+          }
+        }
+      }
       metadata.isAdultContent = isAdultContent;
       if (location) metadata.location = location;
       if (countryId) metadata.countryId = countryId;
@@ -306,6 +380,7 @@ export function UploadModal({
     title,
     description,
     tags,
+    availableTags,
     isAdultContent,
     location,
     countryId,
@@ -316,6 +391,34 @@ export function UploadModal({
   ]);
 
   const handleClose = useCallback(() => {
+    // FLUSH: Clear any pending debounced metadata updates and sync immediately
+    if (metadataTimeoutRef.current) {
+      clearTimeout(metadataTimeoutRef.current);
+      metadataTimeoutRef.current = null;
+
+      // Build and sync final metadata state
+      const metadata: Parameters<typeof updateMetadata>[0] = { title };
+      if (description) metadata.description = description;
+      if (tags.length > 0) {
+        metadata.tags = tags;
+        // Convert IDs to slugs for API
+        if (availableTags.length > 0) {
+          const slugs = tags
+            .map((id) => availableTags.find((t) => t.id === id)?.slug)
+            .filter((slug): slug is string => Boolean(slug));
+          if (slugs.length > 0) {
+            metadata.tagSlugs = slugs;
+          }
+        }
+      }
+      metadata.isAdultContent = isAdultContent;
+      if (location) metadata.location = location;
+      if (countryId) metadata.countryId = countryId;
+      if (!isShort) metadata.publishMode = publishMode;
+      if (publishMode === 'scheduled' && scheduledAt) metadata.scheduledAt = scheduledAt;
+      updateMetadata(metadata);
+    }
+
     // Check if upload is actively in progress
     const isActivelyUploading =
       state.uploadPhase === 'uploading' || state.uploadPhase === 'preparing';
@@ -349,7 +452,8 @@ export function UploadModal({
 
       // Don't cancel - let upload continue in background
       // Only reset local form state
-      setCurrentStep('details');
+      hasHydratedRef.current = null;
+      setModalStep('details');
       setTitle('');
       setDescription('');
       setVisibility('draft');
@@ -366,8 +470,9 @@ export function UploadModal({
       return;
     }
 
+    hasHydratedRef.current = null;
     reset();
-    setCurrentStep('details');
+    setModalStep('details');
     setTitle('');
     setDescription('');
     setVisibility('draft');
@@ -381,7 +486,25 @@ export function UploadModal({
     resetThumbnail();
     resetVideoPreview();
     onClose();
-  }, [state.uploadPhase, reset, onClose, thumbnailPreviewUrl, videoPreviewUrl]);
+  }, [
+    state.uploadPhase,
+    reset,
+    onClose,
+    thumbnailPreviewUrl,
+    videoPreviewUrl,
+    setModalStep,
+    updateMetadata,
+    title,
+    description,
+    tags,
+    availableTags,
+    isAdultContent,
+    location,
+    countryId,
+    isShort,
+    publishMode,
+    scheduledAt,
+  ]);
 
   const handleFileSelect = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -390,6 +513,7 @@ export function UploadModal({
         uploadStartedRef.current = true;
         startUpload(file);
         setTitle(file.name.replace(/\.[^/.]+$/, ''));
+        // Note: fileReferenceStore.set is called in startUpload via the hook
         setVideoPreviewUrl(URL.createObjectURL(file));
       }
       e.target.value = '';
@@ -419,42 +543,70 @@ export function UploadModal({
     await publish(derivedVisibility);
   }, [publish, publishMode]);
 
-  // Save handler for edit mode
-  // Save handler for edit mode
+  // Save handler for edit mode - uses UUID-based endpoints with schedule API
   const handleSaveChanges = useCallback(async () => {
-    if (!editVideo) return;
+    if (!editVideo?.uuid) return; // Use uuid, not id
 
     setIsSaving(true);
     try {
-      // Build complete metadata payload
-      const metadataPayload: Parameters<typeof studioClient.updateVideoMetadata>[1] = {
+      // Step 1: Build metadata payload (no publish_mode)
+      const metadataPayload: UpdateVideoPayload = {
         title,
         is_adult_content: isAdultContent,
       };
       if (description) metadataPayload.description = description;
-      if (tags.length > 0) metadataPayload.tags = tags;
       if (location) metadataPayload.location = location;
       if (countryId) metadataPayload.country_id = countryId;
 
-      await studioClient.updateVideoMetadata(editVideo.id, metadataPayload);
-
-      // Handle visibility/publish mode changes
-      const newPublishMode = publishMode;
-      const visibilityPayload: { publish_mode: typeof newPublishMode; scheduled_at?: string } = {
-        publish_mode: newPublishMode,
-      };
-      if (newPublishMode === 'scheduled' && scheduledAt) {
-        visibilityPayload.scheduled_at = scheduledAt.toISOString();
+      // Tag slugs conversion: Convert IDs to slugs using availableTags
+      if (tags.length > 0 && availableTags.length > 0) {
+        const slugs = tags
+          .map((id) => availableTags.find((t) => t.id === id)?.slug)
+          .filter((slug): slug is string => Boolean(slug));
+        if (slugs.length > 0) {
+          metadataPayload.tags = slugs;
+        }
       }
 
-      // Only update visibility if mode changed
+      // Update metadata
+      await studioClient.updateVideo(editVideo.uuid, metadataPayload);
+
+      // Step 2: Handle publish mode changes via schedule API
       const originalMode =
         editVideo.publishMode || (editVideo.visibility === 'live' ? 'auto' : 'none');
-      if (newPublishMode !== originalMode) {
-        if (editVideo.isShort) {
-          await studioClient.updateShortVisibility(editVideo.id, visibilityPayload);
-        } else {
-          await studioClient.updateVideoVisibility(editVideo.id, visibilityPayload);
+      const isOriginallyLive = editVideo.visibility === 'live';
+      const hasOriginalSchedule = editVideo.publishMode === 'scheduled';
+
+      // IMPORTANT: Live videos cannot be unpublished (backend limitation)
+      // Only handle transitions that are allowed
+
+      if (publishMode !== originalMode) {
+        if (isOriginallyLive) {
+          // Live videos: Cannot unpublish, only warn if user tries
+          // (UI should prevent this, but just in case)
+          if (publishMode === 'none') {
+            toast.error('Live videos cannot be unpublished');
+          }
+          // No action needed - video stays live
+        } else if (publishMode === 'auto') {
+          // Draft/Scheduled -> Live: POST /schedule with auto
+          await studioClient.createSchedule(editVideo.uuid, { publish_mode: 'auto' });
+        } else if (publishMode === 'scheduled' && scheduledAt) {
+          if (hasOriginalSchedule) {
+            // Scheduled -> Scheduled (edit): PATCH /schedule
+            await studioClient.updateSchedule(editVideo.uuid, {
+              scheduled_at: scheduledAt.toISOString(),
+            });
+          } else {
+            // Draft -> Scheduled: POST /schedule
+            await studioClient.createSchedule(editVideo.uuid, {
+              publish_mode: 'scheduled',
+              scheduled_at: scheduledAt.toISOString(),
+            });
+          }
+        } else if (publishMode === 'none' && hasOriginalSchedule) {
+          // Scheduled -> Draft: DELETE /schedule
+          await studioClient.deleteSchedule(editVideo.uuid);
         }
       }
 
@@ -472,6 +624,7 @@ export function UploadModal({
     title,
     description,
     tags,
+    availableTags,
     isAdultContent,
     location,
     countryId,
@@ -486,20 +639,20 @@ export function UploadModal({
     if (currentIndex < steps.length - 1) {
       const nextStep = steps[currentIndex + 1];
       if (nextStep) {
-        setCurrentStep(nextStep.id);
+        setModalStep(nextStep.id);
       }
     }
-  }, [currentStep, steps]);
+  }, [currentStep, steps, setModalStep]);
 
   const handleBack = useCallback(() => {
     const currentIndex = steps.findIndex((s) => s.id === currentStep);
     if (currentIndex > 0) {
       const prevStep = steps[currentIndex - 1];
       if (prevStep) {
-        setCurrentStep(prevStep.id);
+        setModalStep(prevStep.id);
       }
     }
-  }, [currentStep, steps]);
+  }, [currentStep, steps, setModalStep]);
 
   const toggleTag = useCallback((tagId: number) => {
     setTags((prev) =>
@@ -572,7 +725,7 @@ export function UploadModal({
                 onClick={() => {
                   resetCircuitBreaker();
                   reset();
-                  setCurrentStep('details');
+                  setModalStep('details');
                   setTitle('');
                   setDescription('');
                   setVisibility('draft');
@@ -657,7 +810,7 @@ export function UploadModal({
                   <div key={step.id} className="flex items-center flex-1">
                     {/* Step circle */}
                     <button
-                      onClick={() => setCurrentStep(step.id)}
+                      onClick={() => setModalStep(step.id)}
                       className={cn(
                         'w-8 h-8 rounded-full flex items-center justify-center border-2 transition-colors',
                         isActive && 'border-red-primary bg-red-primary text-white',
@@ -1021,8 +1174,25 @@ export function UploadModal({
 
                 {currentStep === 'publishing' && (
                   <div>
+                    {/* Show notice for live videos in edit mode */}
+                    {mode === 'edit' && editVideo?.visibility === 'live' && (
+                      <div className="mb-4 p-4 rounded-xl bg-green-500/10 border border-green-500/30">
+                        <div className="flex items-center gap-2 text-green-500 mb-2">
+                          <Globe className="w-5 h-5" />
+                          <p className="font-medium">This video is live</p>
+                        </div>
+                        <p className="text-sm text-text-secondary">
+                          Live videos cannot be unpublished. You can only edit metadata and use
+                          &quot;Hide from Listings&quot; from the content table to control
+                          visibility.
+                        </p>
+                      </div>
+                    )}
+
                     <label className="block text-sm font-medium text-text-primary mb-4">
-                      How would you like to publish?
+                      {mode === 'edit' && editVideo?.visibility === 'live'
+                        ? 'Publication Status'
+                        : 'How would you like to publish?'}
                     </label>
                     <div className="space-y-3">
                       {[
@@ -1032,13 +1202,21 @@ export function UploadModal({
                           title: 'Save as Draft',
                           description: 'Keep private and publish later from your studio',
                           badge: null,
+                          disabled: mode === 'edit' && editVideo?.visibility === 'live',
                         },
                         {
                           value: 'auto' as PublishMode,
                           icon: Zap,
-                          title: 'Publish Now',
-                          description: 'Make public as soon as processing completes',
+                          title:
+                            mode === 'edit' && editVideo?.visibility === 'live'
+                              ? 'Published'
+                              : 'Publish Now',
+                          description:
+                            mode === 'edit' && editVideo?.visibility === 'live'
+                              ? 'This video is currently live and public'
+                              : 'Make public as soon as processing completes',
                           badge: null,
+                          disabled: false,
                         },
                         {
                           value: 'scheduled' as PublishMode,
@@ -1049,25 +1227,32 @@ export function UploadModal({
                             scheduledAt && publishMode === 'scheduled'
                               ? scheduledAt.toLocaleString()
                               : null,
+                          disabled: mode === 'edit' && editVideo?.visibility === 'live',
                         },
                       ].map((option) => {
                         const Icon = option.icon;
                         const isSelected = publishMode === option.value;
+                        const isDisabled = option.disabled;
 
                         return (
                           <label
                             key={option.value}
                             className={cn(
-                              'flex items-start gap-4 p-4 rounded-xl border cursor-pointer transition-all',
-                              isSelected
+                              'flex items-start gap-4 p-4 rounded-xl border transition-all',
+                              isDisabled
+                                ? 'opacity-50 cursor-not-allowed bg-white/5 border-white/10'
+                                : 'cursor-pointer',
+                              !isDisabled && isSelected
                                 ? 'bg-red-primary/10 border-red-primary'
-                                : 'bg-white/5 border-white/10 hover:border-red-primary/40'
+                                : !isDisabled &&
+                                    'bg-white/5 border-white/10 hover:border-red-primary/40'
                             )}
                           >
                             <input
                               type="radio"
                               checked={isSelected}
-                              onChange={() => setPublishMode(option.value)}
+                              onChange={() => !isDisabled && setPublishMode(option.value)}
+                              disabled={isDisabled}
                               className="sr-only"
                             />
                             <div
@@ -1140,13 +1325,14 @@ export function UploadModal({
 
               {/* Right Column - Preview */}
               <div className="space-y-4">
-                {/* Video Preview */}
+                {/* Video Preview - Tiered fallback */}
                 <div
                   className={cn(
                     'relative overflow-hidden rounded-lg bg-white/5 border border-white/10',
                     isShort ? 'aspect-[9/16] max-h-[300px] mx-auto' : 'aspect-video'
                   )}
                 >
+                  {/* Tier 1: Local file preview (from current session or file reference store) */}
                   {videoPreviewUrl ? (
                     <video
                       src={videoPreviewUrl}
@@ -1156,13 +1342,25 @@ export function UploadModal({
                       muted
                     />
                   ) : mode === 'edit' && editVideo?.thumbnailUrl ? (
+                    /* Tier 2: Edit mode thumbnail */
                     // eslint-disable-next-line @next/next/no-img-element -- Edit thumbnail from API
                     <img
                       src={editVideo.thumbnailUrl}
                       alt=""
                       className="absolute inset-0 w-full h-full object-cover"
                     />
+                  ) : storeUpload?.isStale ? (
+                    /* Tier 3: Stale upload - show re-select message */
+                    <StaleUploadPreview
+                      upload={storeUpload}
+                      onFileReselected={(file) => {
+                        // Store the file reference and create preview
+                        fileReferenceStore.set(storeUpload.id, file);
+                        setVideoPreviewUrl(URL.createObjectURL(file));
+                      }}
+                    />
                   ) : (
+                    /* Default placeholder */
                     <div className="absolute inset-0 flex items-center justify-center">
                       {isShort ? (
                         <Clapperboard className="w-12 h-12 text-text-tertiary" />
@@ -1176,54 +1374,60 @@ export function UploadModal({
                   </div>
                 </div>
 
-                {/* Upload Progress - show during active upload and when complete */}
-                {mode === 'upload' && state.uploadPhase !== 'idle' && (
+                {/* Upload Progress - show during active upload, when complete, or for stale uploads */}
+                {mode === 'upload' && (state.uploadPhase !== 'idle' || storeUpload?.isStale) && (
                   <div className="p-4 bg-white/5 border border-white/10 rounded-lg">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm text-text-primary flex items-center gap-2">
-                        {state.uploadPhase === 'preparing' && 'Preparing...'}
-                        {state.uploadPhase === 'uploading' &&
-                          !state.isPaused &&
-                          `Uploading... ${state.uploadProgress}%`}
-                        {state.uploadPhase === 'uploading' && state.isPaused && (
+                        {storeUpload?.isStale && (
                           <>
-                            <Pause className="w-4 h-4 text-yellow-500" />
-                            Upload paused - Click resume to continue
+                            <AlertTriangle className="w-4 h-4 text-orange-500" />
+                            Session expired
                           </>
                         )}
-                        {state.uploadPhase === 'processing' && 'Processing...'}
-                        {state.uploadPhase === 'error' && 'Upload failed'}
-                        {state.uploadPhase === 'complete' && (
+                        {!storeUpload?.isStale &&
+                          state.uploadPhase === 'preparing' &&
+                          'Preparing...'}
+                        {!storeUpload?.isStale &&
+                          state.uploadPhase === 'uploading' &&
+                          !state.isPaused &&
+                          `Uploading... ${state.uploadProgress}%`}
+                        {!storeUpload?.isStale &&
+                          state.uploadPhase === 'uploading' &&
+                          state.isPaused && (
+                            <>
+                              <Pause className="w-4 h-4 text-yellow-500" />
+                              Upload paused - Click resume to continue
+                            </>
+                          )}
+                        {!storeUpload?.isStale &&
+                          state.uploadPhase === 'processing' &&
+                          'Processing...'}
+                        {!storeUpload?.isStale && state.uploadPhase === 'error' && 'Upload failed'}
+                        {!storeUpload?.isStale && state.uploadPhase === 'complete' && (
                           <>
                             <Check className="w-4 h-4 text-green-500" />
                             Upload complete!
                           </>
                         )}
                       </span>
-                      {state.uploadPhase === 'uploading' && !state.isPaused && (
-                        <span className="text-xs text-text-tertiary">
-                          {formatBytes(state.bytesUploaded)} / {formatBytes(state.bytesTotal)}
-                        </span>
-                      )}
-                    </div>
-                    <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                      <div
-                        className={cn(
-                          'h-full rounded-full transition-all duration-300',
-                          state.uploadPhase === 'error'
-                            ? 'bg-red-500'
-                            : state.uploadPhase === 'complete'
-                              ? 'bg-green-500'
-                              : state.isPaused
-                                ? 'bg-yellow-500'
-                                : 'bg-red-primary'
+                      {state.uploadPhase === 'uploading' &&
+                        !state.isPaused &&
+                        !storeUpload?.isStale && (
+                          <span className="text-xs text-text-tertiary">
+                            {formatBytes(state.bytesUploaded)} / {formatBytes(state.bytesTotal)}
+                          </span>
                         )}
-                        style={{ width: `${state.uploadProgress}%` }}
-                      />
                     </div>
+                    <UploadProgressBar
+                      phase={storeUpload?.phase ?? state.uploadPhase}
+                      progress={storeUpload?.progress ?? state.uploadProgress}
+                      isPaused={storeUpload?.isPaused ?? state.isPaused}
+                      isStale={storeUpload?.isStale ?? false}
+                    />
 
                     {/* Pause/Resume buttons */}
-                    {state.uploadPhase === 'uploading' && (
+                    {state.uploadPhase === 'uploading' && !storeUpload?.isStale && (
                       <div className="flex items-center gap-2 mt-3">
                         {state.isPaused ? (
                           <Button
@@ -1249,7 +1453,7 @@ export function UploadModal({
                       </div>
                     )}
 
-                    {state.error && (
+                    {state.error && !storeUpload?.isStale && (
                       <div className="mt-2">
                         <p className="text-xs text-red-400">{state.error}</p>
                         {state.uploadPhase === 'error' && (
@@ -1318,17 +1522,25 @@ export function UploadModal({
                   disabled={
                     state.uploadPhase === 'uploading' ||
                     state.uploadPhase === 'preparing' ||
-                    state.uploadPhase === 'processing'
+                    state.uploadPhase === 'processing' ||
+                    !state.videoUuid // UUID GUARD
                   }
                   className="bg-red-primary hover:bg-red-primary/90 min-w-[100px]"
                 >
-                  {state.uploadPhase === 'uploading' ||
-                  state.uploadPhase === 'preparing' ||
-                  state.uploadPhase === 'processing' ? (
+                  {!state.videoUuid && state.uploadPhase !== 'idle' ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                      Preparing...
+                    </>
+                  ) : state.uploadPhase === 'uploading' ||
+                    state.uploadPhase === 'preparing' ||
+                    state.uploadPhase === 'processing' ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin mr-2" />
                       Uploading...
                     </>
+                  ) : publishMode === 'none' ? (
+                    'Save as Draft'
                   ) : (
                     'Publish'
                   )}
@@ -1350,4 +1562,60 @@ export function UploadModal({
   );
 
   return createPortal(modalContent, document.body);
+}
+
+/**
+ * StaleUploadPreview - Shows message and file re-select for stale uploads
+ * Stale uploads are those hydrated from localStorage without a live TUS client
+ */
+function StaleUploadPreview({
+  upload,
+  onFileReselected,
+}: {
+  upload: ActiveUpload;
+  onFileReselected: (file: File) => void;
+}) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file matches original (basic check by name and size)
+    if (file.name !== upload.fileName || file.size !== upload.fileSize) {
+      toast.error('Please select the original file to restore preview');
+      e.target.value = '';
+      return;
+    }
+
+    onFileReselected(file);
+    e.target.value = '';
+  };
+
+  return (
+    <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
+      <AlertTriangle className="w-10 h-10 text-orange-500 mb-3" />
+      <p className="text-sm text-text-secondary mb-2">Session expired</p>
+      <p className="text-xs text-text-tertiary mb-4">
+        Re-select the original file to restore preview
+      </p>
+      <button
+        onClick={() => fileInputRef.current?.click()}
+        className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-red-primary border border-red-primary/30 rounded-lg hover:bg-red-primary/10 transition-colors"
+      >
+        <RotateCcw className="w-3 h-3" />
+        Select file
+      </button>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="video/*"
+        className="hidden"
+        onChange={handleFileSelect}
+      />
+      <p className="text-[10px] text-text-tertiary mt-2 max-w-[200px]">
+        Looking for: {upload.fileName}
+      </p>
+    </div>
+  );
 }

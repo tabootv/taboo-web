@@ -3,6 +3,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { PublishMode } from '@/app/studio/upload/_config/types';
+import { fileReferenceStore } from './file-reference-store';
 
 /**
  * Upload Phase States
@@ -47,7 +48,10 @@ export interface ActiveUpload {
   metadata: {
     title: string;
     description?: string;
+    /** Tag IDs for UI selection */
     tags?: number[];
+    /** Tag slugs for API payload */
+    tagSlugs?: string[];
     isAdultContent?: boolean;
     countryId?: number;
     location?: string;
@@ -66,7 +70,12 @@ export interface ActiveUpload {
 
   // State
   isPaused: boolean;
+  isStale: boolean; // True for hydrated uploads with no live TUS client
   error: string | null;
+
+  // Modal UI state
+  modalStep: 'details' | 'location' | 'tags' | 'content-rating' | 'thumbnail' | 'publishing';
+  hasOpenModal: boolean; // True when modal is open for this upload (prevents auto-clear)
 
   // Timestamps
   startedAt: number;
@@ -98,8 +107,44 @@ interface UploadState {
    * Returns the generated upload ID
    */
   addUpload: (
-    upload: Omit<ActiveUpload, 'id' | 'startedAt' | 'lastProgressAt' | 'circuitBreaker'>
+    upload: Omit<
+      ActiveUpload,
+      | 'id'
+      | 'startedAt'
+      | 'lastProgressAt'
+      | 'circuitBreaker'
+      | 'isStale'
+      | 'modalStep'
+      | 'hasOpenModal'
+    >
   ) => string;
+
+  /**
+   * Find existing non-terminal upload matching file signature
+   * Returns upload ID if found, null otherwise
+   */
+  findExistingUpload: (
+    fileName: string,
+    fileSize: number,
+    contentType: 'video' | 'short'
+  ) => string | null;
+
+  /**
+   * Add upload or return existing one with same signature
+   * Returns { id, isExisting } to indicate if deduplication occurred
+   */
+  addOrFindUpload: (
+    upload: Omit<
+      ActiveUpload,
+      | 'id'
+      | 'startedAt'
+      | 'lastProgressAt'
+      | 'circuitBreaker'
+      | 'isStale'
+      | 'modalStep'
+      | 'hasOpenModal'
+    >
+  ) => { id: string; isExisting: boolean };
 
   /**
    * Update an existing upload
@@ -132,6 +177,21 @@ interface UploadState {
   resumeUpload: (id: string) => void;
 
   /**
+   * Update modal step for an upload
+   */
+  updateModalStep: (id: string, step: ActiveUpload['modalStep']) => void;
+
+  /**
+   * Set whether modal is open for an upload (prevents auto-clear)
+   */
+  setModalOpen: (id: string, isOpen: boolean) => void;
+
+  /**
+   * Clear error for an upload (without changing phase)
+   */
+  clearError: (id: string) => void;
+
+  /**
    * Remove an upload from the store
    */
   removeUpload: (id: string) => void;
@@ -145,6 +205,12 @@ interface UploadState {
    * Clean up orphaned uploads (older than 24h)
    */
   cleanupOrphaned: () => void;
+
+  /**
+   * Mark hydrated uploads as stale (no live TUS client)
+   * Called during rehydration for uploads that were in progress
+   */
+  markHydratedUploadsStale: () => void;
 
   // ============ CIRCUIT BREAKER ACTIONS ============
 
@@ -240,11 +306,49 @@ export const useUploadStore = create<UploadState>()(
             startedAt: now,
             lastProgressAt: now,
             circuitBreaker: { ...initialCircuitBreaker },
+            isStale: false,
+            modalStep: 'details', // Initialize modal step
+            hasOpenModal: false,
           });
           return { uploads: newUploads };
         });
 
         return id;
+      },
+
+      findExistingUpload: (fileName, fileSize, contentType) => {
+        const uploads = get().uploads;
+        for (const [id, upload] of uploads) {
+          // Match file signature
+          if (
+            upload.fileName === fileName &&
+            upload.fileSize === fileSize &&
+            upload.contentType === contentType &&
+            // Non-terminal: not complete and not error
+            upload.phase !== 'complete' &&
+            upload.phase !== 'error'
+          ) {
+            return id;
+          }
+        }
+        return null;
+      },
+
+      addOrFindUpload: (upload) => {
+        // Check for existing upload with same signature
+        const existingId = get().findExistingUpload(
+          upload.fileName,
+          upload.fileSize,
+          upload.contentType
+        );
+
+        if (existingId) {
+          return { id: existingId, isExisting: true };
+        }
+
+        // Create new upload
+        const id = get().addUpload(upload);
+        return { id, isExisting: false };
       },
 
       updateUpload: (id, updates) => {
@@ -263,6 +367,12 @@ export const useUploadStore = create<UploadState>()(
       },
 
       updateProgress: (id, progress, bytesUploaded) => {
+        const upload = get().uploads.get(id);
+        if (!upload) return;
+
+        // Early return if values unchanged (progress updates are frequent)
+        if (upload.progress === progress && upload.bytesUploaded === bytesUploaded) return;
+
         set((state) => {
           const upload = state.uploads.get(id);
           if (!upload) return state;
@@ -279,6 +389,10 @@ export const useUploadStore = create<UploadState>()(
       },
 
       setPhase: (id, phase, error) => {
+        // Debug logging to trace error state
+        if (error) {
+          console.log('[UploadStore] setPhase with error:', { id, phase, error });
+        }
         set((state) => {
           const upload = state.uploads.get(id);
           if (!upload) return state;
@@ -288,6 +402,8 @@ export const useUploadStore = create<UploadState>()(
             ...upload,
             phase,
             error: error ?? null,
+            // Clear isPaused when transitioning away from uploading phase
+            isPaused: phase === 'uploading' ? upload.isPaused : false,
             lastProgressAt: Date.now(),
           });
           return { uploads: newUploads };
@@ -295,6 +411,14 @@ export const useUploadStore = create<UploadState>()(
       },
 
       updateMetadata: (id, metadata) => {
+        const upload = get().uploads.get(id);
+        if (!upload) return;
+
+        // Early return if no actual changes (shallow compare)
+        const metadataKeys = Object.keys(metadata) as (keyof typeof metadata)[];
+        const hasChanges = metadataKeys.some((key) => upload.metadata[key] !== metadata[key]);
+        if (!hasChanges) return;
+
         set((state) => {
           const upload = state.uploads.get(id);
           if (!upload) return state;
@@ -318,12 +442,62 @@ export const useUploadStore = create<UploadState>()(
 
       resumeUpload: (id) => {
         const upload = get().uploads.get(id);
-        if (upload && upload.isPaused) {
+        // Reject resume for stale uploads - they need retry instead
+        if (upload && upload.isPaused && !upload.isStale) {
           get().updateUpload(id, { isPaused: false });
         }
       },
 
+      updateModalStep: (id, step) => {
+        set((state) => {
+          const upload = state.uploads.get(id);
+          if (!upload) return state;
+
+          const newUploads = new Map(state.uploads);
+          newUploads.set(id, {
+            ...upload,
+            modalStep: step,
+          });
+          return { uploads: newUploads };
+        });
+      },
+
+      setModalOpen: (id, isOpen) => {
+        const upload = get().uploads.get(id);
+        // Early return if value unchanged - prevents infinite loops
+        if (!upload || upload.hasOpenModal === isOpen) return;
+
+        set((state) => {
+          const upload = state.uploads.get(id);
+          if (!upload) return state;
+
+          const newUploads = new Map(state.uploads);
+          newUploads.set(id, {
+            ...upload,
+            hasOpenModal: isOpen,
+          });
+          return { uploads: newUploads };
+        });
+      },
+
+      clearError: (id) => {
+        set((state) => {
+          const upload = state.uploads.get(id);
+          if (!upload) return state;
+
+          const newUploads = new Map(state.uploads);
+          newUploads.set(id, {
+            ...upload,
+            error: null,
+          });
+          return { uploads: newUploads };
+        });
+      },
+
       removeUpload: (id) => {
+        // Clean up file reference before removing from store
+        fileReferenceStore.remove(id);
+
         set((state) => {
           const newUploads = new Map(state.uploads);
           newUploads.delete(id);
@@ -336,6 +510,8 @@ export const useUploadStore = create<UploadState>()(
           const newUploads = new Map(state.uploads);
           for (const [id, upload] of newUploads) {
             if (upload.phase === 'complete' || upload.phase === 'error') {
+              // Clean up file reference before removing
+              fileReferenceStore.remove(id);
               newUploads.delete(id);
             }
           }
@@ -350,6 +526,8 @@ export const useUploadStore = create<UploadState>()(
           for (const [id, upload] of newUploads) {
             // Remove uploads older than 24h that are stuck
             if (now - upload.lastProgressAt > ORPHAN_THRESHOLD_MS) {
+              // Clean up file reference before removing
+              fileReferenceStore.remove(id);
               newUploads.delete(id);
             }
           }
@@ -357,9 +535,34 @@ export const useUploadStore = create<UploadState>()(
         });
       },
 
+      markHydratedUploadsStale: () => {
+        set((state) => {
+          const newUploads = new Map(state.uploads);
+          let hasChanges = false;
+
+          for (const [id, upload] of newUploads) {
+            // Mark as stale if in-progress or paused (no live TUS client after hydration)
+            if (
+              upload.phase === 'uploading' ||
+              upload.phase === 'preparing' ||
+              upload.phase === 'processing' ||
+              upload.isPaused
+            ) {
+              newUploads.set(id, { ...upload, isStale: true });
+              hasChanges = true;
+            }
+          }
+
+          return hasChanges ? { uploads: newUploads } : state;
+        });
+      },
+
       // ============ CIRCUIT BREAKER ACTIONS ============
 
       recordFailure: (id, error) => {
+        // Debug logging to trace error state
+        console.log('[UploadStore] recordFailure:', { id, error });
+
         const state = get();
         const upload = state.uploads.get(id);
         if (!upload) return false;
@@ -468,6 +671,8 @@ export const useUploadStore = create<UploadState>()(
           state.setHasHydrated(true);
           // Clean up orphaned uploads on hydration
           state.cleanupOrphaned();
+          // Mark in-progress uploads as stale (no live TUS client)
+          state.markHydratedUploadsStale();
         }
       },
     }
