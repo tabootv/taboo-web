@@ -202,7 +202,116 @@ Common errors:
 
 ---
 
-## Video Management
+## Studio Video Management API
+
+The Studio API provides unified endpoints for managing videos using **UUID identifiers** (not numeric IDs).
+
+### List Videos
+
+**Endpoint:** `GET /api/studio/videos`
+
+Lists all videos belonging to the authenticated creator, including unpublished and hidden.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `per_page` | integer | 20 | Items per page (max: 100) |
+| `sort_by` | string | `latest` | Sort order: `latest`, `oldest` |
+| `ids` | string/array | - | Filter by video IDs (CSV) |
+| `types` | string | `videos,series` | Content types: `videos`, `series`, `courses`, `shorts` |
+
+---
+
+### Update Video (Unified Endpoint)
+
+**Endpoint:** `PATCH /api/studio/videos/{videoUuid}`
+
+Updates video metadata and/or publication status in a **single request**.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `title` | string | No | Video title (max 255) |
+| `description` | string | No | Video description |
+| `tags` | string[] | No | Array of **tag slugs** (not IDs) |
+| `country_id` | number | No | Country ID |
+| `location` | string | No | Location text |
+| `latitude` | number | No | Latitude (-90 to 90) |
+| `longitude` | number | No | Longitude (-180 to 180) |
+| `is_adult_content` | boolean | No | Adult content flag |
+| `featured` | boolean | No | Featured flag |
+| `hidden` | boolean | No | Hidden from public listings |
+| `publish_mode` | string | No | `none`, `auto`, or `scheduled` |
+| `scheduled_at` | datetime | No | Required if `publish_mode='scheduled'` |
+| `thumbnail` | file | No | Thumbnail image (max 10MB) |
+
+**Note:** Uses `videoUuid` (string), not numeric `videoId`.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "video": {
+      "id": 123,
+      "uuid": "550e8400-e29b-41d4-a716-446655440000",
+      "title": "Updated Title",
+      ...
+    }
+  },
+  "message": "Video updated successfully."
+}
+```
+
+---
+
+### Toggle Hidden Status
+
+**Endpoint:** `POST /api/studio/videos/{videoUuid}/toggle-hidden`
+
+Toggles video visibility in public listings. Hidden videos remain accessible in Studio.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "hidden": true,
+    "message": "Video hidden successfully."
+  }
+}
+```
+
+---
+
+### Delete Video
+
+**Endpoint:** `DELETE /api/studio/videos/{videoUuid}`
+
+Permanently deletes video and associated resources.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [],
+  "message": "Video deleted successfully."
+}
+```
+
+---
+
+### Error Responses
+
+| Code | Description |
+|------|-------------|
+| 403 | User does not own the video |
+| 404 | Video UUID not found |
+| 422 | Validation error |
+
+---
+
+## Video Management (Legacy)
+
+> **Deprecated:** These endpoints use numeric IDs. Prefer the Studio API above using UUIDs.
 
 ### Video Listing (Creator's Own)
 
