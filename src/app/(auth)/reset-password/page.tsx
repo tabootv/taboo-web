@@ -49,7 +49,7 @@ function ResetPasswordForm() {
     try {
       await authClient.resetPassword({
         email,
-        token,
+        otp: token,
         password,
         password_confirmation: confirmPassword,
       });

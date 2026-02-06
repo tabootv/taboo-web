@@ -61,7 +61,11 @@ export default function RegisterPage() {
     }
 
     try {
-      await register(formData);
+      await register({
+        ...formData,
+        privacy_policy: true,
+        terms_and_condition: true,
+      });
       toast.success('Account created successfully!');
       router.push('/home');
     } catch (err) {

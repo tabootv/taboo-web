@@ -12,6 +12,8 @@ export interface User {
   first_name: string;
   last_name: string;
   display_name: string;
+  handler?: string;
+  handler_changes_remaining?: number;
   email: string;
   gender?: string;
   phone_number?: string;
@@ -39,20 +41,26 @@ export interface AuthResponse {
 export interface LoginCredentials {
   email: string;
   password: string;
+  device_token?: string;
 }
 
 export interface RegisterData {
-  first_name: string;
-  last_name: string;
-  display_name?: string;
   email: string;
   password: string;
   password_confirmation: string;
+  first_name?: string;
+  last_name?: string;
+  display_name?: string;
+  privacy_policy: boolean;
+  terms_and_condition: boolean;
+  referral_code?: string;
+  device_token?: string;
 }
 
 export interface FirebaseLoginData {
-  token: string;
-  provider: 'google' | 'apple';
+  firebase_token: string;
+  device_token?: string;
+  provider?: 'google' | 'apple';
 }
 
 export interface MeResponse {

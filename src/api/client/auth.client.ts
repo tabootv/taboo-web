@@ -2,14 +2,14 @@
  * Authentication API Client
  *
  * API Endpoints:
- * - POST /login
- * - POST /register
- * - POST /auth/firebase-login
- * - POST /forget-password
- * - POST /reset-password
- * - POST /logout
- * - GET /me
- * - POST /device-token
+ * - POST /login - Email/password login (accepts device_token)
+ * - POST /register - Account creation (requires privacy_policy, terms_and_condition)
+ * - POST /auth/firebase-login - Google/Apple OAuth via Firebase
+ * - POST /forget-password - Request OTP for password reset
+ * - POST /reset-password - Reset password with OTP
+ * - POST /logout - Logout (accepts device_token to remove)
+ * - GET /me - Get authenticated user
+ * - POST /device-token - Update FCM device token
  */
 
 import type {
@@ -53,15 +53,15 @@ export const authClient = {
 
   resetPassword: async (payload: {
     email: string;
-    token: string;
+    otp: string;
     password: string;
     password_confirmation: string;
   }): Promise<MessageResponse> => {
     return apiClient.post<MessageResponse>('/reset-password', payload);
   },
 
-  logout: async (): Promise<void> => {
-    await apiClient.post('/logout');
+  logout: async (device_token?: string): Promise<void> => {
+    await apiClient.post('/logout', device_token ? { device_token } : undefined);
     removeToken();
   },
 
@@ -70,9 +70,9 @@ export const authClient = {
   },
 
   registerDeviceToken: async (
-    token: string,
+    device_token: string,
     platform: 'ios' | 'android' | 'web'
   ): Promise<void> => {
-    await apiClient.post('/device-token', { token, platform });
+    await apiClient.post('/device-token', { device_token, platform });
   },
 };
