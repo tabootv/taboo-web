@@ -51,7 +51,7 @@ export default defineConfig({
     ['list'],
     ['html', { outputFolder: 'playwright-report', open: 'never' }],
     ['json', { outputFile: 'playwright-report/results.json' }],
-    ...(isCI ? [['github' as const]] : []),
+    ...(isCI ? [['github', {}] as const] : []),
   ],
 
   // Shared settings for all projects
