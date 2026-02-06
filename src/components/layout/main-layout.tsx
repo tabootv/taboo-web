@@ -5,7 +5,6 @@ import { ScrollRestoration } from '@/components/layout/navigation/ScrollRestorat
 import { AppSidebar } from '@/components/sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { useHiddenComponentByPage } from '@/hooks/use-hidden-component-page';
-import { useAuthStore } from '@/shared/stores/auth-store';
 import { cn } from '@/shared/utils/formatting';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
@@ -19,16 +18,10 @@ interface MainLayoutProps {
 }
 
 export function MainLayout({ children, showFooter = true }: MainLayoutProps) {
-  const { checkAuth } = useAuthStore();
   const pathname = usePathname();
   const router = useRouter();
   const PIP_RETURN_URL_KEY = 'tabootv_pip_return_url';
   const isNotShortsPage = useHiddenComponentByPage(['/shorts']);
-
-  // Check auth state on mount
-  useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
 
   // Global PiP return handler: poll to detect when PiP closes
   // Note: leavepictureinpicture event doesn't bubble to document, so we poll instead

@@ -32,7 +32,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const handleLogout = () => {
     logout();
-    window.location.href = '/sign-in';
   };
 
   return (

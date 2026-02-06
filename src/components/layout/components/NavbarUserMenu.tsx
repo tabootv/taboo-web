@@ -3,7 +3,6 @@
  */
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { Bell, User, LogOut, Settings, Bookmark, Clapperboard } from 'lucide-react';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -18,7 +17,6 @@ interface NavbarUserMenuProps {
 }
 
 export function NavbarUserMenu({ isSearchExpanded }: NavbarUserMenuProps) {
-  const router = useRouter();
   const { user, isAuthenticated, logout } = useAuthStore();
   const { isUserMenuOpen, toggleMenu: toggleUserMenu, closeMenu: closeUserMenu } = useUserMenu();
   const { data: notificationsList = [] } = useNotifications();
@@ -31,7 +29,6 @@ export function NavbarUserMenu({ isSearchExpanded }: NavbarUserMenuProps) {
   const handleLogout = async () => {
     await logout();
     closeUserMenu();
-    router.push('/sign-in');
   };
 
   if (!isAuthenticated) {
