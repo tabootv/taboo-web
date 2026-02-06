@@ -12,58 +12,34 @@ interface AuthLayoutProps {
 export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
   return (
     <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
-      {/* Frosted background effects */}
+      {/* Subtle background glow */}
       <div className="absolute inset-0 pointer-events-none">
-        {/* Subtle red glow at top */}
         <div
-          className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px]"
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px]"
           style={{
             background:
-              'radial-gradient(ellipse at center, rgba(171, 0, 19, 0.08) 0%, transparent 70%)',
-          }}
-        />
-        {/* Subtle ambient glow */}
-        <div
-          className="absolute bottom-0 left-0 w-[600px] h-[600px]"
-          style={{
-            background:
-              'radial-gradient(circle at center, rgba(255,255,255,0.02) 0%, transparent 60%)',
-          }}
-        />
-        <div
-          className="absolute top-1/3 right-0 w-[500px] h-[500px]"
-          style={{
-            background:
-              'radial-gradient(circle at center, rgba(255,255,255,0.015) 0%, transparent 60%)',
+              'radial-gradient(ellipse at center, rgba(171, 0, 19, 0.06) 0%, transparent 70%)',
           }}
         />
       </div>
 
       {/* Header */}
-      <header className="relative z-10 py-6 px-4">
+      <header className="relative z-10 py-5 px-4">
         <div className="max-w-7xl mx-auto">
           <Logo size="md" linkTo="/home" />
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="relative z-10 flex-1 flex items-center justify-center px-4 py-8">
-        <div className="w-full max-w-md">
-          {/* Frosted Glass Card */}
-          <div
-            className="rounded-2xl p-8 backdrop-blur-xl"
-            style={{
-              background:
-                'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-            }}
-          >
+      <main className="relative z-10 flex-1 flex items-center justify-center px-4 py-6">
+        <div className="w-full max-w-[400px]">
+          {/* Solid Dark Card - Compact Supabase Style */}
+          <div className="rounded-xl p-6 bg-surface border border-border">
             {/* Title */}
             {title && (
-              <div className="text-center mb-8">
-                <h1 className="text-2xl font-bold text-white">{title}</h1>
-                {subtitle && <p className="mt-2 text-white/60">{subtitle}</p>}
+              <div className="text-center mb-5">
+                <h1 className="text-xl font-semibold text-text-primary">{title}</h1>
+                {subtitle && <p className="mt-1.5 text-sm text-text-secondary">{subtitle}</p>}
               </div>
             )}
 
@@ -74,9 +50,9 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
       </main>
 
       {/* Footer */}
-      <footer className="relative z-10 py-6 px-4">
+      <footer className="relative z-10 py-4 px-4">
         <div className="max-w-7xl mx-auto text-center">
-          <p className="text-sm text-white/40">
+          <p className="text-xs text-text-secondary">
             &copy; {new Date().getFullYear()} TabooTV. All rights reserved.
           </p>
         </div>
@@ -87,10 +63,9 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
         richColors
         toastOptions={{
           style: {
-            background: 'rgba(13, 13, 13, 0.95)',
-            border: '1px solid rgba(255,255,255,0.1)',
-            color: '#fff',
-            backdropFilter: 'blur(10px)',
+            background: '#0d0d0d',
+            border: '1px solid rgba(255,255,255,0.08)',
+            color: '#e6e7ea',
           },
         }}
       />
