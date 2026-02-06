@@ -95,19 +95,6 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_APP_NAME: 'TabooTV',
   },
 
-  // API Rewrites - proxy API requests to avoid CORS issues
-  // Note: Next.js API routes (src/app/api/*) are checked BEFORE rewrites
-  async rewrites() {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://app.taboo.tv/api';
-    return [
-      {
-        source: '/api/:path*',
-        destination: `${apiUrl}/:path*`,
-        // This rewrite only applies if no Next.js API route matches first
-      },
-    ];
-  },
-
   // Redirects - see routeRedirects configuration at top of file
   async redirects() {
     return routeRedirects;
