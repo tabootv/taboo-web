@@ -55,4 +55,7 @@ metrics
 
 # SonarJS reports (safety net - normally output to scratchpad)
 sonar-report*.json
-sonar-summary*.mddeploy.sh
+sonar-summary*.md
+deploy.sh
+
+.superdesign
