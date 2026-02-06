@@ -11,12 +11,13 @@ import {
 } from '@/api/mutations/studio.mutations';
 import { useStudioPosts, useStudioShorts, useStudioVideos } from '@/api/queries/studio.queries';
 import { Button } from '@/components/ui/button';
+import { UploadModal } from '@/features/upload';
 import { useAuthStore } from '@/shared/stores/auth-store';
+import { useUploadStore } from '@/shared/stores/upload-store';
 import type { StudioVideoListItem } from '@/types/studio';
 import { Upload } from 'lucide-react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useUploadStore } from '@/shared/stores/upload-store';
 import { toast } from 'sonner';
 import {
   ContentTable,
@@ -28,11 +29,10 @@ import {
   type Visibility,
 } from '../_components/content-table';
 import { ContentFilterBar } from '../_components/content-table/ContentFilterBar';
-import { UploadModal } from '@/features/upload';
 import { useContentFilters } from './_hooks/use-content-filters';
 import {
-  deriveVideoDisplayState,
   deriveProcessingStatus,
+  deriveVideoDisplayState,
   filterVideosByStatus,
 } from './_utils/video-status';
 
@@ -58,7 +58,7 @@ interface EditVideoData {
 function ContentPageInner() {
   const { user } = useAuthStore();
   const searchParams = useSearchParams();
-  const router = useRouter();
+
   const [activeTab, setActiveTab] = useState<ContentType>('videos');
   const [videosPage, setVideosPage] = useState(1);
   const [shortsPage, setShortsPage] = useState(1);
@@ -118,7 +118,10 @@ function ContentPageInner() {
     if (!uploadId || processedUploadIdRef.current === uploadId) return;
 
     const upload = useUploadStore.getState().getUpload(uploadId);
-    if (!upload) return;
+    if (!upload) {
+      window.history.replaceState(null, '', '/studio/content');
+      return;
+    }
 
     // Mark as processed BEFORE opening modal to prevent race conditions
     processedUploadIdRef.current = uploadId;
@@ -155,8 +158,10 @@ function ContentPageInner() {
     }
 
     // Clean up URL to prevent re-triggering on page refresh
-    router.replace('/studio/content', { scroll: false });
-  }, [uploadId, router]);
+    // Use replaceState instead of router.replace to avoid triggering Next.js navigation
+    // which can cause auth state race conditions and extra history entries
+    window.history.replaceState(null, '', '/studio/content');
+  }, [uploadId]);
 
   /**
    * Transform API video item to ContentItem for UI display
