@@ -160,8 +160,14 @@ export const useAuthStore = create<AuthState>()(
         user: state.user,
         isSubscribed: state.isSubscribed,
         isAuthenticated: state.isAuthenticated,
+        isLoading: state.isLoading,
+        // Persist _hasHydrated to allow E2E tests to pre-set hydration state
+        // This prevents race conditions where the layout redirects before hydration
+        _hasHydrated: state._hasHydrated,
       }),
       onRehydrateStorage: () => (state) => {
+        // Set hydrated to true after rehydration completes
+        // This is redundant if _hasHydrated was persisted, but ensures it's set
         state?.setHasHydrated(true);
       },
     }

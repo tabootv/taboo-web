@@ -137,6 +137,14 @@ function redirectToHome(request: NextRequest): NextResponse {
  * Returns true if user is a creator (has is_creator flag or channel object)
  */
 async function validateCreatorStatus(token: string): Promise<boolean> {
+  // Skip validation in E2E test mode - test auth is handled by test fixtures
+  if (process.env.PLAYWRIGHT_MOCK_MODE === 'true') {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[Middleware] E2E test mode - skipping creator validation');
+    }
+    return true;
+  }
+
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://app.taboo.tv/api';
 
