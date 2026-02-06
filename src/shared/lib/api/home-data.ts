@@ -14,6 +14,7 @@
 import { cache } from 'react';
 import { homeClient } from '@/api/client/home.client';
 import { playlistsClient } from '@/api/client/playlists.client';
+import { TOKEN_KEY, decodeCookieToken } from '@/shared/lib/auth/cookie-config';
 import type { Banner, Creator, Playlist, Series, Video } from '@/types';
 import { cookies } from 'next/headers';
 
@@ -57,7 +58,7 @@ export interface FetchHomeOptions {
 export const fetchHomeData = cache(
   async (options: FetchHomeOptions = {}): Promise<HomePageData> => {
     const cookieStore = await cookies();
-    const serverToken = cookieStore.get('tabootv_token')?.value;
+    const serverToken = decodeCookieToken(cookieStore.get(TOKEN_KEY)?.value);
 
     const { cursor = null, includeStatic = cursor === null } = options;
     const playlistPage = cursor ?? 1;

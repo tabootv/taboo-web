@@ -1,7 +1,4 @@
-import { isAuthenticated, removeToken, setToken } from '@/api/client/base-client';
-import { authClient } from '@/api/client/auth.client';
-import { loginAction, logoutAction } from '@/app/(auth)/sign-in/_actions';
-import { registerAction } from '@/app/(auth)/register/_actions';
+import { authClient, AuthenticatedMeResponse } from '@/api/client/auth.client';
 import type { FirebaseLoginData, LoginCredentials, RegisterData, User } from '@/types';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
@@ -11,20 +8,23 @@ interface AuthState {
   isSubscribed: boolean;
   isLoading: boolean;
   isAuthenticated: boolean;
+  isInitialized: boolean;
   error: string | null;
   _hasHydrated: boolean;
 
   login: (credentials: LoginCredentials) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
-  firebaseLogin: (data: FirebaseLoginData) => Promise<void>;
+  firebaseLogin: (data: FirebaseLoginData) => Promise<{ requires_username?: boolean }>;
   logout: () => Promise<void>;
   fetchUser: () => Promise<void>;
   updateUser: (user: Partial<User>) => void;
   setSubscribed: (subscribed: boolean) => void;
   clearError: () => void;
-  checkAuth: () => void;
+  checkAuth: () => Promise<void>;
   setHasHydrated: (state: boolean) => void;
 }
+
+let pendingAuthCheck: Promise<void> | null = null;
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -33,6 +33,7 @@ export const useAuthStore = create<AuthState>()(
       isSubscribed: false,
       isLoading: false,
       isAuthenticated: false,
+      isInitialized: false,
       error: null,
       _hasHydrated: false,
 
@@ -41,15 +42,14 @@ export const useAuthStore = create<AuthState>()(
       login: async (credentials: LoginCredentials) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await loginAction(credentials);
-          if (response.token) {
-            setToken(response.token);
-          }
+          // Client-side: /api/login proxy sets HttpOnly cookie
+          const response = await authClient.login(credentials);
           const isSubscribed = response.subscribed ?? false;
           set({
             user: response.user,
             isSubscribed,
             isAuthenticated: true,
+            isInitialized: true,
             isLoading: false,
           });
         } catch (error: unknown) {
@@ -62,15 +62,14 @@ export const useAuthStore = create<AuthState>()(
       register: async (data: RegisterData) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await registerAction(data);
-          if (response.token) {
-            setToken(response.token);
-          }
+          // Client-side: /api/register proxy sets HttpOnly cookie
+          const response = await authClient.register(data);
           const isSubscribed = response.subscribed ?? false;
           set({
             user: response.user,
             isSubscribed,
             isAuthenticated: true,
+            isInitialized: true,
             isLoading: false,
           });
         } catch (error: unknown) {
@@ -83,14 +82,19 @@ export const useAuthStore = create<AuthState>()(
       firebaseLogin: async (data: FirebaseLoginData) => {
         set({ isLoading: true, error: null });
         try {
+          // Client-side: /api/auth/firebase-login proxy sets HttpOnly cookie
           const response = await authClient.firebaseLogin(data);
           const isSubscribed = response.subscribed ?? false;
           set({
             user: response.user,
             isSubscribed,
             isAuthenticated: true,
+            isInitialized: true,
             isLoading: false,
           });
+          return response.requires_username !== undefined
+            ? { requires_username: response.requires_username }
+            : {};
         } catch (error: unknown) {
           const message = error instanceof Error ? error.message : 'Social login failed';
           set({ error: message, isLoading: false });
@@ -101,32 +105,40 @@ export const useAuthStore = create<AuthState>()(
       logout: async () => {
         set({ isLoading: true });
         try {
-          await logoutAction();
+          // Client-side: /api/logout proxy clears HttpOnly cookie
+          await authClient.logout();
         } catch {
+          // Ignore logout errors - clear local state anyway
         } finally {
-          removeToken();
-          set({ user: null, isSubscribed: false, isAuthenticated: false, isLoading: false });
+          set({
+            user: null,
+            isSubscribed: false,
+            isAuthenticated: false,
+            isInitialized: false,
+            isLoading: false,
+          });
+          window.location.href = '/sign-in';
         }
       },
 
       fetchUser: async () => {
-        if (!isAuthenticated()) {
-          set({ user: null, isSubscribed: false, isAuthenticated: false });
-          return;
-        }
-
         set({ isLoading: true });
         try {
-          const response = await authClient.me();
-          const isSubscribed = response.subscribed ?? response.user?.subscribed ?? false;
-          set({
-            user: response.user,
-            isSubscribed,
-            isAuthenticated: true,
-            isLoading: false,
-          });
+          const response: AuthenticatedMeResponse = await authClient.me();
+          if (response.authenticated && response.user) {
+            const isSubscribed =
+              response.subscribed ?? (response.user as User)?.subscribed ?? false;
+            set({
+              user: response.user as User,
+              isSubscribed,
+              isAuthenticated: true,
+              isLoading: false,
+            });
+          } else {
+            set({ user: null, isSubscribed: false, isAuthenticated: false, isLoading: false });
+          }
         } catch {
-          removeToken();
+          // Not authenticated or error - clear state
           set({ user: null, isSubscribed: false, isAuthenticated: false, isLoading: false });
         }
       },
@@ -144,13 +156,19 @@ export const useAuthStore = create<AuthState>()(
 
       clearError: () => set({ error: null }),
 
-      checkAuth: () => {
-        const authenticated = isAuthenticated();
-        if (!authenticated) {
-          set({ user: null, isSubscribed: false, isAuthenticated: false });
-        } else if (!get().user) {
-          get().fetchUser();
-        }
+      checkAuth: async () => {
+        if (pendingAuthCheck) return pendingAuthCheck;
+        pendingAuthCheck = (async () => {
+          try {
+            await get().fetchUser();
+          } catch {
+            set({ user: null, isSubscribed: false, isAuthenticated: false });
+          } finally {
+            set({ isInitialized: true });
+            pendingAuthCheck = null;
+          }
+        })();
+        return pendingAuthCheck;
       },
     }),
     {
@@ -159,16 +177,18 @@ export const useAuthStore = create<AuthState>()(
       partialize: (state) => ({
         user: state.user,
         isSubscribed: state.isSubscribed,
-        isAuthenticated: state.isAuthenticated,
-        isLoading: state.isLoading,
+        // Don't persist isAuthenticated - derive from server on hydration
         // Persist _hasHydrated to allow E2E tests to pre-set hydration state
-        // This prevents race conditions where the layout redirects before hydration
         _hasHydrated: state._hasHydrated,
       }),
       onRehydrateStorage: () => (state) => {
-        // Set hydrated to true after rehydration completes
-        // This is redundant if _hasHydrated was persisted, but ensures it's set
         state?.setHasHydrated(true);
+        if (state?.user) {
+          setTimeout(() => state.checkAuth(), 0);
+        } else {
+          // No persisted user — no need to verify, mark as initialized
+          useAuthStore.setState({ isInitialized: true });
+        }
       },
     }
   )

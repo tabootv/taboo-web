@@ -3,6 +3,11 @@
  *
  * Type-safe HTTP client wrapper around axios.
  * Provides consistent error handling and request/response interceptors.
+ *
+ * Token Management:
+ * - Tokens are stored in HttpOnly cookies (not accessible to JavaScript)
+ * - Client-side requests go through /api/* proxy routes which read the cookie
+ * - Server-side requests can pass a serverToken explicitly
  */
 
 import { getRequiredEnv } from '@/shared/lib/config/env';
@@ -13,20 +18,53 @@ import axios, {
   AxiosRequestConfig,
   InternalAxiosRequestConfig,
 } from 'axios';
-import Cookies from 'js-cookie';
-
-const TOKEN_KEY = 'tabootv_token';
 
 const getBaseURL = (): string => {
   if (globalThis.window !== undefined) {
+    // Client-side: use /api routes which proxy to backend
+    // The proxy reads HttpOnly cookie and adds Authorization header
     return '/api';
   }
+  // Server-side: direct API calls
   return getRequiredEnv('NEXT_PUBLIC_API_URL');
 };
 
 export interface RequestConfig extends AxiosRequestConfig {
   params?: Record<string, unknown> | undefined;
   serverToken?: string;
+}
+
+let isRedirecting = false;
+
+async function coordinatedLogout(): Promise<void> {
+  if (isRedirecting) return;
+
+  // Don't trigger logout if auth state isn't confirmed yet
+  const { useAuthStore } = await import('@/shared/stores/auth-store');
+  const { isInitialized: initDone, isAuthenticated: authDone } = useAuthStore.getState();
+  if (!initDone || !authDone) return;
+
+  isRedirecting = true;
+
+  try {
+    // Clear Zustand state — persist middleware auto-syncs to localStorage
+    useAuthStore.setState({
+      user: null,
+      isSubscribed: false,
+      isAuthenticated: false,
+      isInitialized: false,
+      isLoading: false,
+    });
+
+    // Don't call /api/logout here — automatic 401-triggered logout should only
+    // clear local state and redirect, NOT invalidate the token on the backend.
+    // Backend token invalidation only happens on explicit user-initiated logout.
+
+    // Redirect — full page load starts fresh
+    window.location.href = '/sign-in';
+  } catch {
+    window.location.href = '/sign-in';
+  }
 }
 
 class ApiClient {
@@ -48,12 +86,12 @@ class ApiClient {
   private setupInterceptors(): void {
     this.client.interceptors.request.use(
       (config: InternalAxiosRequestConfig) => {
+        // For server-side direct calls, add Authorization header if serverToken provided
         const serverToken = (config as RequestConfig).serverToken;
-        const token = serverToken || this.getToken();
-
-        if (token && config.headers) {
-          config.headers.Authorization = `Bearer ${token}`;
+        if (serverToken && config.headers) {
+          config.headers.Authorization = `Bearer ${serverToken}`;
         }
+        // For client-side, the /api proxy routes handle Authorization
         return config;
       },
       (error: AxiosError) => Promise.reject(error)
@@ -61,12 +99,23 @@ class ApiClient {
 
     this.client.interceptors.response.use(
       (response) => response,
-      (error: AxiosError) => {
+      async (error: AxiosError) => {
         try {
           if (error.response?.status === 401) {
-            this.removeToken();
+            const requestUrl = error.config?.url || '';
+            // Always allow /me to fail without triggering logout
+            if (requestUrl.includes('/me')) {
+              return Promise.reject(error);
+            }
             if (globalThis.window !== undefined) {
-              redirect('/sign-in');
+              // Only trigger logout after auth initialization completes.
+              // During hydration (isInitialized: false), silently reject —
+              // checkAuth() will determine the true auth state.
+              const { useAuthStore } = await import('@/shared/stores/auth-store');
+              const { isInitialized } = useAuthStore.getState();
+              if (isInitialized) {
+                coordinatedLogout();
+              }
             }
           }
 
@@ -85,28 +134,6 @@ class ApiClient {
         return Promise.reject(error);
       }
     );
-  }
-
-  getToken(serverToken?: string): string | undefined {
-    if (serverToken) return serverToken;
-    if (globalThis.window === undefined) return undefined;
-    return Cookies.get(TOKEN_KEY);
-  }
-
-  setToken(token: string): void {
-    Cookies.set(TOKEN_KEY, token, {
-      expires: 7,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-    });
-  }
-
-  removeToken(): void {
-    Cookies.remove(TOKEN_KEY);
-  }
-
-  isAuthenticated(): boolean {
-    return !!this.getToken();
   }
 
   async get<T>(endpoint: string, config?: RequestConfig): Promise<T> {
@@ -137,7 +164,33 @@ class ApiClient {
 
 export const apiClient = new ApiClient();
 
-export const getToken = () => apiClient.getToken();
-export const setToken = (token: string) => apiClient.setToken(token);
-export const removeToken = () => apiClient.removeToken();
-export const isAuthenticated = () => apiClient.isAuthenticated();
+/**
+ * @deprecated Token management moved to HttpOnly cookies.
+ * For server-side, read from cookies() and pass as serverToken.
+ */
+export const getToken = (): undefined => undefined;
+
+/**
+ * @deprecated Token management moved to HttpOnly cookies.
+ * Tokens are set by /api/auth/* proxy routes.
+ */
+export const setToken = (_token: string): void => {
+  console.warn('setToken is deprecated. Tokens are now managed via HttpOnly cookies.');
+};
+
+/**
+ * @deprecated Token management moved to HttpOnly cookies.
+ * Call /api/auth/logout to remove token.
+ */
+export const removeToken = (): void => {
+  console.warn('removeToken is deprecated. Call /api/auth/logout to remove token.');
+};
+
+/**
+ * @deprecated Token management moved to HttpOnly cookies.
+ * Use authClient.me() to check authentication status.
+ */
+export const isAuthenticated = (): boolean => {
+  console.warn('isAuthenticated is deprecated. Use authClient.me() to check auth status.');
+  return false;
+};

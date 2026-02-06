@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server';
+import { decodeCookieToken } from '@/shared/lib/auth/cookie-config';
 import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 
 // Token key in cookies
 const TOKEN_KEY = 'tabootv_token';
@@ -138,12 +139,12 @@ function redirectToHome(request: NextRequest): NextResponse {
  */
 async function validateCreatorStatus(token: string): Promise<boolean> {
   // Skip validation in E2E test mode - test auth is handled by test fixtures
-  if (process.env.PLAYWRIGHT_MOCK_MODE === 'true') {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[Middleware] E2E test mode - skipping creator validation');
-    }
-    return true;
-  }
+  // if (process.env.PLAYWRIGHT_MOCK_MODE === 'true') {
+  //   if (process.env.NODE_ENV === 'development') {
+  //     console.log('[Middleware] E2E test mode - skipping creator validation');
+  //   }
+  //   return true;
+  // }
 
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://app.taboo.tv/api';
@@ -204,18 +205,20 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // 2. Get token from cookie
-  const token = request.cookies.get(TOKEN_KEY)?.value;
+  // 2. Get token from cookie (decode URL-encoded Sanctum tokens)
+  const token = decodeCookieToken(request.cookies.get(TOKEN_KEY)?.value);
 
   // 3. Handle public routes
   if (isPublicRoute(pathname)) {
-    // If already authenticated and trying to access auth pages, redirect to home
+    // Allow access to public routes including auth pages.
+    // Client-side useGuestOnly hook will redirect authenticated users
+    // AFTER checkAuth() verifies the token. This prevents redirect loops
+    // where middleware redirects based on cookie existence alone.
+    // Redirect authenticated users away from auth pages
     if (token && isAuthPage(pathname)) {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('[Middleware] Authenticated user on auth page, redirecting to /home');
-      }
       return redirectToHome(request);
     }
+
     return NextResponse.next();
   }
 

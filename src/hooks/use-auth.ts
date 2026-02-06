@@ -17,6 +17,7 @@ export function useAuth(options: UseAuthOptions = {}) {
     user,
     isLoading,
     isAuthenticated,
+    isInitialized,
     error,
     login,
     register,
@@ -25,17 +26,11 @@ export function useAuth(options: UseAuthOptions = {}) {
     fetchUser,
     updateUser,
     clearError,
-    checkAuth,
   } = useAuthStore();
 
-  // Check auth state on mount
+  // Handle redirects — only after initialization completes
   useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
-
-  // Handle redirects
-  useEffect(() => {
-    if (isLoading) return;
+    if (!isInitialized || isLoading) return;
 
     // Redirect to login if not authenticated and redirectTo is set
     if (redirectTo && !isAuthenticated) {
@@ -46,12 +41,13 @@ export function useAuth(options: UseAuthOptions = {}) {
     if (redirectIfAuthenticated && isAuthenticated) {
       router.push(redirectIfAuthenticated);
     }
-  }, [isLoading, isAuthenticated, redirectTo, redirectIfAuthenticated, router]);
+  }, [isInitialized, isLoading, isAuthenticated, redirectTo, redirectIfAuthenticated, router]);
 
   return {
     user,
     isLoading,
     isAuthenticated,
+    isInitialized,
     error,
     login,
     register,

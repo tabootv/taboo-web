@@ -1,15 +1,18 @@
 /**
  * Authentication API Client
  *
- * API Endpoints:
- * - POST /login - Email/password login (accepts device_token)
- * - POST /register - Account creation (requires privacy_policy, terms_and_condition)
+ * API Endpoints (matching backend paths):
+ * - POST /login - Email/password login
+ * - POST /register - Account creation
  * - POST /auth/firebase-login - Google/Apple OAuth via Firebase
- * - POST /forget-password - Request OTP for password reset
- * - POST /reset-password - Reset password with OTP
- * - POST /logout - Logout (accepts device_token to remove)
+ * - POST /logout - Logout
  * - GET /me - Get authenticated user
  * - POST /device-token - Update FCM device token
+ * - POST /forget-password - Request OTP for password reset
+ * - POST /reset-password - Reset password with OTP
+ *
+ * Client-side: Requests go through /api/* proxy routes which manage HttpOnly cookies.
+ * Server-side: Requests go directly to backend (use server actions to set cookies).
  */
 
 import type {
@@ -20,37 +23,57 @@ import type {
   MessageResponse,
   RegisterData,
 } from '../types';
-import { apiClient, removeToken, setToken } from './base-client';
+import { apiClient } from './base-client';
+
+export interface AuthenticatedMeResponse extends MeResponse {
+  authenticated: boolean;
+}
 
 export const authClient = {
+  /**
+   * Login with email and password.
+   * Client-side: /api/login proxy sets HttpOnly cookie.
+   * Server-side: Returns token in response (caller sets cookie).
+   */
   login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
-    const data = await apiClient.post<AuthResponse>('/login', credentials);
-    if (data.token) {
-      setToken(data.token);
-    }
-    return data;
+    return apiClient.post<AuthResponse>('/login', credentials);
   },
 
+  /**
+   * Register a new account.
+   * Client-side: /api/register proxy sets HttpOnly cookie.
+   * Server-side: Returns token in response (caller sets cookie).
+   */
   register: async (userData: RegisterData): Promise<AuthResponse> => {
-    const data = await apiClient.post<AuthResponse>('/register', userData);
-    if (data.token) {
-      setToken(data.token);
-    }
-    return data;
+    return apiClient.post<AuthResponse>('/register', userData);
   },
 
-  firebaseLogin: async (firebaseData: FirebaseLoginData): Promise<AuthResponse> => {
-    const data = await apiClient.post<AuthResponse>('/auth/firebase-login', firebaseData);
-    if (data.token) {
-      setToken(data.token);
-    }
-    return data;
+  /**
+   * Login with Firebase token (Google/Apple OAuth).
+   * Client-side: /api/auth/firebase-login proxy sets HttpOnly cookie.
+   * Server-side: Returns token in response (caller sets cookie).
+   */
+  firebaseLogin: async (
+    firebaseData: FirebaseLoginData
+  ): Promise<AuthResponse & { requires_username?: boolean }> => {
+    return apiClient.post<AuthResponse & { requires_username?: boolean }>(
+      '/auth/firebase-login',
+      firebaseData
+    );
   },
 
+  /**
+   * Request OTP for password reset.
+   * No authentication required.
+   */
   forgotPassword: async (email: string): Promise<MessageResponse> => {
     return apiClient.post<MessageResponse>('/forget-password', { email });
   },
 
+  /**
+   * Reset password with OTP.
+   * No authentication required.
+   */
   resetPassword: async (payload: {
     email: string;
     otp: string;
@@ -60,15 +83,26 @@ export const authClient = {
     return apiClient.post<MessageResponse>('/reset-password', payload);
   },
 
+  /**
+   * Logout the current user.
+   * Client-side: /api/logout proxy clears HttpOnly cookie.
+   * Server-side: Caller clears cookie.
+   */
   logout: async (device_token?: string): Promise<void> => {
     await apiClient.post('/logout', device_token ? { device_token } : undefined);
-    removeToken();
   },
 
-  me: async (): Promise<MeResponse> => {
-    return apiClient.get<MeResponse>('/me');
+  /**
+   * Get the authenticated user's data.
+   * Client-side: /api/me proxy reads HttpOnly cookie.
+   */
+  me: async (): Promise<AuthenticatedMeResponse> => {
+    return apiClient.get<AuthenticatedMeResponse>('/me');
   },
 
+  /**
+   * Register or update FCM device token for push notifications.
+   */
   registerDeviceToken: async (
     device_token: string,
     platform: 'ios' | 'android' | 'web'
