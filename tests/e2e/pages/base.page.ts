@@ -76,7 +76,7 @@ export abstract class BasePage {
   }
 
   async setLocalStorageItem(key: string, value: string): Promise<void> {
-    await this.page.evaluate(([k, v]) => localStorage.setItem(k, v), [key, value]);
+    await this.page.evaluate(([k, v]) => localStorage.setItem(k, v), [key, value] as const);
   }
 
   async clearLocalStorage(): Promise<void> {

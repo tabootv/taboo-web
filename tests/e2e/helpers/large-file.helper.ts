@@ -228,15 +228,12 @@ export async function captureUploadLengthHeader(
 /**
  * Monitor memory usage during upload simulation
  */
-export async function monitorMemoryUsage(
-  page: Page
-): Promise<{
+export async function monitorMemoryUsage(page: Page): Promise<{
   getMemoryInfo: () => Promise<{ usedJSHeapSize: number; totalJSHeapSize: number } | null>;
 }> {
   return {
     getMemoryInfo: async () => {
       return await page.evaluate(() => {
-        // @ts-expect-error - memory is available in Chrome
         const memory = (
           performance as { memory?: { usedJSHeapSize: number; totalJSHeapSize: number } }
         ).memory;

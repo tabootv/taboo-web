@@ -96,8 +96,8 @@ export async function getUploadById(page: Page, uploadId: string): Promise<Activ
       try {
         const parsed = JSON.parse(raw);
         const uploadsArray = parsed.state?.uploads || parsed.uploads || [];
-        const uploadsMap = new Map(uploadsArray);
-        return uploadsMap.get(id) || null;
+        const uploadsMap = new Map<string, ActiveUpload>(uploadsArray);
+        return uploadsMap.get(id) ?? null;
       } catch {
         return null;
       }
