@@ -121,10 +121,8 @@ class ApiClient {
 
           if (error.response?.status === 403) {
             const data = error.response.data as { message?: string };
-            if (data?.message?.includes('subscription')) {
-              if (globalThis.window !== undefined) {
-                redirect('/plans');
-              }
+            if (data?.message?.includes('subscription') && globalThis.window !== undefined) {
+              redirect('/choose-plan');
             }
           }
         } catch (redirectError) {

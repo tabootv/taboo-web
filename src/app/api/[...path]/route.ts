@@ -83,10 +83,10 @@ async function proxyRequest(request: NextRequest, method: string) {
       res = NextResponse.json(data, { status: response.status });
     }
 
-    // Cookie management is handled by specific auth routes:
-    // - /api/me deletes cookie when token validation fails
-    // - /api/logout deletes cookie on explicit logout
-    // This catch-all proxy passes through 401s without touching cookies.
+    // Clear auth cookie on 401 responses per spec Section 3.6
+    if (response.status === 401) {
+      res.cookies.delete(TOKEN_KEY);
+    }
 
     return res;
   } catch (error) {

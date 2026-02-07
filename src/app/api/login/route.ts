@@ -6,12 +6,15 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { COOKIE_OPTIONS, TOKEN_KEY, getApiUrl } from '@/shared/lib/auth/cookie-config';
+import { getCookieOptions, TOKEN_KEY, getApiUrl } from '@/shared/lib/auth/cookie-config';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const apiUrl = getApiUrl();
+
+    // Extract remember_me before forwarding to backend
+    const { remember_me, ...loginData } = body;
 
     const response = await fetch(`${apiUrl}/login`, {
       method: 'POST',
@@ -19,7 +22,7 @@ export async function POST(request: NextRequest) {
         'Content-Type': 'application/json',
         Accept: 'application/json',
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify(loginData),
     });
 
     const data = await response.json();
@@ -56,7 +59,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (token) {
-      res.cookies.set(TOKEN_KEY, token, COOKIE_OPTIONS);
+      res.cookies.set(TOKEN_KEY, token, getCookieOptions(remember_me));
     }
 
     return res;

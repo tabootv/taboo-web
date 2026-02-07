@@ -16,6 +16,29 @@ export const COOKIE_OPTIONS = {
 };
 
 /**
+ * Get cookie options based on remember me preference.
+ * - true:      30-day maxAge
+ * - false:     session cookie (no maxAge, dies on browser close)
+ * - undefined: 7-day default (backward compatible)
+ */
+export function getCookieOptions(rememberMe?: boolean) {
+  const base = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax' as const,
+    path: '/',
+  };
+
+  if (rememberMe === true) {
+    return { ...base, maxAge: 60 * 60 * 24 * 30 }; // 30 days
+  }
+  if (rememberMe === false) {
+    return base; // session cookie
+  }
+  return { ...base, maxAge: 60 * 60 * 24 * 7 }; // 7 days default
+}
+
+/**
  * Safely decode a cookie token value.
  *
  * Next.js ResponseCookies URL-encodes cookie values when setting them.
