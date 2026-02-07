@@ -97,7 +97,9 @@ export async function setupMockAuth(
         state: {
           user: userData,
           isSubscribed: subscribed,
+          isProfileComplete: true,
           isAuthenticated: true,
+          isInitialized: true,
           isLoading: false,
           error: null,
           _hasHydrated: true,
@@ -133,7 +135,9 @@ export async function seedAuthStore(
         state: {
           user: userData,
           isSubscribed: subscribed,
+          isProfileComplete: true,
           isAuthenticated: true,
+          isInitialized: true,
           isLoading: false,
           error: null,
           _hasHydrated: true,

@@ -59,6 +59,23 @@ export {
   type TusMockOptions,
 } from './tus-mock.helper';
 
+// Subscription mocking helpers
+export {
+  mockSubscription,
+  mockSubscriptionError,
+  mockSubscriptionStatusSequence,
+  seedSubscriptionState,
+  MOCK_SUBSCRIPTION_ACTIVE,
+  MOCK_SUBSCRIPTION_CANCELED,
+  MOCK_SUBSCRIPTION_EXPIRED,
+  MOCK_SUBSCRIPTION_PAST_DUE,
+  MOCK_SUBSCRIPTION_APPLE,
+  MOCK_SUBSCRIPTION_GOOGLE,
+  MOCK_NO_MANAGE_URL,
+  type MockSubscriptionResponse,
+  type MockSubscriptionStatusResponse,
+} from './subscription-mock.helper';
+
 // Large file simulation helpers
 export {
   EIGHTEEN_GB,
