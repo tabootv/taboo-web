@@ -4,7 +4,6 @@ import { NavigationProgress } from '@/components/layout/navigation/NavigationPro
 import { ScrollRestoration } from '@/components/layout/navigation/ScrollRestoration';
 import { AppSidebar } from '@/components/sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { useHiddenComponentByPage } from '@/hooks/use-hidden-component-page';
 import { cn } from '@/shared/utils/formatting';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
@@ -21,7 +20,6 @@ export function MainLayout({ children, showFooter = true }: MainLayoutProps) {
   const pathname = usePathname();
   const router = useRouter();
   const PIP_RETURN_URL_KEY = 'tabootv_pip_return_url';
-  const isNotShortsPage = useHiddenComponentByPage(['/shorts']);
 
   // Global PiP return handler: poll to detect when PiP closes
   // Note: leavepictureinpicture event doesn't bubble to document, so we poll instead
@@ -62,12 +60,12 @@ export function MainLayout({ children, showFooter = true }: MainLayoutProps) {
   return (
     <SidebarProvider defaultOpen={false}>
       <AppSidebar />
-      <SidebarInset className="bg-background min-h-screen overflow-x-hidden">
+      <SidebarInset className="bg-background min-h-screen">
         <ScrollRestoration />
         <NavigationProgress />
         <TopHeader />
 
-        <div className={cn(isNotShortsPage ? 'pt-0' : 'pt-14')}>
+        <div className={cn('overflow-x-hidden')}>
           {children}
           {showFooter && <Footer />}
         </div>

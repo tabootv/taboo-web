@@ -9,7 +9,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Logo } from '@/components/ui/logo';
 import {
   Sidebar,
   SidebarContent,
@@ -20,6 +19,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
   SidebarSeparator,
+  SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { useAuthStore } from '@/shared/stores/auth-store';
 import { ChevronUp, CreditCard, LogOut, Settings, User2 } from 'lucide-react';
@@ -39,12 +39,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild size="lg" className="data-[slot=sidebar-menu-button]:p-1.5!">
-              <div>
-                <Logo size="sm" linkTo="/home" />
-                <span className="text-base font-semibold text-red-primary">TabooTV</span>
-              </div>
-            </SidebarMenuButton>
+            <div className="flex items-center gap-2 py-2">
+              <SidebarTrigger className="size-8" />
+            </div>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>

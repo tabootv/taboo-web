@@ -117,7 +117,7 @@ export default function VideosPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="w-full px-[4%] py-8">
+      <div className="w-full page-px py-8">
         {/* Page Title */}
         <h1 className="text-2xl md:text-3xl font-bold text-white mb-6">Videos</h1>
 

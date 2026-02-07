@@ -67,7 +67,7 @@ export function Navbar() {
           : 'bg-black'
       )}
     >
-      <div className="max-w-[1920px] mx-auto px-4 md:px-8 lg:px-12">
+      <div className="max-w-[1920px] mx-auto page-px">
         <div className="flex items-center justify-between h-16">
           {/* Logo - hide when search expanded on smaller screens */}
           <div

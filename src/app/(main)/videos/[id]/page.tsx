@@ -252,7 +252,7 @@ export default function VideoPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-6 relative z-10">
+      <div className="max-w-[1800px] mx-auto page-px py-4 lg:py-6 relative z-10">
         <div className="flex flex-col lg:flex-row gap-6">
           <div className="flex-1 min-w-0">
             <div className="w-full rounded-lg overflow-hidden bg-black">

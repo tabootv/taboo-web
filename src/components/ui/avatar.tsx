@@ -4,10 +4,10 @@ import Image from 'next/image';
 
 interface AvatarProps {
   src?: string | null | undefined;
-  alt?: string | undefined;
+  alt?: string | null | undefined;
   size?: 'sm' | 'md' | 'lg' | 'xl' | undefined;
   className?: string | undefined;
-  fallback?: string | undefined;
+  fallback?: string | null | undefined;
 }
 
 const sizes = {
@@ -43,7 +43,7 @@ export function Avatar({ src, alt = 'Avatar', size = 'md', className, fallback }
       {src ? (
         <Image
           src={src}
-          alt={alt}
+          alt={alt ?? 'Avatar'}
           width={imageSizes[size]}
           height={imageSizes[size]}
           className="object-cover w-full h-full"

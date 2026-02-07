@@ -39,7 +39,7 @@ export function SeriesPlayerContent({
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-6">
+      <div className="max-w-[1800px] mx-auto page-px py-4 lg:py-6">
         <SeriesBreadcrumb
           seriesId={seriesId}
           seriesTitle={seriesData.title}

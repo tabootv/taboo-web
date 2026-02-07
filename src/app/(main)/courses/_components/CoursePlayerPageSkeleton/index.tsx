@@ -1,7 +1,7 @@
 export function CoursePlayerPageSkeleton() {
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-6">
+      <div className="max-w-[1800px] mx-auto page-px py-4 lg:py-6">
         <div className="h-5 w-64 bg-surface/50 rounded animate-pulse mb-4" />
         <div className="flex flex-col lg:flex-row gap-6">
           <div className="flex-1">

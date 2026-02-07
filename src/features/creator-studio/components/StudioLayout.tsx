@@ -63,7 +63,7 @@ export function StudioLayout({ children }: StudioLayoutProps) {
     <div className="min-h-screen bg-background">
       {/* Studio Header */}
       <div className="border-b border-border bg-surface/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto page-px">
           <div className="flex items-center justify-between h-14">
             {/* Breadcrumbs */}
             <nav className="flex items-center gap-2 text-sm">
@@ -113,7 +113,7 @@ export function StudioLayout({ children }: StudioLayoutProps) {
       </div>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">{children}</main>
+      <main className="max-w-7xl mx-auto page-px py-6">{children}</main>
     </div>
   );
 }

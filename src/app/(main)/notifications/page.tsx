@@ -96,7 +96,7 @@ export default function NotificationsPage() {
   const emptyState = getEmptyStateMessage();
 
   return (
-    <div className="w-full px-[4%] py-8">
+    <div className="w-full page-px py-8">
       <div className="max-w-full">
         <div className="flex items-center justify-between mb-6">
           <div>

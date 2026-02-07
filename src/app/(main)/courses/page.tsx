@@ -24,7 +24,7 @@ export default function CoursesPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-[1920px] mx-auto px-4 md:px-8 lg:px-12 py-6">
+      <div className="max-w-[1920px] mx-auto page-px py-6">
         <PageHeader title="Education" />
 
         <ContentGrid columns={{ default: 1, sm: 2, lg: 3 }} gap="lg" className="mt-6">

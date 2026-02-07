@@ -1,7 +1,7 @@
 export function PostDetailSkeleton() {
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-[820px] mx-auto px-4 md:px-6 lg:px-8 py-8">
+      <div className="max-w-[820px] mx-auto page-px py-8">
         <div className="mb-6">
           <div className="h-6 w-24 bg-surface/50 rounded animate-pulse mb-4" />
           <div className="h-8 w-3/4 bg-surface/50 rounded animate-pulse" />

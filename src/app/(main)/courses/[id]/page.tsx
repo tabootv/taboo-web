@@ -119,7 +119,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
         </div>
 
         <div className="relative z-10 pt-16 pb-8 min-h-[80vh] flex flex-col justify-end">
-          <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 w-full">
+          <div className="max-w-[1800px] mx-auto page-px w-full">
             {showTrailer && courseData.trailer_url && (
               <div className="mb-8 max-w-4xl animate-fade-in">
                 <VideoPlayer
@@ -255,7 +255,7 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
       </div>
 
       <div className="relative z-20 mt-8 pb-16">
-        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1800px] mx-auto page-px">
           <div className="flex items-center justify-between mb-6 pt-4 border-t border-white/5">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-red-primary/10 rounded-lg">

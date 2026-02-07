@@ -1,7 +1,7 @@
 export function CreatorProfileSkeleton() {
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12 py-8">
+      <div className="max-w-[1400px] mx-auto page-px py-8">
         <div className="mb-8">
           <div className="h-32 w-full bg-surface/50 rounded-lg animate-pulse mb-4" />
           <div className="flex items-start gap-6">

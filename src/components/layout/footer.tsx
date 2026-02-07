@@ -1,15 +1,14 @@
 'use client';
 
-import { Logo } from '@/components/ui/logo';
 import { useHiddenComponentByPage } from '@/hooks/use-hidden-component-page';
 import Image from 'next/image';
 import Link from 'next/link';
 
 const footerLinks = [
-  { name: 'Customer support', href: 'https://taboo.tv/contact-us' },
-  { name: 'Terms and conditions', href: 'https://taboo.tv/terms-conditions' },
-  { name: 'Privacy policy', href: 'https://taboo.tv/privacy-policy' },
-  { name: 'Refund policy', href: 'https://taboo.tv/refund-policy' },
+  { name: 'Terms', href: 'https://taboo.tv/terms-conditions' },
+  { name: 'Privacy', href: 'https://taboo.tv/privacy-policy' },
+  { name: 'Refund', href: 'https://taboo.tv/refund-policy' },
+  { name: 'Help', href: 'https://taboo.tv/contact-us' },
 ];
 
 export function Footer() {
@@ -18,30 +17,40 @@ export function Footer() {
   if (isHidden) return;
 
   return (
-    <footer className="bg-surface safe-bottom">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        {/* Logo */}
-        <div className="flex justify-center mb-8">
-          <Logo size="lg" linkTo="/home" />
-        </div>
+    <footer className="border-t border-border safe-bottom">
+      <div className="max-w-7xl mx-auto page-px py-6">
+        {/* Contact CTA */}
+        <p className="text-center text-sm text-text-secondary mb-4">
+          Questions?{' '}
+          <Link
+            href="https://taboo.tv/contact-us"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-red-primary hover:text-red-hover transition-colors"
+          >
+            Contact us
+          </Link>
+        </p>
 
-        {/* Links */}
-        <div className="flex flex-wrap justify-center gap-x-8 gap-y-3 mb-8">
-          {footerLinks.map((link) => (
-            <Link
-              key={link.name}
-              href={link.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-text-secondary hover:text-red-primary transition-colors"
-            >
-              {link.name}
-            </Link>
+        {/* Links - pipe separated */}
+        <div className="flex items-center justify-center gap-2 mb-4 text-sm">
+          {footerLinks.map((link, index) => (
+            <span key={link.name} className="flex items-center gap-2">
+              {index > 0 && <span className="text-white/20">|</span>}
+              <Link
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-text-secondary hover:text-red-primary transition-colors"
+              >
+                {link.name}
+              </Link>
+            </span>
           ))}
         </div>
 
-        {/* App Store Badges */}
-        <div className="flex flex-wrap justify-center gap-4 mb-8">
+        {/* App Store Badges - single row, smaller */}
+        <div className="flex justify-center gap-3 mb-4">
           <Link
             href="https://apps.apple.com/us/app/taboo-tv/id6738045672"
             target="_blank"
@@ -51,9 +60,9 @@ export function Footer() {
             <Image
               src="/images/app-store-badge.svg"
               alt="Download on the App Store"
-              width={135}
-              height={40}
-              className="h-10 w-auto"
+              width={108}
+              height={32}
+              className="h-8 w-auto"
             />
           </Link>
           <Link
@@ -65,20 +74,17 @@ export function Footer() {
             <Image
               src="/images/google-play-badge.svg"
               alt="Get it on Google Play"
-              width={135}
-              height={40}
-              className="h-10 w-auto"
+              width={108}
+              height={32}
+              className="h-8 w-auto"
             />
           </Link>
         </div>
 
-        {/* Address & Copyright */}
-        <div className="text-center pt-8">
-          <p className="text-sm text-text-secondary mb-2">Georgia, United States.</p>
-          <p className="text-sm text-text-secondary">
-            &copy; {new Date().getFullYear()} Taboo Studios LLC
-          </p>
-        </div>
+        {/* Copyright */}
+        <p className="text-center text-xs text-text-tertiary">
+          &copy; {new Date().getFullYear()} Taboo TV Studios LLC
+        </p>
       </div>
     </footer>
   );

@@ -157,6 +157,11 @@
   --sidebar-accent-foreground: #e6e7ea;
   --sidebar-border: rgba(255, 255, 255, 0.06);
   --sidebar-ring: #ab0013;
+
+  --account-max-width: 1320px;
+  --account-narrow-max-width: 600px;
+  --account-sidebar-width: 180px;
+  --account-sidebar-gap: 48px;
 }
 
 @theme inline {
@@ -848,6 +853,18 @@ small {
   animation: scale-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 /* ============================================
    Red Accent Elements
    ============================================ */
@@ -888,6 +905,73 @@ small {
 .video-progress-bar {
   background: linear-gradient(90deg, var(--red-primary), var(--red-hover));
   box-shadow: var(--glow-soft);
+}
+
+/* ============================================
+   Page Horizontal Padding
+   Standard responsive padding matching the header.
+   Mobile: 16px | Tablet (md): 32px | Desktop (lg): 64px
+   ============================================ */
+.page-px {
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+@media (min-width: 768px) {
+  .page-px {
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .page-px {
+    padding-left: 64px;
+    padding-right: 64px;
+  }
+}
+
+/* ============================================
+   Account Page Layout (Netflix-inspired)
+   Tighter padding & narrower max-width for account/settings pages.
+   Sidebar layout: 1080px | Centered sub-pages: 600px
+   Mobile: 16px | Tablet (md): 24px | Desktop (lg): 48px
+   ============================================ */
+.account-container {
+  max-width: var(--account-max-width);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+@media (min-width: 768px) {
+  .account-container {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .account-container {
+    padding-left: 48px;
+    padding-right: 48px;
+  }
+}
+
+.account-narrow {
+  max-width: var(--account-narrow-max-width);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+@media (min-width: 768px) {
+  .account-narrow {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
 }
 
 /* ============================================
@@ -1120,28 +1204,6 @@ small {
   background: rgba(0, 0, 0, 0.2);
   border-radius: 12px;
   padding: 16px;
-}
-
-/* ============================================
-   Creators Grid Styles
-   ============================================ */
-
-.grid-creators {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-  gap: 20px;
-}
-
-@media (max-width: 1024px) {
-  .grid-creators {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 640px) {
-  .grid-creators {
-    grid-template-columns: 1fr;
-  }
 }
 
 /* Creator Card - Studio Dashboard Style */

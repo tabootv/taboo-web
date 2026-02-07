@@ -34,7 +34,7 @@ export function HomeContent({ initialData }: HomeContentProps) {
         <BannerSlider initialBanners={initialData.static?.banners || []} />
       </div>
 
-      <div className="w-full px-[4%] flex flex-col gap-5 sm:gap-6 md:gap-8 lg:gap-10 mt-4 sm:mt-8 md:mt-12 relative z-10">
+      <div className="w-full page-px flex flex-col gap-5 sm:gap-6 md:gap-8 lg:gap-10 mt-4 sm:mt-8 md:mt-12 relative z-10">
         <CreatorsSection initialCreators={initialData.static?.creators || []} />
         <FeaturedSection initialVideos={initialData.static?.featured || []} />
         <HomeShortsSection key={shortsKey} initialShorts={initialData.static?.shorts || []} />

@@ -106,7 +106,7 @@ export default function SeriesDetailPage() {
         </div>
 
         <div className="relative z-10 pt-16 pb-8 min-h-[80vh] flex flex-col justify-end">
-          <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 w-full">
+          <div className="max-w-[1800px] mx-auto page-px w-full">
             <div className="max-w-2xl space-y-5 animate-fade-in">
               <div className="flex items-center gap-3 flex-wrap">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-primary text-white text-sm font-bold rounded tracking-wide">
@@ -228,7 +228,7 @@ export default function SeriesDetailPage() {
       </div>
 
       <div className="relative z-20 pt-8 pb-16">
-        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1800px] mx-auto page-px">
           <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
             <h2 className="text-xl sm:text-2xl font-semibold text-white">
               {isCourse ? 'Course Episodes' : 'Episodes'}

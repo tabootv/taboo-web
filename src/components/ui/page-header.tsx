@@ -24,25 +24,6 @@ export interface PageHeaderProps {
   variant?: 'default' | 'large' | 'hero';
 }
 
-/**
- * Unified page header component for consistent page titles across the app.
- *
- * @example
- * // Basic usage
- * <PageHeader title="Videos" subtitle="Browse all videos" />
- *
- * @example
- * // With back button
- * <PageHeader
- *   title="Upload Video"
- *   subtitle="Share your content"
- *   backHref="/studio"
- * />
- *
- * @example
- * // With filters
- * <PageHeader title="Series" actions={<FilterChips filters={filters} />} />
- */
 export function PageHeader({
   title,
   subtitle,

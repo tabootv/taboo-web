@@ -108,7 +108,7 @@ export function BannerSlider({ initialBanners }: BannerSliderProps) {
       >
         <div className="absolute inset-0 bg-linear-to-r from-black/80 via-black/40 to-transparent" />
         <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
-        <div className="absolute inset-0 flex flex-col justify-end sm:justify-center items-start px-[4%] pb-16 sm:pb-20 md:pb-24">
+        <div className="absolute inset-0 flex flex-col justify-end sm:justify-center items-start page-px pb-16 sm:pb-20 md:pb-24">
           <div className="text-left backdrop-blur-md sm:backdrop-blur-none rounded-lg p-3 sm:p-4 md:p-0 max-w-[90%] sm:max-w-[600px]">
             <div className="flex items-center gap-2 mb-1 sm:mb-2">
               {creatorImage ? (

@@ -204,7 +204,7 @@ export function ShortsFeedContainer({ initialUuid }: ShortsFeedContainerProps) {
   return (
     <div
       ref={containerRef}
-      className="shorts-feed-container mt-[56px] top-14 left-0 right-0 bottom-0 z-30 lg:left-[72px]"
+      className="shorts-feed-container top-14 left-0 right-0 bottom-0 z-30 lg:left-[72px]"
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
       {...containerProps}
     >

@@ -40,7 +40,7 @@ function HomePageSkeleton() {
     <>
       <div className="relative w-full aspect-21/9 bg-surface animate-pulse" />
 
-      <div className="w-full px-[4%] flex flex-col gap-6 md:gap-8 lg:gap-10 mt-8 md:mt-12">
+      <div className="w-full page-px flex flex-col gap-6 md:gap-8 lg:gap-10 mt-8 md:mt-12">
         <div className="flex gap-4 overflow-hidden">
           {Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="shrink-0">

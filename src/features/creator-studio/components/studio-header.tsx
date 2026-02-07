@@ -103,7 +103,7 @@ export function StudioHeader() {
                   {user?.dp ? (
                     <Image
                       src={user.dp}
-                      alt={user.display_name}
+                      alt={user.display_name ?? ''}
                       width={32}
                       height={32}
                       className="object-cover w-full h-full"
@@ -125,7 +125,7 @@ export function StudioHeader() {
                     {user?.dp ? (
                       <Image
                         src={user.dp}
-                        alt={user.display_name}
+                        alt={user.display_name ?? ''}
                         width={40}
                         height={40}
                         className="object-cover w-full h-full"

@@ -1,18 +1,26 @@
 'use client';
+import { useNotifications } from '@/api/queries/notifications.queries';
 import { SmartSearchDropdown } from '@/components/search';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/ui/logo';
-import { useSidebar } from '@/components/ui/sidebar';
+import { useSidebarSafe } from '@/components/ui/sidebar';
 import { useAuthStore } from '@/shared/stores/auth-store';
-import { useNotifications } from '@/api/queries/notifications.queries';
+import { cn } from '@/shared/utils/formatting';
 import { Bell, LogOut, Menu, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 
-export function TopHeader() {
+export function TopHeader({
+  classNameDivContainer,
+  hiddenSearch,
+}: {
+  classNameDivContainer?: string;
+  hiddenSearch?: boolean;
+}) {
   const { user, isAuthenticated, logout } = useAuthStore();
-  const { toggleSidebar } = useSidebar();
+  const sidebar = useSidebarSafe();
+
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { data: notificationsList = [] } = useNotifications();
 
@@ -48,28 +56,37 @@ export function TopHeader() {
   }, [isUserMenuOpen]);
 
   return (
-    <header className="fixed top-0 left-0 right-0 h-14 bg-black backdrop-blur-xs z-[9999]">
-      <div className="flex items-center justify-between h-full pr-4">
+    <header className="sticky top-0 left-0 right-0 h-[4rem] bg-black backdrop-blur-xs z-9999">
+      <div
+        className={cn(
+          'flex items-center justify-between h-full page-px mx-auto max-w-[1920px]',
+          classNameDivContainer
+        )}
+      >
         {/* Left: Hamburger + Logo */}
         <div className="flex items-center">
           {/* Hamburger - Aligned with sidebar icons (3rem = 48px width) */}
-          <div className="w-12 h-14 flex items-center justify-center shrink-0">
-            <button
-              onClick={toggleSidebar}
-              className="p-2 rounded-full hover:bg-hover text-text-secondary hover:text-text-primary transition-colors"
-              aria-label="Toggle menu"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
-          </div>
+          {sidebar && (
+            <div className="w-12 h-14 flex items-center justify-center shrink-0 md:hidden">
+              <button
+                onClick={sidebar.toggleSidebar}
+                className="p-2 rounded-full hover:bg-hover text-text-secondary hover:text-text-primary transition-colors"
+                aria-label="Toggle menu"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+            </div>
+          )}
 
           <Logo size="md" linkTo="/home" />
         </div>
 
         {/* Center: Search */}
-        <div className="flex-1 max-w-md mx-4 hidden sm:block">
-          <SmartSearchDropdown />
-        </div>
+        {hiddenSearch ?? (
+          <div className="flex-1 max-w-md mx-4 hidden sm:block">
+            <SmartSearchDropdown />
+          </div>
+        )}
 
         {/* Right: Notifications, User */}
         <div className="flex items-center gap-1">

@@ -117,7 +117,7 @@ export default function CoursePlayerPage({
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-6">
+      <div className="max-w-[1800px] mx-auto page-px py-4 lg:py-6">
         <nav className="flex items-center gap-2 text-sm text-white/50 mb-4">
           <Link href="/courses" className="hover:text-white transition-colors">
             Education

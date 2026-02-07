@@ -86,8 +86,8 @@ export const pageSpacing = {
   // Horizontal padding
   paddingX: {
     mobile: spacing[4], // 16px
-    tablet: spacing[6], // 24px
-    desktop: spacing[8], // 32px
+    tablet: spacing[8], // 32px
+    desktop: spacing[16], // 64px
   },
   // Vertical padding
   paddingY: {
@@ -99,6 +99,8 @@ export const pageSpacing = {
     content: '1400px',
     narrow: '800px',
     wide: '1600px',
+    account: '1080px',
+    accountNarrow: '600px',
   },
   // Section spacing
   sectionGap: spacing[10], // 40px
