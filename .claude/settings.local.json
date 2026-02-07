@@ -91,11 +91,13 @@
       "Bash(node scripts/sonar-scan.mjs:*)",
       "Bash(superdesign create-project:*)",
       "Bash(superdesign create-design-draft:*)",
-      "Bash(superdesign iterate-design-draft:*)"
+      "Bash(superdesign iterate-design-draft:*)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(superdesign get-design:*)"
     ],
     "deny": [],
     "ask": []
   },
-  "enabledMcpjsonServers": ["playwright-test"],
-  "enableAllProjectMcpServers": true
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": ["playwright-test"]
 }
