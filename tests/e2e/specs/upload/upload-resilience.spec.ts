@@ -39,7 +39,7 @@ test.describe('Upload Resilience', () => {
 
       // Navigate and start upload
       await contentPage.navigate();
-      const _uploadModal = await contentPage.openUploadModal();
+      await contentPage.openUploadModal();
 
       // Start an upload (would need a test file)
       // For now, we'll seed the store with an active upload
@@ -65,12 +65,7 @@ test.describe('Upload Resilience', () => {
       });
 
       // Listen for dialog
-      let _dialogTriggered = false;
-      let _dialogType = '';
-
       page.on('dialog', async (dialog) => {
-        _dialogTriggered = true;
-        _dialogType = dialog.type();
         await dialog.dismiss();
       });
 
@@ -88,7 +83,7 @@ test.describe('Upload Resilience', () => {
       await contentPage.navigate();
 
       // Verify no uploads in store
-      const _uploads = await page.evaluate(() => {
+      await page.evaluate(() => {
         const raw = localStorage.getItem('taboo-uploads');
         return raw ? JSON.parse(raw) : null;
       });
@@ -204,7 +199,7 @@ test.describe('Upload Resilience', () => {
 
       // Modal should show stale upload indicator
       // (The actual UI element depends on implementation)
-      const _staleIndicator = page.locator('text=/stale|interrupted|resume/i');
+      // const _staleIndicator = page.locator('text=/stale|interrupted|resume/i');
 
       // This assertion may need adjustment based on actual UI
       // await expect(_staleIndicator).toBeVisible({ timeout: 5000 });

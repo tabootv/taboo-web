@@ -60,7 +60,7 @@ test.describe('Upload Network Handling', () => {
       await page.waitForTimeout(500);
 
       // Check if upload is paused
-      const _upload = await getUploadById(page, uploadId);
+      await getUploadById(page, uploadId);
 
       // Note: This depends on implementation
       // The app should pause on offline
@@ -92,7 +92,7 @@ test.describe('Upload Network Handling', () => {
 
       // Check for offline indicator
       // (Depends on UI implementation)
-      const _offlineIndicator = page.locator('text=/offline|disconnected|no connection/i');
+      // const _offlineIndicator = page.locator('text=/offline|disconnected|no connection/i');
 
       // Adjust based on actual UI
       // await expect(_offlineIndicator).toBeVisible({ timeout: 5000 });

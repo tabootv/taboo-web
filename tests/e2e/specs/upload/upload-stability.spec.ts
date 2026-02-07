@@ -71,11 +71,11 @@ test.describe('Upload Stability', () => {
             const uploadIndex = uploads.findIndex(([uid]: [string]) => uid === id);
             if (uploadIndex >= 0) {
               uploads[uploadIndex][1].progress = p;
-              uploads[uploadIndex][1].bytesUploaded = Math.floor(10000000 * (p / 100));
+              uploads[uploadIndex][1].bytesUploaded = Math.floor(10000000 * (Number(p) / 100));
               localStorage.setItem('taboo-uploads', JSON.stringify(state));
             }
           },
-          [uploadId, progress]
+          [uploadId, progress] as const
         );
 
         // Small delay to allow React to process
@@ -133,7 +133,7 @@ test.describe('Upload Stability', () => {
       await contentPage.navigate();
 
       // Open upload modal
-      const _uploadModal = await contentPage.openUploadModal();
+      await contentPage.openUploadModal();
 
       // Wait for any async operations
       await page.waitForTimeout(2000);
@@ -260,7 +260,6 @@ test.describe('Upload Stability', () => {
 
       // Get initial memory (if available)
       const initialMemory = await page.evaluate(() => {
-        // @ts-expect-error - memory is Chrome-specific
         return (performance as { memory?: { usedJSHeapSize: number } }).memory?.usedJSHeapSize;
       });
 
@@ -277,7 +276,6 @@ test.describe('Upload Stability', () => {
 
       // Get final memory
       const finalMemory = await page.evaluate(() => {
-        // @ts-expect-error - memory is Chrome-specific
         return (performance as { memory?: { usedJSHeapSize: number } }).memory?.usedJSHeapSize;
       });
 

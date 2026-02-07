@@ -118,7 +118,7 @@ test.describe('Upload Navigation', () => {
       await page.waitForTimeout(500);
 
       // URL should be cleaned (uploadId removed)
-      const _currentUrl = page.url();
+      // const _currentUrl = page.url();
 
       // Note: This depends on implementation
       // The app may or may not clean the URL
@@ -255,7 +255,7 @@ test.describe('Upload Navigation', () => {
       await page.waitForTimeout(500);
 
       // Other params should be preserved
-      const _currentUrl = new URL(page.url());
+      // const _currentUrl = new URL(page.url());
 
       // Note: Adjust based on actual implementation
       // expect(_currentUrl.searchParams.get('tab')).toBe('videos');

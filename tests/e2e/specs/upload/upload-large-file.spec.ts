@@ -198,7 +198,7 @@ test.describe('Large-Scale Content (18GB+)', () => {
         if (text?.includes('GB')) {
           const match = text.match(/(\d+\.?\d*)\s*GB/i);
           if (match) {
-            const gbValue = parseFloat(match[1]);
+            const gbValue = parseFloat(match[1]!);
             expect(gbValue).toBeGreaterThan(0);
             expect(gbValue).toBeLessThan(100);
           }
@@ -255,7 +255,7 @@ test.describe('Large-Scale Content (18GB+)', () => {
         const method = route.request().method();
 
         if (method === 'POST') {
-          capturedUploadLength = route.request().headers()['upload-length'];
+          capturedUploadLength = route.request().headers()['upload-length'] ?? null;
           await route.fulfill({
             status: 201,
             headers: {
@@ -279,7 +279,7 @@ test.describe('Large-Scale Content (18GB+)', () => {
 
       await mockPrepareUpload(page);
       await contentPage.navigate();
-      const _uploadModal = await contentPage.openUploadModal();
+      await contentPage.openUploadModal();
 
       // Inject virtual large file
       await injectVirtualFileToInput(page, 'input[type="file"]', {
@@ -361,7 +361,7 @@ test.describe('Large-Scale Content (18GB+)', () => {
       // Verify offsets are sequential (if any were captured)
       if (chunkOffsets.length > 1) {
         for (let i = 1; i < chunkOffsets.length; i++) {
-          expect(chunkOffsets[i]).toBeGreaterThanOrEqual(chunkOffsets[i - 1]);
+          expect(chunkOffsets[i]).toBeGreaterThanOrEqual(chunkOffsets[i - 1]!);
         }
       }
     });
@@ -502,7 +502,7 @@ test.describe('Large-Scale Content (18GB+)', () => {
       await mockTusUpload(page);
 
       await contentPage.navigate();
-      const _uploadModal = await contentPage.openUploadModal();
+      await contentPage.openUploadModal();
 
       // Test with 10GB file
       await injectVirtualFileToInput(page, 'input[type="file"]', {
