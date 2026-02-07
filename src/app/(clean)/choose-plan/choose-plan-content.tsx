@@ -3,21 +3,29 @@
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Check, Crown, Star, X, Sparkles } from 'lucide-react';
-import { WhopCheckoutEmbed } from '@whop/checkout/react';
+import { Check, Crown, Star, Sparkles } from 'lucide-react';
 import { subscriptionsClient as subscriptionsApi } from '@/api/client/subscriptions.client';
 import type { Plan } from '@/types';
 import { useAuthStore } from '@/shared/stores/auth-store';
+import { RedeemCodeCard } from '@/components/redeem/redeem-code-card';
 import { toast } from 'sonner';
 
-const DEFAULT_BENEFITS = [
-  'Watch shorts, full episodes, and exclusive Taboo series',
-  'Unfiltered stories from creators around the world',
-  'One membership gives you access to all creators, anywhere',
-  'Show your Infinity badge in every comment',
-  'Stream anywhere on mobile, web, and TVs soon',
-  'Taboo Education: creator courses included free',
-];
+import { CheckoutModal } from './components/checkout-modal';
+import { LoadingPlans, VerifyingSubscription } from './components/loading-states';
+import { PlanToggle } from './components/plan-toggle';
+import {
+  DEFAULT_BENEFITS,
+  MAX_POLL_ATTEMPTS,
+  POLL_INTERVAL_MS,
+  MUTED_TEXT_COLOR,
+  MUTED_TEXT_LIGHT,
+  MUTED_TEXT_LIGHTER,
+  BRAND_COLOR,
+  findMonthlyPlan,
+  findYearlyPlan,
+  calcYearlySavings,
+  formatPrice,
+} from './utils';
 
 export function ChoosePlanContent() {
   const router = useRouter();
@@ -28,11 +36,18 @@ export function ChoosePlanContent() {
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('yearly');
   const [showCheckout, setShowCheckout] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [verifyMessage, setVerifyMessage] = useState('Activating your subscription...');
+  const [showRetry, setShowRetry] = useState(false);
+
+  // Affiliate ref from URL
+  const ref = searchParams.get('ref') || undefined;
 
   // Verify subscription after successful payment
   const verifySubscription = useCallback(async () => {
+    setShowRetry(false);
+    setVerifyMessage('Activating your subscription...');
     try {
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < MAX_POLL_ATTEMPTS; i++) {
         const status = await subscriptionsApi.getStatus();
         if (status.is_subscribed) {
           setSubscribed(true);
@@ -40,13 +55,17 @@ export function ChoosePlanContent() {
           router.push('/home');
           return;
         }
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
       }
-      toast.info('Payment received. Your subscription will be active shortly.');
-      router.push('/home');
+      // Timeout - show friendly message with retry
+      setVerifyMessage(
+        'Payment received! Your subscription is being activated. This usually takes less than a minute.'
+      );
+      setShowRetry(true);
     } catch (error) {
       console.error('Failed to verify subscription:', error);
       toast.error('Failed to verify subscription status');
+      setShowRetry(true);
     } finally {
       setIsVerifying(false);
     }
@@ -63,12 +82,12 @@ export function ChoosePlanContent() {
     }
   }, [searchParams, verifySubscription]);
 
-  // Fetch plans
+  // Fetch plans with optional affiliate ref
   useEffect(() => {
     async function fetchData() {
       try {
         setIsLoading(true);
-        const plansData = await subscriptionsApi.getPlans();
+        const plansData = await subscriptionsApi.getPlans({ ref });
         setPlans(plansData);
       } catch (error) {
         console.error('Failed to fetch plans:', error);
@@ -77,43 +96,15 @@ export function ChoosePlanContent() {
       }
     }
     fetchData();
-  }, []);
+  }, [ref]);
 
-  // API returns name like "monthly usd" or "yearly usd", not interval field
-  const monthlyPlan = plans.find(
-    (p) => p.name?.toLowerCase().includes('monthly') || p.interval === 'monthly'
-  );
-  const yearlyPlan = plans.find(
-    (p) => p.name?.toLowerCase().includes('yearly') || p.interval === 'yearly'
-  );
+  const monthlyPlan = findMonthlyPlan(plans);
+  const yearlyPlan = findYearlyPlan(plans);
   const activePlan = selectedPlan === 'monthly' ? monthlyPlan : yearlyPlan;
+  const yearlySavings = calcYearlySavings(monthlyPlan, yearlyPlan);
 
-  // Calculate yearly savings
-  const yearlySavings =
-    monthlyPlan && yearlyPlan
-      ? Math.round(((monthlyPlan.price * 12 - yearlyPlan.price) / (monthlyPlan.price * 12)) * 100)
-      : 17;
-
-  const formatPrice = (price: number, currency: string = 'USD') => {
-    try {
-      const parts = new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency,
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      }).formatToParts(price);
-
-      const currencySymbol = parts.find((p) => p.type === 'currency')?.value || '$';
-      const numberPart = parts
-        .filter((p) => p.type !== 'currency')
-        .map((p) => p.value)
-        .join('');
-
-      return { symbol: currencySymbol, amount: numberPart };
-    } catch {
-      return { symbol: '$', amount: price.toFixed(2) };
-    }
-  };
+  // Dynamic trial days
+  const trialDays = activePlan?.trial_days;
 
   const handleCheckout = useCallback(() => {
     if (!activePlan) return;
@@ -147,7 +138,8 @@ export function ChoosePlanContent() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      setCheckoutReturnUrl(`${window.location.origin}/choose-plan?status=success`);
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+      setCheckoutReturnUrl(`${appUrl}/choose-plan?status=success`);
     }
   }, []);
 
@@ -158,19 +150,32 @@ export function ChoosePlanContent() {
     verifySubscription();
   }, [verifySubscription]);
 
-  if (isLoading || isVerifying) {
+  const handleRedeemSubscribed = useCallback(() => {
+    setSubscribed(true);
+    toast.success('Redeem code applied! Your subscription is now active.');
+    router.push('/home');
+  }, [setSubscribed, router]);
+
+  const handleRedeemStartVerifying = useCallback(() => {
+    setIsVerifying(true);
+    verifySubscription();
+  }, [verifySubscription]);
+
+  if (isLoading) {
+    return <LoadingPlans />;
+  }
+
+  if (isVerifying || showRetry) {
     return (
-      <div className="min-h-[80vh] flex items-center justify-center">
-        <div className="text-center">
-          <div
-            className="w-10 h-10 mx-auto mb-4 rounded-full border-3 border-elevated border-t-red-primary animate-spin"
-            style={{ borderWidth: 3 }}
-          />
-          <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 'clamp(14px, 3.5vw, 16px)' }}>
-            {isVerifying ? 'Verifying your subscription...' : 'Loading plans...'}
-          </p>
-        </div>
-      </div>
+      <VerifyingSubscription
+        verifyMessage={verifyMessage}
+        showRetry={showRetry}
+        onRetry={() => {
+          setIsVerifying(true);
+          setShowRetry(false);
+          verifySubscription();
+        }}
+      />
     );
   }
 
@@ -184,11 +189,20 @@ export function ChoosePlanContent() {
     ? formatPrice(yearlyPlan.price / 12, yearlyPlan.currency)
     : { symbol: '$', amount: '7.40' };
 
+  const benefits = activePlan?.features?.length ? activePlan.features : DEFAULT_BENEFITS;
+
+  // CTA text based on trial days
+  const ctaText =
+    trialDays && trialDays > 0 ? `Start ${trialDays}-day free trial` : 'Start free trial';
+
+  // Trial description
+  const trialDescription = trialDays && trialDays > 0 ? `${trialDays} days free, then ` : '';
+
   return (
     <>
       {/* Hero section with radial glow */}
       <div className="relative min-h-[80vh]">
-        {/* Background glow - matching design system hero-glow */}
+        {/* Background glow */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
@@ -207,7 +221,6 @@ export function ChoosePlanContent() {
         >
           {/* Title Section */}
           <div className="text-center" style={{ marginBottom: 20 }}>
-            {/* Premium badge */}
             <div
               className="inline-flex items-center gap-2 mb-4"
               style={{
@@ -217,8 +230,8 @@ export function ChoosePlanContent() {
                 borderRadius: 16,
               }}
             >
-              <Sparkles style={{ width: 14, height: 14, color: '#ab0013' }} />
-              <span style={{ fontSize: 12, fontWeight: 500, color: '#ab0013' }}>
+              <Sparkles style={{ width: 14, height: 14, color: BRAND_COLOR }} />
+              <span style={{ fontSize: 12, fontWeight: 500, color: BRAND_COLOR }}>
                 Premium Access
               </span>
             </div>
@@ -238,7 +251,7 @@ export function ChoosePlanContent() {
             <p
               style={{
                 fontSize: 14,
-                color: 'rgba(255,255,255,0.6)',
+                color: MUTED_TEXT_LIGHT,
                 lineHeight: 1.5,
               }}
             >
@@ -259,56 +272,11 @@ export function ChoosePlanContent() {
           >
             <div style={{ position: 'relative', padding: 20 }}>
               {/* Plan Toggle */}
-              <div className="flex items-center justify-center gap-2" style={{ marginBottom: 16 }}>
-                <button
-                  onClick={() => setSelectedPlan('monthly')}
-                  style={{
-                    padding: '10px 20px',
-                    borderRadius: 8,
-                    fontSize: 14,
-                    fontWeight: 600,
-                    border: 'none',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    background: selectedPlan === 'monthly' ? '#fff' : 'rgba(255,255,255,0.08)',
-                    color: selectedPlan === 'monthly' ? '#000' : 'rgba(255,255,255,0.6)',
-                  }}
-                >
-                  Monthly
-                </button>
-                <button
-                  onClick={() => setSelectedPlan('yearly')}
-                  className="relative"
-                  style={{
-                    padding: '10px 20px',
-                    borderRadius: 8,
-                    fontSize: 14,
-                    fontWeight: 600,
-                    border: 'none',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    background: selectedPlan === 'yearly' ? '#fff' : 'rgba(255,255,255,0.08)',
-                    color: selectedPlan === 'yearly' ? '#000' : 'rgba(255,255,255,0.6)',
-                  }}
-                >
-                  Yearly
-                  <span
-                    style={{
-                      position: 'absolute',
-                      top: -6,
-                      right: -6,
-                      padding: '2px 6px',
-                      background: '#22c55e',
-                      color: '#fff',
-                      fontSize: 10,
-                      fontWeight: 600,
-                      borderRadius: 10,
-                    }}
-                  >
-                    -{yearlySavings}%
-                  </span>
-                </button>
-              </div>
+              <PlanToggle
+                selectedPlan={selectedPlan}
+                onSelect={setSelectedPlan}
+                yearlySavings={yearlySavings}
+              />
 
               {/* Price Display */}
               <div className="text-center" style={{ marginBottom: 16 }}>
@@ -324,12 +292,12 @@ export function ChoosePlanContent() {
                     {selectedPlan === 'monthly' ? monthlyPrice.symbol : yearlyPrice.symbol}
                     {selectedPlan === 'monthly' ? monthlyPrice.amount : yearlyPrice.amount}
                   </span>
-                  <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)' }}>
+                  <span style={{ fontSize: 14, color: MUTED_TEXT_COLOR }}>
                     /{selectedPlan === 'monthly' ? 'mo' : 'yr'}
                   </span>
                 </div>
                 {selectedPlan === 'yearly' && (
-                  <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, marginTop: 4 }}>
+                  <p style={{ color: MUTED_TEXT_COLOR, fontSize: 13, marginTop: 4 }}>
                     {monthlyEquivalent.symbol}
                     {monthlyEquivalent.amount}/mo
                   </p>
@@ -338,10 +306,10 @@ export function ChoosePlanContent() {
 
               {/* Benefits List */}
               <div className="flex flex-col gap-2" style={{ marginBottom: 16 }}>
-                {DEFAULT_BENEFITS.map((benefit, index) => (
+                {benefits.map((benefit, index) => (
                   <div key={index} className="flex items-center gap-2">
-                    <Check style={{ width: 16, height: 16, color: '#ab0013', flexShrink: 0 }} />
-                    <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>{benefit}</span>
+                    <Check style={{ width: 16, height: 16, color: BRAND_COLOR, flexShrink: 0 }} />
+                    <span style={{ fontSize: 13, color: MUTED_TEXT_LIGHTER }}>{benefit}</span>
                   </div>
                 ))}
               </div>
@@ -353,7 +321,7 @@ export function ChoosePlanContent() {
                 className="w-full flex items-center justify-center gap-2"
                 style={{
                   padding: '12px 24px',
-                  background: '#ab0013',
+                  background: BRAND_COLOR,
                   color: '#fff',
                   fontSize: 14,
                   fontWeight: 600,
@@ -375,29 +343,36 @@ export function ChoosePlanContent() {
                 }}
               >
                 <Crown style={{ width: 18, height: 18 }} />
-                <span>Start free trial</span>
+                <span>{ctaText}</span>
               </button>
 
               <p
                 className="text-center"
-                style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, marginTop: 12 }}
+                style={{ color: MUTED_TEXT_COLOR, fontSize: 12, marginTop: 12 }}
               >
-                3 days free, then{' '}
+                {trialDescription}
                 {selectedPlan === 'monthly'
                   ? `${monthlyPrice.symbol}${monthlyPrice.amount}/mo`
                   : `${yearlyPrice.symbol}${yearlyPrice.amount}/yr`}
                 . Cancel anytime.
               </p>
 
+              {/* Redeem Code Section */}
+              <RedeemCodeCard
+                variant="inline"
+                onSubscribed={handleRedeemSubscribed}
+                onStartVerifying={handleRedeemStartVerifying}
+              />
+
               {!isAuthenticated && (
                 <p
                   className="text-center"
-                  style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, marginTop: 8 }}
+                  style={{ color: MUTED_TEXT_COLOR, fontSize: 12, marginTop: 8 }}
                 >
                   Have an account?{' '}
                   <Link
                     href="/sign-in"
-                    style={{ color: '#ab0013', fontWeight: 500, textDecoration: 'none' }}
+                    style={{ color: BRAND_COLOR, fontWeight: 500, textDecoration: 'none' }}
                   >
                     Sign in
                   </Link>
@@ -411,7 +386,7 @@ export function ChoosePlanContent() {
             {[...Array(5)].map((_, i) => (
               <Star key={i} style={{ width: 14, height: 14, color: '#facc15', fill: '#facc15' }} />
             ))}
-            <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginLeft: 6 }}>
+            <span style={{ fontSize: 12, color: MUTED_TEXT_COLOR, marginLeft: 6 }}>
               50,000+ members
             </span>
           </div>
@@ -422,14 +397,11 @@ export function ChoosePlanContent() {
             style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 12 }}
           >
             By subscribing, you agree to our{' '}
-            <Link href="/terms" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none' }}>
+            <Link href="/terms" style={{ color: MUTED_TEXT_LIGHT, textDecoration: 'none' }}>
               Terms
             </Link>{' '}
             &{' '}
-            <Link
-              href="/privacy"
-              style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none' }}
-            >
+            <Link href="/privacy" style={{ color: MUTED_TEXT_LIGHT, textDecoration: 'none' }}>
               Privacy
             </Link>
           </p>
@@ -438,78 +410,16 @@ export function ChoosePlanContent() {
 
       {/* Checkout Modal */}
       {showCheckout && activePlan?.whop_plan_id && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0"
-            style={{ background: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(10px)' }}
-            onClick={() => setShowCheckout(false)}
-          />
-
-          {/* Modal */}
-          <div
-            className="relative w-full max-w-lg overflow-hidden"
-            style={{
-              background:
-                'linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
-              borderRadius: 16,
-              border: '1px solid rgba(255,255,255,0.08)',
-            }}
-          >
-            {/* Header */}
-            <div
-              className="flex items-center justify-between p-5"
-              style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
-            >
-              <div>
-                <h2 style={{ fontSize: 18, fontWeight: 600, color: '#fff' }}>
-                  Complete Your Purchase
-                </h2>
-                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>
-                  {selectedPlan === 'monthly' ? 'Monthly' : 'Yearly'} Plan
-                </p>
-              </div>
-              <button
-                onClick={() => setShowCheckout(false)}
-                className="flex items-center justify-center"
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: '50%',
-                  background: 'rgba(255,255,255,0.1)',
-                  border: '1px solid rgba(255,255,255,0.15)',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                <X style={{ width: 18, height: 18, color: 'rgba(255,255,255,0.7)' }} />
-              </button>
-            </div>
-
-            {/* Whop Checkout Embed */}
-            <div className="p-4 min-h-[500px]">
-              <WhopCheckoutEmbed
-                planId={activePlan.whop_plan_id}
-                returnUrl={checkoutReturnUrl}
-                theme="dark"
-                themeOptions={{ accentColor: 'red' }}
-                onComplete={handleCheckoutComplete}
-                skipRedirect
-                {...(user?.email ? { prefill: { email: user.email } } : {})}
-                fallback={
-                  <div className="flex items-center justify-center h-[400px]">
-                    <div className="text-center">
-                      <div className="w-8 h-8 mx-auto mb-3 rounded-full border-2 border-elevated border-t-red-primary animate-spin" />
-                      <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>
-                        Loading checkout...
-                      </p>
-                    </div>
-                  </div>
-                }
-              />
-            </div>
-          </div>
-        </div>
+        <CheckoutModal
+          planId={activePlan.whop_plan_id}
+          planLabel={selectedPlan === 'monthly' ? 'Monthly' : 'Yearly'}
+          returnUrl={checkoutReturnUrl}
+          affiliateCode={ref}
+          email={user?.email}
+          disableEmail={!!isAuthenticated && !!user?.email}
+          onClose={() => setShowCheckout(false)}
+          onComplete={handleCheckoutComplete}
+        />
       )}
     </>
   );

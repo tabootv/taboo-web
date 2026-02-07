@@ -26,7 +26,6 @@ export default function CheckoutPage({ params }: { params: Promise<{ plan: strin
   const { user, isAuthenticated, setSubscribed } = useAuthStore();
   const [plan, setPlan] = useState<Plan | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [checkoutMode, _setCheckoutMode] = useState<'redirect' | 'embed'>('redirect');
   const [isVerifying, setIsVerifying] = useState(false);
 
   // Check if user just returned from Whop checkout
@@ -75,21 +74,23 @@ export default function CheckoutPage({ params }: { params: Promise<{ plan: strin
   const verifySubscription = useCallback(async () => {
     setIsVerifying(true);
     try {
-      // Poll a few times to allow webhook to process
-      for (let i = 0; i < 5; i++) {
+      // Poll up to 15 times (30s total) to allow webhook to process
+      for (let i = 0; i < 15; i++) {
         const status = await subscriptions.getStatus();
         if (status.is_subscribed) {
           setSubscribed(true);
           toast.success('Subscription activated! Welcome to TabooTV.');
-          router.push('/');
+          router.push('/home');
           return;
         }
         // Wait 2 seconds between polls
         await new Promise((resolve) => setTimeout(resolve, 2000));
       }
       // If still not subscribed after polling, show message
-      toast.info('Payment received. Your subscription will be active shortly.');
-      router.push('/');
+      toast.info(
+        'Payment received! Your subscription is being activated. This usually takes less than a minute.'
+      );
+      router.push('/home');
     } catch (error) {
       console.error('Failed to verify subscription:', error);
       toast.error('Failed to verify subscription status');
@@ -110,19 +111,15 @@ export default function CheckoutPage({ params }: { params: Promise<{ plan: strin
       return;
     }
 
-    // For redirect mode, just navigate to Whop
-    if (checkoutMode === 'redirect') {
-      // Add return URL so user comes back after payment
-      const returnUrl = encodeURIComponent(
-        `${window.location.origin}/payment/checkout/${planId}?success=true`
-      );
-      const checkoutUrl = plan.whop_plan_url.includes('?')
-        ? `${plan.whop_plan_url}&redirect_url=${returnUrl}`
-        : `${plan.whop_plan_url}?redirect_url=${returnUrl}`;
+    // Add return URL so user comes back after payment
+    const returnUrl = encodeURIComponent(
+      `${window.location.origin}/payment/checkout/${planId}?success=true`
+    );
+    const checkoutUrl = plan.whop_plan_url.includes('?')
+      ? `${plan.whop_plan_url}&redirect_url=${returnUrl}`
+      : `${plan.whop_plan_url}?redirect_url=${returnUrl}`;
 
-      window.location.href = checkoutUrl;
-      return;
-    }
+    window.location.href = checkoutUrl;
   };
 
   // Show verification screen if returning from checkout
@@ -201,11 +198,11 @@ export default function CheckoutPage({ params }: { params: Promise<{ plan: strin
                 <span className="text-text-secondary">Subtotal</span>
                 <span className="text-text-primary">
                   ${plan.price} /{' '}
-                  {plan.interval === 'yearly'
-                    ? 'year'
-                    : plan.interval === 'lifetime'
-                      ? 'one-time'
-                      : 'month'}
+                  {(() => {
+                    if (plan.interval === 'yearly') return 'year';
+                    if (plan.interval === 'lifetime') return 'one-time';
+                    return 'month';
+                  })()}
                 </span>
               </div>
               {plan.interval === 'yearly' && (

@@ -8,6 +8,7 @@ import { useFeature } from '@/hooks/use-feature';
 import { useAuthStore } from '@/shared/stores/auth-store';
 import { formatCompactNumber } from '@/shared/utils/formatting';
 import type { Video } from '@/types';
+import { RedeemCodeCard } from '@/components/redeem/redeem-code-card';
 import { Bookmark, Camera, Clock, CreditCard, Heart, Lock, LogOut, Settings } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -102,7 +103,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6 min-h-screen">
+    <div className="account-container py-6 min-h-screen">
       {/* Profile Header */}
       <div className="bg-surface rounded-lg elevation-low border border-border overflow-hidden">
         {/* Cover */}
@@ -134,6 +135,7 @@ export default function ProfilePage() {
             {/* Info */}
             <div className="flex-1 sm:mb-2">
               <h1 className="text-2xl font-bold text-text-primary">{user?.display_name}</h1>
+              {user?.handler && <p className="text-sm text-text-secondary">@{user.handler}</p>}
               <p className="text-text-secondary">{user?.email}</p>
             </div>
 
@@ -177,7 +179,7 @@ export default function ProfilePage() {
         </Link>
 
         <Link
-          href="/profile/edit-password"
+          href="/profile/edit?tab=password"
           className="flex items-center gap-3 p-4 bg-surface rounded-md border border-border hover:bg-hover transition-colors"
         >
           <div className="p-2 bg-red-primary/10 rounded-sm">
@@ -188,6 +190,21 @@ export default function ProfilePage() {
             <p className="text-xs text-text-secondary">Change password</p>
           </div>
         </Link>
+      </div>
+
+      {/* Redeem Code */}
+      <div className="mt-6">
+        <RedeemCodeCard
+          variant="card"
+          onSubscribed={() => {
+            toast.success('Redeem code applied! Your subscription is now active.');
+            router.push('/home');
+          }}
+          onStartVerifying={() => {
+            toast.info('Code applied! Verifying your subscription...');
+            router.push('/home');
+          }}
+        />
       </div>
 
       {/* Tabs */}
