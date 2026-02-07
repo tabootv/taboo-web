@@ -1,4 +1,5 @@
 import { authClient, AuthenticatedMeResponse } from '@/api/client/auth.client';
+import { isProfileComplete } from '@/shared/lib/auth/profile-completion';
 import type { FirebaseLoginData, LoginCredentials, RegisterData, User } from '@/types';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
@@ -6,6 +7,7 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 interface AuthState {
   user: User | null;
   isSubscribed: boolean;
+  isProfileComplete: boolean;
   isLoading: boolean;
   isAuthenticated: boolean;
   isInitialized: boolean;
@@ -31,6 +33,7 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       user: null,
       isSubscribed: false,
+      isProfileComplete: false,
       isLoading: false,
       isAuthenticated: false,
       isInitialized: false,
@@ -44,10 +47,11 @@ export const useAuthStore = create<AuthState>()(
         try {
           // Client-side: /api/login proxy sets HttpOnly cookie
           const response = await authClient.login(credentials);
-          const isSubscribed = response.subscribed ?? false;
+          const subscribed = response.subscribed ?? false;
           set({
             user: response.user,
-            isSubscribed,
+            isSubscribed: subscribed,
+            isProfileComplete: isProfileComplete(response.user),
             isAuthenticated: true,
             isInitialized: true,
             isLoading: false,
@@ -64,10 +68,11 @@ export const useAuthStore = create<AuthState>()(
         try {
           // Client-side: /api/register proxy sets HttpOnly cookie
           const response = await authClient.register(data);
-          const isSubscribed = response.subscribed ?? false;
+          const subscribed = response.subscribed ?? false;
           set({
             user: response.user,
-            isSubscribed,
+            isSubscribed: subscribed,
+            isProfileComplete: isProfileComplete(response.user),
             isAuthenticated: true,
             isInitialized: true,
             isLoading: false,
@@ -84,10 +89,11 @@ export const useAuthStore = create<AuthState>()(
         try {
           // Client-side: /api/auth/firebase-login proxy sets HttpOnly cookie
           const response = await authClient.firebaseLogin(data);
-          const isSubscribed = response.subscribed ?? false;
+          const subscribed = response.subscribed ?? false;
           set({
             user: response.user,
-            isSubscribed,
+            isSubscribed: subscribed,
+            isProfileComplete: isProfileComplete(response.user),
             isAuthenticated: true,
             isInitialized: true,
             isLoading: false,
@@ -113,6 +119,7 @@ export const useAuthStore = create<AuthState>()(
           set({
             user: null,
             isSubscribed: false,
+            isProfileComplete: false,
             isAuthenticated: false,
             isInitialized: false,
             isLoading: false,
@@ -126,27 +133,44 @@ export const useAuthStore = create<AuthState>()(
         try {
           const response: AuthenticatedMeResponse = await authClient.me();
           if (response.authenticated && response.user) {
-            const isSubscribed =
-              response.subscribed ?? (response.user as User)?.subscribed ?? false;
+            const subscribed = response.subscribed ?? (response.user as User)?.subscribed ?? false;
+            const user = response.user as User;
             set({
-              user: response.user as User,
-              isSubscribed,
+              user,
+              isSubscribed: subscribed,
+              isProfileComplete: isProfileComplete(user),
               isAuthenticated: true,
               isLoading: false,
             });
           } else {
-            set({ user: null, isSubscribed: false, isAuthenticated: false, isLoading: false });
+            set({
+              user: null,
+              isSubscribed: false,
+              isProfileComplete: false,
+              isAuthenticated: false,
+              isLoading: false,
+            });
           }
         } catch {
           // Not authenticated or error - clear state
-          set({ user: null, isSubscribed: false, isAuthenticated: false, isLoading: false });
+          set({
+            user: null,
+            isSubscribed: false,
+            isProfileComplete: false,
+            isAuthenticated: false,
+            isLoading: false,
+          });
         }
       },
 
       updateUser: (userData: Partial<User>) => {
         const currentUser = get().user;
         if (currentUser) {
-          set({ user: { ...currentUser, ...userData } });
+          const updatedUser = { ...currentUser, ...userData };
+          set({
+            user: updatedUser,
+            isProfileComplete: isProfileComplete(updatedUser),
+          });
         }
       },
 
@@ -162,7 +186,12 @@ export const useAuthStore = create<AuthState>()(
           try {
             await get().fetchUser();
           } catch {
-            set({ user: null, isSubscribed: false, isAuthenticated: false });
+            set({
+              user: null,
+              isSubscribed: false,
+              isProfileComplete: false,
+              isAuthenticated: false,
+            });
           } finally {
             set({ isInitialized: true });
             pendingAuthCheck = null;
@@ -177,17 +206,19 @@ export const useAuthStore = create<AuthState>()(
       partialize: (state) => ({
         user: state.user,
         isSubscribed: state.isSubscribed,
-        // Don't persist isAuthenticated - derive from server on hydration
-        // Persist _hasHydrated to allow E2E tests to pre-set hydration state
-        _hasHydrated: state._hasHydrated,
+        isProfileComplete: state.isProfileComplete,
+        isAuthenticated: state.isAuthenticated,
+        isInitialized: state.isInitialized,
       }),
       onRehydrateStorage: () => (state) => {
-        state?.setHasHydrated(true);
-        if (state?.user) {
-          setTimeout(() => state.checkAuth(), 0);
+        if (!state) return;
+        state.setHasHydrated(true);
+        if (state.user) {
+          // Set optimistically so AccessGate renders immediately
+          useAuthStore.setState({ isInitialized: true, isAuthenticated: true });
+          setTimeout(() => state.checkAuth(), 0); // background verify
         } else {
-          // No persisted user — no need to verify, mark as initialized
-          useAuthStore.setState({ isInitialized: true });
+          useAuthStore.setState({ isInitialized: true, isAuthenticated: false });
         }
       },
     }

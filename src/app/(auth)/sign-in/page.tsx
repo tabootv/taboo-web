@@ -7,12 +7,16 @@ import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import { useGuestOnly } from '@/hooks';
 import { useSocialAuth } from '@/hooks/use-social-auth';
+import { useAuthStore } from '@/shared/stores/auth-store';
+import { getOnboardingRedirectPath } from '@/shared/lib/auth/profile-completion';
 import { AxiosError } from 'axios';
 
 function SignInContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get('redirect') || '/home';
+  const subscriptionActivated = searchParams.get('subscription_activated') === 'true';
+  const prefillEmail = searchParams.get('email') || '';
   const { login, isLoading, error, clearError } = useGuestOnly(redirectTo);
   const {
     signInWithGoogle,
@@ -21,7 +25,7 @@ function SignInContent() {
     error: socialError,
   } = useSocialAuth();
   const [formData, setFormData] = useState({
-    email: '',
+    email: prefillEmail,
     password: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -57,9 +61,12 @@ function SignInContent() {
     }
 
     try {
-      await login(formData);
+      await login({ ...formData, remember_me: rememberMe });
       toast.success('Welcome back!');
-      router.push(redirectTo);
+      const { user, isSubscribed } = useAuthStore.getState();
+      const onboardingPath = getOnboardingRedirectPath(user, isSubscribed);
+      // Respect ?redirect= param if profile is complete and subscribed
+      router.push(onboardingPath || redirectTo);
     } catch (err) {
       if (err instanceof AxiosError && err.response?.data?.errors) {
         const apiErrors = err.response.data.errors;
@@ -78,12 +85,9 @@ function SignInContent() {
     const result = await signInWithGoogle();
     if (result.success) {
       toast.success('Welcome back!');
-      if (result.requires_username) {
-        // Redirect to profile completion if username is required
-        router.push('/profile/complete');
-      } else {
-        router.push(redirectTo);
-      }
+      const { user, isSubscribed } = useAuthStore.getState();
+      const onboardingPath = getOnboardingRedirectPath(user, isSubscribed);
+      router.push(onboardingPath || redirectTo);
     } else if (result.error && result.error !== 'Sign-in cancelled') {
       toast.error(result.error);
     }
@@ -93,11 +97,9 @@ function SignInContent() {
     const result = await signInWithApple();
     if (result.success) {
       toast.success('Welcome back!');
-      if (result.requires_username) {
-        router.push('/profile/complete');
-      } else {
-        router.push(redirectTo);
-      }
+      const { user, isSubscribed } = useAuthStore.getState();
+      const onboardingPath = getOnboardingRedirectPath(user, isSubscribed);
+      router.push(onboardingPath || redirectTo);
     } else if (result.error && result.error !== 'Sign-in cancelled') {
       toast.error(result.error);
     }
@@ -105,6 +107,15 @@ function SignInContent() {
 
   return (
     <div className="w-full">
+      {/* Subscription Activation Banner */}
+      {subscriptionActivated && (
+        <div className="mb-4 p-3 rounded-lg bg-green-500/10 border border-green-500/20">
+          <p className="text-sm text-green-500 text-center font-medium">
+            Your subscription has been activated! Sign in to start watching.
+          </p>
+        </div>
+      )}
+
       {/* Header */}
       <div className="text-center mb-5">
         <h1 className="text-xl font-semibold text-text-primary">Welcome back</h1>

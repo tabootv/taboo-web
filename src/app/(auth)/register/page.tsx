@@ -7,6 +7,8 @@ import { toast } from 'sonner';
 import { Mail, Lock, User, Loader2 } from 'lucide-react';
 import { useGuestOnly } from '@/hooks';
 import { useSocialAuth } from '@/hooks/use-social-auth';
+import { useAuthStore } from '@/shared/stores/auth-store';
+import { getOnboardingRedirectPath } from '@/shared/lib/auth/profile-completion';
 import { AxiosError } from 'axios';
 
 export default function RegisterPage() {
@@ -76,7 +78,9 @@ export default function RegisterPage() {
         terms_and_condition: true,
       });
       toast.success('Account created successfully!');
-      router.push('/home');
+      const { user, isSubscribed } = useAuthStore.getState();
+      const onboardingPath = getOnboardingRedirectPath(user, isSubscribed);
+      router.push(onboardingPath || '/home');
     } catch (err) {
       if (err instanceof AxiosError && err.response?.data?.errors) {
         const apiErrors = err.response.data.errors;
@@ -95,11 +99,9 @@ export default function RegisterPage() {
     const result = await signInWithGoogle();
     if (result.success) {
       toast.success('Account created successfully!');
-      if (result.requires_username) {
-        router.push('/profile/complete');
-      } else {
-        router.push('/home');
-      }
+      const { user, isSubscribed } = useAuthStore.getState();
+      const onboardingPath = getOnboardingRedirectPath(user, isSubscribed);
+      router.push(onboardingPath || '/home');
     } else if (result.error && result.error !== 'Sign-in cancelled') {
       toast.error(result.error);
     }
@@ -109,11 +111,9 @@ export default function RegisterPage() {
     const result = await signInWithApple();
     if (result.success) {
       toast.success('Account created successfully!');
-      if (result.requires_username) {
-        router.push('/profile/complete');
-      } else {
-        router.push('/home');
-      }
+      const { user, isSubscribed } = useAuthStore.getState();
+      const onboardingPath = getOnboardingRedirectPath(user, isSubscribed);
+      router.push(onboardingPath || '/home');
     } else if (result.error && result.error !== 'Sign-in cancelled') {
       toast.error(result.error);
     }
