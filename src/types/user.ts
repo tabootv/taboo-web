@@ -9,9 +9,9 @@ export interface User {
   id: number;
   uuid: string;
   country_id?: number;
-  first_name: string;
-  last_name: string;
-  display_name: string;
+  first_name: string | null;
+  last_name: string | null;
+  display_name: string | null;
   handler?: string;
   handler_changes_remaining?: number;
   email: string;
@@ -42,6 +42,7 @@ export interface LoginCredentials {
   email: string;
   password: string;
   device_token?: string;
+  remember_me?: boolean;
 }
 
 export interface RegisterData {

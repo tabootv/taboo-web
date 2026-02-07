@@ -18,8 +18,10 @@ export interface UpdateProfileData {
   first_name?: string;
   last_name?: string;
   display_name?: string;
+  handler?: string;
   gender?: string;
   country_id?: number;
+  phone_number?: string;
 }
 
 export interface UpdateEmailData {
@@ -50,8 +52,14 @@ export const profileClient = {
    * Update profile
    */
   updateProfile: async (profileData: UpdateProfileData): Promise<User> => {
-    const data = await apiClient.post<ApiResponse<User>>('/profile/update-profile', profileData);
-    return data.data;
+    const data = await apiClient.post<{ message: string; user_data: User } | ApiResponse<User>>(
+      '/profile/update-profile',
+      profileData
+    );
+    if ('user_data' in data && data.user_data) {
+      return data.user_data;
+    }
+    return (data as ApiResponse<User>).data;
   },
 
   /**
@@ -86,11 +94,7 @@ export const profileClient = {
    * Update password
    */
   updatePassword: async (passwordData: UpdatePasswordData): Promise<{ message: string }> => {
-    const data = await apiClient.post<{ message: string }>(
-      '/profile/update-password',
-      passwordData
-    );
-    return data;
+    return apiClient.post<{ message: string }>('/profile/update-password', passwordData);
   },
 
   /**
