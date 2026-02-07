@@ -10,6 +10,7 @@ export type PlanInterval = 'monthly' | 'yearly' | 'lifetime';
 export interface Plan {
   id: number;
   name: string;
+  title?: string;
   slug?: string;
   badge?: string;
   description?: string;
@@ -20,8 +21,21 @@ export interface Plan {
   is_active?: boolean;
   whop_plan_id?: string;
   whop_plan_url?: string;
+  checkout_url?: string;
+  apple_id?: string;
   apple_product_id?: string;
   google_product_id?: string;
+  save_percentage?: number;
+  trial_days?: number;
+  country_code?: string;
+}
+
+export interface BackendSubscriptionInfo {
+  provider: string | null;
+  status: string | null;
+  start_at: string | null;
+  end_at: string | null;
+  manage_url: string | null;
 }
 
 export interface PlansResponse {

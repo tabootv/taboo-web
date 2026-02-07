@@ -72,6 +72,7 @@ export type {
   Subscription,
   SubscriptionInfo,
   SubscriptionStatusResponse,
+  BackendSubscriptionInfo,
 } from './subscription';
 
 // Notification Types

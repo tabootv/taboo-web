@@ -6,12 +6,14 @@ import { subscriptionsClient } from '@/api/client/subscriptions.client';
 import { useAuthStore } from '@/shared/stores/auth-store';
 import type { SubscriptionInfo, Plan } from '@/types';
 
+const MANAGE_URL_KEY = 'tabootv_manage_url';
+const SUBSCRIPTION_PROVIDER_KEY = 'tabootv_subscription_provider';
+
 /**
  * Hook for subscription entitlement checks and billing management
  *
  * IMPORTANT: This hook fetches state from the backend.
  * The backend is the ONLY source of truth for subscription state.
- * Never cache or persist subscription state client-side beyond this hook.
  */
 export function useSubscription() {
   const { isAuthenticated, isSubscribed: authStoreSubscribed } = useAuthStore();
@@ -35,6 +37,22 @@ export function useSubscription() {
     try {
       const info = await subscriptionsClient.getSubscriptionInfo();
       setSubscriptionInfo(info);
+
+      // Cache manage_url and provider to localStorage for post-cancellation fallback
+      if (info.manage_url) {
+        try {
+          localStorage.setItem(MANAGE_URL_KEY, info.manage_url);
+        } catch {
+          /* ignore */
+        }
+      }
+      if (info.provider) {
+        try {
+          localStorage.setItem(SUBSCRIPTION_PROVIDER_KEY, info.provider);
+        } catch {
+          /* ignore */
+        }
+      }
     } catch (err) {
       console.error('Failed to fetch subscription info:', err);
       setError('Failed to load subscription info');
@@ -58,20 +76,40 @@ export function useSubscription() {
 
   /**
    * Get the manage subscription URL (Whop, Apple, etc.)
-   * Opens in new tab or returns URL for custom handling
+   * Fallback chain: current info -> cached localStorage -> hardcoded provider URLs
    */
   const getManageUrl = useCallback((): string | null => {
-    if (!subscriptionInfo?.manage_url) {
-      // Fallback based on provider
-      if (subscriptionInfo?.provider === 'apple') {
-        return 'https://apps.apple.com/account/subscriptions';
-      }
-      if (subscriptionInfo?.provider === 'google') {
-        return 'https://play.google.com/store/account/subscriptions';
-      }
-      return null;
+    // 1. Current subscription info
+    if (subscriptionInfo?.manage_url) {
+      return subscriptionInfo.manage_url;
     }
-    return subscriptionInfo.manage_url;
+
+    // 2. Cached manage_url from localStorage
+    try {
+      const cached = localStorage.getItem(MANAGE_URL_KEY);
+      if (cached) return cached;
+    } catch {
+      /* ignore */
+    }
+
+    // 3. Fallback based on provider (current or cached)
+    const provider =
+      subscriptionInfo?.provider ||
+      (() => {
+        try {
+          return localStorage.getItem(SUBSCRIPTION_PROVIDER_KEY);
+        } catch {
+          return null;
+        }
+      })();
+
+    if (provider === 'apple') {
+      return 'https://apps.apple.com/account/subscriptions';
+    }
+    if (provider === 'google') {
+      return 'https://play.google.com/store/account/subscriptions';
+    }
+    return null;
   }, [subscriptionInfo]);
 
   /**
