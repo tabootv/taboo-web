@@ -29,6 +29,20 @@ export interface AuthenticatedMeResponse extends MeResponse {
   authenticated: boolean;
 }
 
+export interface WhopExchangeRequest {
+  code: string;
+  membership_id?: string | undefined;
+}
+
+export interface WhopExchangeResponse {
+  message: string;
+  user?: Record<string, unknown>;
+  subscribed?: boolean;
+  scenario?: 'new_user' | 'existing_logged_in' | 'existing_logged_out';
+  requires_profile_completion?: boolean;
+  email?: string;
+}
+
 export const authClient = {
   /**
    * Login with email and password.
@@ -98,6 +112,14 @@ export const authClient = {
    */
   me: async (): Promise<AuthenticatedMeResponse> => {
     return apiClient.get<AuthenticatedMeResponse>('/me');
+  },
+
+  /**
+   * Exchange Whop OAuth code for authentication.
+   * Client-side: /api/auth/whop-exchange proxy sets HttpOnly cookie.
+   */
+  whopExchange: async (data: WhopExchangeRequest): Promise<WhopExchangeResponse> => {
+    return apiClient.post<WhopExchangeResponse>('/auth/whop-exchange', data);
   },
 
   /**

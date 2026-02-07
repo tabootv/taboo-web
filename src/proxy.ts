@@ -16,7 +16,10 @@ const PUBLIC_ROUTES = [
   '/verify-email',
   '/confirm-password',
   '/plans',
+  '/choose-plan',
   '/checkout',
+  '/profile/complete',
+  '/auth/whop-callback',
   '/',
 ];
 
