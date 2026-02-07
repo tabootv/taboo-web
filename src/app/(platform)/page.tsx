@@ -1,21 +1,21 @@
 import { fetchHomeData } from '@/shared/lib/api/home-data';
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
-import { HomeContent } from './home-content';
+import { HomeContent } from './_home/home-content';
 
 export const metadata: Metadata = {
   title: 'Home',
   description:
     'Discover premium video content, educational courses, and connect with creators on TabooTV. Browse trending videos, explore series, and find your next favorite creator.',
   alternates: {
-    canonical: '/home',
+    canonical: '/',
   },
   openGraph: {
     title: 'Home | TabooTV',
     description:
       'Discover premium video content, educational courses, and connect with creators on TabooTV.',
     type: 'website',
-    url: '/home',
+    url: '/',
   },
   twitter: {
     card: 'summary_large_image',

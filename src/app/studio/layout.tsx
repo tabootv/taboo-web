@@ -23,7 +23,7 @@ export default function StudioLayout({ children }: { children: React.ReactNode }
     }
 
     if (!user?.channel && !user?.is_creator) {
-      router.push('/home');
+      router.push('/');
       return;
     }
 

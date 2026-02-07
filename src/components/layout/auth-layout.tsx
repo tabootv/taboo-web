@@ -26,7 +26,7 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
       {/* Header */}
       <header className="relative z-10 py-5 px-4">
         <div className="max-w-7xl mx-auto">
-          <Logo size="md" linkTo="/home" />
+          <Logo size="md" linkTo="/" />
         </div>
       </header>
 

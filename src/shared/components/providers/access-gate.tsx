@@ -10,9 +10,9 @@ const INIT_TIMEOUT_MS = 5000;
 // Paths exempt from gating - accessible regardless of profile/subscription state
 const EXEMPT_PATHS = [
   '/choose-plan',
-  '/profile/complete',
-  '/profile/edit',
-  '/profile/subscription',
+  '/account/complete',
+  '/account',
+  '/account/subscription',
   '/payment',
   '/auth/whop-callback',
 ];
@@ -22,7 +22,7 @@ function isExemptPath(pathname: string): boolean {
 }
 
 // Content routes that require subscription (non-profile, non-settings pages)
-const NON_CONTENT_PREFIXES = ['/profile', '/settings'];
+const NON_CONTENT_PREFIXES = ['/profile', '/settings', '/account'];
 
 function isContentRoute(pathname: string): boolean {
   return !NON_CONTENT_PREFIXES.some((prefix) => pathname.startsWith(prefix));
@@ -30,7 +30,7 @@ function isContentRoute(pathname: string): boolean {
 
 /**
  * AccessGate enforces the onboarding decision tree:
- * 1. Profile incomplete? -> redirect to /profile/complete
+ * 1. Profile incomplete? -> redirect to /account/complete
  * 2. Content route + not subscribed? -> redirect to /choose-plan
  * 3. All pass -> render children
  */
@@ -75,10 +75,10 @@ export function AccessGate({ children }: { children: React.ReactNode }) {
       redirectCountRef.current = { pathname, count: 0, timestamp: now };
     }
 
-    // 1. Profile incomplete -> /profile/complete
+    // 1. Profile incomplete -> /account/complete
     if (!isProfileComplete) {
       redirectCountRef.current.count++;
-      router.replace('/profile/complete');
+      router.replace('/account/complete');
       return;
     }
 

@@ -8,11 +8,10 @@
  * - POST /profile/update-email → User
  * - POST /profile/update-contact → User
  * - POST /profile/update-password → { message: string }
- * - DELETE /profile/delete → void
  */
 
 import type { ApiResponse, User } from '../types';
-import { apiClient, removeToken } from './base-client';
+import { apiClient } from './base-client';
 
 export interface UpdateProfileData {
   first_name?: string;
@@ -95,13 +94,5 @@ export const profileClient = {
    */
   updatePassword: async (passwordData: UpdatePasswordData): Promise<{ message: string }> => {
     return apiClient.post<{ message: string }>('/profile/update-password', passwordData);
-  },
-
-  /**
-   * Delete account
-   */
-  deleteAccount: async (): Promise<void> => {
-    await apiClient.delete('/profile/delete');
-    removeToken();
   },
 };

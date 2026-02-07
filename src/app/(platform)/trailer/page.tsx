@@ -54,7 +54,7 @@ function TrailerContent() {
     if (window.history.length > 1) {
       router.back();
     } else {
-      router.push('/home');
+      router.push('/');
     }
   };
 

@@ -103,7 +103,7 @@ export function StudioSidebar({ ...props }: React.ComponentProps<typeof Sidebar>
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Back to Taboo">
-                  <Link href="/home">
+                  <Link href="/">
                     <ArrowLeft />
                     <span>Back to Taboo</span>
                   </Link>

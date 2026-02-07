@@ -75,7 +75,7 @@ export function useShortsKeyboard({
 
         case 'escape':
           e.preventDefault();
-          router.push('/home');
+          router.push('/');
           break;
       }
     };

@@ -90,10 +90,10 @@ function WhopCallbackContent() {
 
           if (response.requires_profile_completion || response.scenario === 'new_user') {
             await fetchUser();
-            setTimeout(() => router.push('/profile/complete'), 1500);
+            setTimeout(() => router.push('/account/complete'), 1500);
           } else {
             await fetchUser();
-            setTimeout(() => router.push('/home'), 1500);
+            setTimeout(() => router.push('/'), 1500);
           }
           return;
         }

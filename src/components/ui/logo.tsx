@@ -7,7 +7,7 @@ interface LogoProps {
   linkTo?: string;
 }
 
-export function Logo({ className, size = 'md', linkTo = '/home' }: LogoProps) {
+export function Logo({ className, size = 'md', linkTo = '/' }: LogoProps) {
   const sizes = {
     sm: { width: 100, height: 15 },
     md: { width: 140, height: 21 },

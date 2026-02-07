@@ -49,7 +49,7 @@ export function StudioHeader() {
             </button>
           </div>
 
-          <Logo size="md" linkTo="/home" />
+          <Logo size="md" linkTo="/" />
 
           <span className="text-xs font-medium text-red-primary px-2 py-0.5 bg-red-primary/10 rounded ml-1">
             Studio

@@ -30,7 +30,7 @@ export function Navbar() {
   } = useMobileMenu();
 
   // Check if we're on the home page for transparent header
-  const isHomePage = pathname === '/home' || pathname === '/';
+  const isHomePage = pathname === '/';
 
   // Handle scroll for navbar background
   useEffect(() => {
@@ -78,7 +78,7 @@ export function Navbar() {
                 : 'opacity-100'
             )}
           >
-            <Logo size="md" linkTo="/home" />
+            <Logo size="md" linkTo="/" />
           </div>
 
           {/* Desktop Navigation */}

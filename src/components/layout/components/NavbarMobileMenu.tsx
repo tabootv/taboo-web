@@ -76,8 +76,8 @@ export function NavbarMobileMenu({
                 Sign In
               </Button>
             </Link>
-            <Link href="/register" onClick={onClose}>
-              <Button className="w-full h-12 text-base">Sign Up</Button>
+            <Link href="/choose-plan" onClick={onClose}>
+              <Button className="w-full h-12 text-base">Get Started</Button>
             </Link>
           </div>
         )}

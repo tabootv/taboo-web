@@ -125,7 +125,7 @@ export default function WatchlistPage() {
                 : `You haven't saved any ${activeFilter}s yet.`}
             </p>
             <Link
-              href="/home"
+              href="/"
               className="px-6 py-2.5 bg-red-primary hover:bg-red-hover rounded-full text-sm font-medium text-white transition-colors"
             >
               Explore Content

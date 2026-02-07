@@ -13,7 +13,7 @@ import { AxiosError } from 'axios';
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { register, isLoading, error, clearError } = useGuestOnly('/home');
+  const { register, isLoading, error, clearError } = useGuestOnly('/');
   const {
     signInWithGoogle,
     signInWithApple,
@@ -80,7 +80,7 @@ export default function RegisterPage() {
       toast.success('Account created successfully!');
       const { user, isSubscribed } = useAuthStore.getState();
       const onboardingPath = getOnboardingRedirectPath(user, isSubscribed);
-      router.push(onboardingPath || '/home');
+      router.push(onboardingPath || '/');
     } catch (err) {
       if (err instanceof AxiosError && err.response?.data?.errors) {
         const apiErrors = err.response.data.errors;
@@ -101,7 +101,7 @@ export default function RegisterPage() {
       toast.success('Account created successfully!');
       const { user, isSubscribed } = useAuthStore.getState();
       const onboardingPath = getOnboardingRedirectPath(user, isSubscribed);
-      router.push(onboardingPath || '/home');
+      router.push(onboardingPath || '/');
     } else if (result.error && result.error !== 'Sign-in cancelled') {
       toast.error(result.error);
     }
@@ -113,7 +113,7 @@ export default function RegisterPage() {
       toast.success('Account created successfully!');
       const { user, isSubscribed } = useAuthStore.getState();
       const onboardingPath = getOnboardingRedirectPath(user, isSubscribed);
-      router.push(onboardingPath || '/home');
+      router.push(onboardingPath || '/');
     } else if (result.error && result.error !== 'Sign-in cancelled') {
       toast.error(result.error);
     }

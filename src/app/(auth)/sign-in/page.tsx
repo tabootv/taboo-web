@@ -14,7 +14,7 @@ import { AxiosError } from 'axios';
 function SignInContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get('redirect') || '/home';
+  const redirectTo = searchParams.get('redirect') || '/';
   const subscriptionActivated = searchParams.get('subscription_activated') === 'true';
   const prefillEmail = searchParams.get('email') || '';
   const { login, isLoading, error, clearError } = useGuestOnly(redirectTo);
@@ -272,10 +272,10 @@ function SignInContent() {
       <p className="mt-5 text-center text-sm text-text-secondary">
         Don&apos;t have an account?{' '}
         <Link
-          href="/register"
+          href="/choose-plan"
           className="text-red-primary font-medium hover:text-red-hover transition-colors"
         >
-          Sign up
+          Get started
         </Link>
       </p>
     </div>

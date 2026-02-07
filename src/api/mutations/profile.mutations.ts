@@ -81,17 +81,3 @@ export function useUpdatePassword() {
     mutationFn: (data: UpdatePasswordData) => profileClient.updatePassword(data),
   });
 }
-
-/**
- * Hook to delete account
- */
-export function useDeleteAccount() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: () => profileClient.deleteAccount(),
-    onSuccess: () => {
-      queryClient.clear();
-    },
-  });
-}

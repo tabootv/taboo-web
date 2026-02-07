@@ -37,8 +37,8 @@ export function NavbarUserMenu({ isSearchExpanded }: NavbarUserMenuProps) {
         <Link href="/sign-in">
           <Button variant="ghost">Sign In</Button>
         </Link>
-        <Link href="/register">
-          <Button>Sign Up</Button>
+        <Link href="/choose-plan">
+          <Button>Get Started</Button>
         </Link>
       </div>
     );
@@ -115,7 +115,7 @@ export function NavbarUserMenu({ isSearchExpanded }: NavbarUserMenuProps) {
                 Watchlist
               </Link>
               <Link
-                href="/profile/settings"
+                href="/account"
                 onClick={closeUserMenu}
                 className="flex items-center gap-2 px-4 py-2 text-sm text-text-secondary hover:bg-hover hover:text-text-primary transition-colors"
               >

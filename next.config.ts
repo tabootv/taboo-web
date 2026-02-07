@@ -21,14 +21,15 @@ const routeRedirects: Redirect[] = [
     destination: '/creators/:channel',
     permanent: true,
   },
+  { source: '/home', destination: '/', permanent: true },
 
   // ============================================
   // Auth Route Consolidation (PR 2.2)
   // Canonical: /sign-in, /register
   // ============================================
   { source: '/login', destination: '/sign-in', permanent: true },
-  { source: '/signup', destination: '/register', permanent: true },
-  { source: '/sign-up', destination: '/register', permanent: true },
+  { source: '/signup', destination: '/choose-plan', permanent: true },
+  { source: '/sign-up', destination: '/choose-plan', permanent: true },
 
   // ============================================
   // Content Route Consolidation (PR 2.3)
@@ -43,6 +44,17 @@ const routeRedirects: Redirect[] = [
   // Canonical: /searches
   // ============================================
   { source: '/search', destination: '/searches', permanent: true },
+
+  // ============================================
+  // Account Route Restructuring
+  // Canonical: /account, /account/*, /profile
+  // ============================================
+  { source: '/profile/edit', destination: '/account', permanent: true },
+  { source: '/profile/edit/password', destination: '/account/security', permanent: true },
+  { source: '/profile/edit/danger', destination: '/account', permanent: true },
+  { source: '/profile/subscription', destination: '/account/subscription', permanent: true },
+  { source: '/profile/complete', destination: '/account/complete', permanent: true },
+  { source: '/profile/settings', destination: '/account', permanent: true },
 ];
 
 const nextConfig: NextConfig = {

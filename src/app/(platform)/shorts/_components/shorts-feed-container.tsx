@@ -190,7 +190,7 @@ export function ShortsFeedContainer({ initialUuid }: ShortsFeedContainerProps) {
           <>
             <p className="text-white/50 text-lg">No shorts available</p>
             <button
-              onClick={() => router.push('/home')}
+              onClick={() => router.push('/')}
               className="px-6 py-2.5 bg-white/10 text-white rounded-full font-medium hover:bg-white/20 transition-colors"
             >
               Go Home

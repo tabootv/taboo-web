@@ -42,7 +42,7 @@ export function getOnboardingRedirectPath(user: User | null, isSubscribed: boole
   const step = getOnboardingStep(user, isSubscribed);
   switch (step) {
     case 'complete_profile':
-      return '/profile/complete';
+      return '/account/complete';
     case 'subscribe':
       return '/choose-plan';
     case 'ready':

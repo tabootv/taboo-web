@@ -15,12 +15,9 @@ const PUBLIC_ROUTES = [
   '/reset-password',
   '/verify-email',
   '/confirm-password',
-  '/plans',
   '/choose-plan',
-  '/checkout',
-  '/profile/complete',
+  '/account/complete',
   '/auth/whop-callback',
-  '/',
 ];
 
 // Patterns to skip middleware processing
@@ -132,7 +129,7 @@ function redirectToSignIn(request: NextRequest, originalPath: string): NextRespo
  * Redirect to home
  */
 function redirectToHome(request: NextRequest): NextResponse {
-  const homeUrl = new URL('/home', request.url);
+  const homeUrl = new URL('/', request.url);
   return NextResponse.redirect(homeUrl);
 }
 

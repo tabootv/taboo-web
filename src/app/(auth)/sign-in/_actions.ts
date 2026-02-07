@@ -7,7 +7,7 @@ export async function loginAction(credentials: { email: string; password: string
   const result = await authClient.login(credentials);
 
   revalidatePath('/profile');
-  revalidatePath('/home');
+  revalidatePath('/');
 
   return result;
 }

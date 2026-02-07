@@ -65,6 +65,6 @@ export function useRequireAuth(redirectTo: string = '/sign-in') {
 }
 
 // Hook for guest routes - redirects to home if already authenticated
-export function useGuestOnly(redirectTo: string = '/home') {
+export function useGuestOnly(redirectTo: string = '/') {
   return useAuth({ redirectIfAuthenticated: redirectTo });
 }

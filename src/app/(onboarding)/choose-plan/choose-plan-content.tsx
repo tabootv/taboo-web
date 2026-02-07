@@ -52,7 +52,7 @@ export function ChoosePlanContent() {
         if (status.is_subscribed) {
           setSubscribed(true);
           toast.success('Subscription activated! Welcome to TabooTV.');
-          router.push('/home');
+          router.push('/');
           return;
         }
         await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
@@ -153,7 +153,7 @@ export function ChoosePlanContent() {
   const handleRedeemSubscribed = useCallback(() => {
     setSubscribed(true);
     toast.success('Redeem code applied! Your subscription is now active.');
-    router.push('/home');
+    router.push('/');
   }, [setSubscribed, router]);
 
   const handleRedeemStartVerifying = useCallback(() => {

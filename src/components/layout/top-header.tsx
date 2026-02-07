@@ -78,7 +78,7 @@ export function TopHeader({
             </div>
           )}
 
-          <Logo size="md" linkTo="/home" />
+          <Logo size="md" linkTo="/" />
         </div>
 
         {/* Center: Search */}
@@ -171,8 +171,8 @@ export function TopHeader({
                   Sign In
                 </Button>
               </Link>
-              <Link href="/register" className="hidden sm:block">
-                <Button size="sm">Sign Up</Button>
+              <Link href="/choose-plan" className="hidden sm:block">
+                <Button size="sm">Get Started</Button>
               </Link>
             </div>
           )}

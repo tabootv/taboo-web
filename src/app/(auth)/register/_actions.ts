@@ -18,7 +18,7 @@ export async function registerAction(userData: {
   const result = await authClient.register(userData);
 
   revalidatePath('/profile');
-  revalidatePath('/home');
+  revalidatePath('/');
 
   return result;
 }

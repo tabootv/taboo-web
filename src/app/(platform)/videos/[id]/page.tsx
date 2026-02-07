@@ -226,7 +226,7 @@ export default function VideoPage() {
           >
             Try again
           </button>
-          <Link href="/home" className="text-text-secondary hover:underline">
+          <Link href="/" className="text-text-secondary hover:underline">
             Go back home
           </Link>
         </div>
@@ -241,7 +241,7 @@ export default function VideoPage() {
         <p className="text-text-secondary mt-2">
           The video you&apos;re looking for doesn&apos;t exist or has been removed.
         </p>
-        <Link href="/home" className="mt-4 text-red-primary hover:underline">
+        <Link href="/" className="mt-4 text-red-primary hover:underline">
           Go back home
         </Link>
       </div>

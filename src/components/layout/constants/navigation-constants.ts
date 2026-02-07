@@ -22,7 +22,7 @@ export interface NavigationItem {
 }
 
 export const mainNavigation: NavigationItem[] = [
-  { name: 'Home', href: '/home', icon: Home },
+  { name: 'Home', href: '/', icon: Home },
   { name: 'Shorts', href: '/shorts', icon: PlayCircle },
   { name: 'Videos', href: '/videos', icon: Film },
   { name: 'Series', href: '/series', icon: Layers },

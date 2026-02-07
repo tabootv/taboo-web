@@ -6,7 +6,7 @@ import { useVideoList } from '@/api/queries/video.queries';
 import type { Video } from '@/types';
 import { Film } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { MediaPreviewModal } from '../home/_components/media-preview-modal';
+import { MediaPreviewModal } from '../_home/_components/media-preview-modal';
 import { SelectFilter } from './components/select-filter';
 import { VideoCardEnhanced } from './components/video-card-enhanced';
 import { VideoGridSkeleton } from './components/video-grid-skeleton';
