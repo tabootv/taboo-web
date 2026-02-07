@@ -18,6 +18,10 @@ export { useVideoPlayer } from './use-video-player';
 export { useFeature, useFeatureConfig } from './use-feature';
 export { useHiddenComponentByPage } from './use-hidden-component-page';
 
+// Onboarding & Profile
+export { useHandlerCheck } from './use-handler-check';
+export { useCountries } from './use-countries';
+
 // Data
 export { useCreatorById } from './use-creator-by-id';
 export { useNormalizedTags } from './use-tags';
