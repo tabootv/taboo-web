@@ -5,7 +5,7 @@ export function RedeemBackground() {
     <div className="fixed inset-0" aria-hidden="true">
       {/* Movies grid image */}
       <Image
-        src="/movies-grid.png"
+        src="/movies-grid.webp"
         alt=""
         fill
         priority={false}
