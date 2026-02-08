@@ -3,13 +3,15 @@
  *
  * Provides Google and Apple OAuth login via Firebase Authentication.
  * Handles the OAuth popup flow and exchanges Firebase token for app session.
+ *
+ * Firebase is lazy-loaded on first social login attempt to keep it out of the initial bundle.
  */
 
 'use client';
 
 import { useState, useCallback } from 'react';
-import { signInWithPopup, UserCredential } from 'firebase/auth';
-import { getFirebaseAuth, googleProvider, appleProvider } from '@/shared/lib/firebase/config';
+import type { UserCredential } from 'firebase/auth';
+import { getFirebaseAuth, getGoogleProvider, getAppleProvider } from '@/shared/lib/firebase/config';
 import { useAuthStore } from '@/shared/stores/auth-store';
 
 export interface SocialAuthResult {
@@ -54,8 +56,9 @@ export function useSocialAuth() {
     setError(null);
 
     try {
-      const auth = getFirebaseAuth();
-      const result = await signInWithPopup(auth, googleProvider);
+      const { signInWithPopup } = await import('firebase/auth');
+      const [auth, provider] = await Promise.all([getFirebaseAuth(), getGoogleProvider()]);
+      const result = await signInWithPopup(auth, provider);
       return await handleFirebaseAuth(result, 'google');
     } catch (err) {
       // Handle Firebase-specific errors
@@ -84,8 +87,9 @@ export function useSocialAuth() {
     setError(null);
 
     try {
-      const auth = getFirebaseAuth();
-      const result = await signInWithPopup(auth, appleProvider);
+      const { signInWithPopup } = await import('firebase/auth');
+      const [auth, provider] = await Promise.all([getFirebaseAuth(), getAppleProvider()]);
+      const result = await signInWithPopup(auth, provider);
       return await handleFirebaseAuth(result, 'apple');
     } catch (err) {
       const error = err as { code?: string; message?: string };

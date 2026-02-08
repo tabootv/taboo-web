@@ -3,11 +3,13 @@
  *
  * Initializes Firebase app and authentication providers for social login.
  * Used for Google and Apple OAuth via Firebase Authentication.
+ *
+ * All Firebase imports are dynamically loaded to keep them out of the initial bundle.
+ * Firebase (~131 KB) is only downloaded when a user initiates social login.
  */
 
-import { FirebaseApp, FirebaseOptions, getApps, initializeApp } from 'firebase/app';
-import { Analytics, getAnalytics, isSupported } from 'firebase/analytics';
-import { Auth, getAuth, GoogleAuthProvider, OAuthProvider } from 'firebase/auth';
+import type { FirebaseApp, FirebaseOptions } from 'firebase/app';
+import type { Auth } from 'firebase/auth';
 
 function getFirebaseConfig(): FirebaseOptions {
   const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
@@ -43,12 +45,13 @@ function getFirebaseConfig(): FirebaseOptions {
 // Initialize Firebase app (singleton pattern)
 let cachedApp: FirebaseApp | null = null;
 let cachedAuth: Auth | null = null;
-let cachedAnalytics: Analytics | null = null;
 
-function getFirebaseApp(): FirebaseApp {
+async function getFirebaseApp(): Promise<FirebaseApp> {
   if (cachedApp) {
     return cachedApp;
   }
+
+  const { getApps, initializeApp } = await import('firebase/app');
 
   const apps = getApps();
   const existingApp = apps[0];
@@ -61,32 +64,30 @@ function getFirebaseApp(): FirebaseApp {
   return cachedApp;
 }
 
-function getFirebaseAuth(): Auth {
+async function getFirebaseAuth(): Promise<Auth> {
   if (cachedAuth) {
     return cachedAuth;
   }
 
-  cachedAuth = getAuth(getFirebaseApp());
+  const { getAuth } = await import('firebase/auth');
+  cachedAuth = getAuth(await getFirebaseApp());
   return cachedAuth;
 }
 
-// Google OAuth provider
-const googleProvider = new GoogleAuthProvider();
-googleProvider.addScope('email');
-googleProvider.addScope('profile');
-
-// Apple OAuth provider
-const appleProvider = new OAuthProvider('apple.com');
-appleProvider.addScope('email');
-appleProvider.addScope('name');
-
-async function getFirebaseAnalytics(): Promise<Analytics | null> {
-  if (cachedAnalytics) return cachedAnalytics;
-  if (globalThis.window === undefined) return null;
-  const supported = await isSupported();
-  if (!supported) return null;
-  cachedAnalytics = getAnalytics(getFirebaseApp());
-  return cachedAnalytics;
+async function getGoogleProvider() {
+  const { GoogleAuthProvider } = await import('firebase/auth');
+  const provider = new GoogleAuthProvider();
+  provider.addScope('email');
+  provider.addScope('profile');
+  return provider;
 }
 
-export { appleProvider, getFirebaseAnalytics, getFirebaseApp, getFirebaseAuth, googleProvider };
+async function getAppleProvider() {
+  const { OAuthProvider } = await import('firebase/auth');
+  const provider = new OAuthProvider('apple.com');
+  provider.addScope('email');
+  provider.addScope('name');
+  return provider;
+}
+
+export { getAppleProvider, getFirebaseApp, getFirebaseAuth, getGoogleProvider };
