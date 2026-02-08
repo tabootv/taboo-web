@@ -89,7 +89,8 @@ export function BannerSlider({ initialBanners }: BannerSliderProps) {
   }
 
   const thumbnail =
-    currentBanner.type === 'video' ? currentBanner.thumbnail : currentBanner.trailer_thumbnail;
+    (currentBanner.type === 'video' ? currentBanner.thumbnail : currentBanner.trailer_thumbnail) ??
+    '';
 
   const href =
     currentBanner.type === 'series'
@@ -98,14 +99,15 @@ export function BannerSlider({ initialBanners }: BannerSliderProps) {
 
   return (
     <div className="relative w-full overflow-hidden group">
-      <div
-        className="relative w-full aspect-[16/9] md:aspect-[21/9] lg:aspect-[2.35/1] transition-all duration-500"
-        style={{
-          backgroundImage: `url(${thumbnail})`,
-          backgroundPosition: 'top',
-          backgroundSize: 'cover',
-        }}
-      >
+      <div className="relative w-full aspect-[16/9] md:aspect-[21/9] lg:aspect-[2.35/1] transition-all duration-500">
+        <Image
+          src={thumbnail}
+          alt={currentBanner.title}
+          fill
+          priority
+          className="object-cover object-top"
+          sizes="100vw"
+        />
         <div className="absolute inset-0 bg-linear-to-r from-black/80 via-black/40 to-transparent" />
         <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
         <div className="absolute inset-0 flex flex-col justify-end sm:justify-center items-start page-px pb-16 sm:pb-20 md:pb-24">
