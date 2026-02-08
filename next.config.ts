@@ -99,7 +99,21 @@ const nextConfig: NextConfig = {
     },
     webpackMemoryOptimizations: true,
     // Optimize barrel imports for better tree-shaking (bundle-barrel-imports rule)
-    optimizePackageImports: ['lucide-react'],
+    optimizePackageImports: [
+      'lucide-react',
+      'recharts',
+      'date-fns',
+      '@radix-ui/react-collapsible',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-dropdown-menu',
+      '@radix-ui/react-label',
+      '@radix-ui/react-popover',
+      '@radix-ui/react-select',
+      '@radix-ui/react-separator',
+      '@radix-ui/react-slot',
+      '@radix-ui/react-tooltip',
+      '@radix-ui/react-visually-hidden',
+    ],
   },
 
   // Environment variables available at build time
