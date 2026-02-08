@@ -1,18 +1,24 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { Mail, Lock, User, Loader2 } from 'lucide-react';
 import { useGuestOnly } from '@/hooks';
 import { useSocialAuth } from '@/hooks/use-social-auth';
 import { useAuthStore } from '@/shared/stores/auth-store';
 import { getOnboardingRedirectPath } from '@/shared/lib/auth/profile-completion';
+import { applyPendingRedeemCode } from '@/shared/lib/redeem/apply-pending-code';
 import { AxiosError } from 'axios';
+import {
+  hasRegisterFlowToken,
+  clearRegisterFlowToken,
+} from '@/shared/lib/auth/register-flow-guard';
 
-export default function RegisterPage() {
+function RegisterContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { register, isLoading, error, clearError } = useGuestOnly('/');
   const {
     signInWithGoogle,
@@ -29,8 +35,19 @@ export default function RegisterPage() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [acceptTerms, setAcceptTerms] = useState(false);
+  const [isFlowAllowed, setIsFlowAllowed] = useState(false);
+
+  useEffect(() => {
+    if (hasRegisterFlowToken()) {
+      setIsFlowAllowed(true);
+    } else {
+      router.replace('/choose-plan');
+    }
+  }, [router]);
 
   const isAnyLoading = isLoading || socialLoading;
+
+  if (!isFlowAllowed) return null;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -78,6 +95,16 @@ export default function RegisterPage() {
         terms_and_condition: true,
       });
       toast.success('Account created successfully!');
+      clearRegisterFlowToken();
+
+      const redeemResult = await applyPendingRedeemCode(searchParams);
+      if (redeemResult.applied && redeemResult.success) {
+        useAuthStore.getState().setSubscribed(true);
+        toast.success(redeemResult.message || 'Subscription activated!');
+      } else if (redeemResult.applied && !redeemResult.success) {
+        toast.error(redeemResult.message);
+      }
+
       const { user, isSubscribed } = useAuthStore.getState();
       const onboardingPath = getOnboardingRedirectPath(user, isSubscribed);
       router.push(onboardingPath || '/');
@@ -99,6 +126,16 @@ export default function RegisterPage() {
     const result = await signInWithGoogle();
     if (result.success) {
       toast.success('Account created successfully!');
+      clearRegisterFlowToken();
+
+      const redeemResult = await applyPendingRedeemCode(searchParams);
+      if (redeemResult.applied && redeemResult.success) {
+        useAuthStore.getState().setSubscribed(true);
+        toast.success(redeemResult.message || 'Subscription activated!');
+      } else if (redeemResult.applied && !redeemResult.success) {
+        toast.error(redeemResult.message);
+      }
+
       const { user, isSubscribed } = useAuthStore.getState();
       const onboardingPath = getOnboardingRedirectPath(user, isSubscribed);
       router.push(onboardingPath || '/');
@@ -111,6 +148,16 @@ export default function RegisterPage() {
     const result = await signInWithApple();
     if (result.success) {
       toast.success('Account created successfully!');
+      clearRegisterFlowToken();
+
+      const redeemResult = await applyPendingRedeemCode(searchParams);
+      if (redeemResult.applied && redeemResult.success) {
+        useAuthStore.getState().setSubscribed(true);
+        toast.success(redeemResult.message || 'Subscription activated!');
+      } else if (redeemResult.applied && !redeemResult.success) {
+        toast.error(redeemResult.message);
+      }
+
       const { user, isSubscribed } = useAuthStore.getState();
       const onboardingPath = getOnboardingRedirectPath(user, isSubscribed);
       router.push(onboardingPath || '/');
@@ -385,5 +432,19 @@ export default function RegisterPage() {
         </Link>
       </p>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="w-6 h-6 animate-spin text-red-primary" />
+        </div>
+      }
+    >
+      <RegisterContent />
+    </Suspense>
   );
 }

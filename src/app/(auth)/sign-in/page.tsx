@@ -1,23 +1,25 @@
 'use client';
 
-import { Suspense, useState } from 'react';
-import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
 import { useGuestOnly } from '@/hooks';
 import { useSocialAuth } from '@/hooks/use-social-auth';
-import { useAuthStore } from '@/shared/stores/auth-store';
 import { getOnboardingRedirectPath } from '@/shared/lib/auth/profile-completion';
+import { setRegisterFlowToken } from '@/shared/lib/auth/register-flow-guard';
+import { applyPendingRedeemCode, saveRedeemCode } from '@/shared/lib/redeem/apply-pending-code';
+import { useAuthStore } from '@/shared/stores/auth-store';
 import { AxiosError } from 'axios';
+import { Loader2 } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useState } from 'react';
+import { toast } from 'sonner';
 
 function SignInContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get('redirect') || '/';
   const subscriptionActivated = searchParams.get('subscription_activated') === 'true';
   const prefillEmail = searchParams.get('email') || '';
-  const { login, isLoading, error, clearError } = useGuestOnly(redirectTo);
+  const redeemCode = searchParams.get('redeem_code');
+  const { login, isLoading, error, clearError } = useGuestOnly('/');
   const {
     signInWithGoogle,
     signInWithApple,
@@ -63,10 +65,18 @@ function SignInContent() {
     try {
       await login({ ...formData, remember_me: rememberMe });
       toast.success('Welcome back!');
+
+      const redeemResult = await applyPendingRedeemCode(searchParams);
+      if (redeemResult.applied && redeemResult.success) {
+        useAuthStore.getState().setSubscribed(true);
+        toast.success(redeemResult.message || 'Subscription activated!');
+      } else if (redeemResult.applied && !redeemResult.success) {
+        toast.error(redeemResult.message);
+      }
+
       const { user, isSubscribed } = useAuthStore.getState();
       const onboardingPath = getOnboardingRedirectPath(user, isSubscribed);
-      // Respect ?redirect= param if profile is complete and subscribed
-      router.push(onboardingPath || redirectTo);
+      router.push(onboardingPath || '/');
     } catch (err) {
       if (err instanceof AxiosError && err.response?.data?.errors) {
         const apiErrors = err.response.data.errors;
@@ -85,9 +95,18 @@ function SignInContent() {
     const result = await signInWithGoogle();
     if (result.success) {
       toast.success('Welcome back!');
+
+      const redeemResult = await applyPendingRedeemCode(searchParams);
+      if (redeemResult.applied && redeemResult.success) {
+        useAuthStore.getState().setSubscribed(true);
+        toast.success(redeemResult.message || 'Subscription activated!');
+      } else if (redeemResult.applied && !redeemResult.success) {
+        toast.error(redeemResult.message);
+      }
+
       const { user, isSubscribed } = useAuthStore.getState();
       const onboardingPath = getOnboardingRedirectPath(user, isSubscribed);
-      router.push(onboardingPath || redirectTo);
+      router.push(onboardingPath || '/');
     } else if (result.error && result.error !== 'Sign-in cancelled') {
       toast.error(result.error);
     }
@@ -97,11 +116,30 @@ function SignInContent() {
     const result = await signInWithApple();
     if (result.success) {
       toast.success('Welcome back!');
+
+      const redeemResult = await applyPendingRedeemCode(searchParams);
+      if (redeemResult.applied && redeemResult.success) {
+        useAuthStore.getState().setSubscribed(true);
+        toast.success(redeemResult.message || 'Subscription activated!');
+      } else if (redeemResult.applied && !redeemResult.success) {
+        toast.error(redeemResult.message);
+      }
+
       const { user, isSubscribed } = useAuthStore.getState();
       const onboardingPath = getOnboardingRedirectPath(user, isSubscribed);
-      router.push(onboardingPath || redirectTo);
+      router.push(onboardingPath || '/');
     } else if (result.error && result.error !== 'Sign-in cancelled') {
       toast.error(result.error);
+    }
+  };
+
+  const handleGetStarted = () => {
+    if (redeemCode) {
+      setRegisterFlowToken();
+      saveRedeemCode(redeemCode);
+      router.push(`/register?redeem_code=${encodeURIComponent(redeemCode)}`);
+    } else {
+      router.push('/choose-plan');
     }
   };
 
@@ -112,6 +150,15 @@ function SignInContent() {
         <div className="mb-4 p-3 rounded-lg bg-green-500/10 border border-green-500/20">
           <p className="text-sm text-green-500 text-center font-medium">
             Your subscription has been activated! Sign in to start watching.
+          </p>
+        </div>
+      )}
+
+      {/* Redeem Code Banner */}
+      {redeemCode && (
+        <div className="mb-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+          <p className="text-sm text-amber-400 text-center font-medium">
+            Sign in to redeem your code
           </p>
         </div>
       )}
@@ -192,7 +239,7 @@ function SignInContent() {
         <button
           type="submit"
           disabled={isAnyLoading}
-          className="w-full h-10 rounded-lg text-sm font-semibold text-white bg-red-primary hover:bg-red-hover disabled:opacity-70 transition-colors flex items-center justify-center gap-2"
+          className="w-full h-10 cursor-pointer rounded-lg text-sm font-semibold text-white bg-red-primary hover:bg-red-hover disabled:opacity-70 transition-colors flex items-center justify-center gap-2"
         >
           {isLoading ? (
             <>
@@ -221,7 +268,7 @@ function SignInContent() {
           type="button"
           onClick={handleGoogleSignIn}
           disabled={isAnyLoading}
-          className="h-10 rounded-lg text-sm font-medium text-text-primary bg-background border border-border hover:bg-surface-hover disabled:opacity-70 transition-colors flex items-center justify-center gap-2"
+          className="h-10 cursor-pointer rounded-lg text-sm font-medium text-text-primary bg-background border border-border hover:bg-surface-hover disabled:opacity-70 transition-colors flex items-center justify-center gap-2"
         >
           {socialLoading ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -252,7 +299,7 @@ function SignInContent() {
           type="button"
           onClick={handleAppleSignIn}
           disabled={isAnyLoading}
-          className="h-10 rounded-lg text-sm font-medium text-text-primary bg-background border border-border hover:bg-surface-hover disabled:opacity-70 transition-colors flex items-center justify-center gap-2"
+          className="h-10 cursor-pointer rounded-lg text-sm font-medium text-text-primary bg-background border border-border hover:bg-surface-hover disabled:opacity-70 transition-colors flex items-center justify-center gap-2"
         >
           {socialLoading ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -271,12 +318,13 @@ function SignInContent() {
       {/* Sign Up Link */}
       <p className="mt-5 text-center text-sm text-text-secondary">
         Don&apos;t have an account?{' '}
-        <Link
-          href="/choose-plan"
-          className="text-red-primary font-medium hover:text-red-hover transition-colors"
+        <button
+          type="button"
+          onClick={handleGetStarted}
+          className="text-red-primary font-medium hover:text-red-hover transition-colors cursor-pointer"
         >
           Get started
-        </Link>
+        </button>
       </p>
     </div>
   );

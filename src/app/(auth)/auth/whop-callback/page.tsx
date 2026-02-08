@@ -42,17 +42,21 @@ function WhopCallbackContent() {
 
   const code = searchParams.get('code');
   const membershipId = searchParams.get('membership_id') || undefined;
-  const missingCode = !code;
 
-  const [state, setState] = useState<CallbackState>(missingCode ? 'error' : 'loading');
-  const [errorMessage, setErrorMessage] = useState(
-    missingCode ? 'Missing authorization code. Please try checking out again.' : ''
-  );
+  const [state, setState] = useState<CallbackState>('loading');
+  const [errorMessage, setErrorMessage] = useState('');
   const [redirectEmail, setRedirectEmail] = useState('');
   const hasProcessed = useRef(false);
 
+  // Redirect to /choose-plan if no code param is present
   useEffect(() => {
-    if (hasProcessed.current || missingCode) return;
+    if (!code) {
+      router.replace('/choose-plan');
+    }
+  }, [code, router]);
+
+  useEffect(() => {
+    if (hasProcessed.current || !code) return;
     hasProcessed.current = true;
 
     async function exchangeCode() {
@@ -118,7 +122,7 @@ function WhopCallbackContent() {
     }
 
     exchangeCode();
-  }, [code, membershipId, missingCode, router, fetchUser]);
+  }, [code, membershipId, router, fetchUser]);
 
   return (
     <div className="w-full max-w-md mx-auto text-center py-8 px-4">
