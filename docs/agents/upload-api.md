@@ -206,6 +206,12 @@ Common errors:
 
 The Studio API provides unified endpoints for managing videos using **UUID identifiers** (not numeric IDs).
 
+**Authentication:** Required (Sanctum token)
+
+**Authorization:** All endpoints verify `video.user_id === auth.user.id` before any action.
+
+**Global scope bypass:** All Studio endpoints use `Video::withoutGlobalScope('allowed')` to access unpublished (`published_at IS NULL`) and hidden (`hidden = true`) videos.
+
 ### List Videos
 
 **Endpoint:** `GET /api/studio/videos`
@@ -217,6 +223,9 @@ Lists all videos belonging to the authenticated creator, including unpublished a
 | `per_page` | integer | 20 | Items per page (max: 100) |
 | `sort_by` | string | `latest` | Sort order: `latest`, `oldest` |
 | `ids` | string/array | - | Filter by video IDs (CSV) |
+| `countries` | string/array | - | Filter by country names |
+| `countries_ids` | string/array | - | Filter by country IDs |
+| `series_ids` | string/array | - | Filter by series IDs |
 | `types` | string | `videos,series` | Content types: `videos`, `series`, `courses`, `shorts` |
 
 ---
@@ -233,17 +242,17 @@ Updates video metadata and/or publication status in a **single request**.
 | `description` | string | No | Video description |
 | `tags` | string[] | No | Array of **tag slugs** (not IDs) |
 | `country_id` | number | No | Country ID |
+| `series_id` | number | No | Series ID (must exist) |
 | `location` | string | No | Location text |
 | `latitude` | number | No | Latitude (-90 to 90) |
 | `longitude` | number | No | Longitude (-180 to 180) |
 | `is_adult_content` | boolean | No | Adult content flag |
 | `featured` | boolean | No | Featured flag |
 | `hidden` | boolean | No | Hidden from public listings |
-| `publish_mode` | string | No | `none`, `auto`, or `scheduled` |
-| `scheduled_at` | datetime | No | Required if `publish_mode='scheduled'` |
-| `thumbnail` | file | No | Thumbnail image (max 10MB) |
+| `published_at` | datetime | No | Publication date (ISO 8601) |
+| `thumbnail` | file | No | Thumbnail image (max 10MB, converted to WebP) |
 
-**Note:** Uses `videoUuid` (string), not numeric `videoId`.
+**Note:** Uses `videoUuid` (string), not numeric `videoId`. Tags accept **slugs** (not IDs).
 
 **Response:**
 ```json
@@ -265,9 +274,9 @@ Updates video metadata and/or publication status in a **single request**.
 
 ### Toggle Hidden Status
 
-**Endpoint:** `POST /api/studio/videos/{videoUuid}/toggle-hidden`
+**Endpoint:** `PATCH /api/studio/videos/{videoUuid}/toggle-hidden`
 
-Toggles video visibility in public listings. Hidden videos remain accessible in Studio.
+Toggles video visibility in public listings. Hidden videos remain accessible in Studio but are excluded from public endpoints (`GET /api/videos`, `GET /api/featured-videos`, etc.) via the `allowed` global scope.
 
 **Response:**
 ```json
@@ -282,11 +291,38 @@ Toggles video visibility in public listings. Hidden videos remain accessible in 
 
 ---
 
+### Publish Schedule
+
+Manage when unpublished videos go live.
+
+**Create:** `POST /api/studio/videos/{videoUuid}/schedule`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `publish_mode` | string | Yes | `auto` or `scheduled` |
+| `scheduled_at` | datetime | If `scheduled` | Must be in the future (ISO 8601) |
+| `notify` | boolean | No | Notify users after publishing (default: true) |
+
+Returns 409 if a schedule already exists for this video.
+
+**Update:** `PATCH /api/studio/videos/{videoUuid}/schedule`
+
+Same fields as create, all optional. Switching to `auto` mode clears `scheduled_at`.
+
+**Delete:** `DELETE /api/studio/videos/{videoUuid}/schedule`
+
+| Mode | Description |
+|------|-------------|
+| `auto` | Published automatically when processing completes |
+| `scheduled` | Published at `scheduled_at` datetime |
+
+---
+
 ### Delete Video
 
 **Endpoint:** `DELETE /api/studio/videos/{videoUuid}`
 
-Permanently deletes video and associated resources.
+Permanently deletes video and associated resources (Bunny.net video, media library, DB record).
 
 **Response:**
 ```json
@@ -305,44 +341,8 @@ Permanently deletes video and associated resources.
 |------|-------------|
 | 403 | User does not own the video |
 | 404 | Video UUID not found |
+| 409 | Schedule already exists (create only) |
 | 422 | Validation error |
-
----
-
-## Video Management (Legacy)
-
-> **Deprecated:** These endpoints use numeric IDs. Prefer the Studio API above using UUIDs.
-
-### Video Listing (Creator's Own)
-
-**Endpoint:** `GET /contents/videos` (Web, Inertia)
-
-Returns all videos owned by authenticated user, including drafts and processing videos.
-- Includes drafts, processing, and published
-- Only long-form videos (`short = false`)
-- Ordered by newest first (50 per page)
-
-### Update Video
-
-**Endpoint:** `PUT /contents/video/{video}/edit`
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `title` | string | **Yes** | Video title |
-| `description` | string | **Yes** | Video description |
-| `country` | integer | **Yes** | Country ID |
-| `published` | boolean | **Yes** | Publish status |
-| `thumbnail` | file | No | New thumbnail image |
-| `tags` | array | No | Array of tag IDs |
-| `is_adult_content` | boolean | No | Sensitive content flag |
-| `publish_mode` | string | No | `none`, `auto`, or `scheduled` |
-| `scheduled_at` | datetime | No | Required if `publish_mode=scheduled` |
-
-### Delete Video
-
-**Endpoint:** `DELETE /contents/video/{video}/delete`
-
-Authorization: User must own the video. Returns error "You are not the owner of this video" if unauthorized.
 
 ---
 
