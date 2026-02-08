@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Camera, User, Loader2, Check, X, ArrowRight, ShieldCheck } from 'lucide-react';
@@ -71,6 +71,26 @@ export default function CompleteProfilePage() {
     phone_number: user?.phone_number || '',
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    fetchUser().then(() => {
+      const freshUser = useAuthStore.getState().user;
+      if (!freshUser) return;
+
+      setFormData((prev) => ({
+        display_name: prev.display_name || freshUser.display_name || '',
+        handler: prev.handler || freshUser.handler || '',
+        first_name: prev.first_name || freshUser.first_name || '',
+        last_name: prev.last_name || freshUser.last_name || '',
+        gender: prev.gender || freshUser.gender || '',
+        country_id: prev.country_id || freshUser.country_id?.toString() || '',
+        phone_number: prev.phone_number || freshUser.phone_number || '',
+      }));
+
+      setProfileImage((prev) => prev || freshUser.dp || null);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const {
     isAvailable: handlerAvailable,
