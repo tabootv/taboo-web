@@ -7,7 +7,10 @@ import { Check, Crown, Star, Sparkles } from 'lucide-react';
 import { subscriptionsClient as subscriptionsApi } from '@/api/client/subscriptions.client';
 import type { Plan } from '@/types';
 import { useAuthStore } from '@/shared/stores/auth-store';
+import { setRegisterFlowToken } from '@/shared/lib/auth/register-flow-guard';
+import { useCountryCode } from '@/hooks/use-country-code';
 import { RedeemCodeCard } from '@/components/redeem/redeem-code-card';
+import { saveRedeemCode } from '@/shared/lib/redeem/apply-pending-code';
 import { toast } from 'sonner';
 
 import { CheckoutModal } from './components/checkout-modal';
@@ -31,6 +34,7 @@ export function ChoosePlanContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isAuthenticated, setSubscribed, user } = useAuthStore();
+  const countryCode = useCountryCode();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('yearly');
@@ -41,6 +45,14 @@ export function ChoosePlanContent() {
 
   // Affiliate ref from URL
   const ref = searchParams.get('ref') || undefined;
+  const redeemCode = searchParams.get('redeem_code') || undefined;
+
+  // Save redeem code to localStorage for unauthenticated users so it survives the sign-in/register chain
+  useEffect(() => {
+    if (redeemCode && !isAuthenticated) {
+      saveRedeemCode(redeemCode);
+    }
+  }, [redeemCode, isAuthenticated]);
 
   // Verify subscription after successful payment
   const verifySubscription = useCallback(async () => {
@@ -82,12 +94,15 @@ export function ChoosePlanContent() {
     }
   }, [searchParams, verifySubscription]);
 
-  // Fetch plans with optional affiliate ref
+  // Fetch plans with optional affiliate ref and detected country
   useEffect(() => {
     async function fetchData() {
       try {
         setIsLoading(true);
-        const plansData = await subscriptionsApi.getPlans({ ref });
+        const plansData = await subscriptionsApi.getPlans({
+          ref,
+          country_code: countryCode,
+        });
         setPlans(plansData);
       } catch (error) {
         console.error('Failed to fetch plans:', error);
@@ -96,7 +111,7 @@ export function ChoosePlanContent() {
       }
     }
     fetchData();
-  }, [ref]);
+  }, [ref, countryCode]);
 
   const monthlyPlan = findMonthlyPlan(plans);
   const yearlyPlan = findYearlyPlan(plans);
@@ -110,7 +125,11 @@ export function ChoosePlanContent() {
     if (!activePlan) return;
 
     if (!isAuthenticated) {
-      router.push(`/register?redirect=/choose-plan`);
+      setRegisterFlowToken();
+      const redirectPath = redeemCode
+        ? `/choose-plan?redeem_code=${encodeURIComponent(redeemCode)}`
+        : '/choose-plan';
+      router.push(`/register?redirect=${encodeURIComponent(redirectPath)}`);
       return;
     }
 
@@ -131,7 +150,7 @@ export function ChoosePlanContent() {
     }
 
     toast.error('Checkout not available for this plan');
-  }, [activePlan, isAuthenticated, router]);
+  }, [activePlan, isAuthenticated, redeemCode, router]);
 
   // Return URL for Whop checkout - use state to avoid SSR mismatch
   const [checkoutReturnUrl, setCheckoutReturnUrl] = useState('');
@@ -357,12 +376,14 @@ export function ChoosePlanContent() {
                 . Cancel anytime.
               </p>
 
-              {/* Redeem Code Section */}
-              <RedeemCodeCard
-                variant="inline"
-                onSubscribed={handleRedeemSubscribed}
-                onStartVerifying={handleRedeemStartVerifying}
-              />
+              {/* Redeem Code Section - only for authenticated users to prevent 401 errors */}
+              {isAuthenticated && (
+                <RedeemCodeCard
+                  variant="inline"
+                  onSubscribed={handleRedeemSubscribed}
+                  onStartVerifying={handleRedeemStartVerifying}
+                />
+              )}
 
               {!isAuthenticated && (
                 <p
