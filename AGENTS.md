@@ -108,6 +108,7 @@ Load specialized docs **when working on that specific area**:
 | **Server actions** | `docs/agents/server-actions.md` |
 | **Video, Shorts, Series, Courses, Posts specs** | `docs/agents/content-types.md` |
 | **Upload API / Bunny.net TUS / Video processing** | `docs/agents/upload-api.md` |
+| **Subscriptions / Whop / Plans / Redeem codes** | `docs/agents/subscriptions.md` |
 | **Comments API (video, shorts, posts)** | `docs/agents/api-design.md` (Comments section) |
 | **Backend API / database schema** | `docs/agents/database.md` |
 
