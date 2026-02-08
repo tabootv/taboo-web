@@ -13,11 +13,9 @@ const PUBLIC_ROUTES = [
   '/register',
   '/forgot-password',
   '/reset-password',
-  '/verify-email',
-  '/confirm-password',
   '/choose-plan',
-  '/account/complete',
   '/auth/whop-callback',
+  '/redeem',
 ];
 
 // Patterns to skip middleware processing

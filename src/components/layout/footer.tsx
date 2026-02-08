@@ -17,7 +17,7 @@ export function Footer() {
   if (isHidden) return;
 
   return (
-    <footer className="border-t border-border safe-bottom">
+    <footer className="border-t border-border safe-bottom z-1">
       <div className="max-w-7xl mx-auto page-px py-6">
         {/* Contact CTA */}
         <p className="text-center text-sm text-text-secondary mb-4">

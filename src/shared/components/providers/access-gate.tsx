@@ -10,6 +10,7 @@ const INIT_TIMEOUT_MS = 5000;
 // Paths exempt from gating - accessible regardless of profile/subscription state
 const EXEMPT_PATHS = [
   '/choose-plan',
+  '/redeem',
   '/account/complete',
   '/account',
   '/account/subscription',
@@ -62,6 +63,12 @@ export function AccessGate({ children }: { children: React.ReactNode }) {
     // Only gate authenticated users
     if (!isAuthenticated) return;
 
+    // Redirect completed users away from /account/complete
+    if (pathname === '/account/complete' && isProfileComplete) {
+      router.replace('/');
+      return;
+    }
+
     // Never gate exempt paths
     if (isExemptPath(pathname)) return;
 
@@ -100,7 +107,7 @@ export function AccessGate({ children }: { children: React.ReactNode }) {
 
   // Show loading while auth state resolves, with timeout safety valve
   if (!isInitialized || !_hasHydrated) {
-    if (!timedOut) {
+    if (!timedOut && !isExemptPath(pathname)) {
       return (
         <div className="min-h-[60vh] flex items-center justify-center">
           <Loader2 className="w-8 h-8 text-red-primary animate-spin" />
