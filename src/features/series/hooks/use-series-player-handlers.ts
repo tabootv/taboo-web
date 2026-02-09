@@ -1,9 +1,11 @@
 'use client';
 
 import { useToggleAutoplay, useToggleDislike, useToggleLike } from '@/api/mutations';
+import { AnalyticsEvent } from '@/shared/lib/analytics/events';
 import { getSeriesPlayRoute } from '@/shared/utils/formatting';
 import type { Video } from '@/types';
 import { useRouter } from 'next/navigation';
+import posthog from 'posthog-js';
 import { useCallback, useState } from 'react';
 import { useUpNextCountdown } from './use-up-next-countdown';
 
@@ -12,7 +14,8 @@ export function useSeriesPlayerHandlers(
   videoUuid: string,
   nextEpisode: Video | null,
   autoplayEnabled: boolean,
-  seriesTitle?: string
+  seriesTitle?: string,
+  hasLiked?: boolean
 ) {
   const router = useRouter();
   const toggleLike = useToggleLike();
@@ -22,6 +25,12 @@ export function useSeriesPlayerHandlers(
 
   const navigateToNextEpisode = useCallback(() => {
     if (nextEpisode) {
+      posthog.capture(AnalyticsEvent.SERIES_EPISODE_STARTED, {
+        series_id: seriesId,
+        series_title: seriesTitle,
+        episode_uuid: nextEpisode.uuid,
+        is_autoplay: true,
+      });
       setShowUpNext(false);
       const route = getSeriesPlayRoute(seriesId, seriesTitle, nextEpisode.uuid);
       router.push(`${route}?autoplay=true`);
@@ -34,16 +43,25 @@ export function useSeriesPlayerHandlers(
   });
 
   const handleVideoEnded = useCallback(() => {
+    posthog.capture(AnalyticsEvent.SERIES_EPISODE_COMPLETED, {
+      series_id: seriesId,
+      episode_uuid: videoUuid,
+    });
     if (autoplayEnabled && nextEpisode) {
+      posthog.capture(AnalyticsEvent.SERIES_UP_NEXT_TRIGGERED, {
+        series_id: seriesId,
+        next_episode_uuid: nextEpisode.uuid,
+      });
       setShowUpNext(true);
       upNextCountdown.start();
     }
-  }, [autoplayEnabled, nextEpisode, upNextCountdown]);
+  }, [autoplayEnabled, nextEpisode, upNextCountdown, seriesId, videoUuid]);
 
   const handleCancelUpNext = useCallback(() => {
+    posthog.capture(AnalyticsEvent.SERIES_UP_NEXT_CANCELLED, { series_id: seriesId });
     upNextCountdown.cancel();
     setShowUpNext(false);
-  }, [upNextCountdown]);
+  }, [upNextCountdown, seriesId]);
 
   const handlePlayNow = useCallback(() => {
     upNextCountdown.playNow();
@@ -60,8 +78,17 @@ export function useSeriesPlayerHandlers(
   }, [toggleAutoplay]);
 
   const handleLike = useCallback(() => {
-    toggleLike.mutate(videoUuid);
-  }, [toggleLike, videoUuid]);
+    const event = hasLiked ? AnalyticsEvent.VIDEO_LIKE_REMOVED : AnalyticsEvent.VIDEO_LIKED;
+    toggleLike.mutate(videoUuid, {
+      onSuccess: () => {
+        posthog.capture(event, {
+          video_id: videoUuid,
+          series_id: seriesId,
+          content_type: 'series_episode',
+        });
+      },
+    });
+  }, [toggleLike, videoUuid, seriesId, hasLiked]);
 
   const handleDislike = useCallback(() => {
     toggleDislike.mutate(videoUuid);

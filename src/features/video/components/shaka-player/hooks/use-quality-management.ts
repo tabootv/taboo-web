@@ -1,5 +1,7 @@
 'use client';
 
+import { AnalyticsEvent } from '@/shared/lib/analytics/events';
+import posthog from 'posthog-js';
 import { useCallback, useState } from 'react';
 import {
   getBufferConfigForSpeed,
@@ -63,8 +65,14 @@ export function useQualityManagement(): UseQualityManagementReturn {
   const selectQuality = useCallback(
     (quality: QualityTrack | null, shakaRef: React.RefObject<ShakaPlayerInstance | null>) => {
       if (!shakaRef.current) return;
+      const previousQuality = selectedQuality?.label ?? 'auto';
       if (quality === null) {
         shakaRef.current.configure({ abr: { enabled: true } });
+        posthog.capture(AnalyticsEvent.VIDEO_QUALITY_CHANGED, {
+          quality: 'auto',
+          previous_quality: previousQuality,
+          is_auto: true,
+        });
         setIsAutoQuality(true);
         setSelectedQuality(null);
       } else {
@@ -74,11 +82,16 @@ export function useQualityManagement(): UseQualityManagementReturn {
         if (targetTrack) {
           shakaRef.current.selectVariantTrack(targetTrack, true);
         }
+        posthog.capture(AnalyticsEvent.VIDEO_QUALITY_CHANGED, {
+          quality: quality.label,
+          previous_quality: previousQuality,
+          is_auto: false,
+        });
         setIsAutoQuality(false);
         setSelectedQuality(quality);
       }
     },
-    []
+    [selectedQuality]
   );
 
   const changePlaybackSpeed = useCallback(
@@ -113,6 +126,11 @@ export function useQualityManagement(): UseQualityManagementReturn {
       // Store current time for "Flush & Seek"
       const currentTime = video.currentTime;
 
+      posthog.capture(AnalyticsEvent.VIDEO_SPEED_CHANGED, {
+        speed,
+        previous_speed: playbackSpeed,
+      });
+
       // Change playback rate
       video.playbackRate = speed;
 
@@ -125,7 +143,7 @@ export function useQualityManagement(): UseQualityManagementReturn {
       // Update state outside render loop to avoid potential race conditions
       queueMicrotask(() => setPlaybackSpeed(speed));
     },
-    []
+    [playbackSpeed]
   );
 
   return {

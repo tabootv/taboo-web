@@ -44,6 +44,11 @@ export function SeriesVideoPlayer({
         autoplay={shouldAutoplay}
         onEnded={onEnded}
         isBunnyVideo={currentVideo.is_bunny_video}
+        videoId={currentVideo.uuid}
+        videoTitle={currentVideo.title}
+        channelName={currentVideo.channel?.name}
+        contentType="series_episode"
+        videoDuration={currentVideo.duration}
       />
       {showUpNext && nextVideo && (
         <UpNextOverlay

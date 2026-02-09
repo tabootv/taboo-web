@@ -1,6 +1,8 @@
 'use client';
 
+import { useCallback } from 'react';
 import { ShakaPlayer } from './shaka-player';
+import { useVideoAnalytics } from '../hooks/use-video-analytics';
 
 interface VideoPlayerProps {
   thumbnail?: string;
@@ -14,6 +16,12 @@ interface VideoPlayerProps {
   onEnded?: () => void;
   className?: string;
   isBunnyVideo?: boolean | undefined;
+  // Analytics props — analytics only fire when videoId is provided
+  videoId?: string | undefined;
+  videoTitle?: string | undefined;
+  channelName?: string | undefined;
+  contentType?: 'video' | 'short' | 'series_episode' | 'course_lesson' | undefined;
+  videoDuration?: number | undefined;
 }
 
 export function VideoPlayer({
@@ -28,7 +36,39 @@ export function VideoPlayer({
   onEnded,
   className = '',
   isBunnyVideo = false,
+  videoId,
+  videoTitle,
+  channelName,
+  contentType,
+  videoDuration,
 }: VideoPlayerProps) {
+  const { trackPlay, trackPause, trackSeek, trackCompleted } = useVideoAnalytics(videoId ?? '', {
+    title: videoTitle,
+    channelName,
+    contentType,
+    duration: videoDuration,
+  });
+
+  const handlePlay = useCallback(() => {
+    if (videoId) trackPlay();
+  }, [videoId, trackPlay]);
+
+  const handlePause = useCallback(() => {
+    if (videoId) trackPause();
+  }, [videoId, trackPause]);
+
+  const handleSeek = useCallback(
+    (time: number) => {
+      if (videoId) trackSeek(time);
+    },
+    [videoId, trackSeek]
+  );
+
+  const handleEnded = useCallback(() => {
+    if (videoId) trackCompleted();
+    onEnded?.();
+  }, [videoId, trackCompleted, onEnded]);
+
   // Determine the best source URL: prefer HLS, then highest quality MP4
   const src = hls_url || url_1440 || url_1080 || url_720 || url_480;
 
@@ -48,7 +88,10 @@ export function VideoPlayer({
       thumbnail={thumbnail}
       autoplay={autoplay}
       onProgress={onProgress}
-      onEnded={onEnded}
+      onPlay={handlePlay}
+      onPause={handlePause}
+      onSeek={handleSeek}
+      onEnded={handleEnded}
       className={className}
       isBunnyVideo={isBunnyVideo}
     />

@@ -10,7 +10,6 @@
   "SingleComment": "@/features/video/components/single-comment",
   "VideoComments": "@/features/video/components/video-comments",
   "VideoPlayer": "@/features/video/components/video-player",
-  "VideoPlayerWrapper": "@/features/video/components/video-player-wrapper",
   "VideoRightSidebarCard": "@/features/video/components/video-right-sidebar-card",
   "WatchlistButton": "@/features/video/components/watchlist-button",
   "useVideoAnalytics": "@/features/video/hooks/use-video-analytics"

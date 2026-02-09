@@ -1,6 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import posthog from 'posthog-js';
+import { AnalyticsEvent } from '@/shared/lib/analytics/events';
 import { PLAYER_CONFIG, STORAGE_KEYS } from '../../../constants/player-constants';
 import type { SeekFeedback } from '../types';
 
@@ -154,8 +156,10 @@ export function usePlayerControls({
     try {
       if (document.fullscreenElement) {
         await document.exitFullscreen();
+        posthog.capture(AnalyticsEvent.VIDEO_FULLSCREEN_TOGGLED, { is_fullscreen: false });
       } else {
         await containerRef.current.requestFullscreen();
+        posthog.capture(AnalyticsEvent.VIDEO_FULLSCREEN_TOGGLED, { is_fullscreen: true });
       }
     } catch (err) {
       console.error('Fullscreen error:', err);
