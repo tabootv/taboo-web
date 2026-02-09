@@ -110,6 +110,7 @@ Load specialized docs **when working on that specific area**:
 | **Upload API / Bunny.net TUS / Video processing** | `docs/agents/upload-api.md` |
 | **Subscriptions / Whop / Plans / Redeem codes** | `docs/agents/subscriptions.md` |
 | **Comments API (video, shorts, posts)** | `docs/agents/api-design.md` (Comments section) |
+| **Optimizing performance / Core Web Vitals** | `docs/agents/performance.md` |
 | **Backend API / database schema** | `docs/agents/database.md` |
 
 ---
@@ -156,6 +157,7 @@ When you see a trigger keyword, mention the skill name:
 | **clean-code** | "Simplify", "Better naming", "Remove duplication" | Pragmatic coding standards, DRY, KISS, YAGNI, SRP |
 | **component-refactoring** | "Component too complex", "High complexity score" | Advanced component splitting, hook extraction, complexity reduction |
 | **vercel-react-best-practices** | "Performance optimization", "React best practices" | Core Web Vitals, Vercel engineering standards, React patterns |
+| **web-performance-optimization** | "Performance", "Slow page", "Core Web Vitals", "LCP", "Bundle size" | Diagnose perf issues, apply streaming/caching/prefetching patterns, monitor Web Vitals |
 | **commit-work** | "Create commit", "Commit message", "Stage changes" | Git workflow, conventional commits, reviewing changes |
 
 ---

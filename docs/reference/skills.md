@@ -16,7 +16,7 @@ This file indexes all available skills and tools for AI assistant reference.
 | **Documentation** | Syncing docs after changes | `sync-project-docs` |
 | **Code quality** | Code review, standards | `clean-code`, `commit-work` |
 | **Testing** | Component testing, analysis | `component-refactoring` (includes testing) |
-| **Performance** | React/Next.js optimization | `.agents/skills/vercel-react-best-practices` |
+| **Performance** | React/Next.js optimization | `web-performance-optimization`, `.agents/skills/vercel-react-best-practices` |
 | **Feature integration** | Complex branch merges | `integrate-branch-feature` |
 | **Hovers & patterns** | Netflix-style interactions | `implement-hover-card` |
 
@@ -118,6 +118,12 @@ These are universal across AI assistants.
 - **When:** Writing React/Next.js code, optimizing performance
 - **Contains 70+ rules:** Bundle optimization, rendering, caching, etc.
 - **Files:** `.agents/skills/vercel-react-best-practices/AGENTS.md` + `rules/`
+
+#### web-performance-optimization
+- **Purpose:** Diagnose and fix performance issues using streaming, caching, and bundle optimization
+- **When:** Page loads slowly, bundle size regression, new feature needs perf optimization
+- **Triggers:** "performance", "slow page", "LCP", "CLS", "bundle size"
+- **Files:** `.agents/skills/web-performance-optimization/SKILL.md`
 
 ---
 

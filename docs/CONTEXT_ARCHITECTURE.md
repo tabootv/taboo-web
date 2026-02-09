@@ -94,6 +94,7 @@ Task Keyword          → Load This Doc
 "state" OR "store"    → docs/agents/state-management.md
 "form" OR "action"    → docs/agents/server-actions.md
 "video/shorts/series" → docs/agents/content-types.md
+"performance"         → docs/agents/performance.md
 ```
 
 ---
@@ -113,6 +114,7 @@ TabooTV/
 │   │   ├── state-management.md
 │   │   ├── styling.md
 │   │   ├── testing.md
+│   │   ├── performance.md
 │   │   └── skills-guide.md            ← NEW (how to use agent skills)
 │   ├── reference/                     ← Layer 3 (Deep research)
 │   │   ├── architecture.md
@@ -120,7 +122,7 @@ TabooTV/
 │   │   └── skills.md                  ← Complete skill index
 │   ├── DESIGN_SYSTEM.md               (archived, see reference/)
 │   └── PROJECT_CONTEXT.md             (archived, see reference/)
-├── .agents/skills/                    ← 12 universal AI tools
+├── .agents/skills/                    ← 13 universal AI tools
 │   ├── refactoring-patterns/
 │   ├── api-integration/
 │   ├── ui-components/
@@ -132,7 +134,8 @@ TabooTV/
 │   ├── clean-code/
 │   ├── commit-work/
 │   ├── component-refactoring/
-│   └── vercel-react-best-practices/
+│   ├── vercel-react-best-practices/
+│   └── web-performance-optimization/
 └── .claude/skills/                    ← Specialized Claude tools
     └── (10+ Claude-specific skills)
 ```
@@ -178,7 +181,7 @@ TabooTV/
 
 Skills (`.claude/skills/`, `.agents/skills/`) provide **specialized tools** for specific tasks.
 
-**12 Universal Skills** (`.agents/skills/`):
+**13 Universal Skills** (`.agents/skills/`):
 - `refactoring-patterns` – Code simplification and refactoring
 - `api-integration` – TanStack Query, API clients, OpenAPI
 - `ui-components` – Tailwind CSS, shadcn, design system
@@ -191,6 +194,7 @@ Skills (`.claude/skills/`, `.agents/skills/`) provide **specialized tools** for 
 - `commit-work` – Git commits, staging, conventional commits
 - `component-refactoring` – React complexity reduction, hook extraction
 - `vercel-react-best-practices` – React 19, Next.js 16 performance
+- `web-performance-optimization` – Core Web Vitals, streaming, caching, bundle optimization
 
 **How to invoke:** Use trigger keywords in task descriptions. Skills auto-load when keywords match.
 
@@ -264,7 +268,7 @@ Skills (`.claude/skills/`, `.agents/skills/`) provide **specialized tools** for 
 - **Task-specific guides:** `docs/agents/`
 - **Skills guide:** `docs/agents/skills-guide.md` ← START HERE for agent skills
 - **Reference material:** `docs/reference/`
-- **Tools & skills:** `.agents/skills/` (12 universal), `.claude/skills/` (Claude-specific)
+- **Tools & skills:** `.agents/skills/` (13 universal), `.claude/skills/` (Claude-specific)
 
 ---
 
@@ -272,7 +276,7 @@ Skills (`.claude/skills/`, `.agents/skills/`) provide **specialized tools** for 
 
 ### Phase 1-2: Root Consolidation & Skills System
 - Eliminated redundant root config files
-- Created 12 universal agent skills in `.agents/skills/`
+- Created 13 universal agent skills in `.agents/skills/`
 - Added Skill Registry to AGENTS.md with trigger keywords
 - Result: Config reduced from 21 → 17 files; skill coverage 30% → 95%
 

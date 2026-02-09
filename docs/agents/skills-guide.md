@@ -14,7 +14,7 @@ Agent skills are specialized capabilities that enhance AI-assisted development. 
 
 ---
 
-## Quick Reference: All 12 Skills
+## Quick Reference: All 13 Skills
 
 | Skill | Purpose | Triggers | Files |
 |-------|---------|----------|-------|
@@ -30,6 +30,7 @@ Agent skills are specialized capabilities that enhance AI-assisted development. 
 | **commit-work** | Git commits, staging, conventional commits | "commit", "git", "stage", "message" | `.agents/skills/commit-work/` |
 | **component-refactoring** | React complexity reduction, hook extraction | "complexity", "refactor", "hook extraction" | `.agents/skills/component-refactoring/` |
 | **vercel-react-best-practices** | React 19, Next.js 16 performance | "performance", "React", "Next.js", "optimization" | `.agents/skills/vercel-react-best-practices/` |
+| **web-performance-optimization** | Core Web Vitals, streaming, caching, bundle | "performance", "slow", "LCP", "CLS", "optimize" | `.agents/skills/web-performance-optimization/` |
 
 ---
 
@@ -93,6 +94,9 @@ component-refactoring:
 
 vercel-react-best-practices:
   - "React", "Next.js", "performance", "optimization", "SSR", "CSR"
+
+web-performance-optimization:
+  - "performance", "slow page", "Core Web Vitals", "LCP", "CLS", "INP", "bundle size", "streaming", "Suspense"
 ```
 
 **Example:**
@@ -203,7 +207,8 @@ vim .agents/skills/api-integration/SKILL.md
 ├── clean-code/
 ├── commit-work/
 ├── component-refactoring/
-└── vercel-react-best-practices/
+├── vercel-react-best-practices/
+└── web-performance-optimization/
 ```
 
 ### Claude-Specific Skills
@@ -290,11 +295,12 @@ git commit -m "refactor(components): Simplify MediaCard component
 
 ### Optimizing Performance
 
-1. **bundling-optimization** – Analyze bundle
-2. **vercel-react-best-practices** – Apply React patterns
-3. **code-organization** – Restructure if needed
-4. **testing** – Verify performance gains
-5. **commit-work** – Document improvements
+1. **web-performance-optimization** – Diagnose & apply patterns
+2. **bundling-optimization** – Analyze bundle
+3. **vercel-react-best-practices** – Apply React patterns
+4. **code-organization** – Restructure if needed
+5. **testing** – Verify performance gains
+6. **commit-work** – Document improvements
 
 ---
 
@@ -351,7 +357,7 @@ grep -r "performance\|optimize" AGENTS.md
 | **Testing** | testing | component-refactoring, vercel-react-best-practices |
 | **Code Quality** | clean-code, refactoring-patterns | linting-practices, component-refactoring |
 | **Architecture** | code-organization | refactoring-patterns, bundling-optimization |
-| **Performance** | bundling-optimization, vercel-react-best-practices | code-organization, component-refactoring |
+| **Performance** | web-performance-optimization, bundling-optimization, vercel-react-best-practices | code-organization, component-refactoring |
 
 ---
 
@@ -384,5 +390,5 @@ Skills are referenced in **AGENTS.md Skill Registry**:
 ---
 
 *Last updated: January 27, 2026*  
-*Skill system: 12 universal + Claude-specific skills*  
+*Skill system: 13 universal + Claude-specific skills*  
 *Next review: When new skills are added*

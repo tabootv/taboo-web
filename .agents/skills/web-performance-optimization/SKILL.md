@@ -1,646 +1,245 @@
 ---
 name: web-performance-optimization
-description: "Optimize website and web application performance including loading speed, Core Web Vitals, bundle size, caching strategies, and runtime performance"
+description: "Optimize Core Web Vitals, bundle size, and navigation speed for TabooTV using React Suspense streaming, TanStack Query caching, and bundle analysis"
+triggers:
+  - performance
+  - slow page
+  - Core Web Vitals
+  - LCP
+  - CLS
+  - INP
+  - bundle size
+  - optimize navigation
+  - streaming
+  - Suspense
 ---
 
-# Web Performance Optimization
+# Web Performance Optimization — TabooTV
 
-## Overview
+## When to Use
 
-Help developers optimize website and web application performance to improve user experience, SEO rankings, and conversion rates. This skill provides systematic approaches to measure, analyze, and improve loading speed, runtime performance, and Core Web Vitals metrics.
+- Page loads slowly or Web Vitals are degraded
+- Adding a new feature that affects rendering performance
+- Bundle size regression detected by CI (`scripts/compare-bundle.js`)
+- Diagnosing CLS, LCP, or INP issues
+- Optimizing login→home or other critical navigation flows
 
-## When to Use This Skill
+## Workflow
 
-- Use when website or app is loading slowly
-- Use when optimizing for Core Web Vitals (LCP, FID, CLS)
-- Use when reducing JavaScript bundle size
-- Use when improving Time to Interactive (TTI)
-- Use when optimizing images and assets
-- Use when implementing caching strategies
-- Use when debugging performance bottlenecks
-- Use when preparing for performance audits
+1. **Measure** — `npm run measure:bundle`, Lighthouse, Web Vitals in PostHog
+2. **Identify** bottleneck category (rendering, bundle, network, layout shift)
+3. **Apply** the relevant pattern below
+4. **Verify** — re-run measurements, compare before/after
+5. **Monitor** — Web Vitals in PostHog dashboard
 
-## How It Works
+---
 
-### Step 1: Measure Current Performance
+## Pattern 1: React Suspense Streaming
 
-I'll help you establish baseline metrics:
-- Run Lighthouse audits
-- Measure Core Web Vitals (LCP, FID, CLS)
-- Check bundle sizes
-- Analyze network waterfall
-- Identify performance bottlenecks
+Stream each section independently so fast sections render first.
 
-### Step 2: Identify Issues
+**Before:** Monolithic page component with single data fetch blocking all sections.
 
-Analyze performance problems:
-- Large JavaScript bundles
-- Unoptimized images
-- Render-blocking resources
-- Slow server response times
-- Missing caching headers
-- Layout shifts
-- Long tasks blocking main thread
+**After:** Individual `<Suspense>` boundaries per section:
 
-### Step 3: Prioritize Optimizations
-
-Focus on high-impact improvements:
-- Critical rendering path optimization
-- Code splitting and lazy loading
-- Image optimization
-- Caching strategies
-- Third-party script optimization
-
-### Step 4: Implement Optimizations
-
-Apply performance improvements:
-- Optimize assets (images, fonts, CSS, JS)
-- Implement code splitting
-- Add caching headers
-- Lazy load non-critical resources
-- Optimize critical rendering path
-
-### Step 5: Verify Improvements
-
-Measure impact of changes:
-- Re-run Lighthouse audits
-- Compare before/after metrics
-- Monitor real user metrics (RUM)
-- Test on different devices and networks
-
-## Examples
-
-### Example 1: Optimizing Core Web Vitals
-
-```markdown
-## Performance Audit Results
-
-### Current Metrics (Before Optimization)
-- **LCP (Largest Contentful Paint):** 4.2s ❌ (should be < 2.5s)
-- **FID (First Input Delay):** 180ms ❌ (should be < 100ms)
-- **CLS (Cumulative Layout Shift):** 0.25 ❌ (should be < 0.1)
-- **Lighthouse Score:** 62/100
-
-### Issues Identified
-
-1. **LCP Issue:** Hero image (2.5MB) loads slowly
-2. **FID Issue:** Large JavaScript bundle (850KB) blocks main thread
-3. **CLS Issue:** Images without dimensions cause layout shifts
-
-### Optimization Plan
-
-#### Fix LCP (Largest Contentful Paint)
-
-**Problem:** Hero image is 2.5MB and loads slowly
-
-**Solutions:**
-\`\`\`html
-<!-- Before: Unoptimized image -->
-<img src="/hero.jpg" alt="Hero">
-
-<!-- After: Optimized with modern formats -->
-<picture>
-  <source srcset="/hero.avif" type="image/avif">
-  <source srcset="/hero.webp" type="image/webp">
-  <img 
-    src="/hero.jpg" 
-    alt="Hero"
-    width="1200" 
-    height="600"
-    loading="eager"
-    fetchpriority="high"
-  >
-</picture>
-\`\`\`
-
-**Additional optimizations:**
-- Compress image to < 200KB
-- Use CDN for faster delivery
-- Preload hero image: `<link rel="preload" as="image" href="/hero.avif">`
-
-#### Fix FID (First Input Delay)
-
-**Problem:** 850KB JavaScript bundle blocks main thread
-
-**Solutions:**
-
-1. **Code Splitting:**
-\`\`\`javascript
-// Before: Everything in one bundle
-import { HeavyComponent } from './HeavyComponent';
-import { Analytics } from './analytics';
-import { ChatWidget } from './chat';
-
-// After: Lazy load non-critical code
-const HeavyComponent = lazy(() => import('./HeavyComponent'));
-const ChatWidget = lazy(() => import('./chat'));
-
-// Load analytics after page interactive
-if (typeof window !== 'undefined') {
-  window.addEventListener('load', () => {
-    import('./analytics').then(({ Analytics }) => {
-      Analytics.init();
-    });
-  });
+```tsx
+// src/app/(platform)/page.tsx
+export default function HomePage() {
+  return (
+    <>
+      <Suspense fallback={<BannerSkeleton />}>
+        <BannerSection />
+      </Suspense>
+      <Suspense fallback={<CreatorsSkeleton />}>
+        <CreatorsSectionServer />
+      </Suspense>
+      <Suspense fallback={<FeaturedSkeleton />}>
+        <FeaturedSectionServer />
+      </Suspense>
+      <Suspense fallback={<ShortsSkeleton />}>
+        <ShortsSectionServer />
+      </Suspense>
+      <Suspense fallback={<RecommendedSkeleton />}>
+        <RecommendedSectionServer />
+      </Suspense>
+      <Suspense fallback={<SeriesSkeleton />}>
+        <SeriesSectionServer />
+      </Suspense>
+      <Suspense fallback={<PlaylistsSkeleton />}>
+        <PlaylistsSectionServer />
+      </Suspense>
+    </>
+  );
 }
-\`\`\`
-
-2. **Remove Unused Dependencies:**
-\`\`\`bash
-# Analyze bundle
-npx webpack-bundle-analyzer
-
-# Remove unused packages
-npm uninstall moment  # Use date-fns instead (smaller)
-npm install date-fns
-\`\`\`
-
-3. **Defer Non-Critical Scripts:**
-\`\`\`html
-<!-- Before: Blocks rendering -->
-<script src="/analytics.js"></script>
-
-<!-- After: Deferred -->
-<script src="/analytics.js" defer></script>
-\`\`\`
-
-#### Fix CLS (Cumulative Layout Shift)
-
-**Problem:** Images without dimensions cause layout shifts
-
-**Solutions:**
-\`\`\`html
-<!-- Before: No dimensions -->
-<img src="/product.jpg" alt="Product">
-
-<!-- After: With dimensions -->
-<img 
-  src="/product.jpg" 
-  alt="Product"
-  width="400" 
-  height="300"
-  style="aspect-ratio: 4/3;"
->
-\`\`\`
-
-**For dynamic content:**
-\`\`\`css
-/* Reserve space for content that loads later */
-.skeleton-loader {
-  min-height: 200px;
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
-  animation: loading 1.5s infinite;
-}
-
-@keyframes loading {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-\`\`\`
-
-### Results After Optimization
-
-- **LCP:** 1.8s ✅ (improved by 57%)
-- **FID:** 45ms ✅ (improved by 75%)
-- **CLS:** 0.05 ✅ (improved by 80%)
-- **Lighthouse Score:** 94/100 ✅
 ```
 
-### Example 2: Reducing JavaScript Bundle Size
+Each async server component fetches its own data — no waterfall.
 
-```markdown
-## Bundle Size Optimization
+---
 
-### Current State
-- **Total Bundle:** 850KB (gzipped: 280KB)
-- **Main Bundle:** 650KB
-- **Vendor Bundle:** 200KB
-- **Load Time (3G):** 8.2s
+## Pattern 2: Server → Client with initialData
 
-### Analysis
+Eliminate client-side fetch waterfalls by hydrating with server-fetched data.
 
-\`\`\`bash
-# Analyze bundle composition
-npx webpack-bundle-analyzer dist/stats.json
-\`\`\`
+**Before:** Client component mounts → fires `useEffect` fetch → loading state.
 
-**Findings:**
-1. Moment.js: 67KB (can replace with date-fns: 12KB)
-2. Lodash: 72KB (using entire library, only need 5 functions)
-3. Unused code: ~150KB of dead code
-4. No code splitting: Everything in one bundle
+**After:** Server component fetches → passes `initialData` to client hook:
 
-### Optimization Steps
+```tsx
+// Server component: banner-section.tsx
+export async function BannerSection() {
+  const banners = await homeClient.getBanners(serverToken);
+  return <BannerSlider initialBanners={banners} />;
+}
 
-#### 1. Replace Heavy Dependencies
+// Client component: banner-slider.tsx
+const { data: banners } = useBanners({ initialData: initialBanners });
+```
 
-\`\`\`bash
-# Remove moment.js (67KB) → Use date-fns (12KB)
-npm uninstall moment
-npm install date-fns
+**Rule:** Keep `staleTime` >= server cache time to avoid refetch on hydration.
 
-# Before
-import moment from 'moment';
-const formatted = moment(date).format('YYYY-MM-DD');
+---
 
-# After
-import { format } from 'date-fns';
-const formatted = format(date, 'yyyy-MM-dd');
-\`\`\`
+## Pattern 3: Route Prefetching
 
-**Savings:** 55KB
+Prefetch the destination route before the user triggers navigation:
 
-#### 2. Use Lodash Selectively
+```tsx
+// src/app/(auth)/sign-in/page.tsx
+useEffect(() => {
+  router.prefetch('/');
+}, [router]);
+```
 
-\`\`\`javascript
-// Before: Import entire library (72KB)
-import _ from 'lodash';
-const unique = _.uniq(array);
+This loads the RSC payload + JS chunks in parallel with the login flow, so navigation after login is near-instant.
 
-// After: Import only what you need (5KB)
-import uniq from 'lodash/uniq';
-const unique = uniq(array);
+---
 
-// Or use native methods
-const unique = [...new Set(array)];
-\`\`\`
+## Pattern 4: Deferred Post-Navigation Work
 
-**Savings:** 67KB
+Navigate immediately, then fire-and-forget non-critical work:
 
-#### 3. Implement Code Splitting
+```tsx
+const navigateAndDeferPostLogin = (method: 'email' | 'google' | 'apple') => {
+  const { user, isSubscribed } = useAuthStore.getState();
+  const onboardingPath = getOnboardingRedirectPath(user, isSubscribed);
+  router.push(onboardingPath || '/');
 
-\`\`\`javascript
-// Next.js example
-import dynamic from 'next/dynamic';
-
-// Lazy load heavy components
-const Chart = dynamic(() => import('./Chart'), {
-  loading: () => <div>Loading chart...</div>,
-  ssr: false
-});
-
-const AdminPanel = dynamic(() => import('./AdminPanel'), {
-  loading: () => <div>Loading...</div>
-});
-
-// Route-based code splitting (automatic in Next.js)
-// pages/admin.js - Only loaded when visiting /admin
-// pages/dashboard.js - Only loaded when visiting /dashboard
-\`\`\`
-
-#### 4. Remove Dead Code
-
-\`\`\`javascript
-// Enable tree shaking in webpack.config.js
-module.exports = {
-  mode: 'production',
-  optimization: {
-    usedExports: true,
-    sideEffects: false
-  }
+  // Fire-and-forget: toast, analytics, redeem code
+  toast.success('Welcome back!');
+  posthog.capture(AnalyticsEvent.AUTH_LOGIN_COMPLETED, { method });
+  applyPendingRedeemCode(searchParams).then((redeemResult) => {
+    if (redeemResult.applied && redeemResult.success) {
+      useAuthStore.getState().setSubscribed(true);
+      toast.success(redeemResult.message || 'Subscription activated!');
+    }
+  });
 };
-
-// In package.json
-{
-  "sideEffects": false
-}
-\`\`\`
-
-#### 5. Optimize Third-Party Scripts
-
-\`\`\`html
-<!-- Before: Loads immediately -->
-<script src="https://analytics.com/script.js"></script>
-
-<!-- After: Load after page interactive -->
-<script>
-  window.addEventListener('load', () => {
-    const script = document.createElement('script');
-    script.src = 'https://analytics.com/script.js';
-    script.async = true;
-    document.body.appendChild(script);
-  });
-</script>
-\`\`\`
-
-### Results
-
-- **Total Bundle:** 380KB ✅ (reduced by 55%)
-- **Main Bundle:** 180KB ✅
-- **Vendor Bundle:** 80KB ✅
-- **Load Time (3G):** 3.1s ✅ (improved by 62%)
 ```
 
-### Example 3: Image Optimization Strategy
-
-```markdown
-## Image Optimization
-
-### Current Issues
-- 15 images totaling 12MB
-- No modern formats (WebP, AVIF)
-- No responsive images
-- No lazy loading
-
-### Optimization Strategy
-
-#### 1. Convert to Modern Formats
-
-\`\`\`bash
-# Install image optimization tools
-npm install sharp
-
-# Conversion script (optimize-images.js)
-const sharp = require('sharp');
-const fs = require('fs');
-const path = require('path');
-
-async function optimizeImage(inputPath, outputDir) {
-  const filename = path.basename(inputPath, path.extname(inputPath));
-  
-  // Generate WebP
-  await sharp(inputPath)
-    .webp({ quality: 80 })
-    .toFile(path.join(outputDir, \`\${filename}.webp\`));
-  
-  // Generate AVIF (best compression)
-  await sharp(inputPath)
-    .avif({ quality: 70 })
-    .toFile(path.join(outputDir, \`\${filename}.avif\`));
-  
-  // Generate optimized JPEG fallback
-  await sharp(inputPath)
-    .jpeg({ quality: 80, progressive: true })
-    .toFile(path.join(outputDir, \`\${filename}.jpg\`));
-}
-
-// Process all images
-const images = fs.readdirSync('./images');
-images.forEach(img => {
-  optimizeImage(\`./images/\${img}\`, './images/optimized');
-});
-\`\`\`
-
-#### 2. Implement Responsive Images
-
-\`\`\`html
-<!-- Responsive images with modern formats -->
-<picture>
-  <!-- AVIF for browsers that support it (best compression) -->
-  <source 
-    srcset="
-      /images/hero-400.avif 400w,
-      /images/hero-800.avif 800w,
-      /images/hero-1200.avif 1200w
-    "
-    type="image/avif"
-    sizes="(max-width: 768px) 100vw, 50vw"
-  >
-  
-  <!-- WebP for browsers that support it -->
-  <source 
-    srcset="
-      /images/hero-400.webp 400w,
-      /images/hero-800.webp 800w,
-      /images/hero-1200.webp 1200w
-    "
-    type="image/webp"
-    sizes="(max-width: 768px) 100vw, 50vw"
-  >
-  
-  <!-- JPEG fallback -->
-  <img 
-    src="/images/hero-800.jpg"
-    srcset="
-      /images/hero-400.jpg 400w,
-      /images/hero-800.jpg 800w,
-      /images/hero-1200.jpg 1200w
-    "
-    sizes="(max-width: 768px) 100vw, 50vw"
-    alt="Hero image"
-    width="1200"
-    height="600"
-    loading="lazy"
-  >
-</picture>
-\`\`\`
-
-#### 3. Lazy Loading
-
-\`\`\`html
-<!-- Native lazy loading -->
-<img 
-  src="/image.jpg" 
-  alt="Description"
-  loading="lazy"
-  width="800"
-  height="600"
->
-
-<!-- Eager loading for above-the-fold images -->
-<img 
-  src="/hero.jpg" 
-  alt="Hero"
-  loading="eager"
-  fetchpriority="high"
->
-\`\`\`
-
-#### 4. Next.js Image Component
-
-\`\`\`javascript
-import Image from 'next/image';
-
-// Automatic optimization
-<Image
-  src="/hero.jpg"
-  alt="Hero"
-  width={1200}
-  height={600}
-  priority  // For above-the-fold images
-  quality={80}
-/>
-
-// Lazy loaded
-<Image
-  src="/product.jpg"
-  alt="Product"
-  width={400}
-  height={300}
-  loading="lazy"
-/>
-\`\`\`
-
-### Results
-
-| Metric | Before | After | Improvement |
-|--------|--------|-------|-------------|
-| Total Image Size | 12MB | 1.8MB | 85% reduction |
-| LCP | 4.5s | 1.6s | 64% faster |
-| Page Load (3G) | 18s | 4.2s | 77% faster |
-```
-
-## Best Practices
-
-### ✅ Do This
-
-- **Measure First** - Always establish baseline metrics before optimizing
-- **Use Lighthouse** - Run audits regularly to track progress
-- **Optimize Images** - Use modern formats (WebP, AVIF) and responsive images
-- **Code Split** - Break large bundles into smaller chunks
-- **Lazy Load** - Defer non-critical resources
-- **Cache Aggressively** - Set proper cache headers for static assets
-- **Minimize Main Thread Work** - Keep JavaScript execution under 50ms chunks
-- **Preload Critical Resources** - Use `<link rel="preload">` for critical assets
-- **Use CDN** - Serve static assets from CDN for faster delivery
-- **Monitor Real Users** - Track Core Web Vitals from real users
-
-### ❌ Don't Do This
-
-- **Don't Optimize Blindly** - Measure first, then optimize
-- **Don't Ignore Mobile** - Test on real mobile devices and slow networks
-- **Don't Block Rendering** - Avoid render-blocking CSS and JavaScript
-- **Don't Load Everything Upfront** - Lazy load non-critical resources
-- **Don't Forget Dimensions** - Always specify image width/height
-- **Don't Use Synchronous Scripts** - Use async or defer attributes
-- **Don't Ignore Third-Party Scripts** - They often cause performance issues
-- **Don't Skip Compression** - Always compress and minify assets
-
-## Common Pitfalls
-
-### Problem: Optimized for Desktop but Slow on Mobile
-**Symptoms:** Good Lighthouse score on desktop, poor on mobile
-**Solution:**
-- Test on real mobile devices
-- Use Chrome DevTools mobile throttling
-- Optimize for 3G/4G networks
-- Reduce JavaScript execution time
-```bash
-# Test with throttling
-lighthouse https://yoursite.com --throttling.cpuSlowdownMultiplier=4
-```
-
-### Problem: Large JavaScript Bundle
-**Symptoms:** Long Time to Interactive (TTI), high FID
-**Solution:**
-- Analyze bundle with webpack-bundle-analyzer
-- Remove unused dependencies
-- Implement code splitting
-- Lazy load non-critical code
-```bash
-# Analyze bundle
-npx webpack-bundle-analyzer dist/stats.json
-```
-
-### Problem: Images Causing Layout Shifts
-**Symptoms:** High CLS score, content jumping
-**Solution:**
-- Always specify width and height
-- Use aspect-ratio CSS property
-- Reserve space with skeleton loaders
-```css
-img {
-  aspect-ratio: 16 / 9;
-  width: 100%;
-  height: auto;
-}
-```
-
-### Problem: Slow Server Response Time
-**Symptoms:** High TTFB (Time to First Byte)
-**Solution:**
-- Implement server-side caching
-- Use CDN for static assets
-- Optimize database queries
-- Consider static site generation (SSG)
-```javascript
-// Next.js: Static generation
-export async function getStaticProps() {
-  const data = await fetchData();
-  return {
-    props: { data },
-    revalidate: 60 // Regenerate every 60 seconds
-  };
-}
-```
-
-## Performance Checklist
-
-### Images
-- [ ] Convert to modern formats (WebP, AVIF)
-- [ ] Implement responsive images
-- [ ] Add lazy loading
-- [ ] Specify dimensions (width/height)
-- [ ] Compress images (< 200KB each)
-- [ ] Use CDN for delivery
-
-### JavaScript
-- [ ] Bundle size < 200KB (gzipped)
-- [ ] Implement code splitting
-- [ ] Lazy load non-critical code
-- [ ] Remove unused dependencies
-- [ ] Minify and compress
-- [ ] Use async/defer for scripts
-
-### CSS
-- [ ] Inline critical CSS
-- [ ] Defer non-critical CSS
-- [ ] Remove unused CSS
-- [ ] Minify CSS files
-- [ ] Use CSS containment
-
-### Caching
-- [ ] Set cache headers for static assets
-- [ ] Implement service worker
-- [ ] Use CDN caching
-- [ ] Cache API responses
-- [ ] Version static assets
-
-### Core Web Vitals
-- [ ] LCP < 2.5s
-- [ ] FID < 100ms
-- [ ] CLS < 0.1
-- [ ] TTFB < 600ms
-- [ ] TTI < 3.8s
-
-## Performance Tools
-
-### Measurement Tools
-- **Lighthouse** - Comprehensive performance audit
-- **WebPageTest** - Detailed waterfall analysis
-- **Chrome DevTools** - Performance profiling
-- **PageSpeed Insights** - Real user metrics
-- **Web Vitals Extension** - Monitor Core Web Vitals
-
-### Analysis Tools
-- **webpack-bundle-analyzer** - Visualize bundle composition
-- **source-map-explorer** - Analyze bundle size
-- **Bundlephobia** - Check package sizes before installing
-- **ImageOptim** - Image compression tool
-
-### Monitoring Tools
-- **Google Analytics** - Track Core Web Vitals
-- **Sentry** - Performance monitoring
-- **New Relic** - Application performance monitoring
-- **Datadog** - Real user monitoring
-
-## Related Skills
-
-- `@react-best-practices` - React performance patterns
-- `@frontend-dev-guidelines` - Frontend development standards
-- `@systematic-debugging` - Debug performance issues
-- `@senior-architect` - Architecture for performance
-
-## Additional Resources
-
-- [Web.dev Performance](https://web.dev/performance/)
-- [Core Web Vitals](https://web.dev/vitals/)
-- [Lighthouse Documentation](https://developers.google.com/web/tools/lighthouse)
-- [MDN Performance Guide](https://developer.mozilla.org/en-US/docs/Web/Performance)
-- [Next.js Performance](https://nextjs.org/docs/advanced-features/measuring-performance)
-- [Image Optimization Guide](https://web.dev/fast/#optimize-your-images)
+This removes ~500ms of blocking work from the critical navigation path.
 
 ---
 
-**Pro Tip:** Focus on Core Web Vitals (LCP, FID, CLS) first - they have the biggest impact on user experience and SEO rankings!
+## Pattern 5: loading.tsx Skeleton Screens
+
+Every route needs a `loading.tsx` that shows skeletons matching the final layout:
+
+```tsx
+// src/app/(platform)/loading.tsx
+export default function HomeLoading() {
+  return (
+    <>
+      <BannerSkeleton />
+      <div className="w-full page-px flex flex-col gap-5 sm:gap-6 md:gap-8 lg:gap-10 mt-4 sm:mt-8 md:mt-12 relative z-10">
+        <CreatorsSkeleton />
+        <FeaturedSkeleton />
+        <ShortsSkeleton />
+      </div>
+    </>
+  );
+}
+```
+
+Import shared skeletons from `_sections/skeletons` — don't create ad-hoc loading states.
+
+---
+
+## Pattern 6: Bundle Optimization
+
+### Remove unused dependencies
+Remove packages not in use (e.g., dayjs when date-fns is already available).
+
+### Expand `optimizePackageImports`
+In `next.config.ts`, add barrel-exporting libraries to optimize tree-shaking:
+
+```ts
+optimizePackageImports: ['lucide-react', 'recharts', 'date-fns']
+```
+
+### Lazy-load heavy SDKs
+```tsx
+// Lazy Firebase init — only loaded when needed
+const { getApp } = await import('firebase/app');
+```
+
+### CI comparison
+`scripts/compare-bundle.js` compares current build against baseline and enforces budgets (10 MB total, 5 MB static chunks). Runs automatically in PR CI.
+
+---
+
+## Pattern 7: CLS Prevention
+
+- **Always set dimensions** on images and containers (`width`, `height`, or `aspect-ratio`)
+- **Use `flex-1`** for footer positioning to avoid page jumps
+- **Show skeletons matching final layout** — same height, same gap structure
+- Use `min-h-screen` on page wrappers to prevent footer CLS
+
+---
+
+## Pattern 8: Web Vitals Monitoring
+
+### WebVitalsReporter → PostHog
+
+```tsx
+// src/shared/components/providers/web-vitals-reporter.tsx
+export function WebVitalsReporter() {
+  useEffect(() => {
+    onLCP(report);
+    onCLS(report);
+    onINP(report);
+    onFCP(report);
+    onTTFB(report);
+  }, []);
+  return null;
+}
+```
+
+Each metric is captured as a PostHog event with value, rating, delta, and page URL.
+
+### Custom performance marks
+For critical flows (e.g., login→home), use `performance.mark()` and `performance.measure()` to track custom timings.
+
+---
+
+## Contextual Awareness & Interoperability
+
+| Skill | Synergy |
+|-------|---------|
+| **vercel-react-best-practices** | Use for React/Next.js specific patterns (Server Components, caching) |
+| **sonar-scan** | Use for cognitive complexity checks after refactoring for perf |
+| **bundling-optimization** | Use for deep bundle analysis and code splitting strategies |
+| **find-skills** | Search for additional perf skills as needed |
+
+---
+
+## Verification Checklist
+
+- [ ] LCP < 2.5s
+- [ ] CLS < 0.1
+- [ ] INP < 200ms
+- [ ] Bundle size within budget (`compare-bundle.js` passes)
+- [ ] All modified routes have `loading.tsx`
+- [ ] No client-side waterfalls (check Network tab)
+- [ ] Web Vitals reporting active
+- [ ] Tested on Fast 3G throttling
