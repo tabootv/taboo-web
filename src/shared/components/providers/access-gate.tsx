@@ -1,11 +1,8 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/shared/stores/auth-store';
-import { Loader2 } from 'lucide-react';
-
-const INIT_TIMEOUT_MS = 5000;
 
 // Paths exempt from gating - accessible regardless of profile/subscription state
 const EXEMPT_PATHS = [
@@ -40,14 +37,6 @@ export function AccessGate({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { isAuthenticated, isInitialized, isProfileComplete, isSubscribed, _hasHydrated } =
     useAuthStore();
-
-  // Safety valve: prevent infinite spinner if hydration stalls
-  const [timedOut, setTimedOut] = useState(false);
-  useEffect(() => {
-    if (isInitialized && _hasHydrated) return;
-    const timer = setTimeout(() => setTimedOut(true), INIT_TIMEOUT_MS);
-    return () => clearTimeout(timer);
-  }, [isInitialized, _hasHydrated]);
 
   // Redirect loop safeguard: track redirects per pathname
   const redirectCountRef = useRef<{ pathname: string; count: number; timestamp: number }>({
@@ -104,18 +93,6 @@ export function AccessGate({ children }: { children: React.ReactNode }) {
     pathname,
     router,
   ]);
-
-  // Show loading while auth state resolves, with timeout safety valve
-  if (!isInitialized || !_hasHydrated) {
-    if (!timedOut && !isExemptPath(pathname)) {
-      return (
-        <div className="min-h-[60vh] flex items-center justify-center">
-          <Loader2 className="w-8 h-8 text-red-primary animate-spin" />
-        </div>
-      );
-    }
-    // Timed out — render children and let redirect logic handle auth
-  }
 
   return <>{children}</>;
 }
