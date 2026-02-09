@@ -18,49 +18,17 @@ const PUBLIC_ROUTES = [
   '/redeem',
 ];
 
-// Patterns to skip middleware processing
-const SKIP_PATTERNS = [
-  '/_next/',
-  '/api/',
-  '/favicon.ico',
-  '/robots.txt',
-  '/sitemap.xml',
-  '.png',
-  '.jpg',
-  '.jpeg',
-  '.gif',
-  '.svg',
-  '.ico',
-  '.webp',
-  '.css',
-  '.js',
-  '.woff',
-  '.woff2',
-  '.ttf',
-  '.eot',
-];
+// O(1) regex for skipping static files and internal routes
+const SKIP_REGEX = /^\/(api|_next)\/.+|\.(png|jpe?g|gif|svg|ico|webp|css|js|woff2?|ttf|eot)$/;
 
 // Auth pages for redirect logic (canonical routes only)
 const AUTH_PAGES = ['/sign-in', '/register'];
-
-// Interface for /me API response
-interface MeResponse {
-  user: {
-    id: number;
-    email: string;
-    is_creator: boolean;
-    channel?: {
-      id: number;
-      name: string;
-    };
-  };
-}
 
 /**
  * Check if middleware should skip processing this path
  */
 function shouldSkipMiddleware(pathname: string): boolean {
-  return SKIP_PATTERNS.some((pattern) => pathname.includes(pattern));
+  return SKIP_REGEX.test(pathname);
 }
 
 /**
@@ -78,13 +46,6 @@ function isPublicRoute(pathname: string): boolean {
  */
 function isAuthPage(pathname: string): boolean {
   return AUTH_PAGES.some((page) => pathname.startsWith(page));
-}
-
-/**
- * Check if route requires creator status
- */
-function isCreatorRoute(pathname: string): boolean {
-  return pathname.startsWith('/studio');
 }
 
 /**
@@ -132,65 +93,9 @@ function redirectToHome(request: NextRequest): NextResponse {
 }
 
 /**
- * Validate creator status by calling /me endpoint
- * Returns true if user is a creator (has is_creator flag or channel object)
+ * Main proxy function — runs at the edge, no async needed
  */
-async function validateCreatorStatus(token: string): Promise<boolean> {
-  // Skip validation in E2E test mode - test auth is handled by test fixtures
-  // if (process.env.PLAYWRIGHT_MOCK_MODE === 'true') {
-  //   if (process.env.NODE_ENV === 'development') {
-  //     console.log('[Middleware] E2E test mode - skipping creator validation');
-  //   }
-  //   return true;
-  // }
-
-  try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://app.taboo.tv/api';
-
-    const response = await fetch(`${apiUrl}/me`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: 'application/json',
-      },
-      // Cache for 60 seconds to reduce API calls
-      next: { revalidate: 60 },
-    });
-
-    if (!response.ok) {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('[Middleware] Creator validation failed: API returned', response.status);
-      }
-      return false;
-    }
-
-    const data = (await response.json()) as MeResponse;
-    const user = data.user || data;
-
-    // User is creator if they have is_creator flag or a channel
-    const isCreator = !!(user.is_creator || user.channel);
-
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[Middleware] Creator validation:', {
-        isCreator,
-        has_is_creator: user.is_creator,
-        has_channel: !!user.channel,
-      });
-    }
-
-    return isCreator;
-  } catch (error) {
-    // Fail closed - deny access on error
-    if (process.env.NODE_ENV === 'development') {
-      console.error('[Middleware] Creator validation error:', error);
-    }
-    return false;
-  }
-}
-
-/**
- * Main middleware function
- */
-export async function proxy(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Debug logging in development
@@ -228,19 +133,7 @@ export async function proxy(request: NextRequest) {
     return redirectToSignIn(request, pathname);
   }
 
-  // 5. Creator-only routes - validate creator status
-  if (isCreatorRoute(pathname)) {
-    const isCreator = await validateCreatorStatus(token);
-
-    if (!isCreator) {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('[Middleware] User is not a creator, redirecting to /home');
-      }
-      return redirectToHome(request);
-    }
-  }
-
-  // 6. Allow request to proceed
+  // 5. Allow request to proceed (studio creator check handled client-side)
   return NextResponse.next();
 }
 
