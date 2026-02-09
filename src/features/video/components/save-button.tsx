@@ -1,12 +1,10 @@
 'use client';
 
+import { useToggleBookmark } from '@/api/mutations';
 import { useFeature } from '@/hooks/use-feature';
-import { AnalyticsEvent } from '@/shared/lib/analytics/events';
-import { useSavedVideosStore, type SavedVideo } from '@/shared/stores/saved-videos-store';
 import type { Video } from '@/types';
 import { Bookmark } from 'lucide-react';
-import posthog from 'posthog-js';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface SaveButtonProps {
   video: Video;
@@ -14,35 +12,28 @@ interface SaveButtonProps {
 
 export function SaveButton({ video }: SaveButtonProps) {
   const bookmarksEnabled = useFeature('BOOKMARK_SYSTEM');
-
-  const { isSaved, toggleSave } = useSavedVideosStore();
-  const [saved, setSaved] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
+  const toggleBookmark = useToggleBookmark();
+  const [optimisticSaved, setOptimisticSaved] = useState(
+    video.is_bookmarked || video.in_watchlist || false
+  );
   useEffect(() => {
-    setMounted(true);
-    if (video.id) {
-      setSaved(isSaved(video.id));
-    }
-  }, [isSaved, video.id]);
+    setOptimisticSaved(video.is_bookmarked || video.in_watchlist || false);
+  }, [video.is_bookmarked, video.in_watchlist]);
+  const saved = optimisticSaved;
 
-  const handleToggle = useCallback(() => {
-    if (!video.id) return;
-
-    const savedVideo: SavedVideo = {
-      id: video.id,
-      title: video.title,
-      thumbnail: video.thumbnail_webp || video.thumbnail || null,
-      channelName: video.channel?.name || null,
-      savedAt: Date.now(),
-    };
-    const newState = toggleSave(savedVideo);
-    posthog.capture(newState ? AnalyticsEvent.VIDEO_SAVED : AnalyticsEvent.VIDEO_UNSAVED, {
-      video_id: video.id,
-      video_title: video.title,
-    });
-    setSaved(newState);
-  }, [video, toggleSave]);
+  const handleToggle = () => {
+    if (!video.uuid) return;
+    setOptimisticSaved((prev) => !prev);
+    toggleBookmark.mutate(
+      { videoUuid: video.uuid, videoId: video.id },
+      {
+        onError: (error) => {
+          setOptimisticSaved(video.is_bookmarked || video.in_watchlist || false);
+          console.error('Failed to toggle bookmark:', error);
+        },
+      }
+    );
+  };
 
   if (!bookmarksEnabled) return null;
 
@@ -57,7 +48,7 @@ export function SaveButton({ video }: SaveButtonProps) {
     <button
       onClick={handleToggle}
       aria-label={saved ? 'Saved' : 'Save'}
-      disabled={!mounted}
+      disabled={toggleBookmark.isPending}
       className={`${baseClasses} ${activeClasses} disabled:opacity-60`}
     >
       <Bookmark className={`w-4 h-4 md:w-5 md:h-5 ${saved ? 'fill-current' : ''}`} />

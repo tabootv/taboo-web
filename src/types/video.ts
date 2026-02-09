@@ -37,6 +37,7 @@ export interface Video {
   is_liked?: boolean;
   is_disliked?: boolean;
   is_bookmarked?: boolean;
+  in_watchlist?: boolean;
   published_at: string;
   likes_count: number;
   dislikes_count?: number;

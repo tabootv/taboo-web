@@ -118,34 +118,55 @@ export function useToggleDislike() {
 
 /**
  * Hook to toggle bookmark on a video with optimistic update
+ *
+ * Accepts a video UUID (string) for the API call.
+ * Optionally accepts a numeric video ID for cache invalidation.
  */
 export function useToggleBookmark() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (videoId: string | number) => videoClient.toggleBookmark(videoId),
-    onMutate: async (videoId) => {
-      await queryClient.cancelQueries({ queryKey: queryKeys.videos.detail(videoId) });
+    mutationFn: ({ videoUuid }: { videoUuid: string; videoId?: string | number | undefined }) =>
+      videoClient.toggleBookmark(videoUuid),
+    onMutate: async ({ videoUuid, videoId }) => {
+      const cacheKey = videoId ?? videoUuid;
+      await queryClient.cancelQueries({ queryKey: queryKeys.videos.detail(cacheKey) });
 
-      const previous = queryClient.getQueryData<Video>(queryKeys.videos.detail(videoId));
+      const previous = queryClient.getQueryData<Video>(queryKeys.videos.detail(cacheKey));
 
       if (previous) {
-        const currentBookmarked = previous.is_bookmarked ?? false;
-        queryClient.setQueryData<Video>(queryKeys.videos.detail(videoId), {
+        const currentBookmarked = previous.is_bookmarked ?? previous.in_watchlist ?? false;
+        queryClient.setQueryData<Video>(queryKeys.videos.detail(cacheKey), {
           ...previous,
           is_bookmarked: !currentBookmarked,
+          in_watchlist: !currentBookmarked,
         });
       }
 
-      return { previous };
+      return { previous, cacheKey };
     },
-    onError: (_err, videoId, context) => {
-      if (context?.previous) {
-        queryClient.setQueryData(queryKeys.videos.detail(videoId), context.previous);
+    onSuccess: (data, _vars, context) => {
+      // Map API's in_watchlist to is_bookmarked in cache
+      if (context?.cacheKey) {
+        const cached = queryClient.getQueryData<Video>(queryKeys.videos.detail(context.cacheKey));
+        if (cached) {
+          queryClient.setQueryData<Video>(queryKeys.videos.detail(context.cacheKey), {
+            ...cached,
+            is_bookmarked: data.in_watchlist,
+            in_watchlist: data.in_watchlist,
+          });
+        }
       }
     },
-    onSettled: (_data, _error, videoId) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.videos.detail(videoId) });
+    onError: (_err, _vars, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(queryKeys.videos.detail(context.cacheKey), context.previous);
+      }
+    },
+    onSettled: (_data, _error, _vars, context) => {
+      if (context?.cacheKey) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.videos.detail(context.cacheKey) });
+      }
       queryClient.invalidateQueries({ queryKey: queryKeys.videos.bookmarked() });
     },
   });

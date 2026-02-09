@@ -9,7 +9,7 @@ import type { Video } from '@/types';
 import { Check, Play, Plus } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NEW_THRESHOLD_DAYS } from '../constants';
 
 interface VideoCardEnhancedProps {
@@ -27,7 +27,13 @@ export function VideoCardEnhanced({
 
   const bookmarksEnabled = useFeature('BOOKMARK_SYSTEM');
   const toggleBookmark = useToggleBookmark();
-  const saved = video.is_bookmarked || false;
+  const [optimisticSaved, setOptimisticSaved] = useState(
+    video.is_bookmarked || video.in_watchlist || false
+  );
+  useEffect(() => {
+    setOptimisticSaved(video.is_bookmarked || video.in_watchlist || false);
+  }, [video.is_bookmarked, video.in_watchlist]);
+  const saved = optimisticSaved;
 
   const href = `/videos/${video.uuid || video.id}`;
   const thumbnail = video.thumbnail_webp || video.thumbnail || video.card_thumbnail;
@@ -50,17 +56,21 @@ export function VideoCardEnhanced({
 
     if (!bookmarksEnabled) return;
 
-    const videoIdentifier = video.uuid || video.id;
-    if (!videoIdentifier) {
-      console.error('Cannot bookmark video: missing uuid and id');
+    if (!video.uuid) {
+      console.error('Cannot bookmark video: missing uuid');
       return;
     }
 
-    toggleBookmark.mutate(videoIdentifier, {
-      onError: (error) => {
-        console.error('Failed to toggle bookmark:', error);
-      },
-    });
+    setOptimisticSaved((prev) => !prev);
+    toggleBookmark.mutate(
+      { videoUuid: video.uuid, videoId: video.id },
+      {
+        onError: (error) => {
+          setOptimisticSaved(video.is_bookmarked || video.in_watchlist || false);
+          console.error('Failed to toggle bookmark:', error);
+        },
+      }
+    );
   };
 
   const handleOpenPreview = (e: React.MouseEvent) => {

@@ -1,6 +1,6 @@
 import { seriesClient } from '@/api/client/series.client';
 import { useFeature } from '@/hooks/use-feature';
-import { useSavedVideosStore, type SavedVideo } from '@/shared/stores/saved-videos-store';
+import { useWatchlistStore, type WatchlistItem } from '@/shared/stores/watchlist-store';
 import {
   cn,
   formatCompactNumber,
@@ -27,15 +27,15 @@ export function SeriesSidePanel({ series }: SeriesSidePanelProps) {
 
   const bookmarksEnabled = useFeature('BOOKMARK_SYSTEM');
   const videoRef = useRef<HTMLVideoElement>(null);
-  const { isSaved, toggleSave } = useSavedVideosStore();
+  const { isInWatchlist, toggleWatchlist } = useWatchlistStore();
   const router = useRouter();
   const seriesDetailHref = series ? getSeriesRoute(series.id, series.title) : '#';
 
   useEffect(() => {
     if (series?.id) {
-      setSaved(isSaved(series.id));
+      setSaved(isInWatchlist(series.id, 'series'));
     }
-  }, [series?.id, isSaved]);
+  }, [series?.id, isInWatchlist]);
 
   useEffect(() => {
     setIsVideoReady(false);
@@ -59,16 +59,20 @@ export function SeriesSidePanel({ series }: SeriesSidePanelProps) {
 
   const handleSave = useCallback(() => {
     if (!series?.id) return;
-    const savedVideo: SavedVideo = {
+    const watchlistItem: WatchlistItem = {
       id: series.id,
+      type: 'series',
       title: series.title,
       thumbnail: series.thumbnail || null,
-      channelName: series.channel?.name || null,
-      savedAt: Date.now(),
+      channel: series.channel
+        ? { id: series.channel.id, name: series.channel.name, dp: series.channel.dp || null }
+        : undefined,
+      videosCount: series.videos_count,
+      addedAt: Date.now(),
     };
-    const newState = toggleSave(savedVideo);
+    const newState = toggleWatchlist(watchlistItem);
     setSaved(newState);
-  }, [series, toggleSave]);
+  }, [series, toggleWatchlist]);
 
   const handlePlay = useCallback(
     async (toHref?: string) => {

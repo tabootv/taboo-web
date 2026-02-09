@@ -13,14 +13,16 @@ export const FEATURES = {
   BOOKMARK_SYSTEM: {
     enabled: process.env.NEXT_PUBLIC_FEATURE_BOOKMARK_SYSTEM === 'true',
     name: 'Bookmark System',
-    description: 'Allows users to save/bookmark videos to their profile',
+    description: 'Allows users to save/bookmark videos to their watchlist',
     impacts: [
       'Save button in VideoCardEnhanced',
       'Save button in ShortPlayer',
       'Profile "Saved" tab',
-      'POST /videos/{id}/toggle-bookmark API calls',
+      'Watchlist page',
+      'POST /api/watchlist/{video:uuid}/toggle API calls',
+      'GET /api/watchlist API calls',
     ],
-    reason: 'Backend not ready - bookmark persistence under development',
+    reason: '',
   },
   WATCH_HISTORY: {
     enabled: process.env.NEXT_PUBLIC_FEATURE_WATCH_HISTORY === 'true',

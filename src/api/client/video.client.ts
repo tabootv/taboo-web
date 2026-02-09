@@ -7,7 +7,8 @@
  * - GET /public/videos/related → VideoListResponse
  * - POST /videos/{id}/toggle-like → LikeResponse
  * - POST /videos/{id}/toggle-dislike → DislikeResponse
- * - POST /videos/{id}/toggle-bookmark → BookmarkResponse
+ * - POST /watchlist/{video:uuid}/toggle → BookmarkResponse
+ * - GET /watchlist → VideoListResponse (user's watchlist)
  * - GET /videos/{id}/comments-list → CommentListResponse
  * - POST /videos/{id}/comment → Comment
  */
@@ -173,12 +174,9 @@ export const videoClient = {
     });
 
     // Defensive: filter out any shorts if backend ignores flags
-    const filtered = response.data.filter((v) => {
-      if (v?.short === true || v?.is_short === true || v?.type === 'short') {
-        return false;
-      }
-      return true;
-    });
+    const filtered = response.data.filter(
+      (v) => v?.short !== true && v?.is_short !== true && v?.type !== 'short'
+    );
 
     if (process.env.NODE_ENV === 'development' && filtered.length !== response.data.length) {
       console.warn('Filtered out short content from /videos response');
@@ -261,10 +259,10 @@ export const videoClient = {
   },
 
   /**
-   * Toggle bookmark on a video
+   * Toggle watchlist (bookmark) on a video by UUID
    */
-  toggleBookmark: async (id: string | number): Promise<BookmarkResponse> => {
-    return apiClient.post<BookmarkResponse>(`/videos/${id}/toggle-bookmark`);
+  toggleBookmark: async (videoUuid: string | number): Promise<BookmarkResponse> => {
+    return apiClient.post<BookmarkResponse>(`/watchlist/${videoUuid}/toggle`);
   },
 
   /**
@@ -296,18 +294,46 @@ export const videoClient = {
   },
 
   /**
-   * Get bookmarked videos
+   * Get user's watchlist (bookmarked videos)
    */
   getBookmarked: async (page = 1, perPage = 12): Promise<VideoListResponse> => {
-    const data = await apiClient.get<{ videos?: VideoListResponse } | VideoListResponse>(
-      '/profile/bookmarked-videos',
-      {
-        params: { page, per_page: perPage } as Record<string, unknown>,
-      }
-    );
-    return typeof data === 'object' && data !== null && 'videos' in data
-      ? data.videos || data
-      : (data as VideoListResponse);
+    const data = await apiClient.get<{
+      watchlist?: Video[];
+      videos?: Video[];
+      data?: Video[];
+      meta?: {
+        current_page?: number;
+        last_page?: number;
+        per_page?: number;
+        total?: number;
+      };
+      pagination?: {
+        current_page?: number;
+        last_page?: number;
+        per_page?: number;
+        total?: number;
+      };
+    }>('/watchlist', {
+      params: { page, per_page: perPage } as Record<string, unknown>,
+    });
+
+    const videos = data.watchlist || data.videos || data.data || [];
+    const paginationSource = data.meta || data.pagination;
+    return {
+      data: videos,
+      current_page: paginationSource?.current_page ?? page,
+      last_page: paginationSource?.last_page ?? 1,
+      per_page: paginationSource?.per_page ?? perPage,
+      total: paginationSource?.total ?? videos.length,
+      first_page_url: '',
+      from: null,
+      last_page_url: '',
+      links: [],
+      next_page_url: null,
+      path: '',
+      prev_page_url: null,
+      to: null,
+    };
   },
 
   /**

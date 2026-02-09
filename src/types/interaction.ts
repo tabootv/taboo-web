@@ -32,5 +32,6 @@ export interface DislikeResponse {
 }
 
 export interface BookmarkResponse {
-  is_bookmarked: boolean;
+  in_watchlist: boolean;
+  message?: string;
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { videoClient as videosApi } from '@/api/client/video.client';
-import { useSavedVideosStore, type SavedVideo } from '@/shared/stores/saved-videos-store';
+import { useToggleBookmark } from '@/api/mutations';
 import type { Video } from '@/types';
 import { Play } from 'lucide-react';
 import Image from 'next/image';
@@ -30,7 +30,6 @@ export function NetflixHoverCard({
   const [isVideoReady, setIsVideoReady] = useState(false);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
-  const [saved, setSaved] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [fetchedPreviewUrl, setFetchedPreviewUrl] = useState<string | null>(null);
@@ -38,15 +37,15 @@ export function NetflixHoverCard({
   const videoRef = useRef<HTMLVideoElement>(null);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
-  const { isSaved, toggleSave } = useSavedVideosStore();
+  const toggleBookmark = useToggleBookmark();
   const router = useRouter();
-
-  // Check saved state on mount
+  const [optimisticSaved, setOptimisticSaved] = useState(
+    video.is_bookmarked || video.in_watchlist || false
+  );
   useEffect(() => {
-    if (video.id) {
-      setSaved(isSaved(video.id));
-    }
-  }, [isSaved, video.id]);
+    setOptimisticSaved(video.is_bookmarked || video.in_watchlist || false);
+  }, [video.is_bookmarked, video.in_watchlist]);
+  const saved = optimisticSaved;
 
   const thumbnail = video.thumbnail_webp || video.thumbnail || video.card_thumbnail;
   const isNew = !!(
@@ -149,19 +148,15 @@ export function NetflixHoverCard({
       e.preventDefault();
       e.stopPropagation();
 
-      if (!video.id) return;
+      if (!video.uuid) return;
 
-      const savedVideo: SavedVideo = {
-        id: video.id,
-        title: video.title,
-        thumbnail: video.thumbnail_webp || video.thumbnail || null,
-        channelName: video.channel?.name || null,
-        savedAt: Date.now(),
-      };
-      const newState = toggleSave(savedVideo);
-      setSaved(newState);
+      setOptimisticSaved((prev) => !prev);
+      toggleBookmark.mutate(
+        { videoUuid: video.uuid, videoId: video.id },
+        { onError: () => setOptimisticSaved(video.is_bookmarked || video.in_watchlist || false) }
+      );
     },
-    [video, toggleSave]
+    [video.uuid, video.id, video.is_bookmarked, video.in_watchlist, toggleBookmark]
   );
 
   const toggleDescription = useCallback((e: React.MouseEvent) => {

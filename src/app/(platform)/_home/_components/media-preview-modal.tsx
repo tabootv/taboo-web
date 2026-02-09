@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useCallback, memo } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { X } from 'lucide-react';
-import { useSavedVideosStore, type SavedVideo } from '@/shared/stores/saved-videos-store';
+import { useToggleBookmark } from '@/api/mutations';
 import type { Video } from '@/types';
 import { PreviewVideoPlayer } from './PreviewVideoPlayer';
 import { PreviewMediaInfo } from './PreviewMediaInfo';
@@ -26,26 +26,24 @@ export const MediaPreviewModal = memo(function MediaPreviewModal({
   const [isVideoReady, setIsVideoReady] = useState(false);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
-  const [saved, setSaved] = useState(false);
-
   const modalRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
-  const { isSaved, toggleSave } = useSavedVideosStore();
+  const toggleBookmark = useToggleBookmark();
   const router = useRouter();
+  const [optimisticSaved, setOptimisticSaved] = useState(
+    video?.is_bookmarked || video?.in_watchlist || false
+  );
+  useEffect(() => {
+    setOptimisticSaved(video?.is_bookmarked || video?.in_watchlist || false);
+  }, [video?.is_bookmarked, video?.in_watchlist]);
+  const saved = optimisticSaved;
 
   // Mount portal
   useEffect(() => {
     setMounted(true);
     return () => setMounted(false);
   }, []);
-
-  // Check saved state
-  useEffect(() => {
-    if (video?.id) {
-      setSaved(isSaved(video.id));
-    }
-  }, [video?.id, isSaved]);
 
   // Lock body scroll, trap focus, handle ESC
   useEffect(() => {
@@ -144,17 +142,13 @@ export const MediaPreviewModal = memo(function MediaPreviewModal({
   }, [router, video]);
 
   const handleSave = useCallback(() => {
-    if (!video?.id) return;
-    const savedVideo: SavedVideo = {
-      id: video.id,
-      title: video.title,
-      thumbnail: video.thumbnail_webp || video.thumbnail || null,
-      channelName: video.channel?.name || null,
-      savedAt: Date.now(),
-    };
-    const newState = toggleSave(savedVideo);
-    setSaved(newState);
-  }, [video, toggleSave]);
+    if (!video?.uuid) return;
+    setOptimisticSaved((prev) => !prev);
+    toggleBookmark.mutate(
+      { videoUuid: video.uuid, videoId: video.id },
+      { onError: () => setOptimisticSaved(video?.is_bookmarked || video?.in_watchlist || false) }
+    );
+  }, [video?.uuid, video?.id, video?.is_bookmarked, video?.in_watchlist, toggleBookmark]);
 
   const toggleMute = useCallback(() => {
     setIsMuted((prev) => {
