@@ -9,6 +9,7 @@
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { homeClient } from '../client/home.client';
 import { queryKeys } from '../query-keys';
+import { seededShuffle, getDailySeed } from '@/shared/utils/array';
 import type { HomePageData } from '@/shared/lib/api/home-data';
 import type { Banner, Video, Series, Creator, Playlist } from '@/types';
 
@@ -77,7 +78,13 @@ export function useCourses() {
 export function useCreators(options: { initialData?: Creator[] } = {}) {
   return useQuery({
     queryKey: queryKeys.home.creators(),
-    queryFn: () => homeClient.getCreators(),
+    queryFn: async () => {
+      const creators = await homeClient.getCreators();
+      return seededShuffle(
+        creators.sort((a, b) => a.id - b.id),
+        getDailySeed()
+      );
+    },
     ...(options.initialData && {
       initialData: options.initialData,
       initialDataUpdatedAt: Date.now(),

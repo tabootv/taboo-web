@@ -7,24 +7,15 @@ import type { Creator } from '@/types';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface CreatorsSectionProps {
   initialCreators?: Creator[];
 }
 
 export function CreatorsSection({ initialCreators }: CreatorsSectionProps) {
-  const { data: creatorsRaw = [], isLoading } = useCreators(
+  const { data: creators = [], isLoading } = useCreators(
     initialCreators ? { initialData: initialCreators } : {}
-  );
-
-  const creators = useMemo(
-    () =>
-      creatorsRaw.filter((c) => {
-        const channelId = c.user?.channel?.id ?? c.id;
-        return channelId !== 8;
-      }),
-    [creatorsRaw]
   );
 
   const scrollRef = useRef<HTMLDivElement>(null);
