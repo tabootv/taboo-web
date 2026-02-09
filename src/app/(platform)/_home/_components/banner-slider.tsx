@@ -1,6 +1,6 @@
 'use client';
 
-import { homeClient } from '@/api/client/home.client';
+import { useBanners } from '@/api/queries/home.queries';
 import { Button } from '@/components/ui/button';
 import { useCreatorById } from '@/hooks/use-creator-by-id';
 import { getSeriesRoute } from '@/shared/utils/formatting';
@@ -15,27 +15,11 @@ interface BannerSliderProps {
 }
 
 export function BannerSlider({ initialBanners }: BannerSliderProps) {
-  const hasInitialData = initialBanners && initialBanners.length > 0;
-  const [banners, setBanners] = useState<Banner[]>(initialBanners || []);
+  const { data: banners = [], isLoading } = useBanners(
+    initialBanners ? { initialData: initialBanners } : {}
+  );
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isLoading, setIsLoading] = useState(!hasInitialData);
   const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    if (initialBanners && initialBanners.length > 0) return;
-
-    async function fetchBanners() {
-      try {
-        const data = await homeClient.getBanners();
-        setBanners(data || []);
-      } catch (error) {
-        console.error('Error fetching banners:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    fetchBanners();
-  }, [initialBanners]);
 
   useEffect(() => {
     if (banners.length <= 1) return;

@@ -30,9 +30,19 @@ export const queryClient = new QueryClient({
           return 1000 * 30; // 30 seconds
         }
 
-        // Home feed: medium cache
+        // Home feed: granular per-section cache
         if (key === 'home') {
-          return 1000 * 60 * 10; // 10 minutes
+          const subKey = query.queryKey[1] as string | undefined;
+          if (subKey === 'banners' || subKey === 'creators') return 1000 * 60 * 30; // 30 minutes
+          if (
+            subKey === 'featured' ||
+            subKey === 'recommended' ||
+            subKey === 'series' ||
+            subKey === 'playlists'
+          )
+            return 1000 * 60 * 15; // 15 minutes
+          if (subKey === 'shorts') return 1000 * 60 * 10; // 10 minutes
+          return 1000 * 60 * 10; // fallback
         }
 
         // Search results: medium cache
@@ -53,7 +63,7 @@ export const queryClient = new QueryClient({
         // Default: 5 minutes
         return 1000 * 60 * 5;
       },
-      gcTime: 1000 * 60 * 10, // 10 minutes (formerly cacheTime)
+      gcTime: 1000 * 60 * 30, // 30 minutes (formerly cacheTime)
       retry: 1,
       refetchOnWindowFocus: false,
       refetchInterval: (query) => {

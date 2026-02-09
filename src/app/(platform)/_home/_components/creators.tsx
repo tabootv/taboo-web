@@ -1,49 +1,35 @@
 'use client';
 
-import { homeClient } from '@/api/client/home.client';
+import { useCreators } from '@/api/queries/home.queries';
 import { SectionCard } from './section-card';
 import { getCreatorRoute } from '@/shared/utils/formatting';
 import type { Creator } from '@/types';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 interface CreatorsSectionProps {
   initialCreators?: Creator[];
 }
 
 export function CreatorsSection({ initialCreators }: CreatorsSectionProps) {
-  const filterCreators = (data: Creator[]) =>
-    data.filter((c: Creator) => {
-      const channelId = c.user?.channel?.id ?? c.id;
-      return channelId !== 8;
-    });
-
-  const hasInitialData = initialCreators && initialCreators.length > 0;
-  const [creators, setCreators] = useState<Creator[]>(
-    initialCreators ? filterCreators(initialCreators) : []
+  const { data: creatorsRaw = [], isLoading } = useCreators(
+    initialCreators ? { initialData: initialCreators } : {}
   );
-  const [isLoading, setIsLoading] = useState(!hasInitialData);
+
+  const creators = useMemo(
+    () =>
+      creatorsRaw.filter((c) => {
+        const channelId = c.user?.channel?.id ?? c.id;
+        return channelId !== 8;
+      }),
+    [creatorsRaw]
+  );
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showLeftGradient, setShowLeftGradient] = useState(false);
   const [showRightGradient, setShowRightGradient] = useState(true);
-
-  useEffect(() => {
-    if (initialCreators && initialCreators.length > 0) return;
-
-    async function fetchCreators() {
-      try {
-        const data = await homeClient.getCreators();
-        setCreators(filterCreators(data));
-      } catch (error) {
-        console.error('Error fetching creators:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    fetchCreators();
-  }, [initialCreators]);
 
   const handleScroll = useCallback(() => {
     if (scrollRef.current) {

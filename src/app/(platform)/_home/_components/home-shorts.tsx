@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { homeClient } from '@/api/client/home.client';
+import { useShortVideos } from '@/api/queries/home.queries';
 import type { Video } from '@/types';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { useHorizontalScroll } from './hooks/use-horizontal-scroll';
 import { SectionCard } from './section-card';
 import { ShortCard } from './ShortCard';
-import { useHorizontalScroll } from './hooks/use-horizontal-scroll';
 
 interface HomeShortsSectionProps {
   initialShorts?: Video[];
@@ -30,42 +30,20 @@ function shuffleShorts(shorts: Video[]): Video[] {
 }
 
 export function HomeShortsSection({ initialShorts }: HomeShortsSectionProps) {
-  const [videos, setVideos] = useState<Video[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: shortsRaw = [], isLoading } = useShortVideos(
+    initialShorts ? { initialData: initialShorts } : {}
+  );
+
+  const [videos, setVideos] = useState<Video[]>(initialShorts ?? []);
+  const shuffledRef = useRef(false);
   const { scrollRef, showLeftGradient, showRightGradient, scroll } = useHorizontalScroll();
 
   useEffect(() => {
-    let cancelled = false;
-
-    async function loadShorts() {
-      // Try initialShorts first
-      if (initialShorts && initialShorts.length > 0) {
-        setVideos(shuffleShorts(initialShorts));
-        setIsLoading(false);
-        return;
-      }
-
-      // Fallback: fetch from API
-      try {
-        const data = await homeClient.getShortVideosV2();
-        if (!cancelled && data && data.length > 0) {
-          setVideos(shuffleShorts(data));
-        }
-      } catch (error) {
-        console.error('Error fetching shorts:', error);
-      } finally {
-        if (!cancelled) {
-          setIsLoading(false);
-        }
-      }
+    if (shortsRaw.length > 0 && !shuffledRef.current) {
+      setVideos(shuffleShorts(shortsRaw));
+      shuffledRef.current = true;
     }
-
-    loadShorts();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [initialShorts]);
+  }, [shortsRaw]);
 
   if (isLoading) {
     return (

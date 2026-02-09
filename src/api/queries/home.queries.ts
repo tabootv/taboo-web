@@ -1,96 +1,87 @@
 /**
  * Home Feed Query Hooks
  *
- * TanStack Query hooks for home page data fetching
+ * TanStack Query hooks for home page data fetching.
+ * Hooks accept `initialData` from server components to seed the cache,
+ * enabling instant repeat-visit rendering via stale-while-revalidate.
  */
 
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { homeClient } from '../client/home.client';
 import { queryKeys } from '../query-keys';
 import type { HomePageData } from '@/shared/lib/api/home-data';
-import type { Playlist } from '@/types';
+import type { Banner, Video, Series, Creator, Playlist } from '@/types';
 
-/**
- * Hook to fetch home banners
- * Stale time: 10 minutes
- */
-export function useBanners() {
+export function useBanners(options: { initialData?: Banner[] } = {}) {
   return useQuery({
     queryKey: queryKeys.home.banners(),
     queryFn: () => homeClient.getBanners(),
-    staleTime: 1000 * 60 * 10, // 10 minutes
+    ...(options.initialData && {
+      initialData: options.initialData,
+      initialDataUpdatedAt: Date.now(),
+    }),
   });
 }
 
-/**
- * Hook to fetch featured videos
- * Stale time: 10 minutes
- */
-export function useFeaturedVideos() {
+export function useFeaturedVideos(options: { initialData?: Video[] } = {}) {
   return useQuery({
     queryKey: queryKeys.home.featured(),
     queryFn: () => homeClient.getFeaturedVideos(),
-    staleTime: 1000 * 60 * 10, // 10 minutes
+    ...(options.initialData && {
+      initialData: options.initialData,
+      initialDataUpdatedAt: Date.now(),
+    }),
   });
 }
 
-/**
- * Hook to fetch recommended videos
- * Stale time: 10 minutes
- */
-export function useRecommendedVideos() {
+export function useRecommendedVideos(options: { initialData?: Video[] } = {}) {
   return useQuery({
     queryKey: queryKeys.home.recommended(),
     queryFn: () => homeClient.getRecommendedVideos(),
-    staleTime: 1000 * 60 * 10, // 10 minutes
+    ...(options.initialData && {
+      initialData: options.initialData,
+      initialDataUpdatedAt: Date.now(),
+    }),
   });
 }
 
-/**
- * Hook to fetch short videos
- * Stale time: 10 minutes
- */
-export function useShortVideos() {
+export function useShortVideos(options: { initialData?: Video[] } = {}) {
   return useQuery({
     queryKey: queryKeys.home.shorts(),
     queryFn: () => homeClient.getShortVideosV2(),
-    staleTime: 1000 * 60 * 10, // 10 minutes
+    ...(options.initialData && {
+      initialData: options.initialData,
+      initialDataUpdatedAt: Date.now(),
+    }),
   });
 }
 
-/**
- * Hook to fetch series
- * Stale time: 10 minutes
- */
-export function useSeries() {
+export function useSeries(options: { initialData?: Series[] } = {}) {
   return useQuery({
     queryKey: queryKeys.home.series(),
     queryFn: () => homeClient.getSeries(),
-    staleTime: 1000 * 60 * 10, // 10 minutes
+    ...(options.initialData && {
+      initialData: options.initialData,
+      initialDataUpdatedAt: Date.now(),
+    }),
   });
 }
 
-/**
- * Hook to fetch courses
- * Stale time: 10 minutes
- */
 export function useCourses() {
   return useQuery({
     queryKey: queryKeys.home.courses(),
     queryFn: () => homeClient.getCourses(),
-    staleTime: 1000 * 60 * 10, // 10 minutes
   });
 }
 
-/**
- * Hook to fetch creators
- * Stale time: 10 minutes
- */
-export function useCreators() {
+export function useCreators(options: { initialData?: Creator[] } = {}) {
   return useQuery({
     queryKey: queryKeys.home.creators(),
     queryFn: () => homeClient.getCreators(),
-    staleTime: 1000 * 60 * 10, // 10 minutes
+    ...(options.initialData && {
+      initialData: options.initialData,
+      initialDataUpdatedAt: Date.now(),
+    }),
   });
 }
 
@@ -116,8 +107,6 @@ export interface HomePlaylistsInfiniteOptions {
  * Hook to fetch home playlists with infinite scroll
  *
  * Uses cursor-based pagination via the /api/home/playlists route
- * Stale time: 10 minutes
- * GC time: 30 minutes
  */
 export function useHomePlaylistsInfinite(options: HomePlaylistsInfiniteOptions = {}) {
   const { initialPlaylists, initialCursor, isInitialLastPage } = options;
@@ -142,7 +131,5 @@ export function useHomePlaylistsInfinite(options: HomePlaylistsInfiniteOptions =
           },
         }
       : {}),
-    staleTime: 1000 * 60 * 10, // 10 minutes
-    gcTime: 1000 * 60 * 30, // 30 minutes
   });
 }

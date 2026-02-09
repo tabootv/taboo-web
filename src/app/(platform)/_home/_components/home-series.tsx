@@ -1,6 +1,6 @@
 'use client';
 
-import { homeClient } from '@/api/client/home.client';
+import { useSeries } from '@/api/queries/home.queries';
 import type { Series } from '@/types';
 import { useEffect, useState } from 'react';
 import { SeriesSection } from './SeriesSection';
@@ -13,26 +13,10 @@ interface HomeSeriesSectionProps {
 }
 
 export function HomeSeriesSection({ initialSeries }: HomeSeriesSectionProps) {
-  const hasInitialData = initialSeries && initialSeries.length > 0;
-  const [series, setSeries] = useState<Series[]>(initialSeries || []);
-  const [isLoading, setIsLoading] = useState(!hasInitialData);
+  const { data: series = [], isLoading } = useSeries(
+    initialSeries ? { initialData: initialSeries } : {}
+  );
   const [selectedIndex, setSelectedIndex] = useState(0);
-
-  useEffect(() => {
-    if (initialSeries && initialSeries.length > 0) return;
-
-    async function fetchSeries() {
-      try {
-        const data = await homeClient.getSeries();
-        setSeries(data || []);
-      } catch (error) {
-        console.error('Error fetching series:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    fetchSeries();
-  }, [initialSeries]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

@@ -1,6 +1,6 @@
 'use client';
-import { useEffect, useState, useCallback } from 'react';
-import { homeClient } from '@/api/client/home.client';
+import { useState, useCallback } from 'react';
+import { useRecommendedVideos } from '@/api/queries/home.queries';
 import type { Video } from '@/types';
 import { RailRow } from './rail-row';
 import { RailCard } from './rail-card';
@@ -11,27 +11,10 @@ interface RecommendedSectionProps {
 }
 
 export function RecommendedSection({ initialVideos }: RecommendedSectionProps) {
-  const hasInitialData = initialVideos && initialVideos.length > 0;
-  const [videos, setVideos] = useState<Video[]>(initialVideos || []);
-  const [isLoading, setIsLoading] = useState(!hasInitialData);
+  const { data: videos = [], isLoading } = useRecommendedVideos(
+    initialVideos ? { initialData: initialVideos } : {}
+  );
   const [previewVideo, setPreviewVideo] = useState<Video | null>(null);
-
-  useEffect(() => {
-    // Skip fetch if initial data was provided and has content
-    if (initialVideos && initialVideos.length > 0) return;
-
-    async function fetchVideos() {
-      try {
-        const data = await homeClient.getRecommendedVideos();
-        setVideos(data || []);
-      } catch (error) {
-        console.error('Error fetching recommended videos:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    fetchVideos();
-  }, [initialVideos]);
 
   const handleOpenPreview = useCallback((video: Video) => {
     setPreviewVideo(video);
