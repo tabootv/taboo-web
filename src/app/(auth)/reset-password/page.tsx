@@ -4,7 +4,9 @@ import { useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Eye, EyeOff, CheckCircle, Loader2 } from 'lucide-react';
+import posthog from 'posthog-js';
 import { authClient } from '@/api/client/auth.client';
+import { AnalyticsEvent } from '@/shared/lib/analytics/events';
 import { toast } from 'sonner';
 
 function ResetPasswordForm() {
@@ -51,6 +53,7 @@ function ResetPasswordForm() {
         password,
         password_confirmation: confirmPassword,
       });
+      posthog.capture(AnalyticsEvent.AUTH_PASSWORD_RESET_COMPLETED);
       setIsSuccess(true);
       toast.success('Password reset successfully!');
     } catch {

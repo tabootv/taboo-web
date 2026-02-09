@@ -3,7 +3,9 @@
 import { useState, useRef } from 'react';
 import Image from 'next/image';
 import { X } from 'lucide-react';
+import posthog from 'posthog-js';
 import { postsClient as postsApi } from '@/api/client/posts.client';
+import { AnalyticsEvent } from '@/shared/lib/analytics/events';
 import type { Post } from '@/types';
 import { toast } from 'sonner';
 
@@ -46,6 +48,10 @@ export function CreatePost({ onPostCreated }: CreatePostProps) {
 
     try {
       const newPost = await postsApi.create(postText, postImage || undefined);
+      posthog.capture(AnalyticsEvent.POST_CREATED, {
+        has_image: !!postImage,
+        content_length: postText.trim().length,
+      });
       onPostCreated(newPost);
       toast.success('Post created successfully!');
       setPostText('');

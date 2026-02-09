@@ -1,8 +1,10 @@
 'use client';
 
+import { AnalyticsEvent } from '@/shared/lib/analytics/events';
 import type { Notification } from '@/types';
 import { formatDistanceToNow } from 'date-fns';
 import { MoreVertical, Trash2, X } from 'lucide-react';
+import posthog from 'posthog-js';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -51,7 +53,16 @@ export function NotificationCard({ notification, onMarkRead, onDelete }: Notific
       </div>
 
       <div className="flex-1 min-w-0">
-        <Link href={link} className="block">
+        <Link
+          href={link}
+          className="block"
+          onClick={() => {
+            posthog.capture(AnalyticsEvent.NOTIFICATION_CLICKED, {
+              notification_type: notification.type,
+              is_unread: isUnread,
+            });
+          }}
+        >
           <p
             className={`text-sm ${
               isUnread ? 'text-text-primary font-medium' : 'text-text-secondary'

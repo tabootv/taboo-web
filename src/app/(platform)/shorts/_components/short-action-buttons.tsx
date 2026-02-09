@@ -2,9 +2,11 @@
 
 import { useToggleShortLike } from '@/api/mutations/shorts.mutations';
 import { useShortDetail } from '@/features/shorts/hooks/use-short-detail';
+import { AnalyticsEvent } from '@/shared/lib/analytics/events';
 import { formatCompactNumber } from '@/shared/utils/formatting';
 import type { Video } from '@/types';
 import { Heart, Share2 } from 'lucide-react';
+import posthog from 'posthog-js';
 import { useCallback } from 'react';
 import { toast } from 'sonner';
 
@@ -23,13 +25,23 @@ export function ShortActionButtons({ video }: ShortActionButtonsProps) {
   const likesCount = cachedShort?.likes_count ?? video.likes_count ?? 0;
 
   const handleLike = useCallback(() => {
+    const event = hasLiked ? AnalyticsEvent.SHORT_LIKE_REMOVED : AnalyticsEvent.SHORT_LIKED;
     toggleLike.mutate(video.uuid, {
+      onSuccess: () => {
+        posthog.capture(event, { short_uuid: video.uuid });
+      },
       onError: () => toast.error('Please login to like'),
     });
-  }, [toggleLike, video.uuid]);
+  }, [toggleLike, video.uuid, hasLiked]);
 
   const handleShare = useCallback(async () => {
     const shareUrl = `${window.location.origin}/shorts/${video.uuid}`;
+    const shareMethod = typeof navigator.share === 'function' ? 'native_share' : 'clipboard';
+
+    posthog.capture(AnalyticsEvent.SHORT_SHARED, {
+      short_uuid: video.uuid,
+      share_method: shareMethod,
+    });
 
     if (navigator.share) {
       try {

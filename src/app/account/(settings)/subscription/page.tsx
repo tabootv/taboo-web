@@ -20,6 +20,8 @@ import {
   XCircle,
 } from 'lucide-react';
 import Link from 'next/link';
+import posthog from 'posthog-js';
+import { AnalyticsEvent } from '@/shared/lib/analytics/events';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 const CANCEL_POLL_INTERVAL_MS = 3500;
@@ -154,6 +156,10 @@ export default function SubscriptionPage() {
 
   // Listen for visibility change after opening manage portal
   const handleManageClick = useCallback(() => {
+    posthog.capture(AnalyticsEvent.SUBSCRIPTION_MANAGE_CLICKED, {
+      provider: provider ?? 'unknown',
+      status: status ?? 'unknown',
+    });
     openManageSubscription();
 
     const handleVisibilityChange = () => {

@@ -9,7 +9,9 @@ import { useImmediateUploadV2 } from '../../hooks';
 import { Button } from '@/components/ui/button';
 import { fileReferenceStore } from '@/shared/stores/file-reference-store';
 import { cn } from '@/shared/utils/formatting';
+import { AnalyticsEvent } from '@/shared/lib/analytics/events';
 import { Lock, Upload as UploadIcon, X } from 'lucide-react';
+import posthog from 'posthog-js';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
@@ -416,6 +418,10 @@ export function UploadModal({
       const file = e.target.files?.[0];
       if (file && !uploadStartedRef.current) {
         uploadStartedRef.current = true;
+        posthog.capture(AnalyticsEvent.STUDIO_UPLOAD_STARTED, {
+          content_type: 'video',
+          file_size_mb: Math.round((file.size / 1024 / 1024) * 100) / 100,
+        });
         startUpload(file);
         setTitle(file.name.replace(/\.[^/.]+$/, ''));
         // Note: fileReferenceStore.set is called in startUpload via the hook
@@ -445,8 +451,14 @@ export function UploadModal({
     // - publish-now (auto) → live
     // - scheduled → live (will be scheduled server-side)
     const derivedVisibility = publishMode === 'none' ? 'draft' : 'live';
+    posthog.capture(AnalyticsEvent.STUDIO_CONTENT_PUBLISHED, {
+      content_type: isShort ? 'short' : 'video',
+      publish_mode: publishMode,
+      has_tags: tags.length > 0,
+      is_adult_content: isAdultContent,
+    });
     await publish(derivedVisibility);
-  }, [publish, publishMode]);
+  }, [publish, publishMode, isShort, tags.length, isAdultContent]);
 
   // Save handler for edit mode - uses UUID-based endpoints with schedule API
   const handleSaveChanges = useCallback(async () => {

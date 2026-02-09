@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { videoClient } from '@/api/client/video.client';
 import { useAuthStore } from '@/shared/stores/auth-store';
+import posthog from 'posthog-js';
+import { AnalyticsEvent } from '@/shared/lib/analytics/events';
 
 interface AutoplayButtonProps {
   onAutoplayChange?: (enabled: boolean) => void;
@@ -24,6 +26,7 @@ export function AutoplayButton({ onAutoplayChange, initialValue }: AutoplayButto
     const newValue = !autoplay;
     setAutoplay(newValue);
     onAutoplayChange?.(newValue);
+    posthog.capture(AnalyticsEvent.VIDEO_AUTOPLAY_TOGGLED, { is_enabled: newValue });
 
     try {
       await videoClient.toggleAutoplay();

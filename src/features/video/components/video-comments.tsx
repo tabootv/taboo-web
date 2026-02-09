@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
+import posthog from 'posthog-js';
 import { useAddComment } from '@/api/mutations/comments.mutations';
 import { useVideoComments } from '@/api/queries/video.queries';
+import { AnalyticsEvent } from '@/shared/lib/analytics/events';
 import { useAuthStore } from '@/shared/stores/auth-store';
 import type { Comment, Video } from '@/types';
 import { CommentInput, CommentList, filterValidComments } from './_comments';
@@ -45,6 +47,10 @@ export function VideoComments({ video, initialComments = [] }: VideoCommentsProp
       { content, user },
       {
         onSuccess: () => {
+          posthog.capture(AnalyticsEvent.COMMENT_CREATED, {
+            video_uuid: video.uuid,
+            comment_length: content.trim().length,
+          });
           setContent('');
         },
         onError: (error) => {
@@ -52,7 +58,7 @@ export function VideoComments({ video, initialComments = [] }: VideoCommentsProp
         },
       }
     );
-  }, [content, user, addCommentMutation]);
+  }, [content, user, addCommentMutation, video.uuid]);
 
   return (
     <div>

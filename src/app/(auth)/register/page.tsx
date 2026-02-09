@@ -5,8 +5,10 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { Mail, Lock, User, Loader2 } from 'lucide-react';
+import posthog from 'posthog-js';
 import { useGuestOnly } from '@/hooks';
 import { useSocialAuth } from '@/hooks/use-social-auth';
+import { AnalyticsEvent } from '@/shared/lib/analytics/events';
 import { useAuthStore } from '@/shared/stores/auth-store';
 import { getOnboardingRedirectPath } from '@/shared/lib/auth/profile-completion';
 import { applyPendingRedeemCode } from '@/shared/lib/redeem/apply-pending-code';
@@ -94,6 +96,7 @@ function RegisterContent() {
         privacy_policy: true,
         terms_and_condition: true,
       });
+      posthog.capture(AnalyticsEvent.AUTH_REGISTER_COMPLETED, { method: 'email' });
       toast.success('Account created successfully!');
       clearRegisterFlowToken();
 
@@ -109,6 +112,10 @@ function RegisterContent() {
       const onboardingPath = getOnboardingRedirectPath(user, isSubscribed);
       router.push(onboardingPath || '/');
     } catch (err) {
+      posthog.capture(AnalyticsEvent.AUTH_REGISTER_FAILED, {
+        method: 'email',
+        error_type: err instanceof AxiosError ? 'api_error' : 'unknown',
+      });
       if (err instanceof AxiosError && err.response?.data?.errors) {
         const apiErrors = err.response.data.errors;
         const formattedErrors: Record<string, string> = {};
@@ -125,6 +132,7 @@ function RegisterContent() {
   const handleGoogleSignIn = async () => {
     const result = await signInWithGoogle();
     if (result.success) {
+      posthog.capture(AnalyticsEvent.AUTH_REGISTER_COMPLETED, { method: 'google' });
       toast.success('Account created successfully!');
       clearRegisterFlowToken();
 
@@ -140,6 +148,10 @@ function RegisterContent() {
       const onboardingPath = getOnboardingRedirectPath(user, isSubscribed);
       router.push(onboardingPath || '/');
     } else if (result.error && result.error !== 'Sign-in cancelled') {
+      posthog.capture(AnalyticsEvent.AUTH_REGISTER_FAILED, {
+        method: 'google',
+        error_type: 'social_error',
+      });
       toast.error(result.error);
     }
   };
@@ -147,6 +159,7 @@ function RegisterContent() {
   const handleAppleSignIn = async () => {
     const result = await signInWithApple();
     if (result.success) {
+      posthog.capture(AnalyticsEvent.AUTH_REGISTER_COMPLETED, { method: 'apple' });
       toast.success('Account created successfully!');
       clearRegisterFlowToken();
 
@@ -162,6 +175,10 @@ function RegisterContent() {
       const onboardingPath = getOnboardingRedirectPath(user, isSubscribed);
       router.push(onboardingPath || '/');
     } else if (result.error && result.error !== 'Sign-in cancelled') {
+      posthog.capture(AnalyticsEvent.AUTH_REGISTER_FAILED, {
+        method: 'apple',
+        error_type: 'social_error',
+      });
       toast.error(result.error);
     }
   };

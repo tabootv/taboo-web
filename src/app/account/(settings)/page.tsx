@@ -8,6 +8,8 @@ import { useHandlerCheck } from '@/hooks/use-handler-check';
 import { useAuthStore } from '@/shared/stores/auth-store';
 import type { User } from '@/types';
 import { Camera, Check, Loader2, Mail, Phone, X } from 'lucide-react';
+import posthog from 'posthog-js';
+import { AnalyticsEvent } from '@/shared/lib/analytics/events';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { updateProfileAction } from '../_actions';
@@ -91,7 +93,7 @@ function ProfileSettingsForm({
 
     setIsSubmitting(true);
     try {
-      await updateProfileAction({
+      const payload = {
         first_name: formData.first_name,
         last_name: formData.last_name,
         display_name: formData.display_name,
@@ -99,8 +101,14 @@ function ProfileSettingsForm({
         gender: formData.gender,
         country_id: parseInt(formData.country_id, 10),
         ...(formData.phone_number && { phone_number: formData.phone_number }),
-      });
+      };
+      await updateProfileAction(payload);
       await onUpdate();
+      const userRecord = user as unknown as Record<string, unknown>;
+      const changedFields = Object.keys(payload).filter(
+        (key) => payload[key as keyof typeof payload] !== userRecord?.[key]
+      );
+      posthog.capture(AnalyticsEvent.PROFILE_UPDATED, { fields_changed: changedFields });
       toast.success('Profile updated successfully');
     } catch {
       toast.error('Failed to update profile');

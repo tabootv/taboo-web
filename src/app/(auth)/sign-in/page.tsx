@@ -2,12 +2,14 @@
 
 import { useGuestOnly } from '@/hooks';
 import { useSocialAuth } from '@/hooks/use-social-auth';
+import { AnalyticsEvent } from '@/shared/lib/analytics/events';
 import { getOnboardingRedirectPath } from '@/shared/lib/auth/profile-completion';
 import { setRegisterFlowToken } from '@/shared/lib/auth/register-flow-guard';
 import { applyPendingRedeemCode, saveRedeemCode } from '@/shared/lib/redeem/apply-pending-code';
 import { useAuthStore } from '@/shared/stores/auth-store';
 import { AxiosError } from 'axios';
 import { Loader2 } from 'lucide-react';
+import posthog from 'posthog-js';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useState } from 'react';
@@ -64,6 +66,7 @@ function SignInContent() {
 
     try {
       await login({ ...formData, remember_me: rememberMe });
+      posthog.capture(AnalyticsEvent.AUTH_LOGIN_COMPLETED, { method: 'email' });
       toast.success('Welcome back!');
 
       const redeemResult = await applyPendingRedeemCode(searchParams);
@@ -78,6 +81,10 @@ function SignInContent() {
       const onboardingPath = getOnboardingRedirectPath(user, isSubscribed);
       router.push(onboardingPath || '/');
     } catch (err) {
+      posthog.capture(AnalyticsEvent.AUTH_LOGIN_FAILED, {
+        method: 'email',
+        error_type: err instanceof AxiosError ? 'api_error' : 'unknown',
+      });
       if (err instanceof AxiosError && err.response?.data?.errors) {
         const apiErrors = err.response.data.errors;
         const formattedErrors: Record<string, string> = {};
@@ -94,6 +101,7 @@ function SignInContent() {
   const handleGoogleSignIn = async () => {
     const result = await signInWithGoogle();
     if (result.success) {
+      posthog.capture(AnalyticsEvent.AUTH_LOGIN_COMPLETED, { method: 'google' });
       toast.success('Welcome back!');
 
       const redeemResult = await applyPendingRedeemCode(searchParams);
@@ -108,6 +116,10 @@ function SignInContent() {
       const onboardingPath = getOnboardingRedirectPath(user, isSubscribed);
       router.push(onboardingPath || '/');
     } else if (result.error && result.error !== 'Sign-in cancelled') {
+      posthog.capture(AnalyticsEvent.AUTH_LOGIN_FAILED, {
+        method: 'google',
+        error_type: 'social_error',
+      });
       toast.error(result.error);
     }
   };
@@ -115,6 +127,7 @@ function SignInContent() {
   const handleAppleSignIn = async () => {
     const result = await signInWithApple();
     if (result.success) {
+      posthog.capture(AnalyticsEvent.AUTH_LOGIN_COMPLETED, { method: 'apple' });
       toast.success('Welcome back!');
 
       const redeemResult = await applyPendingRedeemCode(searchParams);
@@ -129,6 +142,10 @@ function SignInContent() {
       const onboardingPath = getOnboardingRedirectPath(user, isSubscribed);
       router.push(onboardingPath || '/');
     } else if (result.error && result.error !== 'Sign-in cancelled') {
+      posthog.capture(AnalyticsEvent.AUTH_LOGIN_FAILED, {
+        method: 'apple',
+        error_type: 'social_error',
+      });
       toast.error(result.error);
     }
   };

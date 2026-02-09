@@ -1,10 +1,12 @@
 'use client';
 
 import { useAddComment, useDeleteComment } from '@/api/mutations/comments.mutations';
+import { AnalyticsEvent } from '@/shared/lib/analytics/events';
 import { useAuthStore } from '@/shared/stores/auth-store';
 import type { Comment } from '@/types';
 import { Reply, Send, Trash2 } from 'lucide-react';
 import Image from 'next/image';
+import posthog from 'posthog-js';
 import { useCallback, useState, useTransition } from 'react';
 import { filterValidComments, getCommentKey } from './comment-utils';
 
@@ -44,6 +46,10 @@ export function SingleComment({
       { content: replyContent, parentId, user },
       {
         onSuccess: () => {
+          posthog.capture(AnalyticsEvent.COMMENT_REPLY_CREATED, {
+            video_uuid: videoUuid,
+            parent_comment_id: comment.parent_id ?? comment.id,
+          });
           setReplyContent('');
           setShowReplies(true);
           setShowReplyInput(false);
@@ -61,6 +67,7 @@ export function SingleComment({
     startDeleteTransition(async () => {
       try {
         await deleteComment.mutateAsync(comment.uuid);
+        posthog.capture(AnalyticsEvent.COMMENT_DELETED, { video_uuid: videoUuid });
       } catch (error) {
         console.error('Failed to delete comment:', error);
       }

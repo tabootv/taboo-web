@@ -4,8 +4,10 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Camera, User, Loader2, Check, X, ArrowRight, ShieldCheck } from 'lucide-react';
+import posthog from 'posthog-js';
 import { Button } from '@/components/ui/button';
 import { profileClient as profileApi } from '@/api/client/profile.client';
+import { AnalyticsEvent } from '@/shared/lib/analytics/events';
 import { useAuthStore } from '@/shared/stores/auth-store';
 import { useHandlerCheck } from '@/hooks/use-handler-check';
 import { useCountries } from '@/hooks/use-countries';
@@ -111,6 +113,10 @@ export default function CompleteProfilePage() {
   };
 
   const handleSkipPhoto = () => {
+    posthog.capture(AnalyticsEvent.ONBOARDING_PROFILE_STEP_COMPLETED, {
+      step: 'photo',
+      is_photo_skipped: true,
+    });
     setCurrentStep('details');
   };
 
@@ -124,6 +130,10 @@ export default function CompleteProfilePage() {
     try {
       const updatedUser = await profileApi.updateDisplayPicture(profileImageFile);
       updateUser(updatedUser);
+      posthog.capture(AnalyticsEvent.ONBOARDING_PROFILE_STEP_COMPLETED, {
+        step: 'photo',
+        is_photo_skipped: false,
+      });
       setCurrentStep('details');
     } catch {
       toast.error('Failed to upload photo');
@@ -161,6 +171,7 @@ export default function CompleteProfilePage() {
         ...(formData.phone_number && { phone_number: formData.phone_number }),
       });
       await fetchUser();
+      posthog.capture(AnalyticsEvent.ONBOARDING_PROFILE_STEP_COMPLETED, { step: 'details' });
       setCurrentStep('complete');
     } catch {
       toast.error('Failed to update profile');
@@ -170,6 +181,9 @@ export default function CompleteProfilePage() {
   };
 
   const handleComplete = () => {
+    posthog.capture(AnalyticsEvent.ONBOARDING_PROFILE_COMPLETED, {
+      has_avatar: !!(profileImage || user?.dp),
+    });
     const redirectPath = getOnboardingRedirectPath(useAuthStore.getState().user, isSubscribed);
     router.push(redirectPath || '/');
   };

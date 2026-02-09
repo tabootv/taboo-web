@@ -1,8 +1,10 @@
 'use client';
 
 import { videoClient } from '@/api/client/video.client';
+import { AnalyticsEvent } from '@/shared/lib/analytics/events';
 import type { Video } from '@/types';
 import { Heart } from 'lucide-react';
+import posthog from 'posthog-js';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -25,6 +27,12 @@ export function LikeButton({ video, onUpdate }: LikeButtonProps) {
 
       const newIsLiked = !isLiked;
       const newLikesCount = newIsLiked ? likesCount + 1 : likesCount - 1;
+
+      posthog.capture(newIsLiked ? AnalyticsEvent.VIDEO_LIKED : AnalyticsEvent.VIDEO_LIKE_REMOVED, {
+        video_id: video.uuid,
+        video_title: video.title,
+        content_type: video.is_short ? 'short' : 'video',
+      });
 
       setIsLiked(newIsLiked);
       setLikesCount(newLikesCount);

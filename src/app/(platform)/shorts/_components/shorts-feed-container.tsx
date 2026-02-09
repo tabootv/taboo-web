@@ -4,9 +4,11 @@ import { useShortsFeed } from '@/features/shorts/hooks/use-shorts-feed';
 import { useShortsKeyboard } from '@/features/shorts/hooks/use-shorts-keyboard';
 import { useShortsUrlSync } from '@/features/shorts/hooks/use-shorts-url-sync';
 import { useVerticalFeed } from '@/features/shorts/hooks/use-vertical-feed';
+import { AnalyticsEvent } from '@/shared/lib/analytics/events';
 import { useAuthStore } from '@/shared/stores/auth-store';
 import { useShortsStore } from '@/shared/stores/shorts-store';
 import { Loader2, LogIn, Video } from 'lucide-react';
+import posthog from 'posthog-js';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
@@ -76,7 +78,16 @@ export function ShortsFeedContainer({ initialUuid }: ShortsFeedContainerProps) {
 
   useEffect(() => {
     setShowComments(false);
-  }, [currentIndex, setShowComments]);
+    const currentShort = shorts[currentIndex];
+    if (currentShort) {
+      posthog.capture(AnalyticsEvent.SHORT_VIEWED, {
+        short_uuid: currentShort.uuid,
+        short_title: currentShort.title,
+        channel_name: currentShort.channel?.name,
+        position_in_feed: currentIndex,
+      });
+    }
+  }, [currentIndex, setShowComments, shorts]);
 
   const windowedSlides = useMemo(() => {
     if (shorts.length === 0) return { slides: [], startSpacer: 0, endSpacer: 0 };

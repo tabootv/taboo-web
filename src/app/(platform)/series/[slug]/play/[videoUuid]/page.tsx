@@ -31,7 +31,8 @@ export default function SeriesPlayerPage({
     videoUuid,
     playerData.nextEpisode ?? null,
     playerData.autoplayEnabled,
-    playerData.seriesData?.title
+    playerData.seriesData?.title,
+    playerData.currentVideo?.has_liked ?? false
   );
 
   useEpisodeScroll(episodesRef, playerData.currentEpisodeIndex);

@@ -8,8 +8,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { AnalyticsEvent } from '@/shared/lib/analytics/events';
 import { cn } from '@/shared/utils/formatting';
 import { Calendar, ChevronDown, Eye, EyeOff, Globe, Loader2, Lock, X } from 'lucide-react';
+import posthog from 'posthog-js';
 import { useState } from 'react';
 
 /**
@@ -81,6 +83,10 @@ export function VisibilityDropdown({
   const handlePublishNow = async () => {
     setIsUpdating(true);
     try {
+      posthog.capture(AnalyticsEvent.STUDIO_VISIBILITY_CHANGED, {
+        from_visibility: visibility,
+        to_visibility: 'live',
+      });
       await onVisibilityChange('live');
       setOpen(false);
     } finally {
@@ -93,6 +99,10 @@ export function VisibilityDropdown({
 
     setIsUpdating(true);
     try {
+      posthog.capture(AnalyticsEvent.STUDIO_VISIBILITY_CHANGED, {
+        from_visibility: visibility,
+        to_visibility: 'scheduled',
+      });
       await onVisibilityChange('scheduled', new Date(selectedDate));
       setOpen(false);
       setShowSchedulePicker(false);

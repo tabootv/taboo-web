@@ -127,6 +127,10 @@ export default function CourseDetailPage({ params }: { params: Promise<{ id: str
                   url_1080={courseData.trailer_url}
                   autoplay={true}
                   onEnded={handleTrailerEnded}
+                  videoId={courseData.uuid}
+                  videoTitle={courseData.title}
+                  channelName={courseData.channel?.name}
+                  contentType="course_lesson"
                 />
               </div>
             )}

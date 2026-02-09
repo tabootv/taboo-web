@@ -266,6 +266,11 @@ export default function VideoPage() {
                 autoplay={autoplayEnabled}
                 onEnded={handleVideoEnded}
                 isBunnyVideo={video.is_bunny_video}
+                videoId={video.uuid}
+                videoTitle={video.title}
+                channelName={video.channel?.name}
+                contentType="video"
+                videoDuration={video.duration}
               />
             </div>
 

@@ -1,9 +1,11 @@
 'use client';
 
 import { useToggleFollowCreator } from '@/api/mutations';
+import { AnalyticsEvent } from '@/shared/lib/analytics/events';
 import { cn } from '@/shared/utils/formatting';
 import type { Creator } from '@/types';
 import { Check, Loader2 } from 'lucide-react';
+import posthog from 'posthog-js';
 
 export interface CreatorFollowButtonProps {
   creator: Creator;
@@ -22,6 +24,14 @@ export function CreatorFollowButton({ creator, size = 'sm', className }: Creator
     e.stopPropagation();
 
     if (isPending) return;
+
+    posthog.capture(
+      isFollowing ? AnalyticsEvent.CREATOR_UNFOLLOWED : AnalyticsEvent.CREATOR_FOLLOWED,
+      {
+        creator_id: creator.id,
+        creator_name: creator.name,
+      }
+    );
 
     toggleFollowMutation.mutate({
       creatorId: creator.id,

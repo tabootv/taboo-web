@@ -9,9 +9,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { AnalyticsEvent } from '@/shared/lib/analytics/events';
 import { cn } from '@/shared/utils/formatting';
 import { Download, MoreVertical, Pencil, Play, Share2, Trash2 } from 'lucide-react';
 import Link from 'next/link';
+import posthog from 'posthog-js';
 import { toast } from 'sonner';
 import type { Visibility } from './VisibilityDropdown';
 
@@ -122,7 +124,16 @@ export function ContentTableActions({
               Download
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={onDelete} className="text-red-500 focus:text-red-500">
+            <DropdownMenuItem
+              onClick={() => {
+                posthog.capture(AnalyticsEvent.STUDIO_CONTENT_DELETED, {
+                  content_type: isShort ? 'short' : 'video',
+                  video_uuid: videoUuid,
+                });
+                onDelete();
+              }}
+              className="text-red-500 focus:text-red-500"
+            >
               <Trash2 className="w-4 h-4 mr-2" />
               Delete
             </DropdownMenuItem>

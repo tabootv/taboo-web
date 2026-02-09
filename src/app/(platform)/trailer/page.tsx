@@ -93,7 +93,13 @@ function TrailerContent() {
       {/* Video Player */}
       <div className="w-full h-screen flex items-center justify-center">
         <div className="w-full max-w-6xl aspect-video">
-          <VideoPlayer url_720={trailerUrl} autoplay={true} className="w-full h-full" />
+          <VideoPlayer
+            url_720={trailerUrl}
+            autoplay={true}
+            className="w-full h-full"
+            videoId={seriesId ?? courseId ?? undefined}
+            videoTitle={title}
+          />
         </div>
       </div>
     </div>

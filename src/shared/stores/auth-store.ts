@@ -1,6 +1,8 @@
 import { authClient, AuthenticatedMeResponse } from '@/api/client/auth.client';
+import { AnalyticsEvent } from '@/shared/lib/analytics/events';
 import { isProfileComplete } from '@/shared/lib/auth/profile-completion';
 import type { FirebaseLoginData, LoginCredentials, RegisterData, User } from '@/types';
+import posthog from 'posthog-js';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
@@ -56,6 +58,13 @@ export const useAuthStore = create<AuthState>()(
             isInitialized: true,
             isLoading: false,
           });
+          posthog.identify(response.user.email, {
+            name:
+              (response.user.display_name ??
+                [response.user.first_name, response.user.last_name].filter(Boolean).join(' ')) ||
+              response.user.email,
+            subscribed,
+          });
         } catch (error: unknown) {
           const message = error instanceof Error ? error.message : 'Login failed';
           set({ error: message, isLoading: false });
@@ -76,6 +85,13 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: true,
             isInitialized: true,
             isLoading: false,
+          });
+          posthog.identify(response.user.email, {
+            name:
+              (response.user.display_name ??
+                [response.user.first_name, response.user.last_name].filter(Boolean).join(' ')) ||
+              response.user.email,
+            subscribed,
           });
         } catch (error: unknown) {
           const message = error instanceof Error ? error.message : 'Registration failed';
@@ -98,6 +114,13 @@ export const useAuthStore = create<AuthState>()(
             isInitialized: true,
             isLoading: false,
           });
+          posthog.identify(response.user.email, {
+            name:
+              (response.user.display_name ??
+                [response.user.first_name, response.user.last_name].filter(Boolean).join(' ')) ||
+              response.user.email,
+            subscribed,
+          });
           return response.requires_username !== undefined
             ? { requires_username: response.requires_username }
             : {};
@@ -116,6 +139,8 @@ export const useAuthStore = create<AuthState>()(
         } catch {
           // Ignore logout errors - clear local state anyway
         } finally {
+          posthog.capture(AnalyticsEvent.AUTH_LOGOUT_COMPLETED);
+          posthog.reset();
           set({
             user: null,
             isSubscribed: false,
@@ -141,6 +166,13 @@ export const useAuthStore = create<AuthState>()(
               isProfileComplete: isProfileComplete(user),
               isAuthenticated: true,
               isLoading: false,
+            });
+            posthog.identify(user.email, {
+              name:
+                (user.display_name ??
+                  [user.first_name, user.last_name].filter(Boolean).join(' ')) ||
+                user.email,
+              subscribed,
             });
           } else {
             set({

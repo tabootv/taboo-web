@@ -4,7 +4,9 @@ import { Suspense, useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Loader2, CheckCircle } from 'lucide-react';
+import posthog from 'posthog-js';
 import { authClient } from '@/api/client/auth.client';
+import { AnalyticsEvent } from '@/shared/lib/analytics/events';
 import { toast } from 'sonner';
 
 type Step = 'email' | 'otp' | 'success';
@@ -38,6 +40,7 @@ function ForgotPasswordContent() {
 
     try {
       await authClient.forgotPassword(email);
+      posthog.capture(AnalyticsEvent.AUTH_PASSWORD_RESET_REQUESTED);
       setStep('otp');
       toast.success('Verification code sent to your email');
     } catch {

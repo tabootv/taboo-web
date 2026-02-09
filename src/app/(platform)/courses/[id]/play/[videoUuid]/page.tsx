@@ -146,6 +146,11 @@ export default function CoursePlayerPage({
                 autoplay={autoplayEnabled}
                 onEnded={handleVideoEnded}
                 isBunnyVideo={currentVideo.is_bunny_video}
+                videoId={currentVideo.uuid}
+                videoTitle={currentVideo.title}
+                channelName={currentVideo.channel?.name}
+                contentType="course_lesson"
+                videoDuration={currentVideo.duration}
               />
             </div>
 

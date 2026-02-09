@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/shared/stores/auth-store';
 import { AlertCircle, ArrowLeft, CheckCircle, Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import Link from 'next/link';
+import posthog from 'posthog-js';
+import { AnalyticsEvent } from '@/shared/lib/analytics/events';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { updatePasswordAction } from '../../_actions';
@@ -59,6 +61,7 @@ export default function PasswordSettings() {
       setNewPassword('');
       setConfirmPassword('');
       setError('');
+      posthog.capture(AnalyticsEvent.PASSWORD_CHANGED);
       toast.success('Password updated successfully');
     } catch (err: unknown) {
       const apiErr = err as { response?: { data?: { message?: string } } };

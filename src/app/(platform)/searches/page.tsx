@@ -2,13 +2,15 @@
 
 import { Spinner } from '@/components/ui/spinner';
 import { useMixedSearch } from '@/hooks/useMixedSearch';
+import { AnalyticsEvent } from '@/shared/lib/analytics/events';
 import { formatDuration, getCreatorRoute } from '@/shared/utils/formatting';
 import type { Creator, Video } from '@/types';
 import { Search as SearchIcon, X } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { Suspense, useEffect, useState } from 'react';
+import posthog from 'posthog-js';
+import { Suspense, useEffect, useRef, useState } from 'react';
 
 function SearchContent() {
   const searchParams = useSearchParams();
@@ -18,6 +20,20 @@ function SearchContent() {
 
   const { filteredVideos, filteredCreators, isLoading, countryHeader, hasResults } =
     useMixedSearch(query);
+
+  // Track search_performed after results load (debounced by the transition from loading → not loading)
+  const prevLoadingRef = useRef(isLoading);
+  useEffect(() => {
+    if (prevLoadingRef.current && !isLoading && query) {
+      posthog.capture(AnalyticsEvent.SEARCH_PERFORMED, {
+        query,
+        results_count_videos: filteredVideos.length,
+        results_count_creators: filteredCreators.length,
+        has_results: hasResults,
+      });
+    }
+    prevLoadingRef.current = isLoading;
+  }, [isLoading, query, filteredVideos.length, filteredCreators.length, hasResults]);
 
   useEffect(() => {
     if (query !== initialQuery) {
@@ -122,8 +138,13 @@ function SearchContent() {
             <section>
               <h2 className="text-lg font-semibold text-text-primary mb-4">Videos</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {filteredVideos.map((video) => (
-                  <VideoCard key={video.uuid || video.id} video={video} />
+                {filteredVideos.map((video, index) => (
+                  <VideoCard
+                    key={video.uuid || video.id}
+                    video={video}
+                    query={query}
+                    position={index}
+                  />
                 ))}
               </div>
             </section>
@@ -134,8 +155,8 @@ function SearchContent() {
             <section>
               <h2 className="text-lg font-semibold text-text-primary mb-4">{countryHeader}</h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-                {filteredCreators.map((creator) => (
-                  <CreatorCard key={creator.id} creator={creator} />
+                {filteredCreators.map((creator, index) => (
+                  <CreatorCard key={creator.id} creator={creator} query={query} position={index} />
                 ))}
               </div>
             </section>
@@ -146,9 +167,20 @@ function SearchContent() {
   );
 }
 
-function VideoCard({ video }: { video: Video }) {
+function VideoCard({ video, query, position }: { video: Video; query: string; position: number }) {
   return (
-    <Link href={`/videos/${video.id}`} className="group">
+    <Link
+      href={`/videos/${video.id}`}
+      className="group"
+      onClick={() =>
+        posthog.capture(AnalyticsEvent.SEARCH_RESULT_CLICKED, {
+          query,
+          result_type: 'video',
+          result_id: video.uuid || video.id,
+          position,
+        })
+      }
+    >
       <div className="relative aspect-video rounded-lg overflow-hidden bg-surface">
         {video.thumbnail && (
           <Image
@@ -174,11 +206,27 @@ function VideoCard({ video }: { video: Video }) {
   );
 }
 
-function CreatorCard({ creator }: { creator: Creator }) {
+function CreatorCard({
+  creator,
+  query,
+  position,
+}: {
+  creator: Creator;
+  query: string;
+  position: number;
+}) {
   return (
     <Link
       href={getCreatorRoute(creator.handler)}
       className="flex flex-col items-center p-4 bg-surface border border-border rounded-xl hover:border-red-primary/50 transition-all"
+      onClick={() =>
+        posthog.capture(AnalyticsEvent.SEARCH_RESULT_CLICKED, {
+          query,
+          result_type: 'creator',
+          result_id: creator.id,
+          position,
+        })
+      }
     >
       <div className="relative w-20 h-20 rounded-full overflow-hidden bg-surface mb-3">
         {creator.dp && <Image src={creator.dp} alt={creator.name} fill className="object-cover" />}

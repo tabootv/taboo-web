@@ -1,9 +1,11 @@
 'use client';
 
 import { useFeature } from '@/hooks/use-feature';
+import { AnalyticsEvent } from '@/shared/lib/analytics/events';
 import { useSavedVideosStore, type SavedVideo } from '@/shared/stores/saved-videos-store';
 import type { Video } from '@/types';
 import { Bookmark } from 'lucide-react';
+import posthog from 'posthog-js';
 import { useCallback, useEffect, useState } from 'react';
 
 interface SaveButtonProps {
@@ -35,6 +37,10 @@ export function SaveButton({ video }: SaveButtonProps) {
       savedAt: Date.now(),
     };
     const newState = toggleSave(savedVideo);
+    posthog.capture(newState ? AnalyticsEvent.VIDEO_SAVED : AnalyticsEvent.VIDEO_UNSAVED, {
+      video_id: video.id,
+      video_title: video.title,
+    });
     setSaved(newState);
   }, [video, toggleSave]);
 

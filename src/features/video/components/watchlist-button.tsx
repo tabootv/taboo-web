@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Bookmark } from 'lucide-react';
+import posthog from 'posthog-js';
+import { AnalyticsEvent } from '@/shared/lib/analytics/events';
 import {
   useWatchlistStore,
   type WatchlistItem,
@@ -63,6 +65,14 @@ export function WatchlistButton({
     };
 
     const newState = toggleWatchlist(watchlistItem);
+    posthog.capture(
+      newState ? AnalyticsEvent.WATCHLIST_ITEM_ADDED : AnalyticsEvent.WATCHLIST_ITEM_REMOVED,
+      {
+        item_id: itemId,
+        item_type: type,
+        title: item.title,
+      }
+    );
     setInWatchlist(newState);
   }, [item, itemId, type, toggleWatchlist]);
 

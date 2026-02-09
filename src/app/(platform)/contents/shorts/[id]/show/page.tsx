@@ -97,6 +97,11 @@ export default function ShowShortPage({ params }: { params: Promise<{ id: string
                 url_480={short.url_480 ?? null}
                 className="w-full h-full"
                 isBunnyVideo={short.is_bunny_video}
+                videoId={short.uuid}
+                videoTitle={short.title}
+                channelName={short.channel?.name}
+                contentType="short"
+                videoDuration={short.duration}
               />
             ) : (
               <div className="w-full h-full relative flex items-center justify-center">

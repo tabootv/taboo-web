@@ -1,9 +1,11 @@
 'use client';
 
 import { subscriptionsClient as subscriptionsApi } from '@/api/client/subscriptions.client';
+import { AnalyticsEvent } from '@/shared/lib/analytics/events';
 import { useAuthStore } from '@/shared/stores/auth-store';
 import type { Plan } from '@/types';
 import { ArrowRight, Check, Gift, Loader2 } from 'lucide-react';
+import posthog from 'posthog-js';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -36,6 +38,15 @@ export function RedeemContent() {
 
   const hasAutoValidated = useRef(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const hadPreviousSubRef = useRef(false);
+
+  // Check for existing subscription on mount to determine renewal vs new
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    subscriptionsApi.getSubscription().then((sub) => {
+      hadPreviousSubRef.current = sub !== null;
+    });
+  }, [isAuthenticated]);
 
   // Read ?code= query param for pre-filling
   const codeFromUrl = searchParams.get('code');
@@ -114,8 +125,10 @@ export function RedeemContent() {
     try {
       const result = await subscriptionsApi.validateRedeemCode(code);
       if (result.valid && result.plan) {
+        posthog.capture(AnalyticsEvent.SUBSCRIPTION_REDEEM_CODE_SUBMITTED, { is_valid: true });
         setValidatedPlan(result.plan);
       } else {
+        posthog.capture(AnalyticsEvent.SUBSCRIPTION_REDEEM_CODE_SUBMITTED, { is_valid: false });
         setError(result.message || 'Invalid redeem code. Please check and try again.');
       }
     } catch {
@@ -134,6 +147,15 @@ export function RedeemContent() {
     try {
       const result = await subscriptionsApi.applyRedeemCode(code);
       if (result.subscribed) {
+        posthog.capture(AnalyticsEvent.SUBSCRIPTION_REDEEM_CODE_APPLIED, {
+          plan_name: validatedPlan?.name,
+          is_renewal: hadPreviousSubRef.current,
+          $set_once: { first_subscribed_at: new Date().toISOString() },
+          $set: {
+            last_subscribed_at: new Date().toISOString(),
+            last_subscription_plan: validatedPlan?.name,
+          },
+        });
         setSubscribed(true);
         toast.success('Redeem code applied! Your subscription is now active.');
         router.push('/');

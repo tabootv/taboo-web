@@ -1,15 +1,17 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Check, Crown, Star, Sparkles } from 'lucide-react';
+import posthog from 'posthog-js';
 import { subscriptionsClient as subscriptionsApi } from '@/api/client/subscriptions.client';
 import type { Plan } from '@/types';
 import { useAuthStore } from '@/shared/stores/auth-store';
 import { setRegisterFlowToken } from '@/shared/lib/auth/register-flow-guard';
 import { useCountryCode } from '@/hooks/use-country-code';
 import { RedeemCodeCard } from '@/components/redeem/redeem-code-card';
+import { AnalyticsEvent } from '@/shared/lib/analytics/events';
 import { saveRedeemCode } from '@/shared/lib/redeem/apply-pending-code';
 import { toast } from 'sonner';
 
@@ -47,6 +49,17 @@ export function ChoosePlanContent() {
   const ref = searchParams.get('ref') || undefined;
   const redeemCode = searchParams.get('redeem_code') || undefined;
 
+  const hasTrackedView = useRef(false);
+  const hadPreviousSubRef = useRef(false);
+
+  // Check for existing subscription on mount to determine renewal vs new
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    subscriptionsApi.getSubscription().then((sub) => {
+      hadPreviousSubRef.current = sub !== null;
+    });
+  }, [isAuthenticated]);
+
   // Save redeem code to localStorage for unauthenticated users so it survives the sign-in/register chain
   useEffect(() => {
     if (redeemCode && !isAuthenticated) {
@@ -63,6 +76,15 @@ export function ChoosePlanContent() {
         const status = await subscriptionsApi.getStatus();
         if (status.is_subscribed) {
           setSubscribed(true);
+          posthog.capture(AnalyticsEvent.SUBSCRIPTION_PAYMENT_COMPLETED, {
+            plan: selectedPlan,
+            is_renewal: hadPreviousSubRef.current,
+            $set_once: { first_subscribed_at: new Date().toISOString() },
+            $set: {
+              last_subscribed_at: new Date().toISOString(),
+              last_subscription_plan: selectedPlan,
+            },
+          });
           toast.success('Subscription activated! Welcome to TabooTV.');
           router.push('/');
           return;
@@ -81,7 +103,7 @@ export function ChoosePlanContent() {
     } finally {
       setIsVerifying(false);
     }
-  }, [router, setSubscribed]);
+  }, [router, selectedPlan, setSubscribed]);
 
   // Handle return from checkout
   useEffect(() => {
@@ -118,6 +140,17 @@ export function ChoosePlanContent() {
   const activePlan = selectedPlan === 'monthly' ? monthlyPlan : yearlyPlan;
   const yearlySavings = calcYearlySavings(monthlyPlan, yearlyPlan);
 
+  // Track plan view once after plans load
+  useEffect(() => {
+    if (!isLoading && plans.length > 0 && !hasTrackedView.current) {
+      hasTrackedView.current = true;
+      posthog.capture(AnalyticsEvent.SUBSCRIPTION_PLAN_VIEWED, {
+        is_authenticated: isAuthenticated,
+        has_redeem_code: !!redeemCode,
+      });
+    }
+  }, [isLoading, plans.length, isAuthenticated, redeemCode]);
+
   // Dynamic trial days
   const trialDays = activePlan?.trial_days;
 
@@ -135,12 +168,22 @@ export function ChoosePlanContent() {
 
     // If plan has Whop plan ID, show embedded checkout
     if (activePlan.whop_plan_id) {
+      posthog.capture(AnalyticsEvent.SUBSCRIPTION_CHECKOUT_STARTED, {
+        plan: selectedPlan,
+        price: activePlan.price,
+        method: 'whop_embedded',
+      });
       setShowCheckout(true);
       return;
     }
 
     // Fallback to redirect if no whop_plan_id but has URL
     if (activePlan.whop_plan_url) {
+      posthog.capture(AnalyticsEvent.SUBSCRIPTION_CHECKOUT_STARTED, {
+        plan: selectedPlan,
+        price: activePlan.price,
+        method: 'whop_redirect',
+      });
       const returnUrl = encodeURIComponent(`${window.location.origin}/choose-plan?status=success`);
       const checkoutUrl = activePlan.whop_plan_url.includes('?')
         ? `${activePlan.whop_plan_url}&redirect_url=${returnUrl}`
@@ -150,7 +193,7 @@ export function ChoosePlanContent() {
     }
 
     toast.error('Checkout not available for this plan');
-  }, [activePlan, isAuthenticated, redeemCode, router]);
+  }, [activePlan, isAuthenticated, redeemCode, router, selectedPlan]);
 
   // Return URL for Whop checkout - use state to avoid SSR mismatch
   const [checkoutReturnUrl, setCheckoutReturnUrl] = useState('');
@@ -293,7 +336,15 @@ export function ChoosePlanContent() {
               {/* Plan Toggle */}
               <PlanToggle
                 selectedPlan={selectedPlan}
-                onSelect={setSelectedPlan}
+                onSelect={(plan) => {
+                  setSelectedPlan(plan);
+                  const selected = plan === 'monthly' ? monthlyPlan : yearlyPlan;
+                  posthog.capture(AnalyticsEvent.SUBSCRIPTION_PLAN_SELECTED, {
+                    plan,
+                    price: selected?.price,
+                    currency: selected?.currency,
+                  });
+                }}
                 yearlySavings={yearlySavings}
               />
 
