@@ -12,7 +12,7 @@ import { Loader2 } from 'lucide-react';
 import posthog from 'posthog-js';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 function SignInContent() {
@@ -36,6 +36,33 @@ function SignInContent() {
   const [rememberMe, setRememberMe] = useState(false);
 
   const isAnyLoading = isLoading || socialLoading;
+
+  // Prefetch home route so RSC payload + JS chunks load in parallel with login
+  useEffect(() => {
+    router.prefetch('/');
+  }, [router]);
+
+  /**
+   * Navigate immediately after login, then fire analytics/redeem in background.
+   * This removes ~500ms of blocking work from the critical path.
+   */
+  const navigateAndDeferPostLogin = (method: 'email' | 'google' | 'apple') => {
+    const { user, isSubscribed } = useAuthStore.getState();
+    const onboardingPath = getOnboardingRedirectPath(user, isSubscribed);
+    router.push(onboardingPath || '/');
+
+    // Fire-and-forget: toast, analytics, redeem code
+    toast.success('Welcome back!');
+    posthog.capture(AnalyticsEvent.AUTH_LOGIN_COMPLETED, { method });
+    applyPendingRedeemCode(searchParams).then((redeemResult) => {
+      if (redeemResult.applied && redeemResult.success) {
+        useAuthStore.getState().setSubscribed(true);
+        toast.success(redeemResult.message || 'Subscription activated!');
+      } else if (redeemResult.applied && !redeemResult.success) {
+        toast.error(redeemResult.message);
+      }
+    });
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -66,20 +93,7 @@ function SignInContent() {
 
     try {
       await login({ ...formData, remember_me: rememberMe });
-      posthog.capture(AnalyticsEvent.AUTH_LOGIN_COMPLETED, { method: 'email' });
-      toast.success('Welcome back!');
-
-      const redeemResult = await applyPendingRedeemCode(searchParams);
-      if (redeemResult.applied && redeemResult.success) {
-        useAuthStore.getState().setSubscribed(true);
-        toast.success(redeemResult.message || 'Subscription activated!');
-      } else if (redeemResult.applied && !redeemResult.success) {
-        toast.error(redeemResult.message);
-      }
-
-      const { user, isSubscribed } = useAuthStore.getState();
-      const onboardingPath = getOnboardingRedirectPath(user, isSubscribed);
-      router.push(onboardingPath || '/');
+      navigateAndDeferPostLogin('email');
     } catch (err) {
       posthog.capture(AnalyticsEvent.AUTH_LOGIN_FAILED, {
         method: 'email',
@@ -101,20 +115,7 @@ function SignInContent() {
   const handleGoogleSignIn = async () => {
     const result = await signInWithGoogle();
     if (result.success) {
-      posthog.capture(AnalyticsEvent.AUTH_LOGIN_COMPLETED, { method: 'google' });
-      toast.success('Welcome back!');
-
-      const redeemResult = await applyPendingRedeemCode(searchParams);
-      if (redeemResult.applied && redeemResult.success) {
-        useAuthStore.getState().setSubscribed(true);
-        toast.success(redeemResult.message || 'Subscription activated!');
-      } else if (redeemResult.applied && !redeemResult.success) {
-        toast.error(redeemResult.message);
-      }
-
-      const { user, isSubscribed } = useAuthStore.getState();
-      const onboardingPath = getOnboardingRedirectPath(user, isSubscribed);
-      router.push(onboardingPath || '/');
+      navigateAndDeferPostLogin('google');
     } else if (result.error && result.error !== 'Sign-in cancelled') {
       posthog.capture(AnalyticsEvent.AUTH_LOGIN_FAILED, {
         method: 'google',
@@ -127,20 +128,7 @@ function SignInContent() {
   const handleAppleSignIn = async () => {
     const result = await signInWithApple();
     if (result.success) {
-      posthog.capture(AnalyticsEvent.AUTH_LOGIN_COMPLETED, { method: 'apple' });
-      toast.success('Welcome back!');
-
-      const redeemResult = await applyPendingRedeemCode(searchParams);
-      if (redeemResult.applied && redeemResult.success) {
-        useAuthStore.getState().setSubscribed(true);
-        toast.success(redeemResult.message || 'Subscription activated!');
-      } else if (redeemResult.applied && !redeemResult.success) {
-        toast.error(redeemResult.message);
-      }
-
-      const { user, isSubscribed } = useAuthStore.getState();
-      const onboardingPath = getOnboardingRedirectPath(user, isSubscribed);
-      router.push(onboardingPath || '/');
+      navigateAndDeferPostLogin('apple');
     } else if (result.error && result.error !== 'Sign-in cancelled') {
       posthog.capture(AnalyticsEvent.AUTH_LOGIN_FAILED, {
         method: 'apple',
