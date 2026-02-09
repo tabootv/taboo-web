@@ -1,31 +1,28 @@
 'use client';
 import { useUpdateAvatar } from '@/api/mutations';
-import { useBookmarkedVideos, useHistoryVideos, useLikedVideos } from '@/api/queries/video.queries';
+import { useBookmarkedVideos, useHistoryVideos } from '@/api/queries/video.queries';
+import { RedeemCodeCard } from '@/components/redeem/redeem-code-card';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { LoadingScreen } from '@/components/ui/spinner';
 import { useFeature } from '@/hooks/use-feature';
 import { useAuthStore } from '@/shared/stores/auth-store';
-import { formatCompactNumber } from '@/shared/utils/formatting';
 import type { Video } from '@/types';
-import { RedeemCodeCard } from '@/components/redeem/redeem-code-card';
-import { Bookmark, Camera, Clock, CreditCard, Heart, Lock, LogOut, Settings } from 'lucide-react';
+import { Bookmark, Camera, Clock, CreditCard, Lock, LogOut, Settings } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
-type TabType = 'bookmarks' | 'history' | 'liked';
+type TabType = 'bookmarks' | 'history';
 
 export default function ProfilePage() {
   const router = useRouter();
   const { user, logout, fetchUser } = useAuthStore();
   const bookmarksEnabled = useFeature('BOOKMARK_SYSTEM');
   const historyEnabled = useFeature('WATCH_HISTORY');
-  const [activeTab, setActiveTab] = useState<TabType>(
-    bookmarksEnabled ? 'bookmarks' : historyEnabled ? 'history' : 'liked'
-  );
+  const [activeTab, setActiveTab] = useState<TabType>(bookmarksEnabled ? 'bookmarks' : 'history');
   const updateAvatar = useUpdateAvatar();
   const [isUploadingDp, setIsUploadingDp] = useState(false);
 
@@ -35,12 +32,9 @@ export default function ProfilePage() {
   const { data: historyData, isLoading: isLoadingHistory } = useHistoryVideos(1, 12, {
     enabled: historyEnabled,
   });
-  const { data: likedData, isLoading: isLoadingLiked } = useLikedVideos(1, 12);
-
-  const isLoading = isLoadingBookmarks || isLoadingHistory || isLoadingLiked;
+  const isLoading = isLoadingBookmarks || isLoadingHistory;
   const bookmarks = bookmarksData?.data || [];
   const history = historyData?.data || [];
-  const liked = likedData?.data || [];
 
   const handleLogout = async () => {
     try {
@@ -86,7 +80,6 @@ export default function ProfilePage() {
     ...(historyEnabled
       ? [{ id: 'history' as TabType, label: 'History', icon: Clock, count: history.length }]
       : []),
-    { id: 'liked' as TabType, label: 'Liked', icon: Heart, count: liked.length },
   ];
 
   const getActiveVideos = () => {
@@ -95,15 +88,13 @@ export default function ProfilePage() {
         return bookmarks;
       case 'history':
         return history;
-      case 'liked':
-        return liked;
       default:
         return [];
     }
   };
 
   return (
-    <div className="account-container py-6 min-h-screen">
+    <div className="page-px max-w-[1920px] py-6 min-h-screen">
       {/* Profile Header */}
       <div className="bg-surface rounded-lg elevation-low border border-border overflow-hidden">
         {/* Cover */}
@@ -151,13 +142,13 @@ export default function ProfilePage() {
       </div>
 
       {/* Quick Links */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
         <Link
           href="/account"
           className="flex items-center gap-3 p-4 bg-surface rounded-md border border-border hover:bg-hover transition-colors"
         >
-          <div className="p-2 bg-hover rounded-sm">
-            <Settings className="w-5 h-5 text-text-secondary" />
+          <div className="p-2 bg-red-primary/10 rounded-sm">
+            <Settings className="w-5 h-5 text-red-primary" />
           </div>
           <div>
             <p className="font-medium text-text-primary">Settings</p>
@@ -264,9 +255,6 @@ function VideoCard({ video }: { video: Video }) {
           {video.title}
         </h3>
         <p className="text-sm text-text-secondary mt-1">{video.channel?.name}</p>
-        <p className="text-xs text-text-secondary">
-          {formatCompactNumber(video.views_count ?? 0)} views
-        </p>
       </div>
     </Link>
   );
