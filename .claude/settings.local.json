@@ -93,7 +93,20 @@
       "Bash(superdesign create-design-draft:*)",
       "Bash(superdesign iterate-design-draft:*)",
       "WebFetch(domain:raw.githubusercontent.com)",
-      "Bash(superdesign get-design:*)"
+      "Bash(superdesign get-design:*)",
+      "Bash(npx next:*)",
+      "Bash(git -C /Users/igaosoza/workspace/www/tabootv/taboo-web diff --cached)",
+      "Bash(git -C /Users/igaosoza/workspace/www/tabootv/taboo-web commit -m \"$\\(cat <<''EOF''\nperf\\(firebase\\): lazy-load Firebase SDK via dynamic imports\n\nFirebase \\(~131 KB\\) was eagerly imported at module level, shipping to all\nusers even though it''s only needed for Google/Apple social login. Convert\nall imports to dynamic import\\(\\) so Firebase loads on-demand when a user\nclicks a social login button. Also removes the unused getFirebaseAnalytics\nexport.\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git -C /Users/igaosoza/workspace/www/tabootv/taboo-web diff --cached --stat)",
+      "Bash(git -C /Users/igaosoza/workspace/www/tabootv/taboo-web commit -m \"$\\(cat <<''EOF''\nperf\\(deps\\): remove unused dayjs dependency\n\ndayjs was in dependencies but had zero imports in src/. The app uses\ndate-fns instead. Removing it saves ~7 KB from the production bundle.\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git -C /Users/igaosoza/workspace/www/tabootv/taboo-web add:*)",
+      "Bash(git -C /Users/igaosoza/workspace/www/tabootv/taboo-web commit -m \"$\\(cat <<''EOF''\nperf\\(fonts\\): remove unused Figtree weights 300 and 900\n\nfont-light \\(300\\) and font-black \\(900\\) have zero usages across the\ncodebase. Dropping them eliminates ~2 font file downloads \\(~40-80 KB\\).\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git -C /Users/igaosoza/workspace/www/tabootv/taboo-web commit -m \"$\\(cat <<''EOF''\nperf\\(ux\\): add loading.tsx for 10 routes missing loading states\n\nAdd LoadingScreen boundaries for shorts, community, searches,\nnotifications, sign-in, register, forgot-password, reset-password,\nchoose-plan, and redeem. Enables React Suspense streaming so users see\ninstant loading indicators during navigation instead of a blank screen.\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git -C /Users/igaosoza/workspace/www/tabootv/taboo-web commit -m \"$\\(cat <<''EOF''\nperf\\(build\\): expand optimizePackageImports for better tree-shaking\n\nAdd recharts, date-fns, and all 10 Radix UI packages to\noptimizePackageImports so Next.js can tree-shake their barrel exports\nmore effectively, reducing per-page bundle sizes.\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git -C /Users/igaosoza/workspace/www/tabootv/taboo-web status)",
+      "WebFetch(domain:posthog.com)",
+      "WebSearch",
+      "WebFetch(domain:github.com)"
     ],
     "deny": [],
     "ask": []
