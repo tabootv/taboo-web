@@ -71,13 +71,14 @@ export function MainLayout({ children, showFooter = true }: MainLayoutProps) {
         </div>
 
         <Toaster
-          position="top-right"
+          position="bottom-center"
           richColors
           toastOptions={{
             style: {
               background: 'var(--surface)',
               border: '1px solid var(--border)',
               color: 'var(--text-primary)',
+              zIndex: 99999,
             },
           }}
         />

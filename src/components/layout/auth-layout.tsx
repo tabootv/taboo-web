@@ -1,7 +1,7 @@
 'use client';
 
-import { Toaster } from 'sonner';
 import { Logo } from '@/components/ui/logo';
+import { Toaster } from 'sonner';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -59,13 +59,14 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
       </footer>
 
       <Toaster
-        position="top-right"
+        position="bottom-center"
         richColors
         toastOptions={{
           style: {
             background: '#0d0d0d',
             border: '1px solid rgba(255,255,255,0.08)',
             color: '#e6e7ea',
+            zIndex: 99999,
           },
         }}
       />

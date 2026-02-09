@@ -22,13 +22,14 @@ export function CleanLayout({ children, showBack: _showBack = true }: CleanLayou
       </main>
 
       <Toaster
-        position="top-right"
+        position="bottom-center"
         richColors
         toastOptions={{
           style: {
             background: 'var(--surface)',
             border: '1px solid var(--border)',
             color: 'var(--text-primary)',
+            zIndex: 99999,
           },
         }}
       />
