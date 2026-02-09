@@ -58,6 +58,8 @@ const routeRedirects: Redirect[] = [
 ];
 
 const nextConfig: NextConfig = {
+  // Required: PostHog API uses trailing slashes (e.g. /e/), prevent Next.js from redirecting them
+  skipTrailingSlashRedirect: true,
   // Image optimization configuration
   images: {
     remotePatterns: [
@@ -124,6 +126,20 @@ const nextConfig: NextConfig = {
   // Redirects - see routeRedirects configuration at top of file
   async redirects() {
     return routeRedirects;
+  },
+
+  // Reverse proxy PostHog through our domain to bypass ad blockers
+  async rewrites() {
+    return [
+      {
+        source: '/phtv/static/:path*',
+        destination: 'https://us-assets.i.posthog.com/static/:path*',
+      },
+      {
+        source: '/phtv/:path*',
+        destination: 'https://us.i.posthog.com/:path*',
+      },
+    ];
   },
 
   // Headers for security

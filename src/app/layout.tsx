@@ -1,4 +1,5 @@
 import { ErrorBoundary } from '@/shared/components/error-boundary';
+import { PostHogProvider } from '@/shared/components/providers/posthog-provider';
 import { QueryProvider } from '@/shared/components/providers/query-provider';
 import { UploadProvider } from '@/shared/components/providers/upload-provider';
 import { GlobalUploadIndicator } from '@/shared/components/upload/GlobalUploadIndicator';
@@ -90,14 +91,16 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
         />
-        <ErrorBoundary>
-          <QueryProvider>
-            <UploadProvider>
-              {children}
-              <GlobalUploadIndicator />
-            </UploadProvider>
-          </QueryProvider>
-        </ErrorBoundary>
+        <PostHogProvider>
+          <ErrorBoundary>
+            <QueryProvider>
+              <UploadProvider>
+                {children}
+                <GlobalUploadIndicator />
+              </UploadProvider>
+            </QueryProvider>
+          </ErrorBoundary>
+        </PostHogProvider>
       </body>
     </html>
   );
