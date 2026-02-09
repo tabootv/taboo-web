@@ -242,17 +242,34 @@ export const useAuthStore = create<AuthState>()(
         isAuthenticated: state.isAuthenticated,
         isInitialized: state.isInitialized,
       }),
-      onRehydrateStorage: () => (state) => {
-        if (!state) return;
-        state.setHasHydrated(true);
-        if (state.user) {
-          // Set optimistically so AccessGate renders immediately
-          useAuthStore.setState({ isInitialized: true, isAuthenticated: true });
-          setTimeout(() => state.checkAuth(), 0); // background verify
-        } else {
-          useAuthStore.setState({ isInitialized: true, isAuthenticated: false });
-        }
+      onRehydrateStorage: () => {
+        console.log('[auth-store] onRehydrateStorage outer called');
+        return (state) => {
+          console.log('[auth-store] onRehydrateStorage inner called, state:', !!state);
+          if (!state) return;
+          console.log('[auth-store] setting _hasHydrated = true, user:', !!state.user);
+          state.setHasHydrated(true);
+          if (state.user) {
+            // Set optimistically so AccessGate renders immediately
+            useAuthStore.setState({ isInitialized: true, isAuthenticated: true });
+            setTimeout(() => state.checkAuth(), 0); // background verify
+          } else {
+            useAuthStore.setState({ isInitialized: true, isAuthenticated: false });
+          }
+        };
       },
     }
   )
 );
+
+// Safety net: ensure _hasHydrated is set even if onRehydrateStorage doesn't fire
+if (typeof window !== 'undefined') {
+  useAuthStore.persist.onFinishHydration(() => {
+    console.log('[auth-store] onFinishHydration called');
+    const state = useAuthStore.getState();
+    if (!state._hasHydrated) {
+      console.warn('[auth-store] _hasHydrated was still false after hydration, forcing it');
+      useAuthStore.setState({ _hasHydrated: true });
+    }
+  });
+}
