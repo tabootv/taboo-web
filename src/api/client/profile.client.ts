@@ -50,10 +50,11 @@ export const profileClient = {
   /**
    * Update profile
    */
-  updateProfile: async (profileData: UpdateProfileData): Promise<User> => {
+  updateProfile: async (profileData: UpdateProfileData, serverToken?: string): Promise<User> => {
     const data = await apiClient.post<{ message: string; user_data: User } | ApiResponse<User>>(
       '/profile/update-profile',
-      profileData
+      profileData,
+      serverToken ? { serverToken } : undefined
     );
     if ('user_data' in data && data.user_data) {
       return data.user_data;
@@ -92,7 +93,14 @@ export const profileClient = {
   /**
    * Update password
    */
-  updatePassword: async (passwordData: UpdatePasswordData): Promise<{ message: string }> => {
-    return apiClient.post<{ message: string }>('/profile/update-password', passwordData);
+  updatePassword: async (
+    passwordData: UpdatePasswordData,
+    serverToken?: string
+  ): Promise<{ message: string }> => {
+    return apiClient.post<{ message: string }>(
+      '/profile/update-password',
+      passwordData,
+      serverToken ? { serverToken } : undefined
+    );
   },
 };
