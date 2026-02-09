@@ -8,6 +8,20 @@ import type { Tag } from './media';
 import type { Comment } from './comment';
 import type { PaginatedResponse } from './api';
 
+export interface Caption {
+  srclang: string;
+  label: string;
+  url: string;
+}
+
+export interface UserProgress {
+  position: number;
+  duration: number;
+  completed: boolean;
+  first_watched_at: string | null;
+  first_completed_at: string | null;
+}
+
 export interface Video {
   id?: number;
   uuid: string;
@@ -44,6 +58,8 @@ export interface Video {
   humans_publish_at?: string;
   channel: Channel;
   series_id?: number;
+  captions?: Caption[];
+  user_progress?: UserProgress | null;
   tags?: Tag[];
   comments?: Comment[];
   country?:

@@ -266,6 +266,8 @@ export default function VideoPage() {
                 autoplay={autoplayEnabled}
                 onEnded={handleVideoEnded}
                 isBunnyVideo={video.is_bunny_video}
+                captions={video.captions}
+                userProgress={video.user_progress}
                 videoId={video.uuid}
                 videoTitle={video.title}
                 channelName={video.channel?.name}

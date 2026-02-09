@@ -5,6 +5,7 @@ import { Loader2, Play, Volume1, Volume2, VolumeX } from 'lucide-react';
 import Image from 'next/image';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import {
+  useCaptionManagement,
   useKeyboardShortcuts,
   usePiPMode,
   usePlayerControls,
@@ -14,7 +15,7 @@ import {
 
 const noop = () => {};
 import { PlayerControls } from './player-controls';
-import type { SeekPreview } from './types';
+import type { CaptionTrack, SeekPreview } from './types';
 
 interface ShakaPlayerProps {
   src: string;
@@ -28,6 +29,8 @@ interface ShakaPlayerProps {
   onEnded?: (() => void) | undefined;
   className?: string | undefined;
   isBunnyVideo?: boolean | undefined;
+  captions?: CaptionTrack[] | undefined;
+  initialPosition?: number | undefined;
 }
 
 export function ShakaPlayer({
@@ -42,6 +45,8 @@ export function ShakaPlayer({
   onEnded,
   className = '',
   isBunnyVideo = false,
+  captions,
+  initialPosition,
 }: ShakaPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const previewVideoRef = useRef<HTMLVideoElement>(null);
@@ -61,8 +66,27 @@ export function ShakaPlayer({
     changePlaybackSpeed,
   } = useQualityManagement();
 
+  const {
+    availableCaptions,
+    selectedCaption,
+    captionsVisible,
+    loadCaptions,
+    selectCaption,
+    disableCaptions,
+    toggleCaptions,
+  } = useCaptionManagement();
+
   const { isPiP, isPiPSupported, isPiPRef, togglePiP, handleEnterPiP, handleLeavePiP } = usePiPMode(
     { videoRef }
+  );
+
+  const handlePlayerLoaded = useCallback(
+    (player: import('./types').ShakaPlayerInstance) => {
+      if (captions?.length) {
+        loadCaptions(captions, { current: player });
+      }
+    },
+    [captions, loadCaptions]
   );
 
   const {
@@ -88,6 +112,8 @@ export function ShakaPlayer({
     onEnded,
     onEnterPiP: handleEnterPiP,
     onLeavePiP: handleLeavePiP,
+    initialPosition,
+    onLoaded: handlePlayerLoaded,
   });
 
   const {
@@ -114,11 +140,27 @@ export function ShakaPlayer({
     onSeek,
   });
 
+  const handleSelectCaption = useCallback(
+    (caption: import('./types').CaptionTrack) => {
+      selectCaption(caption, shakaRef);
+    },
+    [selectCaption, shakaRef]
+  );
+
+  const handleDisableCaptions = useCallback(() => {
+    disableCaptions(shakaRef);
+  }, [disableCaptions, shakaRef]);
+
+  const handleToggleCaptions = useCallback(() => {
+    toggleCaptions(shakaRef);
+  }, [toggleCaptions, shakaRef]);
+
   useKeyboardShortcuts({
     togglePlay,
     toggleFullscreen,
     toggleMute,
     togglePiP,
+    toggleCaptions: handleToggleCaptions,
     seek,
     seekToPercent,
     volume,
@@ -235,9 +277,7 @@ export function ShakaPlayer({
         playsInline
         autoPlay={autoplay && !thumbnail}
         onClick={togglePlay}
-      >
-        <track kind="captions" />
-      </video>
+      />
 
       {isBuffering && !showThumbnail && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-15">
@@ -308,6 +348,9 @@ export function ShakaPlayer({
           selectedQuality={selectedQuality}
           isAutoQuality={isAutoQuality}
           playbackSpeed={playbackSpeed}
+          availableCaptions={availableCaptions}
+          selectedCaption={selectedCaption}
+          captionsVisible={captionsVisible}
           seekPreview={seekPreview}
           previewImage={previewImage}
           thumbnail={thumbnail}
@@ -321,6 +364,9 @@ export function ShakaPlayer({
           seekToPercent={seekToPercent}
           onProgressHover={handleProgressHover}
           onProgressLeave={handleProgressLeave}
+          onSelectCaption={handleSelectCaption}
+          onDisableCaptions={handleDisableCaptions}
+          onToggleCaptions={handleToggleCaptions}
           onSelectQuality={handleSelectQuality}
           onChangePlaybackSpeed={handleChangePlaybackSpeed}
         />

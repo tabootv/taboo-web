@@ -23,6 +23,8 @@ interface UseShakaPlayerParams {
   onEnded?: (() => void) | undefined;
   onEnterPiP: () => void;
   onLeavePiP: () => void;
+  initialPosition?: number | undefined;
+  onLoaded?: ((player: ShakaPlayerInstance) => void) | undefined;
 }
 
 interface UseShakaPlayerReturn {
@@ -51,6 +53,8 @@ export function useShakaPlayer({
   onEnded,
   onEnterPiP,
   onLeavePiP,
+  initialPosition,
+  onLoaded,
 }: UseShakaPlayerParams): UseShakaPlayerReturn {
   const [shakaModule, setShakaModule] = useState<ShakaModule | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -66,6 +70,7 @@ export function useShakaPlayer({
   const previewShakaRef = useRef<ShakaPlayerInstance | null>(null);
   const previewCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const previewThrottleRef = useRef<number>(0);
+  const hasResumedRef = useRef(false);
 
   // Load Shaka module dynamically
   useEffect(() => {
@@ -148,7 +153,14 @@ export function useShakaPlayer({
           if (savedVolume) {
             videoRef.current.volume = Number.parseFloat(savedVolume);
           }
+
+          if (initialPosition && initialPosition > 0 && !hasResumedRef.current) {
+            videoRef.current.currentTime = initialPosition;
+            hasResumedRef.current = true;
+          }
         }
+
+        onLoaded?.(player);
       } catch (error) {
         console.error('Error initializing Shaka Player:', error);
         setIsLoading(false);
@@ -163,6 +175,10 @@ export function useShakaPlayer({
         shakaRef.current = null;
       }
     };
+    // Note: initialPosition and onLoaded intentionally excluded from deps
+    // - initialPosition is only used on first load (guarded by hasResumedRef)
+    // - onLoaded is a callback that should only fire once per load
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shakaModule, src, videoRef, isPiPRef, onQualityTracksUpdate]);
 
   // Initialize preview player

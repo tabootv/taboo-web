@@ -36,7 +36,15 @@ export type { Channel, Creator, CreatorsResponse } from './channel';
 export type { Media, Tag } from './media';
 
 // Video Types
-export type { Video, ShortVideo, VideosResponse, VideoResponse, VideoListResponse } from './video';
+export type {
+  Caption,
+  UserProgress,
+  Video,
+  ShortVideo,
+  VideosResponse,
+  VideoResponse,
+  VideoListResponse,
+} from './video';
 
 // Comment Types
 export type {

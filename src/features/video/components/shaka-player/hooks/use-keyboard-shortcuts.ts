@@ -7,6 +7,7 @@ interface UseKeyboardShortcutsParams {
   toggleFullscreen: () => void | Promise<void>;
   toggleMute: () => void;
   togglePiP: () => void | Promise<void>;
+  toggleCaptions?: (() => void) | undefined;
   seek: (seconds: number) => void;
   seekToPercent: (percent: number) => void;
   volume: number;
@@ -20,6 +21,7 @@ export function useKeyboardShortcuts({
   toggleFullscreen,
   toggleMute,
   togglePiP,
+  toggleCaptions,
   seek,
   seekToPercent,
   volume,
@@ -47,6 +49,10 @@ export function useKeyboardShortcuts({
         case 'm':
           e.preventDefault();
           toggleMute();
+          break;
+        case 'c':
+          e.preventDefault();
+          toggleCaptions?.();
           break;
         case 'j':
         case 'arrowleft':
@@ -108,6 +114,7 @@ export function useKeyboardShortcuts({
     toggleFullscreen,
     toggleMute,
     togglePiP,
+    toggleCaptions,
     seek,
     seekToPercent,
     volume,

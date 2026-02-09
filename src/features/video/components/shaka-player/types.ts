@@ -6,7 +6,13 @@ export interface QualityTrack {
   label: string;
 }
 
-export type SettingsPanel = 'main' | 'quality' | 'speed';
+export interface CaptionTrack {
+  srclang: string;
+  label: string;
+  url: string;
+}
+
+export type SettingsPanel = 'main' | 'quality' | 'speed' | 'captions';
 
 // Shaka Player types are not fully typed, using any for now
 // Type aliases improve code readability despite SonarQube warning

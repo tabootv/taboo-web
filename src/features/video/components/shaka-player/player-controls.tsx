@@ -2,6 +2,7 @@
 
 import { cn, formatDuration } from '@/shared/utils/formatting';
 import {
+  Captions,
   Maximize,
   Minimize,
   Pause,
@@ -15,7 +16,12 @@ import {
 import { useMemo, useState } from 'react';
 import { PlayerSettings } from './player-settings';
 import { SeekPreview } from './seek-preview';
-import type { QualityTrack, SeekPreview as SeekPreviewType, SettingsPanel } from './types';
+import type {
+  CaptionTrack,
+  QualityTrack,
+  SeekPreview as SeekPreviewType,
+  SettingsPanel,
+} from './types';
 
 interface PlayerControlsProps {
   isPlaying: boolean;
@@ -35,6 +41,10 @@ interface PlayerControlsProps {
   isAutoQuality: boolean;
   playbackSpeed: number;
 
+  availableCaptions: CaptionTrack[];
+  selectedCaption: CaptionTrack | null;
+  captionsVisible: boolean;
+
   seekPreview: SeekPreviewType | null;
   previewImage: string | null;
   thumbnail?: string | undefined;
@@ -50,6 +60,9 @@ interface PlayerControlsProps {
   seekToPercent: (percent: number) => void;
   onProgressHover: (e: React.MouseEvent<HTMLInputElement>) => void;
   onProgressLeave: () => void;
+  onSelectCaption: (caption: CaptionTrack) => void;
+  onDisableCaptions: () => void;
+  onToggleCaptions: () => void;
   onSelectQuality: (quality: QualityTrack | null) => void;
   onChangePlaybackSpeed: (speed: number) => void;
 }
@@ -70,6 +83,9 @@ export function PlayerControls({
   selectedQuality,
   isAutoQuality,
   playbackSpeed,
+  availableCaptions,
+  selectedCaption,
+  captionsVisible,
   seekPreview,
   previewImage,
   thumbnail,
@@ -83,6 +99,9 @@ export function PlayerControls({
   seekToPercent,
   onProgressHover,
   onProgressLeave,
+  onSelectCaption,
+  onDisableCaptions,
+  onToggleCaptions,
   onSelectQuality,
   onChangePlaybackSpeed,
 }: PlayerControlsProps) {
@@ -224,8 +243,24 @@ export function PlayerControls({
           </div>
 
           <div className="flex items-center gap-1">
-            {/* Only show settings button if there are options (quality or speed) */}
-            {(availableQualities.length > 0 || isBunnyVideo) && (
+            {availableCaptions.length > 0 && (
+              <button
+                onClick={onToggleCaptions}
+                className={cn(
+                  'p-2 text-white hover:bg-white/10 rounded-lg transition-colors relative',
+                  captionsVisible && 'text-white'
+                )}
+                title="Subtitles/CC (C)"
+              >
+                <Captions className="w-5 h-5" />
+                {captionsVisible && (
+                  <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-3 h-0.5 bg-red-primary rounded-full" />
+                )}
+              </button>
+            )}
+
+            {/* Only show settings button if there are options (quality, speed, or captions) */}
+            {(availableQualities.length > 0 || isBunnyVideo || availableCaptions.length > 0) && (
               <div className="relative">
                 <button
                   onClick={() => {
@@ -255,6 +290,11 @@ export function PlayerControls({
                   isAutoQuality={isAutoQuality}
                   playbackSpeed={playbackSpeed}
                   isBunnyVideo={isBunnyVideo}
+                  availableCaptions={availableCaptions}
+                  selectedCaption={selectedCaption}
+                  captionsVisible={captionsVisible}
+                  onSelectCaption={onSelectCaption}
+                  onDisableCaptions={onDisableCaptions}
                   onSelectQuality={onSelectQuality}
                   onChangePlaybackSpeed={onChangePlaybackSpeed}
                 />

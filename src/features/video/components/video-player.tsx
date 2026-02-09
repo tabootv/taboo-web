@@ -1,7 +1,9 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
+import type { Caption, UserProgress } from '@/types';
 import { ShakaPlayer } from './shaka-player';
+import type { CaptionTrack } from './shaka-player/types';
 import { useVideoAnalytics } from '../hooks/use-video-analytics';
 
 interface VideoPlayerProps {
@@ -16,6 +18,8 @@ interface VideoPlayerProps {
   onEnded?: () => void;
   className?: string;
   isBunnyVideo?: boolean | undefined;
+  captions?: Caption[] | undefined;
+  userProgress?: UserProgress | null | undefined;
   // Analytics props — analytics only fire when videoId is provided
   videoId?: string | undefined;
   videoTitle?: string | undefined;
@@ -36,6 +40,8 @@ export function VideoPlayer({
   onEnded,
   className = '',
   isBunnyVideo = false,
+  captions,
+  userProgress,
   videoId,
   videoTitle,
   channelName,
@@ -69,6 +75,23 @@ export function VideoPlayer({
     onEnded?.();
   }, [videoId, trackCompleted, onEnded]);
 
+  const captionTracks: CaptionTrack[] | undefined = useMemo(
+    () =>
+      captions?.map((c) => ({
+        srclang: c.srclang,
+        label: c.label,
+        url: c.url,
+      })),
+    [captions]
+  );
+
+  const initialPosition = useMemo(() => {
+    if (userProgress && !userProgress.completed && userProgress.position > 5) {
+      return Math.max(0, userProgress.position - 2);
+    }
+    return undefined;
+  }, [userProgress]);
+
   // Determine the best source URL: prefer HLS, then highest quality MP4
   const src = hls_url || url_1440 || url_1080 || url_720 || url_480;
 
@@ -94,6 +117,8 @@ export function VideoPlayer({
       onEnded={handleEnded}
       className={className}
       isBunnyVideo={isBunnyVideo}
+      captions={captionTracks}
+      initialPosition={initialPosition}
     />
   );
 }
