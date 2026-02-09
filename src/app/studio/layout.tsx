@@ -11,37 +11,47 @@ import { useEffect, useState } from 'react';
 
 export default function StudioLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { user, isAuthenticated, isLoading, _hasHydrated } = useAuthStore();
+  const { user, _hasHydrated } = useAuthStore();
   const [isChecking, setIsChecking] = useState(true);
 
+  // Safety valve: if hydration stalls, stop blocking after 3s
   useEffect(() => {
-    if (isLoading || !_hasHydrated) return;
+    const timeout = setTimeout(() => {
+      if (!_hasHydrated) {
+        useAuthStore.setState({ _hasHydrated: true });
+      }
+    }, 3000);
+    return () => clearTimeout(timeout);
+  }, [_hasHydrated]);
 
-    if (!isAuthenticated) {
-      router.push('/sign-in?redirect=/studio');
-      return;
-    }
+  useEffect(() => {
+    if (!_hasHydrated) return;
 
     if (!user?.channel && !user?.is_creator) {
-      router.push('/');
-      return;
+      router.replace('/');
     }
 
     setIsChecking(false);
-  }, [isAuthenticated, isLoading, _hasHydrated, user, router]);
+  }, [_hasHydrated, user, router]);
 
-  if (isLoading || !_hasHydrated || isChecking) {
+  if (!_hasHydrated || isChecking) {
+    // After hydration, cached user data is available from localStorage
+    if (_hasHydrated && !user?.channel && !user?.is_creator) {
+      // Non-creator: show nothing while redirect fires
+      return null;
+    }
+
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="w-8 h-8 border-2 border-red-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-text-secondary">Loading Creator Studio...</p>
+          {_hasHydrated && <p className="text-text-secondary">Loading Creator Studio...</p>}
         </div>
       </div>
     );
   }
 
-  if (!isAuthenticated || (!user?.channel && !user?.is_creator)) {
+  if (!user?.channel && !user?.is_creator) {
     return null;
   }
 
