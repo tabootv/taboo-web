@@ -2,6 +2,7 @@ import { ErrorBoundary } from '@/shared/components/error-boundary';
 import { PostHogProvider } from '@/shared/components/providers/posthog-provider';
 import { QueryProvider } from '@/shared/components/providers/query-provider';
 import { UploadProvider } from '@/shared/components/providers/upload-provider';
+import { WebVitalsReporter } from '@/shared/components/providers/web-vitals-reporter';
 import { GlobalUploadIndicator } from '@/shared/components/upload/GlobalUploadIndicator';
 import type { Metadata, Viewport } from 'next';
 import { Figtree } from 'next/font/google';
@@ -92,6 +93,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
         />
         <PostHogProvider>
+          <WebVitalsReporter />
           <ErrorBoundary>
             <QueryProvider>
               <UploadProvider>

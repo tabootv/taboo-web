@@ -89,6 +89,13 @@ export const AnalyticsEvent = {
   NOTIFICATION_CLICKED: 'notification_clicked',
   PROFILE_UPDATED: 'profile_updated',
   PASSWORD_CHANGED: 'password_changed',
+
+  // ── Web Vitals (Performance Monitoring) ──
+  WEB_VITALS_LCP: 'web_vitals_lcp',
+  WEB_VITALS_CLS: 'web_vitals_cls',
+  WEB_VITALS_INP: 'web_vitals_inp',
+  WEB_VITALS_FCP: 'web_vitals_fcp',
+  WEB_VITALS_TTFB: 'web_vitals_ttfb',
 } as const;
 
 export type AnalyticsEventName = (typeof AnalyticsEvent)[keyof typeof AnalyticsEvent];
