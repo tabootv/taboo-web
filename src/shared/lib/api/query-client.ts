@@ -14,71 +14,73 @@ import { QueryClient } from '@tanstack/react-query';
  * - Search results: 5 minutes
  * - Creators: 1 hour (rarely changes)
  */
-export const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: (query) => {
-        const key = query.queryKey[0] as string;
+export function makeQueryClient() {
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: (query) => {
+          const key = query.queryKey[0] as string;
 
-        // Video metadata: long cache (rarely changes)
-        if (key === 'videos' && query.queryKey[1] === 'detail') {
-          return 1000 * 60 * 30; // 30 minutes
-        }
+          // Video metadata: long cache (rarely changes)
+          if (key === 'videos' && query.queryKey[1] === 'detail') {
+            return 1000 * 60 * 30; // 30 minutes
+          }
 
-        // Notifications: short cache (real-time feel)
-        if (key === 'notifications') {
-          return 1000 * 30; // 30 seconds
-        }
+          // Notifications: short cache (real-time feel)
+          if (key === 'notifications') {
+            return 1000 * 30; // 30 seconds
+          }
 
-        // Home feed: granular per-section cache
-        if (key === 'home') {
-          const subKey = query.queryKey[1] as string | undefined;
-          if (subKey === 'banners' || subKey === 'creators') return 1000 * 60 * 30; // 30 minutes
-          if (
-            subKey === 'featured' ||
-            subKey === 'recommended' ||
-            subKey === 'series' ||
-            subKey === 'playlists'
-          )
-            return 1000 * 60 * 15; // 15 minutes
-          if (subKey === 'shorts') return 1000 * 60 * 10; // 10 minutes
-          return 1000 * 60 * 10; // fallback
-        }
+          // Home feed: granular per-section cache
+          if (key === 'home') {
+            const subKey = query.queryKey[1] as string | undefined;
+            if (subKey === 'banners' || subKey === 'creators') return 1000 * 60 * 30; // 30 minutes
+            if (
+              subKey === 'featured' ||
+              subKey === 'recommended' ||
+              subKey === 'series' ||
+              subKey === 'playlists'
+            )
+              return 1000 * 60 * 15; // 15 minutes
+            if (subKey === 'shorts') return 1000 * 60 * 10; // 10 minutes
+            return 1000 * 60 * 10; // fallback
+          }
 
-        // Search results: medium cache
-        if (key === 'search') {
-          return 1000 * 60 * 5; // 5 minutes
-        }
+          // Search results: medium cache
+          if (key === 'search') {
+            return 1000 * 60 * 5; // 5 minutes
+          }
 
-        // User profile: medium cache
-        if (key === 'auth') {
-          return 1000 * 60 * 5; // 5 minutes
-        }
+          // User profile: medium cache
+          if (key === 'auth') {
+            return 1000 * 60 * 5; // 5 minutes
+          }
 
-        // Creators: long cache (rarely changes)
-        if (key === 'creators') {
-          return 1000 * 60 * 60; // 1 hour
-        }
+          // Creators: long cache (rarely changes)
+          if (key === 'creators') {
+            return 1000 * 60 * 60; // 1 hour
+          }
 
-        // Default: 5 minutes
-        return 1000 * 60 * 5;
+          // Default: 5 minutes
+          return 1000 * 60 * 5;
+        },
+        gcTime: 1000 * 60 * 30, // 30 minutes (formerly cacheTime)
+        retry: 1,
+        refetchOnWindowFocus: false,
+        refetchInterval: (query) => {
+          const key = query.queryKey[0] as string;
+
+          // Notifications: poll every 30 seconds
+          if (key === 'notifications') {
+            return 1000 * 30;
+          }
+
+          return false;
+        },
       },
-      gcTime: 1000 * 60 * 30, // 30 minutes (formerly cacheTime)
-      retry: 1,
-      refetchOnWindowFocus: false,
-      refetchInterval: (query) => {
-        const key = query.queryKey[0] as string;
-
-        // Notifications: poll every 30 seconds
-        if (key === 'notifications') {
-          return 1000 * 30;
-        }
-
-        return false;
+      mutations: {
+        retry: 0,
       },
     },
-    mutations: {
-      retry: 0,
-    },
-  },
-});
+  });
+}
