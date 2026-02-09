@@ -28,6 +28,7 @@
     "playwright:install": "npx playwright install --with-deps",
     "playwright:report": "npx playwright show-report",
     "measure:bundle": "node scripts/measure-bundle.js",
+    "measure:compare": "node scripts/compare-bundle.js",
     "measure:build": "node scripts/measure-build-time.js",
     "measure:hmr": "node scripts/measure-hmr.js",
     "measure:baseline": "npm run build && node scripts/measure-bundle.js --save-baseline && node scripts/measure-build-time.js --save-baseline && node scripts/measure-hmr.js --startup --save-baseline",
