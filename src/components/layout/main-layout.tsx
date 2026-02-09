@@ -65,7 +65,7 @@ export function MainLayout({ children, showFooter = true }: MainLayoutProps) {
         <NavigationProgress />
         <TopHeader />
 
-        <div className={cn('overflow-x-hidden')}>
+        <div className={cn('overflow-x-hidden flex-1')}>
           {children}
           {showFooter && <Footer />}
         </div>
