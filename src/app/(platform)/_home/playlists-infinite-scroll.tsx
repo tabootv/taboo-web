@@ -2,6 +2,7 @@
 
 import { playlistsClient as playlistsApi } from '@/api/client/playlists.client';
 import { useHomePlaylistsInfinite } from '@/api/queries/home.queries';
+import { EndOfContentMessage } from './_components/end-of-content-message';
 import { MediaPreviewModal } from './_components/media-preview-modal';
 import { PlaylistRail, type PlaylistWithVideos } from './_components/playlist-rail';
 import type { Playlist, Video } from '@/types';
@@ -61,6 +62,13 @@ export function PlaylistsInfiniteScroll({
       initialCursor,
       isInitialLastPage,
     });
+
+  // Track when all playlists have been loaded
+  const [hasReachedEnd, setHasReachedEnd] = useState(false);
+
+  const handleScrollToTop = useCallback(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
 
   // Local state for video loading within playlists
   const [playlistVideosState, setPlaylistVideosState] = useState<
@@ -186,8 +194,9 @@ export function PlaylistsInfiniteScroll({
   // Effects
   // ============================================
 
-  // Notify parent when last page is reached
+  // Track when last page is reached
   useEffect(() => {
+    if (isLastPage) setHasReachedEnd(true);
     onLastPageReached?.(isLastPage);
   }, [isLastPage, onLastPageReached]);
 
@@ -309,6 +318,8 @@ export function PlaylistsInfiniteScroll({
           />
         )}
       </div>
+
+      {hasReachedEnd && <EndOfContentMessage onScrollToTop={handleScrollToTop} />}
 
       {/* Preview Modal */}
       <MediaPreviewModal video={previewVideo} onClose={handleClosePreview} />
