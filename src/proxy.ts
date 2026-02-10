@@ -16,6 +16,7 @@ const PUBLIC_ROUTES = [
   '/choose-plan',
   '/auth/whop-callback',
   '/redeem',
+  '/creators',
 ];
 
 // O(1) regex for skipping static files and internal routes
