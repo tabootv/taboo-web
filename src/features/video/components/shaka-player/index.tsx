@@ -23,6 +23,7 @@ interface ShakaPlayerProps {
   title?: string | undefined;
   autoplay?: boolean | undefined;
   onProgress?: ((progress: number) => void) | undefined;
+  onTimeUpdate?: ((currentTime: number, duration: number) => void) | undefined;
   onPlay?: (() => void) | undefined;
   onPause?: (() => void) | undefined;
   onSeek?: ((time: number) => void) | undefined;
@@ -39,6 +40,7 @@ export function ShakaPlayer({
   title,
   autoplay = false,
   onProgress,
+  onTimeUpdate,
   onPlay,
   onPause,
   onSeek,
@@ -107,6 +109,7 @@ export function ShakaPlayer({
     isPiPRef,
     onQualityTracksUpdate: updateQualityTracks,
     onProgress,
+    onTimeUpdate,
     onPlay,
     onPause,
     onEnded,

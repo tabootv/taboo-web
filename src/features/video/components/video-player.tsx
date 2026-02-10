@@ -5,6 +5,7 @@ import type { Caption, UserProgress } from '@/types';
 import { ShakaPlayer } from './shaka-player';
 import type { CaptionTrack } from './shaka-player/types';
 import { useVideoAnalytics } from '../hooks/use-video-analytics';
+import { useWatchProgress } from '../hooks/use-watch-progress';
 
 interface VideoPlayerProps {
   thumbnail?: string;
@@ -55,25 +56,38 @@ export function VideoPlayer({
     duration: videoDuration,
   });
 
+  const progress = useWatchProgress({ videoUuid: videoId, contentType });
+
   const handlePlay = useCallback(() => {
     if (videoId) trackPlay();
-  }, [videoId, trackPlay]);
+    progress.handlePlay();
+  }, [videoId, trackPlay, progress]);
 
   const handlePause = useCallback(() => {
     if (videoId) trackPause();
-  }, [videoId, trackPause]);
+    progress.handlePause();
+  }, [videoId, trackPause, progress]);
 
   const handleSeek = useCallback(
     (time: number) => {
       if (videoId) trackSeek(time);
+      progress.handleSeek(time);
     },
-    [videoId, trackSeek]
+    [videoId, trackSeek, progress]
   );
 
   const handleEnded = useCallback(() => {
     if (videoId) trackCompleted();
+    progress.handleEnded();
     onEnded?.();
-  }, [videoId, trackCompleted, onEnded]);
+  }, [videoId, trackCompleted, progress, onEnded]);
+
+  const handleTimeUpdate = useCallback(
+    (currentTime: number, duration: number) => {
+      progress.handleProgressUpdate(currentTime, duration);
+    },
+    [progress]
+  );
 
   const captionTracks: CaptionTrack[] | undefined = useMemo(
     () =>
@@ -111,6 +125,7 @@ export function VideoPlayer({
       thumbnail={thumbnail}
       autoplay={autoplay}
       onProgress={onProgress}
+      onTimeUpdate={handleTimeUpdate}
       onPlay={handlePlay}
       onPause={handlePause}
       onSeek={handleSeek}

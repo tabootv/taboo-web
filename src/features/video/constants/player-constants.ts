@@ -10,6 +10,12 @@ export const STORAGE_KEYS = {
   CAPTION_LANG: 'tabootv_caption_lang',
 } as const;
 
+export const PROGRESS_SAVE_CONFIG = {
+  THROTTLE_MS: 15_000,
+  MIN_POSITION_DELTA: 5,
+  MIN_WATCH_THRESHOLD: 5,
+} as const;
+
 export const PLAYER_CONFIG = {
   CONTROLS_HIDE_DELAY: 3000,
   FEEDBACK_DISPLAY_MS: 800,

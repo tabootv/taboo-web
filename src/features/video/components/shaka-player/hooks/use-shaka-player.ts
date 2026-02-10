@@ -18,6 +18,7 @@ interface UseShakaPlayerParams {
   isPiPRef: React.RefObject<boolean>;
   onQualityTracksUpdate: (player: ShakaPlayerInstance) => void;
   onProgress?: ((progress: number) => void) | undefined;
+  onTimeUpdate?: ((currentTime: number, duration: number) => void) | undefined;
   onPlay?: (() => void) | undefined;
   onPause?: (() => void) | undefined;
   onEnded?: (() => void) | undefined;
@@ -48,6 +49,7 @@ export function useShakaPlayer({
   isPiPRef,
   onQualityTracksUpdate,
   onProgress,
+  onTimeUpdate,
   onPlay,
   onPause,
   onEnded,
@@ -325,6 +327,7 @@ export function useShakaPlayer({
       setCurrentTime(video.currentTime);
       if (video.duration) {
         onProgress?.(video.currentTime / video.duration);
+        onTimeUpdate?.(video.currentTime, video.duration);
       }
     };
     const handleDurationChange = () => setDuration(video.duration);
@@ -421,7 +424,7 @@ export function useShakaPlayer({
       video.removeEventListener('leavepictureinpicture', onLeavePiP);
       clearStallInterval();
     };
-  }, [videoRef, onProgress, onPlay, onPause, onEnded, onEnterPiP, onLeavePiP]);
+  }, [videoRef, onProgress, onTimeUpdate, onPlay, onPause, onEnded, onEnterPiP, onLeavePiP]);
 
   return {
     isLoading,
