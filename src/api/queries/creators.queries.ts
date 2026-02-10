@@ -51,7 +51,7 @@ export function useCreatorProfile(id: string | number | null | undefined) {
  */
 export function useCreatorVideos(
   id: string | number | null | undefined,
-  params?: { sort_by?: string; page_url?: string }
+  params?: { sort_by?: string; page?: number }
 ) {
   return useQuery({
     queryKey: [...queryKeys.creators.videos(id!), params],
@@ -66,7 +66,7 @@ export function useCreatorVideos(
  */
 export function useCreatorShorts(
   id: string | number | null | undefined,
-  params?: { sort_by?: string; page_url?: string }
+  params?: { sort_by?: string; page?: number }
 ) {
   return useQuery({
     queryKey: [...queryKeys.creators.shorts(id!), params],
@@ -81,7 +81,7 @@ export function useCreatorShorts(
  */
 export function useCreatorSeries(
   id: string | number | null | undefined,
-  params?: { sort_by?: string; page_url?: string }
+  params?: { sort_by?: string; page?: number }
 ) {
   return useQuery({
     queryKey: [...queryKeys.creators.series(id!), params],
@@ -96,7 +96,7 @@ export function useCreatorSeries(
  */
 export function useCreatorPosts(
   id: string | number | null | undefined,
-  params?: { sort_by?: string; page_url?: string }
+  params?: { sort_by?: string; page?: number }
 ) {
   return useQuery({
     queryKey: [...queryKeys.creators.posts(id!), params],
@@ -111,7 +111,7 @@ export function useCreatorPosts(
  */
 export function useCreatorCourses(
   id: string | number | null | undefined,
-  params?: { sort_by?: string; page_url?: string }
+  params?: { sort_by?: string; page?: number }
 ) {
   return useQuery({
     queryKey: [...queryKeys.creators.courses(id!), params],
@@ -151,14 +151,16 @@ export function useCreatorVideosInfinite(
   creatorId: string | number | null | undefined,
   filters?: { sort_by?: string }
 ) {
+  const resolvedFilters = { sort_by: 'newest', per_page: 15, ...filters };
   return useInfiniteQuery({
-    queryKey: [...queryKeys.creators.videos(creatorId!), 'infinite', filters],
+    queryKey: [...queryKeys.creators.videos(creatorId!), 'infinite', resolvedFilters],
     queryFn: async ({ pageParam }) => {
-      const params = pageParam ? { page_url: pageParam, ...filters } : filters;
+      const params = pageParam ? { page: pageParam, ...resolvedFilters } : resolvedFilters;
       return creatorsClient.getVideos(creatorId!, params);
     },
-    getNextPageParam: (lastPage) => lastPage.next_page_url || undefined,
-    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) =>
+      lastPage.next_page_url ? lastPage.current_page + 1 : undefined,
+    initialPageParam: undefined as number | undefined,
     enabled: !!creatorId,
     staleTime: 1000 * 60 * 10,
     gcTime: 1000 * 60 * 30,
@@ -172,14 +174,16 @@ export function useCreatorShortsInfinite(
   creatorId: string | number | null | undefined,
   filters?: { sort_by?: string }
 ) {
+  const resolvedFilters = { sort_by: 'newest', per_page: 21, ...filters };
   return useInfiniteQuery({
-    queryKey: [...queryKeys.creators.shorts(creatorId!), 'infinite', filters],
+    queryKey: [...queryKeys.creators.shorts(creatorId!), 'infinite', resolvedFilters],
     queryFn: async ({ pageParam }) => {
-      const params = pageParam ? { page_url: pageParam, ...filters } : filters;
+      const params = pageParam ? { page: pageParam, ...resolvedFilters } : resolvedFilters;
       return creatorsClient.getShorts(creatorId!, params);
     },
-    getNextPageParam: (lastPage) => lastPage.next_page_url || undefined,
-    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) =>
+      lastPage.next_page_url ? lastPage.current_page + 1 : undefined,
+    initialPageParam: undefined as number | undefined,
     enabled: !!creatorId,
     staleTime: 1000 * 60 * 10,
     gcTime: 1000 * 60 * 30,
@@ -193,14 +197,16 @@ export function useCreatorSeriesInfinite(
   creatorId: string | number | null | undefined,
   filters?: { sort_by?: string }
 ) {
+  const resolvedFilters = { sort_by: 'newest', per_page: 21, ...filters };
   return useInfiniteQuery({
-    queryKey: [...queryKeys.creators.series(creatorId!), 'infinite', filters],
+    queryKey: [...queryKeys.creators.series(creatorId!), 'infinite', resolvedFilters],
     queryFn: async ({ pageParam }) => {
-      const params = pageParam ? { page_url: pageParam, ...filters } : filters;
+      const params = pageParam ? { page: pageParam, ...resolvedFilters } : resolvedFilters;
       return creatorsClient.getSeries(creatorId!, params);
     },
-    getNextPageParam: (lastPage) => lastPage.next_page_url || undefined,
-    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) =>
+      lastPage.next_page_url ? lastPage.current_page + 1 : undefined,
+    initialPageParam: undefined as number | undefined,
     enabled: !!creatorId,
     staleTime: 1000 * 60 * 10,
     gcTime: 1000 * 60 * 30,
@@ -217,11 +223,12 @@ export function useCreatorPostsInfinite(
   return useInfiniteQuery({
     queryKey: [...queryKeys.creators.posts(creatorId!), 'infinite', filters],
     queryFn: async ({ pageParam }) => {
-      const params = pageParam ? { page_url: pageParam, ...filters } : filters;
+      const params = pageParam ? { page: pageParam, ...filters } : filters;
       return creatorsClient.getPosts(creatorId!, params);
     },
-    getNextPageParam: (lastPage) => lastPage.next_page_url || undefined,
-    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) =>
+      lastPage.next_page_url ? lastPage.current_page + 1 : undefined,
+    initialPageParam: undefined as number | undefined,
     enabled: !!creatorId,
     staleTime: 1000 * 60 * 10,
     gcTime: 1000 * 60 * 30,
@@ -230,19 +237,22 @@ export function useCreatorPostsInfinite(
 
 /**
  * Hook to fetch creator courses (Education tab) with infinite scroll
+ * Note: Education API uses 'old' (not 'oldest') for descending sort
  */
 export function useCreatorCoursesInfinite(
   creatorId: string | number | null | undefined,
   filters?: { sort_by?: string }
 ) {
+  const resolvedFilters = { sort_by: 'newest', per_page: 21, ...filters };
   return useInfiniteQuery({
-    queryKey: [...queryKeys.creators.courses(creatorId!), 'infinite', filters],
+    queryKey: [...queryKeys.creators.courses(creatorId!), 'infinite', resolvedFilters],
     queryFn: async ({ pageParam }) => {
-      const params = pageParam ? { page_url: pageParam, ...filters } : filters;
+      const params = pageParam ? { page: pageParam, ...resolvedFilters } : resolvedFilters;
       return creatorsClient.getCourses(creatorId!, params);
     },
-    getNextPageParam: (lastPage) => lastPage.next_page_url || undefined,
-    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) =>
+      lastPage.next_page_url ? lastPage.current_page + 1 : undefined,
+    initialPageParam: undefined as number | undefined,
     enabled: !!creatorId,
     staleTime: 1000 * 60 * 10,
     gcTime: 1000 * 60 * 30,

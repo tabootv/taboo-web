@@ -118,13 +118,17 @@ export const creatorsClient = {
    */
   getVideos: async (
     id: string | number,
-    params?: { sort_by?: string; page_url?: string }
+    params?: { sort_by?: string; per_page?: number; page?: number }
   ): Promise<PaginatedResponse<Video>> => {
-    const url = params?.page_url || `/creators/creator-videos/${id}`;
-    const queryParams = params?.sort_by ? { sort_by: params.sort_by } : undefined;
+    const queryParams: Record<string, unknown> = {};
+    if (params?.sort_by) queryParams.sort_by = params.sort_by;
+    if (params?.per_page) queryParams.per_page = params.per_page;
+    if (params?.page) queryParams.page = params.page;
     const data = await apiClient.get<
       { videos?: PaginatedResponse<Video> } | PaginatedResponse<Video>
-    >(url, { params: queryParams as Record<string, unknown> });
+    >(`/creators/creator-videos/${id}`, {
+      params: Object.keys(queryParams).length > 0 ? queryParams : undefined,
+    });
     return typeof data === 'object' && data !== null && 'videos' in data
       ? data.videos || data
       : (data as PaginatedResponse<Video>);
@@ -135,13 +139,17 @@ export const creatorsClient = {
    */
   getShorts: async (
     id: string | number,
-    params?: { sort_by?: string; page_url?: string }
+    params?: { sort_by?: string; per_page?: number; page?: number }
   ): Promise<PaginatedResponse<ShortVideo>> => {
-    const url = params?.page_url || `/creators/creator-shorts/${id}`;
-    const queryParams = params?.sort_by ? { sort_by: params.sort_by } : undefined;
+    const queryParams: Record<string, unknown> = {};
+    if (params?.sort_by) queryParams.sort_by = params.sort_by;
+    if (params?.per_page) queryParams.per_page = params.per_page;
+    if (params?.page) queryParams.page = params.page;
     const data = await apiClient.get<
       { videos?: PaginatedResponse<ShortVideo> } | PaginatedResponse<ShortVideo>
-    >(url, { params: queryParams as Record<string, unknown> });
+    >(`/creators/creator-shorts/${id}`, {
+      params: Object.keys(queryParams).length > 0 ? queryParams : undefined,
+    });
     return typeof data === 'object' && data !== null && 'videos' in data
       ? data.videos || data
       : (data as PaginatedResponse<ShortVideo>);
@@ -152,13 +160,17 @@ export const creatorsClient = {
    */
   getSeries: async (
     id: string | number,
-    params?: { sort_by?: string; page_url?: string }
+    params?: { sort_by?: string; per_page?: number; page?: number }
   ): Promise<PaginatedResponse<Series>> => {
-    const url = params?.page_url || `/creators/creator-series/${id}`;
-    const queryParams = params?.sort_by ? { sort_by: params.sort_by } : undefined;
+    const queryParams: Record<string, unknown> = {};
+    if (params?.sort_by) queryParams.sort_by = params.sort_by;
+    if (params?.per_page) queryParams.per_page = params.per_page;
+    if (params?.page) queryParams.page = params.page;
     const data = await apiClient.get<
       { series?: PaginatedResponse<Series> } | PaginatedResponse<Series>
-    >(url, { params: queryParams as Record<string, unknown> });
+    >(`/creators/creator-series/${id}`, {
+      params: Object.keys(queryParams).length > 0 ? queryParams : undefined,
+    });
     return typeof data === 'object' && data !== null && 'series' in data
       ? data.series || data
       : (data as PaginatedResponse<Series>);
@@ -169,13 +181,14 @@ export const creatorsClient = {
    */
   getPosts: async (
     id: string | number,
-    params?: { sort_by?: string; page_url?: string }
+    params?: { sort_by?: string; page?: number }
   ): Promise<PaginatedResponse<Post>> => {
-    const url = params?.page_url || `/creators/creator-posts/${id}`;
-    const queryParams = params?.sort_by ? { sort_by: params.sort_by } : undefined;
+    const queryParams: Record<string, unknown> = {};
+    if (params?.sort_by) queryParams.sort_by = params.sort_by;
+    if (params?.page) queryParams.page = params.page;
     const data = await apiClient.get<{ posts?: PaginatedResponse<Post> } | PaginatedResponse<Post>>(
-      url,
-      { params: queryParams as Record<string, unknown> }
+      `/creators/creator-posts/${id}`,
+      { params: Object.keys(queryParams).length > 0 ? queryParams : undefined }
     );
     return typeof data === 'object' && data !== null && 'posts' in data
       ? data.posts || data
@@ -187,13 +200,17 @@ export const creatorsClient = {
    */
   getCourses: async (
     id: string | number,
-    params?: { sort_by?: string; page_url?: string }
+    params?: { sort_by?: string; per_page?: number; page?: number }
   ): Promise<PaginatedResponse<Course>> => {
-    const url = params?.page_url || `/creators/creator-course/${id}`;
-    const queryParams = params?.sort_by ? { sort_by: params.sort_by } : undefined;
+    const queryParams: Record<string, unknown> = {};
+    if (params?.sort_by) queryParams.sort_by = params.sort_by;
+    if (params?.per_page) queryParams.per_page = params.per_page;
+    if (params?.page) queryParams.page = params.page;
     const data = await apiClient.get<
       { courses?: PaginatedResponse<Course> } | PaginatedResponse<Course>
-    >(url, { params: queryParams as Record<string, unknown> });
+    >(`/creators/creator-course/${id}`, {
+      params: Object.keys(queryParams).length > 0 ? queryParams : undefined,
+    });
     return typeof data === 'object' && data !== null && 'courses' in data
       ? data.courses || data
       : (data as PaginatedResponse<Course>);
