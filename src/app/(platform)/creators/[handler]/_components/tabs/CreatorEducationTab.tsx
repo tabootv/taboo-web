@@ -13,7 +13,7 @@ interface CreatorEducationTabProps {
 
 export function CreatorEducationTab({ creator }: CreatorEducationTabProps) {
   const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } =
-    useCreatorCoursesInfinite(creator.id, { sort_by: 'latest' });
+    useCreatorCoursesInfinite(creator.id, { sort_by: 'newest' });
 
   const courses = useMemo(() => {
     if (!data?.pages) return [];

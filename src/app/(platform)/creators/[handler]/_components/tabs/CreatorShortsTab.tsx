@@ -1,8 +1,9 @@
 'use client';
 
 import { useCreatorShortsInfinite } from '@/api/queries/creators.queries';
+import { SelectFilter } from '@/components/ui/select-filter';
 import type { Creator, Video } from '@/types';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { CreatorShortsGrid } from '../CreatorShortsGrid';
 import { InfiniteScrollLoader } from './shared/InfiniteScrollLoader';
 import { EmptyState, ShortsGridSkeleton } from './shared/TabSkeletons';
@@ -11,9 +12,15 @@ interface CreatorShortsTabProps {
   creator: Creator;
 }
 
+const SORT_OPTIONS = [
+  { label: 'Newest', value: 'newest' },
+  { label: 'Oldest', value: 'oldest' },
+];
+
 export function CreatorShortsTab({ creator }: CreatorShortsTabProps) {
+  const [sort, setSort] = useState('newest');
   const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } =
-    useCreatorShortsInfinite(creator.id, { sort_by: 'latest' });
+    useCreatorShortsInfinite(creator.id, { sort_by: sort });
 
   const shorts = useMemo(() => {
     if (!data?.pages) return [];
@@ -50,9 +57,12 @@ export function CreatorShortsTab({ creator }: CreatorShortsTabProps) {
 
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-9">
-      <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold leading-tight tracking-tight text-white mb-6">
-        Shorts
-      </h2>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold leading-tight tracking-tight text-white">
+          Shorts
+        </h2>
+        <SelectFilter label="Sort" value={sort} options={SORT_OPTIONS} onChange={setSort} />
+      </div>
       <CreatorShortsGrid shorts={shorts} />
       <InfiniteScrollLoader
         hasNextPage={hasNextPage}

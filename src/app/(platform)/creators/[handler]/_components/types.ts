@@ -1,6 +1,6 @@
 import type { Creator, Video } from '@/types';
 
-export type TabType = 'home' | 'videos' | 'shorts' | 'series' | 'posts' | 'education';
+export type TabType = 'home' | 'videos' | 'shorts' | 'series' | 'posts' | 'education' | 'search';
 
 export interface TabConfig {
   key: TabType;
@@ -26,8 +26,7 @@ export interface CreatorHeaderProps {
 }
 
 export interface CreatorTabsProps {
-  activeTab: TabType;
-  onTabChange: (tab: TabType) => void;
+  handler: string;
   tabs: TabConfig[];
 }
 

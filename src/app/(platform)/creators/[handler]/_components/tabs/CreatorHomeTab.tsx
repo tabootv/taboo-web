@@ -1,50 +1,30 @@
 'use client';
 
-import { useVideos } from '@/api/queries/video.queries';
+import { useCreatorVideos, useCreatorShorts } from '@/api/queries/creators.queries';
 import type { Creator } from '@/types';
 import { useMemo } from 'react';
 import { CreatorFeaturedVideo } from '../CreatorFeaturedVideo';
 import { CreatorShortsGrid } from '../CreatorShortsGrid';
 import { CreatorVideoGrid } from '../CreatorVideoGrid';
 import { shuffleArray } from '@/shared/utils/array';
-import type { TabType } from '../types';
+import Link from 'next/link';
 
 interface CreatorHomeTabProps {
   creator: Creator;
-  onTabChange: (tab: TabType) => void;
+  handler: string;
 }
 
-export function CreatorHomeTab({ creator, onTabChange }: CreatorHomeTabProps) {
-  const { data: videosData, isLoading: videosLoading } = useVideos(
-    {
-      creators: String(creator.id),
-      short: false,
-      sort_by: 'latest',
-      per_page: 20,
-    },
-    {
-      enabled: true,
-      staleTime: 5 * 60 * 1000,
-      refetchOnWindowFocus: false,
-    }
-  );
+export function CreatorHomeTab({ creator, handler }: CreatorHomeTabProps) {
+  const { data: videosData, isLoading: videosLoading } = useCreatorVideos(creator.id, {
+    sort_by: 'newest',
+  });
 
-  const { data: shortsData, isLoading: shortsLoading } = useVideos(
-    {
-      creators: String(creator.id),
-      short: true,
-      sort_by: 'latest',
-      per_page: 20,
-    },
-    {
-      enabled: true,
-      staleTime: 5 * 60 * 1000,
-      refetchOnWindowFocus: false,
-    }
-  );
+  const { data: shortsData, isLoading: shortsLoading } = useCreatorShorts(creator.id, {
+    sort_by: 'newest',
+  });
 
-  const longVideos = videosData?.videos || [];
-  const shortVideos = shortsData?.videos || [];
+  const longVideos = videosData?.data || [];
+  const shortVideos = shortsData?.data || [];
   const featuredVideo = longVideos[0];
   const latestVideos = longVideos.slice(1);
   const randomShorts = useMemo(() => shuffleArray(shortVideos), [shortVideos]);
@@ -76,9 +56,9 @@ export function CreatorHomeTab({ creator, onTabChange }: CreatorHomeTabProps) {
               Latest Videos
             </h2>
 
-            <button
-              onClick={() => onTabChange('videos')}
-              className="inline-flex items-center gap-1.5 text-white/50 text-sm font-medium bg-transparent border-none cursor-pointer hover:text-white transition-colors"
+            <Link
+              href={`/creators/${handler}/videos`}
+              className="inline-flex items-center gap-1.5 text-white/50 text-sm font-medium hover:text-white transition-colors"
             >
               Show more{' '}
               <svg
@@ -91,7 +71,7 @@ export function CreatorHomeTab({ creator, onTabChange }: CreatorHomeTabProps) {
               >
                 <path d="M9 18l6-6-6-6" />
               </svg>
-            </button>
+            </Link>
           </div>
 
           <CreatorVideoGrid videos={latestVideos} variant="rail" />
@@ -105,9 +85,9 @@ export function CreatorHomeTab({ creator, onTabChange }: CreatorHomeTabProps) {
               Shorts
             </h2>
 
-            <button
-              onClick={() => onTabChange('shorts')}
-              className="inline-flex items-center gap-1.5 text-white/50 text-sm font-medium bg-transparent border-none cursor-pointer hover:text-white transition-colors"
+            <Link
+              href={`/creators/${handler}/shorts`}
+              className="inline-flex items-center gap-1.5 text-white/50 text-sm font-medium hover:text-white transition-colors"
             >
               Show more{' '}
               <svg
@@ -120,7 +100,7 @@ export function CreatorHomeTab({ creator, onTabChange }: CreatorHomeTabProps) {
               >
                 <path d="M9 18l6-6-6-6" />
               </svg>
-            </button>
+            </Link>
           </div>
 
           <CreatorShortsGrid shorts={randomShorts.slice(0, 8)} variant="rail" />

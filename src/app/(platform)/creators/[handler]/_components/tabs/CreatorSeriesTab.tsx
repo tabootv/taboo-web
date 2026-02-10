@@ -13,7 +13,7 @@ interface CreatorSeriesTabProps {
 
 export function CreatorSeriesTab({ creator }: CreatorSeriesTabProps) {
   const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } =
-    useCreatorSeriesInfinite(creator.id, { sort_by: 'latest' });
+    useCreatorSeriesInfinite(creator.id, { sort_by: 'newest' });
 
   const series = useMemo(() => {
     if (!data?.pages) return [];

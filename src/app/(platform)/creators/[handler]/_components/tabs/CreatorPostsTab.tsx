@@ -13,7 +13,7 @@ interface CreatorPostsTabProps {
 
 export function CreatorPostsTab({ creator }: CreatorPostsTabProps) {
   const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } =
-    useCreatorPostsInfinite(creator.id, { sort_by: 'latest' });
+    useCreatorPostsInfinite(creator.id);
 
   const posts = useMemo(() => {
     if (!data?.pages) return [];

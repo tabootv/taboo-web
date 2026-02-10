@@ -1,36 +1,18 @@
-import { Metadata } from 'next';
-import { notFound } from 'next/navigation';
-import { CreatorPageContent } from './CreatorPageContent';
+'use client';
+
+import { use } from 'react';
+import { CreatorHomeTab } from './_components/tabs/CreatorHomeTab';
+import { useCreatorFromLayout } from './_components/useCreatorFromLayout';
 
 interface PageProps {
   params: Promise<{ handler: string }>;
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { handler } = await params;
+export default function CreatorHomePage({ params }: PageProps) {
+  const { handler } = use(params);
+  const { creator, isLoading } = useCreatorFromLayout(handler);
 
-  return {
-    title: `${handler}`,
-    description: `Explore ${handler}'s raw, unfiltered content from around the world on Taboo TV.`,
-    openGraph: {
-      title: `${handler}`,
-      description: `Explore ${handler}'s raw, unfiltered content from around the world on Taboo TV.`,
-      type: 'website',
-    },
-    twitter: {
-      card: 'summary',
-      title: `${handler}`,
-      description: `Explore ${handler}'s raw, unfiltered content from around the world on Taboo TV.`,
-    },
-  };
-}
+  if (isLoading || !creator) return null;
 
-export default async function CreatorPage({ params }: PageProps) {
-  const { handler } = await params;
-
-  if (!handler) {
-    notFound();
-  }
-
-  return <CreatorPageContent handler={handler} />;
+  return <CreatorHomeTab creator={creator} handler={handler} />;
 }

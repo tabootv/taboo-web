@@ -1,8 +1,9 @@
 'use client';
 
 import { useCreatorVideosInfinite } from '@/api/queries/creators.queries';
+import { SelectFilter } from '@/components/ui/select-filter';
 import type { Creator, Video } from '@/types';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { CreatorVideoGrid } from '../CreatorVideoGrid';
 import { InfiniteScrollLoader } from './shared/InfiniteScrollLoader';
 import { EmptyState, VideoGridSkeleton } from './shared/TabSkeletons';
@@ -11,9 +12,15 @@ interface CreatorVideosTabProps {
   creator: Creator;
 }
 
+const SORT_OPTIONS = [
+  { label: 'Newest', value: 'newest' },
+  { label: 'Oldest', value: 'oldest' },
+];
+
 export function CreatorVideosTab({ creator }: CreatorVideosTabProps) {
+  const [sort, setSort] = useState('newest');
   const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } =
-    useCreatorVideosInfinite(creator.id, { sort_by: 'latest' });
+    useCreatorVideosInfinite(creator.id, { sort_by: sort });
 
   const videos = useMemo(() => {
     if (!data?.pages) return [];
@@ -50,9 +57,12 @@ export function CreatorVideosTab({ creator }: CreatorVideosTabProps) {
 
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-9">
-      <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold leading-tight tracking-tight text-white mb-6">
-        Videos
-      </h2>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold leading-tight tracking-tight text-white">
+          Videos
+        </h2>
+        <SelectFilter label="Sort" value={sort} options={SORT_OPTIONS} onChange={setSort} />
+      </div>
       <CreatorVideoGrid videos={videos} showAll />
       <InfiniteScrollLoader
         hasNextPage={hasNextPage}
