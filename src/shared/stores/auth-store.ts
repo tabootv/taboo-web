@@ -240,19 +240,16 @@ export const useAuthStore = create<AuthState>()(
         isSubscribed: state.isSubscribed,
         isProfileComplete: state.isProfileComplete,
         isAuthenticated: state.isAuthenticated,
-        isInitialized: state.isInitialized,
       }),
       onRehydrateStorage: () => {
-        console.log('[auth-store] onRehydrateStorage outer called');
         return (state) => {
-          console.log('[auth-store] onRehydrateStorage inner called, state:', !!state);
           if (!state) return;
-          console.log('[auth-store] setting _hasHydrated = true, user:', !!state.user);
           state.setHasHydrated(true);
           if (state.user) {
-            // Set optimistically so AccessGate renders immediately
-            useAuthStore.setState({ isInitialized: true, isAuthenticated: true });
-            setTimeout(() => state.checkAuth(), 0); // background verify
+            // Optimistic for UI rendering only — NOT for redirect decisions
+            // Force isInitialized: false to override stale value from old localStorage
+            useAuthStore.setState({ isAuthenticated: true, isInitialized: false });
+            state.checkAuth();
           } else {
             useAuthStore.setState({ isInitialized: true, isAuthenticated: false });
           }

@@ -35,6 +35,28 @@ export interface RequestConfig extends AxiosRequestConfig {
 }
 
 let isRedirecting = false;
+let pendingSessionVerification: Promise<boolean> | null = null;
+
+async function verifySessionIsInvalid(): Promise<boolean> {
+  if (pendingSessionVerification) return pendingSessionVerification;
+  pendingSessionVerification = (async () => {
+    try {
+      const res = await fetch('/api/me', {
+        credentials: 'same-origin',
+        headers: { Accept: 'application/json' },
+      });
+      const data = await res.json();
+      return data.authenticated !== true;
+    } catch {
+      return false; // Network error — don't logout
+    } finally {
+      setTimeout(() => {
+        pendingSessionVerification = null;
+      }, 2000);
+    }
+  })();
+  return pendingSessionVerification;
+}
 
 async function coordinatedLogout(): Promise<void> {
   if (isRedirecting) return;
@@ -46,11 +68,17 @@ async function coordinatedLogout(): Promise<void> {
 
   isRedirecting = true;
 
+  // Safety: reset flag if redirect doesn't complete (e.g., blocked by extension)
+  setTimeout(() => {
+    isRedirecting = false;
+  }, 5000);
+
   try {
     // Clear Zustand state — persist middleware auto-syncs to localStorage
     useAuthStore.setState({
       user: null,
       isSubscribed: false,
+      isProfileComplete: false,
       isAuthenticated: false,
       isInitialized: false,
       isLoading: false,
@@ -114,7 +142,10 @@ class ApiClient {
               const { useAuthStore } = await import('@/shared/stores/auth-store');
               const { isInitialized } = useAuthStore.getState();
               if (isInitialized) {
-                coordinatedLogout();
+                const sessionInvalid = await verifySessionIsInvalid();
+                if (sessionInvalid) {
+                  coordinatedLogout();
+                }
               }
             }
           }

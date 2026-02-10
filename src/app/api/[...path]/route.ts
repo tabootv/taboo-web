@@ -83,10 +83,10 @@ async function proxyRequest(request: NextRequest, method: string) {
       res = NextResponse.json(data, { status: response.status });
     }
 
-    // Clear auth cookie on 401 responses per spec Section 3.6
-    if (response.status === 401) {
-      res.cookies.delete(TOKEN_KEY);
-    }
+    // NOTE: Do NOT delete auth cookie on 401 here. Cookie cleanup is handled
+    // exclusively by /api/me/route.ts after verifying the token is truly invalid.
+    // Deleting here causes cascade failures where one 401 wipes the cookie,
+    // making all subsequent requests also fail with 401.
 
     return res;
   } catch (error) {
