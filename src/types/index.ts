@@ -184,3 +184,6 @@ export * from './earnings';
 
 // Feature Flags
 export * from './feature-flags';
+
+// Mention Types
+export type { MentionUser, UserSearchResponse } from './mention';

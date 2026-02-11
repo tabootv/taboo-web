@@ -141,4 +141,9 @@ export const queryKeys = {
       [...queryKeys.studio.all, 'mapStats', String(creatorId)] as const,
     iframeToken: () => [...queryKeys.studio.all, 'iframeToken'] as const,
   },
+  users: {
+    all: ['users'] as const,
+    search: (query: string) => [...queryKeys.users.all, 'search', query] as const,
+    byHandler: (handler: string) => [...queryKeys.users.all, 'handler', handler] as const,
+  },
 } as const;
