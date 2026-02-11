@@ -11,18 +11,7 @@
         { "type": "docs", "section": "Documentation", "hidden": true },
         { "type": "chore", "section": "Miscellaneous", "hidden": true },
         { "type": "test", "section": "Tests", "hidden": true }
-      ],
-      "prerelease-type": "rc"
+      ]
     }
-  },
-  "branch-prefix": "",
-  "branches": [
-    {
-      "branch": "develop",
-      "handleGHRelease": true,
-      "releaseType": "node",
-      "prerelease": true,
-      "prereleaseType": "rc"
-    }
-  ]
+  }
 }
