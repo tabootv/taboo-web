@@ -24,6 +24,14 @@ const routeRedirects: Redirect[] = [
   { source: '/home', destination: '/', permanent: true },
 
   // ============================================
+  // Legacy Platform URL Redirects
+  // Maps old /c/, /u/, /v/ short URLs to canonical routes
+  // ============================================
+  { source: '/c/:handler', destination: '/creators/:handler', permanent: true },
+  { source: '/u/:handler', destination: '/profile/:handler', permanent: true },
+  { source: '/v/:uuid', destination: '/videos/:uuid', permanent: true },
+
+  // ============================================
   // Auth Route Consolidation (PR 2.2)
   // Canonical: /sign-in, /register
   // ============================================
