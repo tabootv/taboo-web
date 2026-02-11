@@ -100,7 +100,6 @@ class ApiClient {
 
   constructor() {
     this.client = axios.create({
-      baseURL: getBaseURL(),
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
@@ -114,6 +113,11 @@ class ApiClient {
   private setupInterceptors(): void {
     this.client.interceptors.request.use(
       (config: InternalAxiosRequestConfig) => {
+        // Lazy baseURL resolution — avoids reading env vars at module import time
+        // (which breaks CI builds where NEXT_PUBLIC_API_URL isn't set)
+        if (!config.baseURL) {
+          config.baseURL = getBaseURL();
+        }
         // For server-side direct calls, add Authorization header if serverToken provided
         const serverToken = (config as RequestConfig).serverToken;
         if (serverToken && config.headers) {
