@@ -23,6 +23,7 @@ interface AuthState {
   fetchUser: () => Promise<void>;
   updateUser: (user: Partial<User>) => void;
   setSubscribed: (subscribed: boolean) => void;
+  setUserFromPostCheckout: (user: User, subscribed: boolean) => void;
   clearError: () => void;
   checkAuth: () => Promise<void>;
   setHasHydrated: (state: boolean) => void;
@@ -208,6 +209,23 @@ export const useAuthStore = create<AuthState>()(
 
       setSubscribed: (subscribed: boolean) => {
         set({ isSubscribed: subscribed });
+      },
+
+      setUserFromPostCheckout: (user: User, subscribed: boolean) => {
+        set({
+          user,
+          isSubscribed: subscribed,
+          isProfileComplete: isProfileComplete(user),
+          isAuthenticated: true,
+          isInitialized: true,
+          isLoading: false,
+        });
+        posthog.identify(user.email, {
+          name:
+            (user.display_name ?? [user.first_name, user.last_name].filter(Boolean).join(' ')) ||
+            user.email,
+          subscribed,
+        });
       },
 
       clearError: () => set({ error: null }),

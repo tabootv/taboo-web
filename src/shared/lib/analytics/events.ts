@@ -36,6 +36,11 @@ export const AnalyticsEvent = {
   // ── P0: Search ──
   SEARCH_PERFORMED: 'search_performed',
 
+  // ── P0: Payment-First Onboarding ──
+  AUTH_LEAD_CAPTURED: 'auth_lead_captured',
+  AUTH_POST_CHECKOUT_ACCOUNT_CREATED: 'auth_post_checkout_account_created',
+  SUBSCRIPTION_GUEST_CHECKOUT_STARTED: 'subscription_guest_checkout_started',
+
   // ── P1: Auth ──
   AUTH_LOGIN_FAILED: 'auth_login_failed',
   AUTH_REGISTER_FAILED: 'auth_register_failed',

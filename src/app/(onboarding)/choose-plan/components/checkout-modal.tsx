@@ -12,7 +12,7 @@ interface CheckoutModalProps {
   email?: string | undefined;
   disableEmail: boolean;
   onClose: () => void;
-  onComplete: () => void;
+  onComplete: (planId: string, receiptId: string) => void;
 }
 
 export function CheckoutModal({
@@ -71,7 +71,7 @@ export function CheckoutModal({
             returnUrl={returnUrl}
             theme="dark"
             themeOptions={{ accentColor: 'red' }}
-            onComplete={onComplete}
+            onComplete={(planId: string, receiptId?: string) => onComplete(planId, receiptId ?? '')}
             skipRedirect
             {...(affiliateCode ? { affiliateCode } : {})}
             {...(email

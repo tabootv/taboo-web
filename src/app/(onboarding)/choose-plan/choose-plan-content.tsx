@@ -12,10 +12,12 @@ import { setRegisterFlowToken } from '@/shared/lib/auth/register-flow-guard';
 import { useCountryCode } from '@/hooks/use-country-code';
 import { RedeemCodeCard } from '@/components/redeem/redeem-code-card';
 import { AnalyticsEvent } from '@/shared/lib/analytics/events';
+import { isProfileComplete as checkProfileComplete } from '@/shared/lib/auth/profile-completion';
 import { saveRedeemCode } from '@/shared/lib/redeem/apply-pending-code';
 import { toast } from 'sonner';
 
 import { CheckoutModal } from './components/checkout-modal';
+import { LeadModal } from './components/lead-modal';
 import { LoadingPlans, VerifyingSubscription } from './components/loading-states';
 import { PlanToggle } from './components/plan-toggle';
 import {
@@ -35,12 +37,16 @@ import {
 export function ChoosePlanContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { isAuthenticated, setSubscribed, user } = useAuthStore();
+  const { isAuthenticated, setSubscribed, setUserFromPostCheckout, user } = useAuthStore();
   const countryCode = useCountryCode();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('yearly');
   const [showCheckout, setShowCheckout] = useState(false);
+  const [showLeadModal, setShowLeadModal] = useState(false);
+  const [leadEmail, setLeadEmail] = useState('');
+  const [isLeadLoading, setIsLeadLoading] = useState(false);
+  const [isCreatingAccount, setIsCreatingAccount] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [verifyMessage, setVerifyMessage] = useState('Activating your subscription...');
   const [showRetry, setShowRetry] = useState(false);
@@ -86,7 +92,14 @@ export function ChoosePlanContent() {
             },
           });
           toast.success('Subscription activated! Welcome to TabooTV.');
-          router.push('/');
+          const currentUser = useAuthStore.getState().user;
+          if (!checkProfileComplete(currentUser)) {
+            // Only add set_password flag for post-checkout (guest) users
+            const pwParam = leadEmail ? '?set_password=1' : '';
+            router.push(`/account/complete${pwParam}`);
+          } else {
+            router.push('/');
+          }
           return;
         }
         await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
@@ -157,6 +170,17 @@ export function ChoosePlanContent() {
   const handleCheckout = useCallback(() => {
     if (!activePlan) return;
 
+    // Unauthenticated user with embedded checkout → show lead modal
+    if (!isAuthenticated && activePlan.whop_plan_id) {
+      posthog.capture(AnalyticsEvent.SUBSCRIPTION_GUEST_CHECKOUT_STARTED, {
+        plan: selectedPlan,
+        price: activePlan.price,
+      });
+      setShowLeadModal(true);
+      return;
+    }
+
+    // Unauthenticated user without embedded checkout → old register-first flow
     if (!isAuthenticated) {
       setRegisterFlowToken();
       const redirectPath = redeemCode
@@ -166,7 +190,7 @@ export function ChoosePlanContent() {
       return;
     }
 
-    // If plan has Whop plan ID, show embedded checkout
+    // Authenticated user with embedded checkout
     if (activePlan.whop_plan_id) {
       posthog.capture(AnalyticsEvent.SUBSCRIPTION_CHECKOUT_STARTED, {
         plan: selectedPlan,
@@ -177,7 +201,7 @@ export function ChoosePlanContent() {
       return;
     }
 
-    // Fallback to redirect if no whop_plan_id but has URL
+    // Authenticated user fallback to redirect
     if (activePlan.whop_plan_url) {
       posthog.capture(AnalyticsEvent.SUBSCRIPTION_CHECKOUT_STARTED, {
         plan: selectedPlan,
@@ -195,6 +219,58 @@ export function ChoosePlanContent() {
     toast.error('Checkout not available for this plan');
   }, [activePlan, isAuthenticated, redeemCode, router, selectedPlan]);
 
+  // Handle lead email submission (guest checkout flow)
+  const handleLeadSubmit = useCallback(
+    async (email: string) => {
+      if (!activePlan?.whop_plan_id) return;
+
+      setIsLeadLoading(true);
+      try {
+        // Fire lead capture (fire-and-forget) and checkout-intent (must succeed) in parallel
+        const leadPromise = fetch('/api/lead', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        }).catch(() => {}); // fire-and-forget
+
+        const intentPromise = fetch('/api/auth/checkout-intent', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, plan_id: activePlan.whop_plan_id }),
+        });
+
+        const [, intentResponse] = await Promise.all([leadPromise, intentPromise]);
+
+        if (!intentResponse.ok) {
+          const data = await intentResponse.json();
+          toast.error(data.message || 'Something went wrong. Please try again.');
+          return;
+        }
+
+        posthog.capture(AnalyticsEvent.AUTH_LEAD_CAPTURED, {
+          email,
+          plan: selectedPlan,
+        });
+
+        setLeadEmail(email);
+        setShowLeadModal(false);
+
+        // Open checkout modal
+        posthog.capture(AnalyticsEvent.SUBSCRIPTION_CHECKOUT_STARTED, {
+          plan: selectedPlan,
+          price: activePlan.price,
+          method: 'whop_embedded_guest',
+        });
+        setShowCheckout(true);
+      } catch {
+        toast.error('Something went wrong. Please try again.');
+      } finally {
+        setIsLeadLoading(false);
+      }
+    },
+    [activePlan, selectedPlan]
+  );
+
   // Return URL for Whop checkout - use state to avoid SSR mismatch
   const [checkoutReturnUrl, setCheckoutReturnUrl] = useState('');
 
@@ -206,11 +282,61 @@ export function ChoosePlanContent() {
   }, []);
 
   // Handle checkout completion callback
-  const handleCheckoutComplete = useCallback(() => {
-    setShowCheckout(false);
-    setIsVerifying(true);
-    verifySubscription();
-  }, [verifySubscription]);
+  const handleCheckoutComplete = useCallback(
+    async (planId: string, receiptId: string) => {
+      setShowCheckout(false);
+
+      // Guest flow: create account via post-checkout
+      if (!isAuthenticated && leadEmail) {
+        setIsCreatingAccount(true);
+        setVerifyMessage('Setting up your account...');
+        try {
+          const response = await fetch('/api/auth/post-checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ receipt_id: receiptId }),
+          });
+
+          const data = await response.json();
+
+          // Email already registered
+          if (response.status === 409 && data.existing_user) {
+            const emailParam = encodeURIComponent(data.email || leadEmail);
+            router.push(`/sign-in?email=${emailParam}&subscription_activated=true`);
+            return;
+          }
+
+          if (!response.ok) {
+            toast.error(data.message || 'Failed to create account. Please contact support.');
+            setIsCreatingAccount(false);
+            return;
+          }
+
+          // Account created successfully
+          posthog.capture(AnalyticsEvent.AUTH_POST_CHECKOUT_ACCOUNT_CREATED, {
+            plan: selectedPlan,
+            plan_id: planId,
+          });
+
+          setUserFromPostCheckout(data.user, data.subscribed ?? false);
+          setIsCreatingAccount(false);
+
+          // Now verify subscription
+          setIsVerifying(true);
+          verifySubscription();
+        } catch {
+          toast.error('Failed to create account. Please contact support.');
+          setIsCreatingAccount(false);
+        }
+        return;
+      }
+
+      // Authenticated flow: go straight to subscription verification
+      setIsVerifying(true);
+      verifySubscription();
+    },
+    [isAuthenticated, leadEmail, router, selectedPlan, setUserFromPostCheckout, verifySubscription]
+  );
 
   const handleRedeemSubscribed = useCallback(() => {
     setSubscribed(true);
@@ -225,6 +351,16 @@ export function ChoosePlanContent() {
 
   if (isLoading) {
     return <LoadingPlans />;
+  }
+
+  if (isCreatingAccount) {
+    return (
+      <VerifyingSubscription
+        verifyMessage="Setting up your account..."
+        showRetry={false}
+        onRetry={() => {}}
+      />
+    );
   }
 
   if (isVerifying || showRetry) {
@@ -480,6 +616,15 @@ export function ChoosePlanContent() {
         </div>
       </div>
 
+      {/* Lead Modal (guest checkout) */}
+      {showLeadModal && (
+        <LeadModal
+          onSubmit={handleLeadSubmit}
+          onClose={() => setShowLeadModal(false)}
+          isLoading={isLeadLoading}
+        />
+      )}
+
       {/* Checkout Modal */}
       {showCheckout && activePlan?.whop_plan_id && (
         <CheckoutModal
@@ -487,8 +632,8 @@ export function ChoosePlanContent() {
           planLabel={selectedPlan === 'monthly' ? 'Monthly' : 'Yearly'}
           returnUrl={checkoutReturnUrl}
           affiliateCode={ref}
-          email={user?.email}
-          disableEmail={!!isAuthenticated && !!user?.email}
+          email={leadEmail || user?.email}
+          disableEmail={!!(leadEmail || (isAuthenticated && user?.email))}
           onClose={() => setShowCheckout(false)}
           onComplete={handleCheckoutComplete}
         />
