@@ -3,6 +3,7 @@
 import { Send } from 'lucide-react';
 import Image from 'next/image';
 import type { User } from '@/types';
+import { MentionInput } from './mention-input';
 
 interface CommentInputProps {
   user: User | null;
@@ -37,9 +38,9 @@ export function CommentInput({
       <div className="mt-4">
         {replyingTo && <p className="text-xs text-white/50 mb-2">Replying to @{replyingTo}</p>}
         <div className="flex items-end gap-2">
-          <textarea
+          <MentionInput
             value={value}
-            onChange={(e) => onChange(e.target.value)}
+            onChange={onChange}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
             rows={1}
@@ -70,16 +71,14 @@ export function CommentInput({
       </div>
 
       <div className="flex items-center w-full">
-        <div className="flex-1 relative">
-          <textarea
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={placeholder}
-            rows={1}
-            className="w-full bg-surface/60 border border-border focus:border-white/20 focus:outline-none rounded-full resize-none py-2.5 px-4 text-sm text-white placeholder:text-white/60 transition-colors"
-          />
-        </div>
+        <MentionInput
+          value={value}
+          onChange={onChange}
+          onKeyDown={handleKeyDown}
+          placeholder={placeholder}
+          rows={1}
+          className="w-full bg-surface/60 border border-border focus:border-white/20 focus:outline-none rounded-full resize-none py-2.5 px-4 text-sm text-white placeholder:text-white/60 transition-colors"
+        />
         <button
           onClick={onSubmit}
           disabled={isPending || !value.trim()}

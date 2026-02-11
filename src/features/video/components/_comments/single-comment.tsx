@@ -6,9 +6,12 @@ import { useAuthStore } from '@/shared/stores/auth-store';
 import type { Comment } from '@/types';
 import { Reply, Send, Trash2 } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import posthog from 'posthog-js';
 import { useCallback, useState, useTransition } from 'react';
 import { filterValidComments, getCommentKey } from './comment-utils';
+import { MentionInput } from './mention-input';
+import { MentionText } from './mention-text';
 
 interface SingleCommentProps {
   comment: Comment;
@@ -112,9 +115,18 @@ export function SingleComment({
             )}
           </div>
           <div className="flex items-center gap-2">
-            <p className="text-[13px] md:text-[15px] font-semibold leading-tight">
-              {comment.user?.display_name}
-            </p>
+            {comment.user?.handler ? (
+              <Link
+                href={`/profile/${comment.user.handler}`}
+                className="text-[13px] md:text-[15px] font-semibold leading-tight hover:underline"
+              >
+                @{comment.user.handler}
+              </Link>
+            ) : (
+              <p className="text-[13px] md:text-[15px] font-semibold leading-tight">
+                {comment.user?.display_name}
+              </p>
+            )}
             {comment.user?.badge && (
               <Image
                 src={comment.user.badge}
@@ -148,20 +160,32 @@ export function SingleComment({
         </div>
       </div>
 
-      <p className="text-[14px] md:text-[15px] font-normal whitespace-pre-wrap break-words mt-2 leading-[20px] md:leading-[22px]">
-        {comment.content}
+      <p className="text-[14px] md:text-[15px] font-normal mt-2 leading-[20px] md:leading-[22px]">
+        <MentionText content={comment.content} />
       </p>
 
       {/* Reply Input */}
       {showReplyInput && (
         <div className="mt-4">
-          {comment.user?.display_name && (
-            <p className="text-xs text-white/50 mb-2">Replying to @{comment.user.display_name}</p>
+          {(comment.user?.handler || comment.user?.display_name) && (
+            <p className="text-xs text-white/50 mb-2">
+              Replying to{' '}
+              {comment.user.handler ? (
+                <Link
+                  href={`/profile/${comment.user.handler}`}
+                  className="text-red-primary hover:underline"
+                >
+                  @{comment.user.handler}
+                </Link>
+              ) : (
+                comment.user.display_name
+              )}
+            </p>
           )}
           <div className="flex items-end gap-2">
-            <textarea
+            <MentionInput
               value={replyContent}
-              onChange={(e) => setReplyContent(e.target.value)}
+              onChange={setReplyContent}
               onKeyDown={handleKeyDown}
               placeholder="Reply Comment"
               rows={1}
