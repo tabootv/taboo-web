@@ -21,6 +21,7 @@ function SignInContent() {
   const subscriptionActivated = searchParams.get('subscription_activated') === 'true';
   const prefillEmail = searchParams.get('email') || '';
   const redeemCode = searchParams.get('redeem_code');
+  const redirectTo = searchParams.get('redirect');
   const { login, isLoading, error, clearError } = useGuestOnly('/');
   const {
     signInWithGoogle,
@@ -37,10 +38,10 @@ function SignInContent() {
 
   const isAnyLoading = isLoading || socialLoading;
 
-  // Prefetch home route so RSC payload + JS chunks load in parallel with login
+  // Prefetch target route so RSC payload + JS chunks load in parallel with login
   useEffect(() => {
-    router.prefetch('/');
-  }, [router]);
+    router.prefetch(redirectTo || '/');
+  }, [router, redirectTo]);
 
   /**
    * Navigate immediately after login, then fire analytics/redeem in background.
@@ -49,7 +50,7 @@ function SignInContent() {
   const navigateAndDeferPostLogin = (method: 'email' | 'google' | 'apple') => {
     const { user, isSubscribed } = useAuthStore.getState();
     const onboardingPath = getOnboardingRedirectPath(user, isSubscribed);
-    router.push(onboardingPath || '/');
+    router.push(onboardingPath || redirectTo || '/');
 
     // Fire-and-forget: toast, analytics, redeem code
     toast.success('Welcome back!');
