@@ -1,5 +1,14 @@
+import { execSync } from 'child_process';
 import type { NextConfig } from 'next';
 import type { Redirect } from 'next/dist/lib/load-custom-routes';
+
+function getGitSha(): string {
+  try {
+    return execSync('git rev-parse --short HEAD').toString().trim();
+  } catch {
+    return 'unknown';
+  }
+}
 
 /**
  * Route Redirect Configuration
@@ -66,6 +75,9 @@ const routeRedirects: Redirect[] = [
 ];
 
 const nextConfig: NextConfig = {
+  // Generate build ID from git SHA for observability
+  generateBuildId: async () => getGitSha(),
+
   // Required: PostHog API uses trailing slashes (e.g. /e/), prevent Next.js from redirecting them
   skipTrailingSlashRedirect: true,
   // Image optimization configuration
@@ -129,6 +141,7 @@ const nextConfig: NextConfig = {
   // Environment variables available at build time
   env: {
     NEXT_PUBLIC_APP_NAME: 'TabooTV',
+    NEXT_PUBLIC_BUILD_ID: getGitSha(),
   },
 
   // Redirects - see routeRedirects configuration at top of file
