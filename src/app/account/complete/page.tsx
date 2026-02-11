@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useRef, useEffect, useMemo } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { Camera, User, Loader2, Check, X, ArrowRight, ShieldCheck } from 'lucide-react';
 import posthog from 'posthog-js';
@@ -13,8 +13,9 @@ import { useHandlerCheck } from '@/hooks/use-handler-check';
 import { useCountries } from '@/hooks/use-countries';
 import { getOnboardingRedirectPath } from '@/shared/lib/auth/profile-completion';
 import { toast } from 'sonner';
+import { PasswordStep } from './components/password-step';
 
-type Step = 'photo' | 'details' | 'complete';
+type Step = 'password' | 'photo' | 'details' | 'complete';
 
 const GLASS_CARD = 'rounded-2xl backdrop-blur-xl' as const;
 
@@ -55,11 +56,15 @@ function getStepCircleStyle(index: number, currentStepIndex: number): React.CSSP
 
 export default function CompleteProfilePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, updateUser, fetchUser, isSubscribed } = useAuthStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { countries, isLoading: countriesLoading } = useCountries();
 
-  const [currentStep, setCurrentStep] = useState<Step>('photo');
+  // Determine if password step is needed (from post-checkout flow)
+  const needsPassword = searchParams.get('set_password') === '1';
+
+  const [currentStep, setCurrentStep] = useState<Step>(needsPassword ? 'password' : 'photo');
   const [isLoading, setIsLoading] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(user?.dp || null);
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
@@ -188,11 +193,14 @@ export default function CompleteProfilePage() {
     router.push(redirectPath || '/');
   };
 
-  const steps = [
-    { id: 'photo', label: 'Photo' },
-    { id: 'details', label: 'Details' },
-    { id: 'complete', label: 'Done' },
-  ];
+  const steps = useMemo(() => {
+    const s: { id: Step; label: string }[] = [];
+    if (needsPassword) s.push({ id: 'password', label: 'Password' });
+    s.push({ id: 'photo', label: 'Photo' });
+    s.push({ id: 'details', label: 'Details' });
+    s.push({ id: 'complete', label: 'Done' });
+    return s;
+  }, [needsPassword]);
 
   const currentStepIndex = steps.findIndex((s) => s.id === currentStep);
 
@@ -256,7 +264,27 @@ export default function CompleteProfilePage() {
         <div className="w-full max-w-lg">
           <div className={GLASS_CARD} style={GLASS_CARD_STYLE}>
             <div className="p-6 md:p-10 animate-[fadeInScale_0.4s_cubic-bezier(0.4,0,0.2,1)]">
-              {/* Step 1: Photo */}
+              {/* Step: Password (conditional) */}
+              {currentStep === 'password' && (
+                <PasswordStep
+                  onComplete={() => {
+                    posthog.capture(AnalyticsEvent.ONBOARDING_PROFILE_STEP_COMPLETED, {
+                      step: 'password',
+                      is_password_skipped: false,
+                    });
+                    setCurrentStep('photo');
+                  }}
+                  onSkip={() => {
+                    posthog.capture(AnalyticsEvent.ONBOARDING_PROFILE_STEP_COMPLETED, {
+                      step: 'password',
+                      is_password_skipped: true,
+                    });
+                    setCurrentStep('photo');
+                  }}
+                />
+              )}
+
+              {/* Step: Photo */}
               {currentStep === 'photo' && (
                 <div className="text-center">
                   <h1 className="text-2xl md:text-3xl font-extrabold text-white mb-3 tracking-tight">
