@@ -47,7 +47,10 @@ export function CreatePost({ onPostCreated }: CreatePostProps) {
     setErrors([]);
 
     try {
-      const newPost = await postsApi.create(postText, postImage || undefined);
+      const newPost = await postsApi.create({
+        caption: postText,
+        ...(postImage && { images: [postImage] }),
+      });
       posthog.capture(AnalyticsEvent.POST_CREATED, {
         has_image: !!postImage,
         content_length: postText.trim().length,
