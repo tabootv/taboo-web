@@ -24,8 +24,11 @@ export const postsClient = {
     return data.posts || (data as PostListResponse);
   },
 
-  get: async (id: number): Promise<Post> => {
-    const data = await apiClient.get<{ post?: Post; data?: Post }>(`/posts/${id}`);
+  get: async (id: number, serverToken?: string): Promise<Post> => {
+    const data = await apiClient.get<{ post?: Post; data?: Post }>(
+      `/posts/${id}`,
+      serverToken ? { serverToken } : undefined
+    );
     return data.post || data.data || (data as Post);
   },
 
@@ -53,11 +56,18 @@ export const postsClient = {
     await apiClient.delete(`/posts/${id}`);
   },
 
-  getComments: async (id: number, params?: { page?: number }): Promise<PostCommentListResponse> => {
+  getComments: async (
+    id: number,
+    params?: { page?: number },
+    serverToken?: string
+  ): Promise<PostCommentListResponse> => {
+    const config: Record<string, unknown> = {};
+    if (params) config.params = params;
+    if (serverToken) config.serverToken = serverToken;
     const data = await apiClient.get<{
       postComment?: PostCommentListResponse;
       comments?: PostCommentListResponse;
-    }>(`/post-comments/posts/${id}`, params ? { params } : undefined);
+    }>(`/post-comments/posts/${id}`, Object.keys(config).length ? config : undefined);
     return data.postComment || data.comments || (data as PostCommentListResponse);
   },
 
@@ -93,5 +103,9 @@ export const postsClient = {
 
   postComment: async (postId: number, content: string, parentId?: number): Promise<PostComment> => {
     return postsClient.addComment(postId, content, parentId);
+  },
+
+  deleteComment: async (commentUuid: string): Promise<void> => {
+    await apiClient.delete(`/post-comments/${commentUuid}/delete`);
   },
 };

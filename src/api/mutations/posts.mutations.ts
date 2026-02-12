@@ -112,6 +112,37 @@ export function useDeletePost() {
   });
 }
 
+/**
+ * Hook to delete a comment on a post
+ */
+export function useDeletePostComment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ commentUuid }: { commentUuid: string; postId: number }) =>
+      postsClient.deleteComment(commentUuid),
+    onSuccess: (_data, { postId }) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.community.comments(postId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.community.postDetail(postId) });
+    },
+  });
+}
+
+/**
+ * Hook to like/unlike a comment on a post
+ */
+export function useLikePostComment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ commentId }: { commentId: number; postId: number }) =>
+      postsClient.likeComment(commentId),
+    onSuccess: (_data, { postId }) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.community.comments(postId) });
+    },
+  });
+}
+
 export function useAddPostComment() {
   const queryClient = useQueryClient();
 
