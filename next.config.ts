@@ -72,6 +72,12 @@ const routeRedirects: Redirect[] = [
   { source: '/profile/subscription', destination: '/account/subscription', permanent: true },
   { source: '/profile/complete', destination: '/account/complete', permanent: true },
   { source: '/profile/settings', destination: '/account', permanent: true },
+
+  // ============================================
+  // Community Post Route Migration
+  // Canonical: /posts/:id
+  // ============================================
+  { source: '/community/:id(\\d+)', destination: '/posts/:id', permanent: true },
 ];
 
 const nextConfig: NextConfig = {

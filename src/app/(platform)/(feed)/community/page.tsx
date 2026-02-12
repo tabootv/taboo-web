@@ -3,6 +3,8 @@
 import { useCreatePost } from '@/api/mutations';
 import { usePostsList } from '@/api/queries/posts.queries';
 import { useAuthStore } from '@/shared/stores/auth-store';
+import { Spinner } from '@/components/ui/spinner';
+import { useInfiniteScroll } from '@/hooks/use-infinite-scroll';
 import { MessageCircle, Rss, Star } from 'lucide-react';
 import Link from 'next/link';
 import { useMemo, useTransition } from 'react';
@@ -24,6 +26,15 @@ export default function CommunityPage() {
   const postsList = useMemo(() => {
     return data?.pages.flatMap((page) => page.data) || [];
   }, [data]);
+
+  const { loadMoreRef } = useInfiniteScroll({
+    onLoadMore: () => {
+      fetchNextPage();
+    },
+    hasMore: !!hasNextPage,
+    isLoading: isFetchingNextPage,
+    rootMargin: '400px',
+  });
 
   const handlePostCreated = async (caption: string, image?: File) => {
     await createPost.mutateAsync({ caption, ...(image && { image }) });
@@ -89,14 +100,8 @@ export default function CommunityPage() {
               ))}
 
               {hasNextPage && (
-                <div className="flex justify-center py-8">
-                  <button
-                    onClick={() => fetchNextPage()}
-                    disabled={isFetchingNextPage}
-                    className="px-6 py-2 bg-surface hover:bg-surface/80 text-white rounded-lg transition-colors disabled:opacity-50"
-                  >
-                    {isFetchingNextPage ? 'Loading...' : 'Load More'}
-                  </button>
+                <div ref={loadMoreRef} className="flex justify-center py-4">
+                  {isFetchingNextPage && <Spinner size="md" />}
                 </div>
               )}
 

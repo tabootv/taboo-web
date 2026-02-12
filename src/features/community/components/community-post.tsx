@@ -114,10 +114,12 @@ export function CommunityPost({ post, currentUserId, onDelete }: CommunityPostPr
             )}
           </div>
 
-          <p
-            className="text-[15px] font-normal text-white mt-1 break-words"
-            dangerouslySetInnerHTML={{ __html: post.caption }}
-          />
+          <Link href={`/posts/${post.id}`} scroll={false}>
+            <p
+              className="text-[15px] font-normal text-white mt-1 break-words"
+              dangerouslySetInnerHTML={{ __html: post.caption }}
+            />
+          </Link>
 
           {post.post_image && post.post_image.length > 0 && (
             <div className="mt-4">
