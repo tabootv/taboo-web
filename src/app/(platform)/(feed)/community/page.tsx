@@ -1,16 +1,15 @@
 'use client';
 
-import { useCreatePost } from '@/api/mutations';
 import { usePostsList } from '@/api/queries/posts.queries';
-import { useAuthStore } from '@/shared/stores/auth-store';
 import { Spinner } from '@/components/ui/spinner';
+import { PostCompose } from '@/features/community';
 import { useInfiniteScroll } from '@/hooks/use-infinite-scroll';
+import { useAuthStore } from '@/shared/stores/auth-store';
 import { MessageCircle, Rss, Star } from 'lucide-react';
 import Link from 'next/link';
 import { useMemo, useTransition } from 'react';
 import { toast } from 'sonner';
 import { deletePostAction } from './_actions';
-import { CreatePostCard } from './_components/CreatePostCard';
 import { FeedPost } from './_components/FeedPost';
 import { PostSkeleton } from './_components/PostSkeleton';
 
@@ -20,8 +19,6 @@ export default function CommunityPage() {
 
   const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage, refetch } =
     usePostsList();
-
-  const createPost = useCreatePost();
 
   const postsList = useMemo(() => {
     return data?.pages.flatMap((page) => page.data) || [];
@@ -35,10 +32,6 @@ export default function CommunityPage() {
     isLoading: isFetchingNextPage,
     rootMargin: '400px',
   });
-
-  const handlePostCreated = async (caption: string, image?: File) => {
-    await createPost.mutateAsync({ caption, ...(image && { image }) });
-  };
 
   const handleDeletePost = (id: number) => {
     startTransition(async () => {
@@ -80,8 +73,8 @@ export default function CommunityPage() {
 
       {/* Navigation + Feed column centered */}
       <div className="max-w-[820px] mx-auto page-px space-y-4 pb-12 mt-4">
-        {/* Create Post Card */}
-        {user?.channel && <CreatePostCard user={user} onPostCreated={handlePostCreated} />}
+        {/* Create Post */}
+        {user?.channel && <PostCompose variant="inline" />}
 
         {/* Feed Posts */}
         <div>

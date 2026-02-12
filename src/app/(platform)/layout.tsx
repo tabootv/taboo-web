@@ -22,7 +22,13 @@ function LayoutFallback() {
   );
 }
 
-export default async function MainGroupLayout({ children }: { children: React.ReactNode }) {
+export default async function MainGroupLayout({
+  children,
+  compose,
+}: {
+  children: React.ReactNode;
+  compose: React.ReactNode;
+}) {
   return (
     <MainLayout>
       <Suspense fallback={<LayoutFallback />}>
@@ -30,6 +36,7 @@ export default async function MainGroupLayout({ children }: { children: React.Re
           <AccessGate>{children}</AccessGate>
         </CreatorsProvider>
       </Suspense>
+      {compose}
     </MainLayout>
   );
 }

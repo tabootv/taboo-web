@@ -8,6 +8,7 @@ import { cn } from '@/shared/utils/formatting';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { Toaster } from 'sonner';
+import { ComposeFAB } from '@/components/fab/compose-fab';
 import { Footer } from './footer';
 import { TopHeader } from './top-header';
 
@@ -70,6 +71,7 @@ export function MainLayout({ children, showFooter = true }: MainLayoutProps) {
           {showFooter && <Footer />}
         </div>
 
+        <ComposeFAB />
         <Toaster
           position="bottom-center"
           richColors
