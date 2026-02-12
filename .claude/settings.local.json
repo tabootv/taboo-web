@@ -116,7 +116,8 @@
       "WebFetch(domain:dev.whop.com)",
       "WebFetch(domain:docs.whop.com)",
       "WebFetch(domain:guides.whop.com)",
-      "WebFetch(domain:whop.com)"
+      "WebFetch(domain:whop.com)",
+      "Bash(node:*)"
     ],
     "deny": [],
     "ask": []

@@ -717,6 +717,10 @@ small {
    Button Styles
    ============================================ */
 
+button {
+  cursor: pointer;
+}
+
 .btn-glow:hover {
   box-shadow: var(--glow-medium);
 }

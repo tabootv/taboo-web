@@ -35,6 +35,8 @@ export function CommunityPost({ post, currentUserId, onDelete }: CommunityPostPr
     setLightboxOpen(true);
   };
 
+  // SECURITY: Frontend-only guard. Backend needs server-side Policy/Middleware
+  // to verify post ownership before allowing deletion.
   const isOwner = currentUserId === post.user_id;
 
   const toggleReply = () => {
