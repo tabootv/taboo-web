@@ -15,6 +15,15 @@
 import type { Post, PostComment, PostCommentListResponse, PostListResponse } from '../types';
 import { apiClient } from './base-client';
 
+export interface CreatePostParams {
+  caption: string;
+  images?: File[];
+  audioFiles?: File[];
+  location?: string;
+  latitude?: number;
+  longitude?: number;
+}
+
 export const postsClient = {
   list: async (params?: { page?: number }): Promise<PostListResponse> => {
     const data = await apiClient.get<{ posts?: PostListResponse }>(
@@ -32,12 +41,23 @@ export const postsClient = {
     return data.post || data.data || (data as Post);
   },
 
-  create: async (caption: string, image?: File): Promise<Post> => {
+  create: async (params: CreatePostParams): Promise<Post> => {
     const formData = new FormData();
-    formData.append('caption', caption);
-    if (image) {
-      formData.append('post_image', image);
+    formData.append('caption', params.caption);
+    if (params.images) {
+      for (const img of params.images) {
+        formData.append('post_image[]', img);
+      }
     }
+    if (params.audioFiles) {
+      for (const audio of params.audioFiles) {
+        formData.append('post_audio[]', audio);
+      }
+    }
+    if (params.location) formData.append('location', params.location);
+    if (params.latitude != null) formData.append('latitude', String(params.latitude));
+    if (params.longitude != null) formData.append('longitude', String(params.longitude));
+
     const data = await apiClient.post<{ post?: Post; data?: Post }>('/posts', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });

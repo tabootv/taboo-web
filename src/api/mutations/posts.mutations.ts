@@ -6,7 +6,7 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { postsClient } from '../client/posts.client';
+import { postsClient, type CreatePostParams } from '../client/posts.client';
 import { queryKeys } from '../query-keys';
 import type { Post } from '../types';
 
@@ -17,8 +17,7 @@ export function useCreatePost() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ caption, image }: { caption: string; image?: File }) =>
-      postsClient.create(caption, image),
+    mutationFn: (params: CreatePostParams) => postsClient.create(params),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.community.postList() });
     },
