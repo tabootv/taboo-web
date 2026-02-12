@@ -84,7 +84,7 @@ export default function CommunityPage() {
         {user?.channel && <CreatePostCard user={user} onPostCreated={handlePostCreated} />}
 
         {/* Feed Posts */}
-        <div className="space-y-4">
+        <div>
           {isLoading ? (
             // Skeleton Loading
             Array.from({ length: 3 }).map((_, i) => <PostSkeleton key={`skeleton-${i}`} />)
