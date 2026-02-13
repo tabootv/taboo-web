@@ -1,7 +1,7 @@
-import { Suspense } from 'react';
 import { MainLayout } from '@/components/layout';
 import { CreatorsProvider } from '@/components/providers/creators-provider';
 import { AccessGate } from '@/shared/components/providers/access-gate';
+import { Suspense } from 'react';
 import {
   BannerSkeleton,
   CreatorsSkeleton,
@@ -31,6 +31,10 @@ export default async function MainGroupLayout({
 }) {
   return (
     <MainLayout>
+      {/* Pre-establish connection to Bunny.net CDN for faster video loading */}
+      <link rel="preconnect" href="https://video.bunnycdn.com" />
+      <link rel="dns-prefetch" href="https://video.bunnycdn.com" />
+
       <Suspense fallback={<LayoutFallback />}>
         <CreatorsProvider>
           <AccessGate>{children}</AccessGate>

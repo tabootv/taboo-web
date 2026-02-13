@@ -1,5 +1,5 @@
-import { PlayerPageSkeleton } from '@/app/(platform)/series/_components/PlayerPageSkeleton';
+import { VideoPageSkeleton } from './_components/skeletons';
 
 export default function VideoPageLoading() {
-  return <PlayerPageSkeleton />;
+  return <VideoPageSkeleton />;
 }

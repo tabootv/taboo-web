@@ -1,6 +1,7 @@
 'use client';
 
 import { useToggleBookmark } from '@/api/mutations';
+import { usePrefetchVideo } from '@/shared/hooks/use-prefetch-video';
 import { formatDuration, formatRelativeTime } from '@/shared/utils/formatting';
 import type { Video } from '@/types';
 import { Check, Clock, Play, Plus } from 'lucide-react';
@@ -29,6 +30,7 @@ export const RailCard = memo(function RailCard({
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const toggleBookmark = useToggleBookmark();
+  const prefetchVideo = usePrefetchVideo();
   const [optimisticSaved, setOptimisticSaved] = useState(
     video.is_bookmarked || video.in_watchlist || false
   );
@@ -60,6 +62,10 @@ export const RailCard = memo(function RailCard({
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true);
 
+    // Prefetch video play data so it's ready on navigation
+    const videoIdStr = String(video.uuid || video.id);
+    if (videoIdStr) prefetchVideo(videoIdStr);
+
     if (previewUrl) {
       hoverTimeoutRef.current = setTimeout(() => {
         if (videoRef.current) {
@@ -71,7 +77,7 @@ export const RailCard = memo(function RailCard({
         }
       }, 500);
     }
-  }, [previewUrl]);
+  }, [previewUrl, video.uuid, video.id, prefetchVideo]);
 
   const handleMouseLeave = useCallback(() => {
     setIsHovered(false);
