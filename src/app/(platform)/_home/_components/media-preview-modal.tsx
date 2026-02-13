@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback, memo } from 'react';
-import { createPortal } from 'react-dom';
-import { useRouter } from 'next/navigation';
-import { X } from 'lucide-react';
 import { useToggleBookmark } from '@/api/mutations';
 import type { Video } from '@/types';
-import { PreviewVideoPlayer } from './PreviewVideoPlayer';
+import { X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { PreviewMediaInfo } from './PreviewMediaInfo';
+import { PreviewVideoPlayer } from './PreviewVideoPlayer';
 
 interface MediaPreviewModalProps {
   video: Video | null;
@@ -181,7 +181,10 @@ export const MediaPreviewModal = memo(function MediaPreviewModal({
       aria-labelledby="modal-title"
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+      <div
+        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+        onClick={handleBackdropClick}
+      />
 
       {/* Modal Card */}
       <div
