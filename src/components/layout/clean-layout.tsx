@@ -26,9 +26,9 @@ export function CleanLayout({ children, showBack: _showBack = true }: CleanLayou
         richColors
         toastOptions={{
           style: {
-            background: 'var(--surface)',
-            border: '1px solid var(--border)',
-            color: 'var(--text-primary)',
+            background: '#ab0013',
+            border: '1px solid rgba(255,255,255,0.2)',
+            color: '#ffffff',
             zIndex: 99999,
           },
         }}

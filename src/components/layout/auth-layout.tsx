@@ -80,9 +80,9 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
         richColors
         toastOptions={{
           style: {
-            background: '#0d0d0d',
-            border: '1px solid rgba(255,255,255,0.08)',
-            color: '#e6e7ea',
+            background: '#ab0013',
+            border: '1px solid rgba(255,255,255,0.2)',
+            color: '#ffffff',
             zIndex: 99999,
           },
         }}
