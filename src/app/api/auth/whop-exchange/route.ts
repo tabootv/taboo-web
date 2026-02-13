@@ -12,10 +12,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import {
   COOKIE_OPTIONS,
   TOKEN_KEY,
-  SUBSCRIBED_KEY,
   decodeCookieToken,
   getApiUrl,
-  getSubscribedCookieOptions,
 } from '@/shared/lib/auth/cookie-config';
 import { createApiLogger } from '@/shared/lib/logger';
 
@@ -92,7 +90,6 @@ export async function POST(request: NextRequest) {
     // Set HttpOnly cookie if token received
     if (token) {
       res.cookies.set(TOKEN_KEY, token, COOKIE_OPTIONS);
-      res.cookies.set(SUBSCRIBED_KEY, subscribed ? '1' : '0', getSubscribedCookieOptions());
     }
 
     return res;

@@ -4,7 +4,6 @@ import { NextResponse } from 'next/server';
 
 // Cookie keys
 const TOKEN_KEY = 'tabootv_token';
-const SUBSCRIBED_KEY = 'tabootv_subscribed';
 
 // Public routes that don't require authentication
 // Note: Duplicate auth routes (/login, /signup, /sign-up) are handled by
@@ -17,17 +16,6 @@ const PUBLIC_ROUTES = [
   '/choose-plan',
   '/auth/whop-callback',
   '/redeem',
-];
-
-// Routes accessible to authenticated but non-subscribed users
-const NON_SUBSCRIBER_ALLOWED = [
-  '/account',
-  '/account/security',
-  '/account/subscription',
-  '/profile',
-  '/choose-plan',
-  '/redeem',
-  '/payment',
 ];
 
 // O(1) regex for skipping static files and internal routes
@@ -58,15 +46,6 @@ function isPublicRoute(pathname: string): boolean {
  */
 function isAuthPage(pathname: string): boolean {
   return AUTH_PAGES.some((page) => pathname.startsWith(page));
-}
-
-/**
- * Check if route is accessible to non-subscribed users
- */
-function isNonSubscriberAllowed(pathname: string): boolean {
-  return NON_SUBSCRIBER_ALLOWED.some((route) => {
-    return pathname === route || pathname.startsWith(`${route}/`);
-  });
 }
 
 /**
@@ -114,14 +93,6 @@ function redirectToHome(request: NextRequest): NextResponse {
 }
 
 /**
- * Redirect to choose-plan
- */
-function redirectToChoosePlan(request: NextRequest): NextResponse {
-  const url = new URL('/choose-plan', request.url);
-  return NextResponse.redirect(url);
-}
-
-/**
  * Main proxy function — runs at the edge, no async needed
  */
 export function proxy(request: NextRequest) {
@@ -162,18 +133,7 @@ export function proxy(request: NextRequest) {
     return redirectToSignIn(request, pathname);
   }
 
-  // 5. Subscription enforcement — redirect non-subscribers away from content routes
-  const subscribed = request.cookies.get(SUBSCRIBED_KEY)?.value;
-  if (subscribed !== '1' && !isNonSubscriberAllowed(pathname)) {
-    if (process.env.NODE_ENV === 'development') {
-      console.log(
-        '[Middleware] Non-subscriber accessing content route, redirecting to choose-plan'
-      );
-    }
-    return redirectToChoosePlan(request);
-  }
-
-  // 6. Allow request to proceed (studio creator check handled client-side)
+  // 5. Allow request to proceed (subscription check handled client-side by AccessGate)
   return NextResponse.next();
 }
 
