@@ -30,7 +30,6 @@ export function CheckoutModal({
       <div
         className="absolute inset-0"
         style={{ background: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(10px)' }}
-        onClick={onClose}
       />
       <div
         className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto"
