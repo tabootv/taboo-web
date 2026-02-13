@@ -11,14 +11,14 @@ This document describes how every login, registration, subscription, and redeem 
 
 1. [How Users Enter the Platform](#1-how-users-enter-the-platform)
 2. [Choose a Plan (Primary Entry Point)](#2-choose-a-plan-primary-entry-point)
-3. [Guest Checkout (Payment-First Onboarding)](#3-guest-checkout-payment-first-onboarding)
+3. [Embedded Checkout (Payment-First Onboarding)](#3-embedded-checkout-payment-first-onboarding)
 4. [Paying with the Embedded Checkout](#4-paying-with-the-embedded-checkout)
 5. [Paying with the Redirect Checkout (Fallback)](#5-paying-with-the-redirect-checkout-fallback)
 6. [Registration](#6-registration)
 7. [Login](#7-login)
 8. [Social Login (Google & Apple)](#8-social-login-google--apple)
 9. [Password Recovery](#9-password-recovery)
-10. [Whop External Purchase (OAuth Callback)](#10-whop-external-purchase-oauth-callback)
+10. [External Checkout (OAuth Callback)](#10-external-checkout-oauth-callback)
 11. [Redeem Code - Existing User](#11-redeem-code---existing-user)
 12. [Redeem Code - New User](#12-redeem-code---new-user)
 13. [Profile Completion](#13-profile-completion)
@@ -36,7 +36,7 @@ Understanding the entry points is essential for testing. The platform is designe
 
 | Entry point | Who uses it | How they get there |
 |---|---|---|
-| `/choose-plan` | **Most new users** | Marketing links, landing pages, word of mouth, or redirected by the Access Gate when they try to watch content without a subscription. Guests can complete checkout without registering first (see [Section 3](#3-guest-checkout-payment-first-onboarding)). |
+| `/choose-plan` | **Most new users** | Marketing links, landing pages, word of mouth, or redirected by the Access Gate when they try to watch content without a subscription. Guests can complete checkout without registering first (see [Section 3](#3-embedded-checkout-payment-first-onboarding)). |
 | `/sign-in` | Returning users | Direct navigation, bookmarks, or redirected by the Access Gate when their session expires |
 | `/auth/whop-callback` | Users who buy on whop.com | Automatic redirect from Whop after an external purchase |
 | `/redeem` | Users with a gift/promo code | Shared links like `taboo.tv/redeem` |
@@ -46,7 +46,7 @@ Understanding the entry points is essential for testing. The platform is designe
 
 There are two paths depending on whether the selected plan supports embedded checkout:
 
-**Primary path: Guest Checkout (payment-first)**
+**Primary path: Embedded Checkout (payment-first)**
 ```
 User arrives at /choose-plan (from an ad, a link, or a redirect)
     |
@@ -104,7 +104,7 @@ Clicks "Start free trial" again --> Checkout opens
 Pays --> Subscription confirmed --> Home page
 ```
 
-The key takeaway: **for most plans, guests can pay first and have their account created automatically — registration is no longer a prerequisite for checkout**.
+The key takeaway: **for most plans, guests can pay first via embedded checkout and have their account created automatically — registration is no longer a prerequisite for checkout**.
 
 ---
 
@@ -131,14 +131,14 @@ The app attempts to detect the user's country automatically from server headers.
 
 ### What happens when they click the subscribe button
 
-- **If the user is not logged in and the plan has a `whop_plan_id` (primary path):** The LeadModal opens to capture the user's email, then the guest checkout flow begins. See [Section 3](#3-guest-checkout-payment-first-onboarding) for the full details.
+- **If the user is not logged in and the plan has a `whop_plan_id` (primary path):** The LeadModal opens to capture the user's email, then the embedded checkout flow begins. See [Section 3](#3-embedded-checkout-payment-first-onboarding) for the full details.
 - **If the user is not logged in and the plan has NO `whop_plan_id` (fallback path):** They are redirected to `/register?redirect=/choose-plan`. After registering, they are sent back to `/choose-plan` to continue with checkout. See [Section 6](#6-registration) for details on the registration form.
 - **If the user is logged in and the plan has a Whop Plan ID**: The embedded checkout modal opens (see [Section 4](#4-paying-with-the-embedded-checkout)).
 - **If the user is logged in and the plan only has a Whop URL (no Plan ID)**: The user is redirected to Whop's hosted checkout page (see [Section 5](#5-paying-with-the-redirect-checkout-fallback)).
 
 ---
 
-## 3. Guest Checkout (Payment-First Onboarding)
+## 3. Embedded Checkout (Payment-First Onboarding)
 
 This flow allows guests to pay **before** creating an account. It is the primary checkout path for unauthenticated users when the selected plan supports embedded checkout (`whop_plan_id` is present).
 
@@ -161,15 +161,32 @@ This flow allows guests to pay **before** creating an account. It is the primary
 3. On payment completion, Whop returns a `receipt_id` to the frontend callback.
 4. The frontend calls `POST /api/auth/post-checkout` with the `receipt_id`:
    - Verifies the `checkout_intent` JWT cookie (checks signature and expiry).
-   - Registers an account on the backend using the email from the JWT, with a random password (UUID).
-   - Sets an encrypted `_pw_hint` cookie (10-minute TTL) that stores the random password for the password-set step.
+   - Calls the backend's `/auth/checkout-claim` endpoint (instead of `/register`) to register or claim the account. This handles the webhook race condition where the Whop webhook may have already created the user.
+   - If a new user: sets an encrypted `_pw_hint` cookie (10-minute TTL) that stores the random password for the password-set step.
+   - If auto-claimed (webhook race): skips the `_pw_hint` cookie since the password step will be skipped.
    - Sets the auth token cookie (same as normal login).
-   - Returns the user object and subscription status.
+   - Returns the user object, subscription status, and `auto_claimed` flag.
    - Deletes the `checkout_intent` cookie (single-use).
 5. The frontend sets the user as authenticated and starts subscription polling (same mechanism as [Section 4](#4-paying-with-the-embedded-checkout)).
 6. On subscription confirmation, redirects based on profile completeness.
 
-### If the email is already registered (409)
+### If the email is already registered
+
+The post-checkout API (`POST /api/auth/post-checkout`) calls the backend's `/auth/checkout-claim` endpoint, which distinguishes between two cases using the `last_login` column:
+
+**Case 1: Webhook-created account (auto-claim)**
+
+This is the "webhook race" — the Whop webhook created the user before the frontend's post-checkout call arrived. The backend detects `last_login IS NULL` (no human has ever logged in) and auto-claims the account.
+
+1. The `POST /api/auth/post-checkout` returns `200` with `{ auto_claimed: true, user, subscribed: true }`.
+2. The user is logged in automatically (same as a new account).
+3. The `_pw_hint` cookie is **not** set (the password step is skipped).
+4. The user is redirected to `/account/complete` (without `?set_password=1`) to complete their profile.
+5. The user can set a password later from Settings > Security or via the Forgot Password flow.
+
+**Case 2: Genuine existing user (409)**
+
+The email belongs to a real user who has logged in before (`last_login IS NOT NULL`). The backend returns a 409.
 
 1. The `POST /api/auth/post-checkout` API returns `409` with `{ existing_user: true, email: "..." }`.
 2. The user is redirected to `/sign-in?email={email}&subscription_activated=true`.
@@ -184,7 +201,9 @@ This flow allows guests to pay **before** creating an account. It is the primary
 | Checkout intent rate limited (429) | Toast: "Too many requests. Please try again later." |
 | Checkout intent fails (other error) | Toast: error message from API or "Something went wrong. Please try again." |
 | Post-checkout fails | Toast: "Failed to create account. Please contact support." |
-| Email already registered (409) | Redirected to sign-in with green banner (see above) |
+| Email already registered, genuine user (409) | Redirected to sign-in with green banner (see above) |
+| Email already registered, webhook race (auto-claim) | Transparent auto-login, redirected to `/account/complete` (no password step) |
+| Invalid receipt (422) | Toast: error message from backend |
 
 **Source files:**
 - `src/app/(onboarding)/choose-plan/components/lead-modal.tsx`
@@ -315,8 +334,8 @@ An existing user signs in with their email and password. Users arrive here by:
 - Clicking "Have an account? Sign in" on `/choose-plan`.
 - Being redirected by the Access Gate when their session expires or when they try to access protected content.
 - Direct navigation (bookmarks, typing the URL).
-- Being redirected from the Whop OAuth callback (Scenario C, see [Section 10](#10-whop-external-purchase-oauth-callback)).
-- Being redirected from guest checkout when the email is already registered (see [Section 3](#3-guest-checkout-payment-first-onboarding)).
+- Being redirected from the Whop OAuth callback (Scenario C, see [Section 10](#10-external-checkout-oauth-callback)).
+- Being redirected from embedded checkout when the email is already registered (see [Section 3](#3-embedded-checkout-payment-first-onboarding)).
 
 ### What the user sees
 
@@ -330,7 +349,7 @@ An existing user signs in with their email and password. Users arrive here by:
 
 The sign-in page can show contextual banners depending on how the user arrived:
 
-- **Subscription activated banner** (green): Appears when the user arrives from a Whop external purchase or guest checkout (`?subscription_activated=true`). Says: "Your subscription has been activated! Sign in to start watching."
+- **Subscription activated banner** (green): Appears when the user arrives from an external checkout or embedded checkout (`?subscription_activated=true`). Says: "Your subscription has been activated! Sign in to start watching."
 - **Redeem code banner** (amber): Appears when the user arrives with a redeem code in the URL (`?redeem_code=XXXX`). Says: "Sign in to redeem your code."
 - **Email pre-fill**: If the URL contains `?email=user@example.com`, the email field is pre-filled automatically.
 
@@ -429,7 +448,7 @@ Users can sign in or register using their Google or Apple account. The flow is t
 
 ---
 
-## 10. Whop External Purchase (OAuth Callback)
+## 10. External Checkout (OAuth Callback)
 
 This flow handles users who purchase a subscription directly on whop.com (not through the TabooTV website). After purchase, Whop redirects them to TabooTV.
 
@@ -574,20 +593,20 @@ There are two entry paths:
 
 **Page**: `/account/complete`
 
-New users (especially those coming from Whop or guest checkout) may need to complete their profile before accessing content.
+New users (especially those coming from Whop or embedded checkout) may need to complete their profile before accessing content.
 
 ### The wizard has 3 or 4 steps
 
 The number of steps depends on how the user arrived:
 
-- **From Guest Checkout ([Section 3](#3-guest-checkout-payment-first-onboarding)):** 4 steps — Password → Photo → Details → Complete
+- **From Embedded Checkout ([Section 3](#3-embedded-checkout-payment-first-onboarding)):** 4 steps — Password → Photo → Details → Complete
 - **All other flows (Whop OAuth, registration, etc.):** 3 steps — Photo → Details → Complete
 
 The wizard reads the URL query parameter `?set_password=1` to determine whether to include the Password step.
 
 #### Step 1: Password (conditional, skippable)
 
-Only shown when `/account/complete?set_password=1` is in the URL — i.e., the user came from the guest checkout flow and has a random password they don't know.
+Only shown when `/account/complete?set_password=1` is in the URL — i.e., the user came from the embedded checkout flow and has a random password they don't know.
 
 1. The user sees a "Set your password" heading with the subtitle "Create a password so you can sign in to your account anytime."
 2. They enter a new password. Requirements are shown in real time as they type:
@@ -643,9 +662,9 @@ As the user types a username, the app checks availability against the backend in
 
 ### Password for auto-created users
 
-Users who were created through the Whop OAuth flow or the guest checkout flow have a random password generated by the backend. They don't know this password. There are two ways to set a real password:
+Users who were created through the Whop OAuth flow or the embedded checkout flow have a random password generated by the backend. They don't know this password. There are two ways to set a real password:
 
-- **Guest checkout users:** The Password step in the onboarding wizard (`POST /api/auth/set-initial-password`) allows them to set a password immediately after checkout. If they skip it or the session expires, they can use the Forgot Password flow later.
+- **Embedded checkout users:** The Password step in the onboarding wizard (`POST /api/auth/set-initial-password`) allows them to set a password immediately after checkout. If they skip it or the session expires, they can use the Forgot Password flow later.
 - **Whop OAuth users:** They need to use the "Forgot Password" flow to set a password (`POST /api/forget-password` → `POST /api/reset-password`).
 
 ---
@@ -686,7 +705,7 @@ The following routes are public (no authentication required):
 - `/redeem` — redeem code entry
 - `/creators` — creator profile pages
 
-Note: `/account/complete` is **not** a public route — it requires authentication. All paths to this page (whop-callback, AccessGate redirect, onboarding helper, guest checkout post-checkout) authenticate the user first.
+Note: `/account/complete` is **not** a public route — it requires authentication. All paths to this page (whop-callback, AccessGate redirect, onboarding helper, embedded checkout post-checkout) authenticate the user first.
 
 **Removed pages**: `/verify-email` and `/confirm-password` have been removed. These routes will return 404.
 
@@ -740,7 +759,7 @@ After any login or registration action, the app checks the user's status and red
 | User's status | Where they go |
 |---|---|
 | Profile incomplete (missing name, username, gender, or country) | `/account/complete` |
-| Profile incomplete + came from guest checkout | `/account/complete?set_password=1` |
+| Profile incomplete + came from embedded checkout | `/account/complete?set_password=1` |
 | Profile complete, but not subscribed | `/choose-plan` |
 | Profile complete and subscribed | `/` (home page) |
 | Had a `?redirect=` parameter in the URL | That redirect target (if it's a valid internal path) |
@@ -819,7 +838,7 @@ Subscription activated
 Home page (/)
 ```
 
-### C. Whop External Purchase: New User
+### C. External Checkout: New User
 
 ```
 Purchase on whop.com
@@ -843,7 +862,7 @@ Complete profile wizard
 Home page (/)
 ```
 
-### D. Whop External Purchase: Existing User (Not Logged In)
+### D. External Checkout: Existing User (Not Logged In)
 
 ```
 Purchase on whop.com
@@ -867,7 +886,7 @@ User signs in with their password
 Home page (/)
 ```
 
-### E. New User: Guest Checkout (Payment-First)
+### E. New User: Embedded Checkout (Payment-First)
 
 ```
 Visit /choose-plan (not logged in)
@@ -888,17 +907,19 @@ Whop embedded checkout modal opens
 Complete payment
     |
     v
-Account created automatically (random password)
+/auth/checkout-claim called
     |
-    v
-Subscription polling → confirmed
-    |
-    v
-Profile incomplete → /account/complete?set_password=1
-    |
-    v
-Password step (optional) → Photo → Details → Done
-    |
-    v
-Home page (/)
+    ├─ No existing user?
+    │  └─ Account created (random password)
+    │     └─ /account/complete?set_password=1
+    │        └─ Password step → Photo → Details → Done → Home (/)
+    │
+    ├─ Webhook already created user (last_login = null)?
+    │  └─ Auto-claimed (no password step)
+    │     └─ /account/complete
+    │        └─ Photo → Details → Done → Home (/)
+    │
+    └─ Genuine existing user (last_login ≠ null)?
+       └─ 409 → /sign-in with green banner
+          └─ Sign in → Home (/)
 ```

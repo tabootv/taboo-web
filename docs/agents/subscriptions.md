@@ -12,6 +12,8 @@ All authenticated API calls go through Next.js API routes that act as server-sid
 - On subsequent requests: proxy reads cookie → forwards as `Authorization: Bearer {token}`
 - Laravel remains unchanged — authenticates via Sanctum Bearer tokens
 
+**Response envelope:** Auth proxies support two backend formats — flat (`{ token, user, ... }`) or wrapped (`{ data: { token, user, ... } }`). Detection: check `'data' in response && response.data?.token` first, then fall back to `'token' in response`.
+
 **Ref:** `src/proxy.ts`
 
 ---
@@ -91,6 +93,61 @@ If polling times out (30s), show "Payment received! Your subscription is being a
 
 ---
 
+## Checkout Claim (Embedded Checkout — Guest Flow)
+
+After an unauthenticated user completes embedded checkout, the frontend calls `POST /api/auth/post-checkout` which proxies to the backend's `POST /api/auth/checkout-claim`.
+
+**Endpoint:** `POST /api/auth/checkout-claim` (public, no auth)
+**Action:** `App\Actions\Auth\CheckoutClaim`
+
+### Request
+
+`{ email, receipt_id, password, first_name, last_name }` — all required. Password is a machine-generated UUID.
+
+### Decision Logic
+
+1. Validate body → invalid: 422
+2. Verify `receipt_id` with Whop API (`GET /v2/payments/{id}`) → invalid/mismatch: 422
+3. Look up user by email (case-insensitive)
+
+| Condition | Scenario | Status | Token | Actions |
+|-----------|----------|--------|-------|---------|
+| User not found | `new_user` | 200 | Yes | Create user → Send WelcomeMail → Sanctum token |
+| User found, `last_login IS NULL` | `auto_claimed` | 200 | Yes | Update password/name → Send WelcomeMail → Sanctum token |
+| User found, `last_login IS NOT NULL` | `existing_user` | 409 | No | Return email for sign-in redirect |
+
+### Frontend Behavior
+
+- **new_user:** Set auth cookie + `_pw_hint` cookie → redirect to `/account/complete?set_password=1`
+- **auto_claimed:** Set auth cookie, NO `_pw_hint` → redirect to `/account/complete` (skip password step)
+- **existing_user (409):** Redirect to `/sign-in?email={email}&subscription_activated=true`
+
+### Backend Files
+
+| File | Role |
+|------|------|
+| `app/Actions/Auth/CheckoutClaim.php` | Business logic |
+| `app/Services/Whop.php` | `payment()` for receipt verification |
+| `app/Mail/WelcomeMail.php` | Welcome email (Scenarios A & B) |
+
+### Error Handling
+
+| Status | Frontend action |
+|--------|----------------|
+| 409 | Redirect to `/sign-in?email={email}&subscription_activated=true` |
+| 422 | Toast with error message |
+| Other | Toast: "Failed to create account. Please contact support." |
+
+### `_pw_hint` Cookie
+
+Set only for `new_user` (not `auto_claimed`). Contains encrypted random password. 10-minute TTL. Used by `POST /api/auth/set-initial-password` to change password without knowing the current one. Auto-claimed users skip this — they can use Forgot Password later.
+
+**Why `last_login` not password?** Webhook-created users have a random password set by the webhook. Checking for a password would always find one.
+
+**Ref:** `src/app/api/auth/post-checkout/route.ts`
+
+---
+
 ## Whop Checkout (Redirect) — Fallback Flow
 
 For plans with `whop_plan_url` but no `whop_plan_id`.
@@ -118,7 +175,15 @@ Handles users who purchase directly on whop.com. Whop redirects to `/auth/whop-c
 | Existing, logged in | 200 + token | Cookie set → redirect to `/` |
 | Existing, NOT logged in | 202, no token | Show "subscription activated" → redirect to `/sign-in` with email pre-filled |
 
-**Security:** Existing users who are NOT logged in are never auto-logged-in (prevents account takeover).
+**Security:** Existing users who are NOT logged in are never auto-logged-in (prevents account takeover). Scenario B includes an email mismatch guard — Bearer token user must match the Whop email, otherwise falls to Scenario C.
+
+**`redirect_uri`:** Accepted optionally in request body, falls back to `WHOP_REDIRECT_URI` env. Required because multiple redirect URIs are registered (legacy + Next.js).
+
+**Why 202 for Scenario C?** The proxy only attempts token extraction/cookie-setting for `2xx` where `status !== 202`. Using 200 for "existing, not logged in" would cause the proxy to try extracting a token and fail.
+
+**Bearer token URL-decode:** Proxy reads `tabootv_token` cookie, URL-decodes it (Sanctum tokens contain `|` encoded as `%7C`), then forwards as `Authorization: Bearer {decoded}`.
+
+**Backend files:** `app/Actions/Auth/WhopExchange.php` (action), `app/Services/Whop.php` (`getAccessToken()`), `config/services.php` (`whop.redirect_uri`)
 
 ---
 
@@ -213,6 +278,7 @@ OAuth users have a random backend-generated password they don't know. **Workarou
 
 - Whop webhook `createOrUpdateUser()` checks `last_login` before updating existing accounts
 - Whop OAuth callback blocks auto-login for existing users who are NOT logged in
+- Checkout-claim uses same `last_login` pattern: NULL = auto-claim, non-NULL = 409
 
 ### Security Gaps Summary
 
@@ -227,9 +293,10 @@ OAuth users have a random backend-generated password they don't know. **Workarou
 
 ## API Gap Registry
 
-### Missing: `POST /api/profile/set-initial-password`
+### ~~Missing:~~ `POST /api/auth/set-initial-password` — Implemented
 
-OAuth/Whop users can't set a password without knowing their current one. **Workaround:** Use forget-password → reset-password OTP flow.
+Embedded checkout users can now set their password via the onboarding wizard.
+Route: `src/app/api/auth/set-initial-password/route.ts`. Uses encrypted `_pw_hint` cookie.
 
 ### Missing: Atomic register + redeem
 
