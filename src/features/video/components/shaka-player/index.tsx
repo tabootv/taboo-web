@@ -102,6 +102,7 @@ export function ShakaPlayer({
     shakaRef,
     capturePreviewFrame,
     previewImage,
+    ensurePreviewPlayer,
   } = useShakaPlayer({
     src,
     videoRef,
@@ -175,6 +176,8 @@ export function ShakaPlayer({
   const handleProgressHover = useCallback(
     (e: React.MouseEvent<HTMLInputElement>) => {
       if (!progressRef.current || !duration) return;
+      // Lazily init preview player on first seek bar hover
+      ensurePreviewPlayer();
       const rect = progressRef.current.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
@@ -184,7 +187,7 @@ export function ShakaPlayer({
         capturePreviewFrame(previewTime);
       }
     },
-    [duration, capturePreviewFrame, isPreviewReady]
+    [duration, capturePreviewFrame, isPreviewReady, ensurePreviewPlayer]
   );
 
   const handleProgressLeave = useCallback(() => {

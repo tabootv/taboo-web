@@ -119,6 +119,9 @@ const nextConfig: NextConfig = {
   // Enable React strict mode for better development experience
   reactStrictMode: true,
 
+  // Exclude shaka-player from server-side bundling (client-only library)
+  serverExternalPackages: ['shaka-player'],
+
   // Experimental features
   experimental: {
     // Enable server actions

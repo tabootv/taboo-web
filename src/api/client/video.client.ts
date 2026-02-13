@@ -99,9 +99,13 @@ export const videoClient = {
   /**
    * Play video (returns video + related videos)
    */
-  play: async (id: string | number): Promise<{ video: Video; videos: Video[] }> => {
+  play: async (
+    id: string | number,
+    serverToken?: string
+  ): Promise<{ video: Video; videos: Video[] }> => {
     const data = await apiClient.get<{ video?: Video; videos?: Video[]; data?: Video }>(
-      `/videos/${id}/play`
+      `/videos/${id}/play`,
+      serverToken ? { serverToken } : undefined
     );
     return {
       video: data.video || data.data || (data as Video),
@@ -112,7 +116,7 @@ export const videoClient = {
   /**
    * Get list of videos with filters
    */
-  list: async (filters?: VideoListFilters): Promise<VideoListResponse> => {
+  list: async (filters?: VideoListFilters, serverToken?: string): Promise<VideoListResponse> => {
     const params: Record<string, unknown> = {
       page: filters?.page,
       limit: filters?.limit || filters?.per_page || 24,
@@ -155,7 +159,7 @@ export const videoClient = {
         per_page?: number;
         total?: number;
       };
-    }>('/videos', { params });
+    }>('/videos', { params, ...(serverToken ? { serverToken } : {}) });
 
     return transformVideoResponse(data);
   },
@@ -191,7 +195,8 @@ export const videoClient = {
   getRelated: async (
     videoId: string | number,
     page = 1,
-    perPage = 12
+    perPage = 12,
+    serverToken?: string
   ): Promise<VideoListResponse> => {
     try {
       const data = await apiClient.get<{
@@ -214,6 +219,7 @@ export const videoClient = {
           sort_by: 'published_at',
           order: 'desc',
         },
+        ...(serverToken ? { serverToken } : {}),
       });
 
       const list = data?.videos || data?.data || [];

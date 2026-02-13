@@ -23,6 +23,8 @@ export const queryKeys = {
       [...queryKeys.videos.all, 'map', filters] as const,
     detail: (id: string | number) => [...queryKeys.videos.all, 'detail', String(id)] as const,
     related: (id: string | number) => [...queryKeys.videos.detail(id), 'related'] as const,
+    byTags: (tagIds: number[]) =>
+      [...queryKeys.videos.all, 'byTags', tagIds.sort().join(',')] as const,
     comments: (id: string | number) => [...queryKeys.videos.detail(id), 'comments'] as const,
     bookmarked: () => [...queryKeys.videos.all, 'bookmarked'] as const,
     history: () => [...queryKeys.videos.all, 'history'] as const,
