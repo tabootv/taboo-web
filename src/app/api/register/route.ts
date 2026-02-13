@@ -6,7 +6,12 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { COOKIE_OPTIONS, TOKEN_KEY, getApiUrl } from '@/shared/lib/auth/cookie-config';
+import {
+  COOKIE_OPTIONS,
+  TOKEN_KEY,
+  getApiUrl,
+  setStateCookies,
+} from '@/shared/lib/auth/cookie-config';
 import { createApiLogger } from '@/shared/lib/logger';
 
 const log = createApiLogger('/api/register', 'POST');
@@ -57,6 +62,11 @@ export async function POST(request: NextRequest) {
 
     if (token) {
       res.cookies.set(TOKEN_KEY, token, COOKIE_OPTIONS);
+      setStateCookies(res, {
+        profile_completed: !!(user as any)?.profile_completed,
+        subscribed: !!subscribed,
+        is_creator: !!(user as any)?.is_creator,
+      });
     }
 
     return res;

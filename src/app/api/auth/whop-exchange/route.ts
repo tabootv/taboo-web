@@ -14,6 +14,7 @@ import {
   TOKEN_KEY,
   decodeCookieToken,
   getApiUrl,
+  setStateCookies,
 } from '@/shared/lib/auth/cookie-config';
 import { createApiLogger } from '@/shared/lib/logger';
 
@@ -90,6 +91,11 @@ export async function POST(request: NextRequest) {
     // Set HttpOnly cookie if token received
     if (token) {
       res.cookies.set(TOKEN_KEY, token, COOKIE_OPTIONS);
+      setStateCookies(res, {
+        profile_completed: !!(user as any)?.profile_completed,
+        subscribed: !!subscribed,
+        is_creator: !!(user as any)?.is_creator,
+      });
     }
 
     return res;

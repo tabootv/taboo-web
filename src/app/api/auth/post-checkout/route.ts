@@ -15,7 +15,12 @@ import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
 import { verifyCheckoutIntent, encryptPasswordHint } from '@/shared/lib/auth/checkout-intent';
-import { COOKIE_OPTIONS, TOKEN_KEY, getApiUrl } from '@/shared/lib/auth/cookie-config';
+import {
+  COOKIE_OPTIONS,
+  TOKEN_KEY,
+  getApiUrl,
+  setStateCookies,
+} from '@/shared/lib/auth/cookie-config';
 import { createApiLogger } from '@/shared/lib/logger';
 
 const log = createApiLogger('/api/auth/post-checkout', 'POST');
@@ -133,8 +138,13 @@ export async function POST(request: NextRequest) {
       auto_claimed: autoClaimed,
     });
 
-    // Set auth token cookie
+    // Set auth token cookie and state cookies
     res.cookies.set(TOKEN_KEY, token, COOKIE_OPTIONS);
+    setStateCookies(res, {
+      profile_completed: !!(user as any)?.profile_completed,
+      subscribed: !!subscribed,
+      is_creator: !!(user as any)?.is_creator,
+    });
 
     // Set encrypted password hint cookie only for new users (not auto-claimed)
     // Auto-claimed users skip the password step — they can set a password later

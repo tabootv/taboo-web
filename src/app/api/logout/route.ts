@@ -6,7 +6,12 @@
 
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
-import { TOKEN_KEY, decodeCookieToken, getApiUrl } from '@/shared/lib/auth/cookie-config';
+import {
+  TOKEN_KEY,
+  decodeCookieToken,
+  getApiUrl,
+  deleteStateCookies,
+} from '@/shared/lib/auth/cookie-config';
 import { createApiLogger } from '@/shared/lib/logger';
 
 const log = createApiLogger('/api/logout', 'POST');
@@ -38,12 +43,14 @@ export async function POST(request: NextRequest) {
     // Delete the HttpOnly cookie on the response object
     const res = NextResponse.json({ success: true, message: 'Logged out successfully' });
     res.cookies.delete(TOKEN_KEY);
+    deleteStateCookies(res);
     return res;
   } catch (error) {
     // Still delete cookie on error
     log.error({ err: error }, 'Logout proxy error');
     const res = NextResponse.json({ success: true, message: 'Logged out successfully' });
     res.cookies.delete(TOKEN_KEY);
+    deleteStateCookies(res);
     return res;
   }
 }
