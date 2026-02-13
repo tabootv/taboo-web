@@ -1,5 +1,47 @@
 # Changelog
 
+## [0.3.0](https://github.com/tabootv/taboo-web/compare/tabootv-new-v0.2.0...tabootv-new-v0.3.0) (2026-02-13)
+
+
+### Features
+
+* **api:** add server token support and comment mutations to posts client ([f034465](https://github.com/tabootv/taboo-web/commit/f0344657680878b350e78624216ff0cd16143d23))
+* **api:** expand post creation to support multi-image, audio, and location ([2ad5cea](https://github.com/tabootv/taboo-web/commit/2ad5cea1e2eedb0ab573696e3d54d9bf28c46d73))
+* **auth:** send redirect_uri in whop OAuth exchange ([c8f1c00](https://github.com/tabootv/taboo-web/commit/c8f1c009820925a08e414d56dca9e2d0a4bbd666))
+* **build:** use git SHA for build ID and expose as env var ([0e8ee21](https://github.com/tabootv/taboo-web/commit/0e8ee21c08a6edb69e0474a8c957a94f7d0ec51c))
+* **checkout:** integrate checkout-claim endpoint with webhook race handling ([5666510](https://github.com/tabootv/taboo-web/commit/56665104a8b7cd28b2dab5ce68dfef70a8aed8fb))
+* **community:** add compose routes with FAB and route interception ([5124ab6](https://github.com/tabootv/taboo-web/commit/5124ab672db831ad06c7ecac07be467d988c4a97))
+* **community:** add post comment input with emoji picker and mentions ([6f363e7](https://github.com/tabootv/taboo-web/commit/6f363e7f89149b7bf7b523ad90a65f1a52c8ea1f))
+* **community:** add PostCompose component with media picker and progress bar ([190c0b1](https://github.com/tabootv/taboo-web/commit/190c0b16ae83e8a18811f884577d993156ed577d))
+* **community:** migrate posts to (feed) route group with parallel route interception ([0219650](https://github.com/tabootv/taboo-web/commit/0219650ffc2d0ccbf241d40d5303240df0a1311d))
+* **community:** redesign feed posts with pill reactions, comment delete, and mentions ([5a0020a](https://github.com/tabootv/taboo-web/commit/5a0020ab6e1f5321366477127926ec33240141bc))
+* **community:** redesign post detail with follow button, share, and threaded comments ([7cd2d5d](https://github.com/tabootv/taboo-web/commit/7cd2d5de59cf9b73d3e9e7e407d7cc8cacccb9e6))
+* **deps:** add emoji-picker-react package ([23e7336](https://github.com/tabootv/taboo-web/commit/23e7336726b19c742697595a21dc193eb94472bc))
+* **errors:** add error and not-found boundary pages ([3c47247](https://github.com/tabootv/taboo-web/commit/3c47247770b3645e76ec27b711402a67cf91f2b2))
+* **logging:** add pino structured logging with Axiom transport ([ebaeb52](https://github.com/tabootv/taboo-web/commit/ebaeb5222d2d5638a2b1ea2389d8b7e8f269c562))
+* **redirects:** add legacy platform URL redirects ([27fb5e1](https://github.com/tabootv/taboo-web/commit/27fb5e168185b3c043d8945bc3de0d6934d989e5))
+* **seo:** add site-wide metadata file conventions ([c7d5ad7](https://github.com/tabootv/taboo-web/commit/c7d5ad784e72aedbf9ad84d540c053cc4c6505e8))
+* **video:** Phase 1 supporting components — server architecture, skeletons, prefetch ([7bb46e0](https://github.com/tabootv/taboo-web/commit/7bb46e07e840040ff35f74302063bad87b5211a3))
+
+
+### Bug Fixes
+
+* **api:** sync follow state to post caches in toggle follow mutation ([13a357a](https://github.com/tabootv/taboo-web/commit/13a357af549ab278dc018b615a0c06e703d60699))
+* **auth:** redirect to intended page after login ([d042564](https://github.com/tabootv/taboo-web/commit/d0425644e3071884795b60da2a580d596a038f00))
+* **creators:** return 404 when creator handle does not exist ([2a75251](https://github.com/tabootv/taboo-web/commit/2a75251fadfb3c80a468c7f68ee48e89ce51ffe1))
+
+
+### Performance
+
+* **query:** lazy-load ReactQueryDevtools to reduce production bundle ([f4e5d36](https://github.com/tabootv/taboo-web/commit/f4e5d3604ab32f63669f449bc36a9cb4403033cc))
+* **video:** Phase 2 optimization — Shaka fast path, ABR tuning, tag-based sidebar ([3a1c78b](https://github.com/tabootv/taboo-web/commit/3a1c78b20afa2645b42164b5476e1afc887337fb))
+
+
+### Refactoring
+
+* **logging:** migrate console.error to pino structured logging ([a5f831a](https://github.com/tabootv/taboo-web/commit/a5f831a022079035dadea2eae7e61bbda5a5d5d2))
+* **mention-input:** add forwardRef and imperative handle for cursor insertion ([581859a](https://github.com/tabootv/taboo-web/commit/581859ad3eeaf4a60ee79bba7a5c989a2121e7bf))
+
 ## [0.2.0](https://github.com/tabootv/taboo-web/compare/tabootv-new-v0.1.0...tabootv-new-v0.2.0) (2026-02-11)
 
 
