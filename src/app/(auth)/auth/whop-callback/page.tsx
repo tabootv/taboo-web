@@ -64,6 +64,7 @@ function WhopCallbackContent() {
         const response = await authClient.whopExchange({
           code: code!,
           membership_id: membershipId,
+          redirect_uri: `${window.location.origin}/auth/whop-callback`,
         });
 
         // Scenario 3: Existing user, not logged in (202 from proxy)
