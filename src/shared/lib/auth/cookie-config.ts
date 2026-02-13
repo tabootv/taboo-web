@@ -6,6 +6,7 @@
  */
 
 export const TOKEN_KEY = 'tabootv_token';
+export const SUBSCRIBED_KEY = 'tabootv_subscribed';
 
 export const COOKIE_OPTIONS = {
   httpOnly: true,
@@ -52,6 +53,20 @@ export function decodeCookieToken(rawValue: string | undefined): string | undefi
   } catch {
     return rawValue;
   }
+}
+
+/**
+ * Cookie options for the subscription status cookie.
+ * Non-HttpOnly so the proxy can read it, same path/sameSite/secure settings.
+ */
+export function getSubscribedCookieOptions() {
+  return {
+    httpOnly: false,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax' as const,
+    path: '/',
+    maxAge: 60 * 60 * 24 * 7, // 7 days
+  };
 }
 
 /**

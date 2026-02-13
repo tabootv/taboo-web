@@ -5,7 +5,13 @@
  * Returns authentication status alongside user data.
  */
 
-import { TOKEN_KEY, decodeCookieToken, getApiUrl } from '@/shared/lib/auth/cookie-config';
+import {
+  TOKEN_KEY,
+  SUBSCRIBED_KEY,
+  decodeCookieToken,
+  getApiUrl,
+  getSubscribedCookieOptions,
+} from '@/shared/lib/auth/cookie-config';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { createApiLogger } from '@/shared/lib/logger';
@@ -61,12 +67,17 @@ export async function GET() {
       message = data.message;
     }
 
-    return NextResponse.json({
+    const res = NextResponse.json({
       authenticated: true,
       message: message || 'Success',
       user,
       subscribed,
     });
+
+    // Refresh subscription status cookie on each /me check
+    res.cookies.set(SUBSCRIBED_KEY, subscribed ? '1' : '0', getSubscribedCookieOptions());
+
+    return res;
   } catch (error) {
     log.error({ err: error }, 'Me proxy error');
     return NextResponse.json(
