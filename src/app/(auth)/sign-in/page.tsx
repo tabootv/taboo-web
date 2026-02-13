@@ -9,9 +9,9 @@ import { applyPendingRedeemCode, saveRedeemCode } from '@/shared/lib/redeem/appl
 import { useAuthStore } from '@/shared/stores/auth-store';
 import { AxiosError } from 'axios';
 import { Loader2 } from 'lucide-react';
-import posthog from 'posthog-js';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import posthog from 'posthog-js';
 import { Suspense, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -34,7 +34,6 @@ function SignInContent() {
     password: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [rememberMe, setRememberMe] = useState(false);
 
   const isAnyLoading = isLoading || socialLoading;
 
@@ -93,7 +92,7 @@ function SignInContent() {
     }
 
     try {
-      await login({ ...formData, remember_me: rememberMe });
+      await login({ ...formData });
       navigateAndDeferPostLogin('email');
     } catch (err) {
       posthog.capture(AnalyticsEvent.AUTH_LOGIN_FAILED, {
@@ -170,13 +169,15 @@ function SignInContent() {
       )}
 
       {/* Header */}
-      <div className="text-center mb-5">
-        <h1 className="text-xl font-semibold text-text-primary">Welcome back</h1>
-        <p className="mt-1 text-sm text-text-secondary">Sign in to continue to TabooTV</p>
+      <div className="text-left">
+        <h1 className="text-[2rem]! font-bold text-white tracking-tight">
+          Endless access starts here
+        </h1>
+        <p className="mt-1 text-[1.125rem] text-text-secondary">Sign in or create an account.</p>
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="space-y-3">
+      <form onSubmit={handleSubmit} className="space-y-6 my-12">
         {/* Email */}
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-text-secondary mb-1.5">
@@ -224,15 +225,6 @@ function SignInContent() {
 
         {/* Remember me & Forgot password */}
         <div className="flex items-center justify-between pt-1">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
-              className="w-4 h-4 rounded bg-background border-border text-red-primary focus:ring-red-primary/30 focus:ring-offset-0"
-            />
-            <span className="text-sm text-text-secondary">Remember me</span>
-          </label>
           <Link
             href="/forgot-password"
             className="text-sm text-red-primary hover:text-red-hover transition-colors"
@@ -264,7 +256,7 @@ function SignInContent() {
           <div className="w-full border-t border-border" />
         </div>
         <div className="relative flex justify-center text-xs">
-          <span className="px-2 bg-surface text-text-tertiary">or continue with</span>
+          <span className="px-2 text-text-tertiary">or continue with</span>
         </div>
       </div>
 

@@ -1,12 +1,12 @@
 'use client';
 
-import { Suspense, useState, useRef, useEffect } from 'react';
-import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft, Loader2, CheckCircle } from 'lucide-react';
-import posthog from 'posthog-js';
 import { authClient } from '@/api/client/auth.client';
 import { AnalyticsEvent } from '@/shared/lib/analytics/events';
+import { ArrowLeft, CheckCircle, Loader2 } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import posthog from 'posthog-js';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 type Step = 'email' | 'otp' | 'success';
@@ -123,15 +123,15 @@ function ForgotPasswordContent() {
         </Link>
 
         {/* Header */}
-        <div className="text-center mb-5">
-          <h1 className="text-xl font-semibold text-text-primary">Reset password</h1>
-          <p className="mt-1 text-sm text-text-secondary">
+        <div className="text-left">
+          <h1 className="text-[2rem]! font-bold text-white tracking-tight">Reset password</h1>
+          <p className="mt-1 text-[1.125rem] text-text-secondary">
             Enter your email to receive a verification code
           </p>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleEmailSubmit} className="space-y-3">
+        <form onSubmit={handleEmailSubmit} className="space-y-6 my-12">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-text-secondary mb-1.5">
               Email
