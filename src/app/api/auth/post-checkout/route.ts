@@ -3,10 +3,12 @@
  *
  * After Whop payment completes, this route:
  * 1. Reads the checkout_intent cookie (signed JWT)
- * 2. Registers a new account with the email from the JWT
- * 3. Sets auth token and password hint cookies
+ * 2. Calls /auth/checkout-claim to register or claim the account
+ * 3. Sets auth token and (conditionally) password hint cookies
  *
- * Pattern follows whop-exchange/route.ts for token extraction and cookie setting.
+ * Uses /auth/checkout-claim instead of /register to handle the webhook race
+ * condition where the Whop webhook may create the user before this route runs.
+ * See docs/agents/subscriptions.md (Checkout Claim section) for the backend spec.
  */
 
 import { cookies } from 'next/headers';
@@ -57,9 +59,9 @@ export async function POST(request: NextRequest) {
     const emailPrefix = intent.email.split('@')[0] || 'New';
     const firstName = emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1);
 
-    // 3. Register account on backend
+    // 3. Claim account on backend (handles webhook race condition)
     const apiUrl = getApiUrl();
-    const registerResponse = await fetch(`${apiUrl}/register`, {
+    const claimResponse = await fetch(`${apiUrl}/auth/checkout-claim`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -67,54 +69,50 @@ export async function POST(request: NextRequest) {
       },
       body: JSON.stringify({
         email: intent.email,
+        receipt_id,
         first_name: firstName,
         last_name: 'User',
         password: randomPassword,
-        password_confirmation: randomPassword,
       }),
     });
 
-    const registerData = await registerResponse.json();
+    const claimData = await claimResponse.json();
 
-    // 4. Handle "email already taken" case
-    if (!registerResponse.ok) {
-      const message =
-        registerData?.message || registerData?.errors?.email?.[0] || 'Registration failed';
-
-      const isEmailTaken =
-        registerResponse.status === 422 &&
-        (message.toLowerCase().includes('already') || message.toLowerCase().includes('taken'));
-
-      if (isEmailTaken) {
-        // Delete the checkout intent cookie
-        const res = NextResponse.json(
-          { existing_user: true, email: intent.email },
-          { status: 409 }
-        );
-        res.cookies.delete(CHECKOUT_INTENT_COOKIE);
-        return res;
-      }
-
-      return NextResponse.json({ message }, { status: registerResponse.status });
+    // 4. Handle existing user (genuine account, not webhook-created)
+    if (claimResponse.status === 409) {
+      const res = NextResponse.json(
+        { existing_user: true, email: claimData?.email || intent.email },
+        { status: 409 }
+      );
+      res.cookies.delete(CHECKOUT_INTENT_COOKIE);
+      return res;
     }
 
-    // 5. Extract token from register response
+    if (!claimResponse.ok) {
+      const message = claimData?.message || 'Registration failed';
+      return NextResponse.json({ message }, { status: claimResponse.status });
+    }
+
+    // 5. Extract token from claim response
     let token: string | undefined;
     let user: Record<string, unknown> | undefined;
     let subscribed: boolean | undefined;
+    let autoClaimed = false;
 
-    if ('data' in registerData && registerData.data?.token) {
-      token = registerData.data.token;
-      user = registerData.data.user;
-      subscribed = registerData.data.subscribed;
-    } else if ('token' in registerData) {
-      token = registerData.token;
-      user = registerData.user;
-      subscribed = registerData.subscribed;
+    if ('data' in claimData && claimData.data?.token) {
+      token = claimData.data.token;
+      user = claimData.data.user;
+      subscribed = claimData.data.subscribed;
+      autoClaimed = claimData.data.auto_claimed === true;
+    } else if ('token' in claimData) {
+      token = claimData.token;
+      user = claimData.user;
+      subscribed = claimData.subscribed;
+      autoClaimed = claimData.auto_claimed === true;
     }
 
     if (!token) {
-      log.error({ registerData }, 'Post-checkout: no token in register response');
+      log.error({ claimData }, 'Post-checkout: no token in claim response');
       return NextResponse.json(
         { message: 'Account created but login failed. Please sign in.' },
         { status: 500 }
@@ -122,26 +120,35 @@ export async function POST(request: NextRequest) {
     }
 
     // 6. Build response and set cookies
-    log.info({ email: intent.email, receiptId: receipt_id }, 'Post-checkout account created');
+    const logAction = autoClaimed ? 'claimed (webhook race)' : 'created';
+    log.info(
+      { email: intent.email, receiptId: receipt_id, autoClaimed },
+      `Post-checkout account ${logAction}`
+    );
 
     const res = NextResponse.json({
-      message: 'Account created',
+      message: autoClaimed ? 'Account claimed' : 'Account created',
       user,
       subscribed: subscribed ?? false,
+      auto_claimed: autoClaimed,
     });
 
     // Set auth token cookie
     res.cookies.set(TOKEN_KEY, token, COOKIE_OPTIONS);
 
-    // Set encrypted password hint cookie
-    const encryptedPw = encryptPasswordHint(randomPassword);
-    res.cookies.set(PW_HINT_COOKIE, encryptedPw, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: PW_HINT_MAX_AGE,
-    });
+    // Set encrypted password hint cookie only for new users (not auto-claimed)
+    // Auto-claimed users skip the password step — they can set a password later
+    // via Settings > Security or the Forgot Password flow.
+    if (!autoClaimed) {
+      const encryptedPw = encryptPasswordHint(randomPassword);
+      res.cookies.set(PW_HINT_COOKIE, encryptedPw, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: PW_HINT_MAX_AGE,
+      });
+    }
 
     // Delete checkout intent cookie (single-use)
     res.cookies.delete(CHECKOUT_INTENT_COOKIE);

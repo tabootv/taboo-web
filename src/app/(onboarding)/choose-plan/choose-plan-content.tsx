@@ -47,6 +47,7 @@ export function ChoosePlanContent() {
   const [leadEmail, setLeadEmail] = useState('');
   const [isLeadLoading, setIsLeadLoading] = useState(false);
   const [isCreatingAccount, setIsCreatingAccount] = useState(false);
+  const autoClaimedRef = useRef(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [verifyMessage, setVerifyMessage] = useState('Activating your subscription...');
   const [showRetry, setShowRetry] = useState(false);
@@ -94,8 +95,9 @@ export function ChoosePlanContent() {
           toast.success('Subscription activated! Welcome to TabooTV.');
           const currentUser = useAuthStore.getState().user;
           if (!checkProfileComplete(currentUser)) {
-            // Only add set_password flag for post-checkout (guest) users
-            const pwParam = leadEmail ? '?set_password=1' : '';
+            // Add set_password flag for embedded checkout users, but not auto-claimed
+            // (webhook-created) users who skip the password step
+            const pwParam = leadEmail && !autoClaimedRef.current ? '?set_password=1' : '';
             router.push(`/account/complete${pwParam}`);
           } else {
             router.push('/');
@@ -219,7 +221,7 @@ export function ChoosePlanContent() {
     toast.error('Checkout not available for this plan');
   }, [activePlan, isAuthenticated, redeemCode, router, selectedPlan]);
 
-  // Handle lead email submission (guest checkout flow)
+  // Handle lead email submission (embedded checkout flow)
   const handleLeadSubmit = useCallback(
     async (email: string) => {
       if (!activePlan?.whop_plan_id) return;
@@ -312,10 +314,12 @@ export function ChoosePlanContent() {
             return;
           }
 
-          // Account created successfully
+          // Account created or claimed successfully
+          autoClaimedRef.current = data.auto_claimed === true;
           posthog.capture(AnalyticsEvent.AUTH_POST_CHECKOUT_ACCOUNT_CREATED, {
             plan: selectedPlan,
             plan_id: planId,
+            auto_claimed: autoClaimedRef.current,
           });
 
           setUserFromPostCheckout(data.user, data.subscribed ?? false);
@@ -616,7 +620,7 @@ export function ChoosePlanContent() {
         </div>
       </div>
 
-      {/* Lead Modal (guest checkout) */}
+      {/* Lead Modal (embedded checkout) */}
       {showLeadModal && (
         <LeadModal
           onSubmit={handleLeadSubmit}
