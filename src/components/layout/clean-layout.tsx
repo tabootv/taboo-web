@@ -29,7 +29,7 @@ export function CleanLayout({ children, showBack: _showBack = true }: CleanLayou
             background: '#ab0013',
             border: '1px solid rgba(255,255,255,0.2)',
             color: '#ffffff',
-            zIndex: 99999,
+            zIndex: 99999999,
           },
         }}
       />

@@ -26,7 +26,6 @@ interface AuthState {
   setUserFromPostCheckout: (user: User, subscribed: boolean) => void;
   clearError: () => void;
   checkAuth: () => Promise<void>;
-  setHasHydrated: (state: boolean) => void;
 }
 
 let pendingAuthCheck: Promise<void> | null = null;
@@ -42,8 +41,6 @@ export const useAuthStore = create<AuthState>()(
       isInitialized: false,
       error: null,
       _hasHydrated: false,
-
-      setHasHydrated: (state: boolean) => set({ _hasHydrated: state }),
 
       login: async (credentials: LoginCredentials) => {
         set({ isLoading: true, error: null });
@@ -262,15 +259,18 @@ export const useAuthStore = create<AuthState>()(
       onRehydrateStorage: () => {
         return (state) => {
           if (!state) return;
-          state.setHasHydrated(true);
+          useAuthStore.setState({ _hasHydrated: true });
           if (state.user) {
             // Optimistic for UI rendering only — NOT for redirect decisions
             // Force isInitialized: false to override stale value from old localStorage
             useAuthStore.setState({ isAuthenticated: true, isInitialized: false });
-            state.checkAuth();
           } else {
-            useAuthStore.setState({ isInitialized: true, isAuthenticated: false });
+            // Wait for server confirmation before considering initialized
+            useAuthStore.setState({ isInitialized: false, isAuthenticated: false });
           }
+          // Always verify auth with server — handles cookie-exists-but-localStorage-cleared edge case
+          // pendingAuthCheck deduplication prevents double calls
+          useAuthStore.getState().checkAuth();
         };
       },
     }
