@@ -1,4 +1,9 @@
-import { decodeCookieToken } from '@/shared/lib/auth/cookie-config';
+import {
+  decodeCookieToken,
+  PROFILE_COMPLETED_KEY,
+  SUBSCRIBED_KEY,
+  IS_CREATOR_KEY,
+} from '@/shared/lib/auth/cookie-config';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
@@ -133,7 +138,38 @@ export function proxy(request: NextRequest) {
     return redirectToSignIn(request, pathname);
   }
 
-  // 5. Allow request to proceed (subscription check handled client-side by AccessGate)
+  // 5. State cookie gates (only trigger on explicit '0', missing cookies fall through)
+  const profileCompleted = request.cookies.get(PROFILE_COMPLETED_KEY)?.value;
+  const subscribed = request.cookies.get(SUBSCRIBED_KEY)?.value;
+  const isCreator = request.cookies.get(IS_CREATOR_KEY)?.value;
+
+  // 5a. Profile gate: incomplete profile → force /account/complete
+  if (profileCompleted === '0') {
+    if (pathname !== '/account/complete') {
+      return NextResponse.redirect(new URL('/account/complete', request.url));
+    }
+    return NextResponse.next();
+  }
+
+  // 5b. Subscription gate: not subscribed → limited access
+  if (subscribed === '0') {
+    if (
+      isPublicRoute(pathname) ||
+      pathname.startsWith('/account') ||
+      pathname === '/profile' ||
+      pathname.startsWith('/profile/')
+    ) {
+      return NextResponse.next();
+    }
+    return NextResponse.redirect(new URL('/choose-plan', request.url));
+  }
+
+  // 5c. Creator gate: non-creators cannot access /studio
+  if (isCreator === '0' && pathname.startsWith('/studio')) {
+    return redirectToHome(request);
+  }
+
+  // 6. Allow request to proceed
   return NextResponse.next();
 }
 
