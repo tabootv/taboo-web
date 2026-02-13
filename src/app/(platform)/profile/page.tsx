@@ -1,7 +1,6 @@
 'use client';
 import { useUpdateAvatar } from '@/api/mutations';
 import { useBookmarkedVideos, useHistoryVideos } from '@/api/queries/video.queries';
-import { RedeemCodeCard } from '@/components/redeem/redeem-code-card';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { LoadingScreen } from '@/components/ui/spinner';
@@ -94,7 +93,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="page-px max-w-[1920px] py-6 min-h-screen">
+    <div className="page-px max-w-[1920px] mx-auto py-6 min-h-screen">
       {/* Profile Header */}
       <div className="bg-surface rounded-lg elevation-low border border-border overflow-hidden">
         {/* Cover */}
@@ -181,21 +180,6 @@ export default function ProfilePage() {
             <p className="text-xs text-text-secondary">Change password</p>
           </div>
         </Link>
-      </div>
-
-      {/* Redeem Code */}
-      <div className="mt-6">
-        <RedeemCodeCard
-          variant="card"
-          onSubscribed={() => {
-            toast.success('Redeem code applied! Your subscription is now active.');
-            router.push('/');
-          }}
-          onStartVerifying={() => {
-            toast.info('Code applied! Verifying your subscription...');
-            router.push('/');
-          }}
-        />
       </div>
 
       {/* Tabs */}

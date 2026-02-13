@@ -1,19 +1,18 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
-import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { Check, Crown, Star, Sparkles } from 'lucide-react';
-import posthog from 'posthog-js';
 import { subscriptionsClient as subscriptionsApi } from '@/api/client/subscriptions.client';
-import type { Plan } from '@/types';
-import { useAuthStore } from '@/shared/stores/auth-store';
-import { setRegisterFlowToken } from '@/shared/lib/auth/register-flow-guard';
 import { useCountryCode } from '@/hooks/use-country-code';
-import { RedeemCodeCard } from '@/components/redeem/redeem-code-card';
 import { AnalyticsEvent } from '@/shared/lib/analytics/events';
 import { isProfileComplete as checkProfileComplete } from '@/shared/lib/auth/profile-completion';
+import { setRegisterFlowToken } from '@/shared/lib/auth/register-flow-guard';
 import { saveRedeemCode } from '@/shared/lib/redeem/apply-pending-code';
+import { useAuthStore } from '@/shared/stores/auth-store';
+import type { Plan } from '@/types';
+import { Check, Crown, Sparkles, Star } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import posthog from 'posthog-js';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import { CheckoutModal } from './components/checkout-modal';
@@ -21,17 +20,17 @@ import { LeadModal } from './components/lead-modal';
 import { LoadingPlans, VerifyingSubscription } from './components/loading-states';
 import { PlanToggle } from './components/plan-toggle';
 import {
+  BRAND_COLOR,
+  calcYearlySavings,
   DEFAULT_BENEFITS,
+  findMonthlyPlan,
+  findYearlyPlan,
+  formatPrice,
   MAX_POLL_ATTEMPTS,
-  POLL_INTERVAL_MS,
   MUTED_TEXT_COLOR,
   MUTED_TEXT_LIGHT,
   MUTED_TEXT_LIGHTER,
-  BRAND_COLOR,
-  findMonthlyPlan,
-  findYearlyPlan,
-  calcYearlySavings,
-  formatPrice,
+  POLL_INTERVAL_MS,
 } from './utils';
 
 export function ChoosePlanContent() {
@@ -342,16 +341,16 @@ export function ChoosePlanContent() {
     [isAuthenticated, leadEmail, router, selectedPlan, setUserFromPostCheckout, verifySubscription]
   );
 
-  const handleRedeemSubscribed = useCallback(() => {
-    setSubscribed(true);
-    toast.success('Redeem code applied! Your subscription is now active.');
-    router.push('/');
-  }, [setSubscribed, router]);
+  // const handleRedeemSubscribed = useCallback(() => {
+  //   setSubscribed(true);
+  //   toast.success('Redeem code applied! Your subscription is now active.');
+  //   router.push('/');
+  // }, [setSubscribed, router]);
 
-  const handleRedeemStartVerifying = useCallback(() => {
-    setIsVerifying(true);
-    verifySubscription();
-  }, [verifySubscription]);
+  // const handleRedeemStartVerifying = useCallback(() => {
+  //   setIsVerifying(true);
+  //   verifySubscription();
+  // }, [verifySubscription]);
 
   if (isLoading) {
     return <LoadingPlans />;
@@ -568,13 +567,13 @@ export function ChoosePlanContent() {
               </p>
 
               {/* Redeem Code Section - only for authenticated users to prevent 401 errors */}
-              {isAuthenticated && (
+              {/* {isAuthenticated && (
                 <RedeemCodeCard
                   variant="inline"
                   onSubscribed={handleRedeemSubscribed}
                   onStartVerifying={handleRedeemStartVerifying}
                 />
-              )}
+              )} */}
 
               {!isAuthenticated && (
                 <p
