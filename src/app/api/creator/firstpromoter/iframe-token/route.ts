@@ -1,6 +1,9 @@
 import { getRequiredEnv } from '@/shared/lib/config/env';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
+import { createApiLogger } from '@/shared/lib/logger';
+
+const log = createApiLogger('/api/creator/firstpromoter/iframe-token', 'GET');
 
 // Mapping of user emails to FirstPromoter promoter IDs
 // TODO: Replace with database lookup once Laravel backend is ready
@@ -64,7 +67,7 @@ export async function GET() {
 
     if (!fpResponse.ok) {
       const errorText = await fpResponse.text();
-      console.error('FirstPromoter iframe_login error:', fpResponse.status, errorText);
+      log.error({ status: fpResponse.status, body: errorText }, 'FirstPromoter iframe_login error');
       return NextResponse.json(
         {
           error: 'Failed to get iframe token',
@@ -81,7 +84,7 @@ export async function GET() {
       expires_in: fpData.expires_in,
     });
   } catch (error) {
-    console.error('FirstPromoter iframe token error:', error);
+    log.error({ err: error }, 'FirstPromoter iframe token error');
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

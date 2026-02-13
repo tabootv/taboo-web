@@ -7,6 +7,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { COOKIE_OPTIONS, TOKEN_KEY, getApiUrl } from '@/shared/lib/auth/cookie-config';
+import { createApiLogger } from '@/shared/lib/logger';
+
+const log = createApiLogger('/api/register', 'POST');
 
 export async function POST(request: NextRequest) {
   try {
@@ -58,7 +61,7 @@ export async function POST(request: NextRequest) {
 
     return res;
   } catch (error) {
-    console.error('Register proxy error:', error);
+    log.error({ err: error }, 'Register proxy error');
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
 }

@@ -8,6 +8,9 @@
 import { TOKEN_KEY, decodeCookieToken, getApiUrl } from '@/shared/lib/auth/cookie-config';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
+import { createApiLogger } from '@/shared/lib/logger';
+
+const log = createApiLogger('/api/me', 'GET');
 
 export async function GET() {
   const cookieStore = await cookies();
@@ -65,7 +68,7 @@ export async function GET() {
       subscribed,
     });
   } catch (error) {
-    console.error('Me proxy error:', error);
+    log.error({ err: error }, 'Me proxy error');
     return NextResponse.json(
       { authenticated: false, message: 'Internal server error' },
       { status: 500 }

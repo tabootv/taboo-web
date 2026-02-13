@@ -13,8 +13,10 @@
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import { TOKEN_KEY, decodeCookieToken, getApiUrl } from '@/shared/lib/auth/cookie-config';
+import { createApiLogger } from '@/shared/lib/logger';
 
 async function proxyRequest(request: NextRequest, method: string) {
+  const log = createApiLogger(request.nextUrl.pathname, method);
   try {
     const cookieStore = await cookies();
     const token = decodeCookieToken(cookieStore.get(TOKEN_KEY)?.value);
@@ -90,7 +92,7 @@ async function proxyRequest(request: NextRequest, method: string) {
 
     return res;
   } catch (error) {
-    console.error('API proxy error:', error);
+    log.error({ err: error }, 'API proxy error');
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
 }

@@ -14,6 +14,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
 import { verifyCheckoutIntent, encryptPasswordHint } from '@/shared/lib/auth/checkout-intent';
 import { COOKIE_OPTIONS, TOKEN_KEY, getApiUrl } from '@/shared/lib/auth/cookie-config';
+import { createApiLogger } from '@/shared/lib/logger';
+
+const log = createApiLogger('/api/auth/post-checkout', 'POST');
 
 const CHECKOUT_INTENT_COOKIE = 'checkout_intent';
 const PW_HINT_COOKIE = '_pw_hint';
@@ -111,7 +114,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!token) {
-      console.error('Post-checkout: no token in register response', registerData);
+      log.error({ registerData }, 'Post-checkout: no token in register response');
       return NextResponse.json(
         { message: 'Account created but login failed. Please sign in.' },
         { status: 500 }
@@ -119,7 +122,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 6. Build response and set cookies
-    console.log(`Post-checkout account created: email=${intent.email}, receipt=${receipt_id}`);
+    log.info({ email: intent.email, receiptId: receipt_id }, 'Post-checkout account created');
 
     const res = NextResponse.json({
       message: 'Account created',
@@ -145,7 +148,7 @@ export async function POST(request: NextRequest) {
 
     return res;
   } catch (error) {
-    console.error('Post-checkout error:', error);
+    log.error({ err: error }, 'Post-checkout error');
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
 }

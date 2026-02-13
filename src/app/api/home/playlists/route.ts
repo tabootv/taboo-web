@@ -1,5 +1,8 @@
 import { fetchHomeData } from '@/shared/lib/api/home-data';
 import { NextRequest, NextResponse } from 'next/server';
+import { createApiLogger } from '@/shared/lib/logger';
+
+const log = createApiLogger('/api/home/playlists', 'GET');
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,7 +17,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Error fetching playlists via API route:', error);
+    log.error({ err: error }, 'Error fetching playlists via API route');
     return NextResponse.json(
       {
         playlists: [],

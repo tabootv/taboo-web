@@ -8,6 +8,9 @@
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import { signCheckoutIntent } from '@/shared/lib/auth/checkout-intent';
+import { createApiLogger } from '@/shared/lib/logger';
+
+const log = createApiLogger('/api/auth/checkout-intent', 'POST');
 
 const CHECKOUT_INTENT_COOKIE = 'checkout_intent';
 const COOKIE_MAX_AGE = 60 * 10; // 10 minutes
@@ -72,7 +75,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Checkout intent error:', error);
+    log.error({ err: error }, 'Checkout intent error');
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
 }

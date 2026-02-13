@@ -8,6 +8,9 @@
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import { TOKEN_KEY, decodeCookieToken, getApiUrl } from '@/shared/lib/auth/cookie-config';
+import { createApiLogger } from '@/shared/lib/logger';
+
+const log = createApiLogger('/api/device-token', 'POST');
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,7 +42,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Device token proxy error:', error);
+    log.error({ err: error }, 'Device token proxy error');
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
 }

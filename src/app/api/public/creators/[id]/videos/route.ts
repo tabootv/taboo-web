@@ -1,5 +1,8 @@
 import { getRequiredEnv } from '@/shared/lib/config/env';
 import { NextRequest, NextResponse } from 'next/server';
+import { createApiLogger } from '@/shared/lib/logger';
+
+const log = createApiLogger('/api/public/creators/[id]/videos', 'GET');
 
 // Force dynamic to avoid build-time env var requirement
 export const dynamic = 'force-dynamic';
@@ -34,7 +37,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       },
     });
   } catch (error) {
-    console.error('Failed to fetch videos:', error);
+    log.error({ err: error }, 'Failed to fetch videos');
     return NextResponse.json({ error: 'Failed to fetch videos' }, { status: 500 });
   }
 }
