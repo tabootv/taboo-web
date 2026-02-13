@@ -119,6 +119,9 @@ const nextConfig: NextConfig = {
   // Enable React strict mode for better development experience
   reactStrictMode: true,
 
+  // Disable dev indicators (N button) in production
+  devIndicators: false,
+
   // Exclude shaka-player from server-side bundling (client-only library)
   serverExternalPackages: ['shaka-player', 'pino', 'pino-pretty', '@axiomhq/pino'],
 
