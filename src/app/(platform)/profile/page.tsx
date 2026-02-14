@@ -10,14 +10,12 @@ import type { Video } from '@/types';
 import { Bookmark, Camera, Clock, CreditCard, Lock, LogOut, Settings } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
 type TabType = 'bookmarks' | 'history';
 
 export default function ProfilePage() {
-  const router = useRouter();
   const { user, logout, fetchUser } = useAuthStore();
   const bookmarksEnabled = useFeature('BOOKMARK_SYSTEM');
   const historyEnabled = useFeature('WATCH_HISTORY');
@@ -39,7 +37,7 @@ export default function ProfilePage() {
     try {
       await logout();
       toast.success('Logged out successfully');
-      router.push('/sign-in');
+      window.location.replace('/sign-in');
     } catch {
       toast.error('Failed to logout');
     }

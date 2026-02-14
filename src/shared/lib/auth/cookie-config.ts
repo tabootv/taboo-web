@@ -99,5 +99,5 @@ export function decodeCookieToken(rawValue: string | undefined): string | undefi
  * Get the backend API URL
  */
 export function getApiUrl(): string {
-  return process.env.NEXT_PUBLIC_API_URL || 'https://app.taboo.tv/api';
+  return process.env.NEXT_PUBLIC_API_URL || 'https://api.taboo.tv/api';
 }

@@ -13,6 +13,7 @@ import {
   setStateCookies,
 } from '@/shared/lib/auth/cookie-config';
 import { createApiLogger } from '@/shared/lib/logger';
+import { getProxyHeaders } from '@/shared/lib/proxy-headers';
 
 const log = createApiLogger('/api/register', 'POST');
 
@@ -26,6 +27,7 @@ export async function POST(request: NextRequest) {
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
+        ...getProxyHeaders(request),
       },
       body: JSON.stringify(body),
     });

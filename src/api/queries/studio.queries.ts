@@ -137,7 +137,7 @@ async function fetchMapVideos(creatorId: string | number): Promise<MapVideo[]> {
   let page = 1;
   let lastPage = 1;
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://app.taboo.tv/api';
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.taboo.tv/api';
 
   while (page <= lastPage && page <= 5) {
     const url = new URL(`${apiUrl}/public/map-videos`);

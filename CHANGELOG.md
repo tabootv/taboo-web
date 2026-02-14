@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.5.0](https://github.com/tabootv/taboo-web/compare/tabootv-new-v0.4.0...tabootv-new-v0.5.0) (2026-02-14)
+
+
+### Features
+
+* **api:** forward client IP headers through proxy to backend ([35f6758](https://github.com/tabootv/taboo-web/commit/35f6758805dde9322f73c17047389bfc7be4d1eb))
+
+
+### Bug Fixes
+
+* **api:** update default backend URL from app.taboo.tv to api.taboo.tv ([902b97d](https://github.com/tabootv/taboo-web/commit/902b97d41ce459c62ad1b4cda986997cf8b5dbc3))
+* **auth:** use hard navigation after login to fix HTTPS redirect ([ba202c1](https://github.com/tabootv/taboo-web/commit/ba202c1e5d4343ab653f3bed2080a21e668c8426))
+* **auth:** use hard navigation for post-auth redirects ([346befe](https://github.com/tabootv/taboo-web/commit/346befee17fdd75ce853e52c1505cc8e6a4117ac))
+* **globe:** add missing iframe sandbox and permission policies ([ef78c64](https://github.com/tabootv/taboo-web/commit/ef78c6465c6d223bc356e13309fb24e7474e7fa3))
+
 ## [0.4.0](https://github.com/tabootv/taboo-web/compare/tabootv-new-v0.3.0...tabootv-new-v0.4.0) (2026-02-14)
 
 
