@@ -1,12 +1,5 @@
 # Changelog
 
-## [0.4.1](https://github.com/tabootv/taboo-web/compare/tabootv-new-v0.4.0...tabootv-new-v0.4.1) (2026-02-14)
-
-
-### Bug Fixes
-
-* **auth:** use hard navigation after login to fix HTTPS redirect ([ba202c1](https://github.com/tabootv/taboo-web/commit/ba202c1e5d4343ab653f3bed2080a21e668c8426))
-
 ## [0.4.0](https://github.com/tabootv/taboo-web/compare/tabootv-new-v0.3.0...tabootv-new-v0.4.0) (2026-02-14)
 
 
