@@ -49,7 +49,7 @@ export default function WatchlistPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <div className="max-w-6xl mx-auto px-4 md:px-8 py-8">
+        <div className="mx-auto page-px py-8">
           <div className="flex items-center gap-3 mb-2">
             <Bookmark className="w-7 h-7 text-red-primary" />
             <h1 className="text-2xl md:text-3xl font-bold text-white">My Watchlist</h1>

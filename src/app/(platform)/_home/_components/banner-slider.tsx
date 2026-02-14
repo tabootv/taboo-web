@@ -94,7 +94,7 @@ export function BannerSlider({ initialBanners }: BannerSliderProps) {
         />
         <div className="absolute inset-0 bg-linear-to-r from-black/80 via-black/40 to-transparent" />
         <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
-        <div className="absolute inset-0 flex flex-col justify-end sm:justify-center items-start page-px pb-16 sm:pb-20 md:pb-24">
+        <div className="absolute inset-0 flex flex-col justify-end sm:justify-center items-start page-px pb-10 sm:pb-20 md:pb-24">
           <div className="text-left rounded-lg p-3 sm:p-4 md:p-0 max-w-[90%] sm:max-w-[600px]">
             <div className="flex items-center gap-2 mb-1 sm:mb-2">
               {creatorImage ? (
@@ -118,13 +118,13 @@ export function BannerSlider({ initialBanners }: BannerSliderProps) {
               </h3>
             </div>
 
-            <h2 className="text-[1.5vw] font-bold text-white mb-2 sm:mb-3 drop-shadow-lg line-clamp-2">
+            <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white mb-2 sm:mb-3 drop-shadow-lg line-clamp-2">
               {currentBanner.title}
             </h2>
 
             {currentBanner.description && (
               <div className="hidden sm:block text-xs md:text-sm text-white/80 drop-shadow-lg mb-3 md:mb-5">
-                <p className="text-[1.2vw] line-clamp-3">{currentBanner.description}</p>
+                <p className="text-xs md:text-sm line-clamp-3">{currentBanner.description}</p>
                 {currentBanner.description.length > 180 && (
                   <Link
                     href={href}
@@ -137,11 +137,15 @@ export function BannerSlider({ initialBanners }: BannerSliderProps) {
               </div>
             )}
 
-            <Link href={href}>
-              <Button
-                size="lg"
-                className="btn-premium text-sm sm:text-base lg:text-xl font-semibold"
-              >
+            <Link href={href} className="md:hidden">
+              <Button size="sm" className="btn-premium text-xs sm:text-sm lg:text-xl font-semibold">
+                <Play className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" fill="white" />
+                Play Now
+              </Button>
+            </Link>
+
+            <Link href={href} className="hidden md:block">
+              <Button size="lg" className="btn-premium text-xs sm:text-sm lg:text-xl font-semibold">
                 <Play className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" fill="white" />
                 Play Now
               </Button>

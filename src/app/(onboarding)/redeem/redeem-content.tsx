@@ -5,13 +5,16 @@ import { AnalyticsEvent } from '@/shared/lib/analytics/events';
 import { useAuthStore } from '@/shared/stores/auth-store';
 import type { Plan } from '@/types';
 import { ArrowRight, Check, Gift, Loader2 } from 'lucide-react';
-import posthog from 'posthog-js';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import posthog from 'posthog-js';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
+import { useGuestOnly } from '@/hooks';
+import { setRegisterFlowToken } from '@/shared/lib/auth/register-flow-guard';
 import { saveRedeemCode } from '@/shared/lib/redeem/apply-pending-code';
+import { cn } from '@/shared/utils/formatting';
 import { RedeemBackground } from './components/redeem-background';
 
 const MAX_POLL_ATTEMPTS = 15;
@@ -26,6 +29,7 @@ export function RedeemContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isAuthenticated, setSubscribed } = useAuthStore();
+  useGuestOnly('/');
 
   const [redeemCode, setRedeemCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -112,10 +116,11 @@ export function RedeemContent() {
     const code = (codeOverride || redeemCode).trim();
     if (!code) return;
 
-    // If unauthenticated, save code and redirect to sign-in
+    // If unauthenticated, save code and redirect to register
     if (!isAuthenticated) {
       saveRedeemCode(code);
-      router.push(`/sign-in?redeem_code=${encodeURIComponent(code)}`);
+      setRegisterFlowToken();
+      router.push(`/register?redeem_code=${encodeURIComponent(code)}`);
       return;
     }
 
@@ -377,10 +382,11 @@ export function RedeemContent() {
             <p style={{ color: MUTED_TEXT_LIGHT, fontSize: 13, marginBottom: 24 }}>
               You&apos;ll need to{' '}
               <Link
-                href={`/sign-in${redeemCode ? `?redeem_code=${encodeURIComponent(redeemCode)}` : ''}`}
+                className={cn(!redeemCode ? 'pointer-events-none' : '')}
+                href={`/register${redeemCode ? `?redeem_code=${encodeURIComponent(redeemCode)}` : ''}`}
                 style={{ color: BRAND_COLOR, fontWeight: 500, textDecoration: 'none' }}
               >
-                sign in
+                create an account
               </Link>{' '}
               to redeem your code.
             </p>

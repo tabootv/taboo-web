@@ -59,7 +59,7 @@ export function VerticalSeriesList({ series, selectedIndex, onSelect }: Vertical
   );
 
   return (
-    <div className="lg:w-[320px] xl:w-[340px] flex-shrink-0 relative lg:h-full">
+    <div className="min-w-0 lg:w-[320px] xl:w-[340px] flex-shrink-0 relative lg:h-full">
       <div className="hidden lg:flex items-center justify-between text-xs text-white/40 mb-2 px-1">
         <span>{series.length} series</span>
         <div className="flex items-center gap-1">
@@ -71,7 +71,7 @@ export function VerticalSeriesList({ series, selectedIndex, onSelect }: Vertical
 
       <div
         ref={listRef}
-        className="flex lg:flex-col gap-3 lg:gap-1.5 overflow-x-auto lg:overflow-x-visible lg:overflow-y-auto lg:h-full lg:max-h-full pb-2 lg:pb-0 lg:pr-3 scroll-smooth series-list-scroll"
+        className="flex lg:flex-col gap-3 lg:gap-1.5 overflow-x-auto lg:overflow-x-visible lg:overflow-y-auto lg:h-full lg:max-h-full pb-2 lg:pb-0 lg:pr-3 scroll-smooth snap-x snap-mandatory lg:snap-none series-list-scroll"
       >
         {series.map((item, index) => (
           <SeriesCard

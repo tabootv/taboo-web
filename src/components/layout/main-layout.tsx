@@ -1,5 +1,6 @@
 'use client';
 
+import { ComposeFAB } from '@/components/fab/compose-fab';
 import { NavigationProgress } from '@/components/layout/navigation/NavigationProgress';
 import { ScrollRestoration } from '@/components/layout/navigation/ScrollRestoration';
 import { AppSidebar } from '@/components/sidebar';
@@ -8,7 +9,6 @@ import { cn } from '@/shared/utils/formatting';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { Toaster } from 'sonner';
-import { ComposeFAB } from '@/components/fab/compose-fab';
 import { Footer } from './footer';
 import { TopHeader } from './top-header';
 
@@ -75,6 +75,7 @@ export function MainLayout({ children, showFooter = true }: MainLayoutProps) {
         <Toaster
           position="bottom-center"
           richColors
+          className="z-99999999"
           toastOptions={{
             style: {
               background: '#ab0013',

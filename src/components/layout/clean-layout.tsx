@@ -14,7 +14,11 @@ export function CleanLayout({ children, showBack: _showBack = true }: CleanLayou
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <NavigationProgress />
-      <TopHeader hiddenSearch={true} classNameDivContainer="account-container" />
+      <TopHeader
+        hiddenSearch={true}
+        hiddenGetStarted={true}
+        classNameDivContainer="account-container"
+      />
 
       <main className="flex-1 flex flex-col">
         <div className="flex-1">{children}</div>

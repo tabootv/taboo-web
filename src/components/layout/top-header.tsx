@@ -14,9 +14,11 @@ import { useEffect, useMemo, useState } from 'react';
 export function TopHeader({
   classNameDivContainer,
   hiddenSearch,
+  hiddenGetStarted,
 }: {
   classNameDivContainer?: string;
   hiddenSearch?: boolean;
+  hiddenGetStarted?: boolean;
 }) {
   const { user, isAuthenticated, logout } = useAuthStore();
   const sidebar = useSidebarSafe();
@@ -171,9 +173,12 @@ export function TopHeader({
                   Sign In
                 </Button>
               </Link>
-              <Link href="/choose-plan" className="hidden sm:block">
-                <Button size="sm">Get Started</Button>
-              </Link>
+
+              {!hiddenGetStarted && (
+                <Link href="/choose-plan" className="hidden sm:block">
+                  <Button size="sm">Get Started</Button>
+                </Link>
+              )}
             </div>
           )}
         </div>
