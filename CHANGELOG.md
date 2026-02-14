@@ -1,5 +1,36 @@
 # Changelog
 
+## [0.4.0](https://github.com/tabootv/taboo-web/compare/tabootv-new-v0.3.0...tabootv-new-v0.4.0) (2026-02-14)
+
+
+### Features
+
+* **account:** add invite-a-friend system for paid subscribers ([0026535](https://github.com/tabootv/taboo-web/commit/002653509bef79a0f4a6b61d3da947a97e6f087d))
+* **auth:** add state cookies for profile, subscription, and creator status ([9a03e0e](https://github.com/tabootv/taboo-web/commit/9a03e0eb9f662d90bc12aa1a60a993dcfa15dfee))
+* **auth:** add subscription cookie for proxy-level route protection ([4cdd350](https://github.com/tabootv/taboo-web/commit/4cdd350ceeb0e73271edfb97e0c41aa321feb386))
+* **config:** add feature flags for studio pages, codes, and invite system ([295fb94](https://github.com/tabootv/taboo-web/commit/295fb9438bb5b436b363542cae2d4fbda26cca1c))
+* **onboarding:** disable redeem code feature from choose-plan and profile ([d81f6b7](https://github.com/tabootv/taboo-web/commit/d81f6b7a730fce590ddc65f497127f19cb40dcb6))
+* **proxy:** add state cookie gates for profile, subscription, and creator ([04c0a96](https://github.com/tabootv/taboo-web/commit/04c0a9686927deea46a8109e171587cc2d749f3b))
+* **studio:** add redeem codes management page for creators ([532781f](https://github.com/tabootv/taboo-web/commit/532781fedd2f03c49eaf10377b33357d0c6b1190))
+
+
+### Bug Fixes
+
+* **auth:** always verify auth with server on rehydrate and fix toast z-index ([3a8cbdb](https://github.com/tabootv/taboo-web/commit/3a8cbdb91e6a6cd52a8d690a4fc9565158e5e896))
+* **checkout:** prevent accidental modal close on backdrop click ([8b8f124](https://github.com/tabootv/taboo-web/commit/8b8f124bb9c9059391d03400033f7a9046729107))
+* **config:** disable Next.js dev indicators in production ([0ab5a83](https://github.com/tabootv/taboo-web/commit/0ab5a83c0dc6c739652b12351b12ca45567405e7))
+* **home:** add backdrop click handler to media preview modal overlay ([010dae9](https://github.com/tabootv/taboo-web/commit/010dae905cb4617f5e5d4c75ab9434a7ed20cf18))
+* **logging:** close Axiom gaps for production error visibility ([53a4829](https://github.com/tabootv/taboo-web/commit/53a4829bc97b21098413d79410e2b819ce360e10))
+* **onboarding:** remove redundant "complete" step from profile flow ([0fe8193](https://github.com/tabootv/taboo-web/commit/0fe8193ac867d3f4dae08b7d07882de4bb0c846a))
+* **ui:** improve responsive layouts, redeem flow, and z-index stacking ([51a9e14](https://github.com/tabootv/taboo-web/commit/51a9e14a1aad248b5c00a652eac089d79e485484))
+
+
+### Refactoring
+
+* **auth:** remove proxy-level subscription cookie enforcement ([69b39cb](https://github.com/tabootv/taboo-web/commit/69b39cb7ab3135b754bbab3845020630c9099feb))
+* **studio:** refactor shorts query to use studio API and add short readonly mode ([fa31614](https://github.com/tabootv/taboo-web/commit/fa3161463c4529a247a88b5e5af40ab7f6e43ac4))
+* **studio:** simplify header, gate sidebar links, and centralize layout padding ([72c3b85](https://github.com/tabootv/taboo-web/commit/72c3b851a23a401e0be64a32c53fe7e08ae8559d))
+
 ## [0.3.0](https://github.com/tabootv/taboo-web/compare/tabootv-new-v0.2.0...tabootv-new-v0.3.0) (2026-02-13)
 
 
