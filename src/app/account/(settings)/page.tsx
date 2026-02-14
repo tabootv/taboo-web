@@ -5,11 +5,11 @@ import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { useCountries } from '@/hooks/use-countries';
 import { useHandlerCheck } from '@/hooks/use-handler-check';
+import { AnalyticsEvent } from '@/shared/lib/analytics/events';
 import { useAuthStore } from '@/shared/stores/auth-store';
 import type { User } from '@/types';
 import { Camera, Check, Loader2, Mail, Phone, X } from 'lucide-react';
 import posthog from 'posthog-js';
-import { AnalyticsEvent } from '@/shared/lib/analytics/events';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { updateProfileAction } from '../_actions';
@@ -326,7 +326,7 @@ function ProfileSettingsForm({
       <div>
         <label className="block text-sm font-medium text-text-secondary mb-2">
           <Phone className="w-4 h-4 inline mr-2" />
-          Phone Number <span className="font-normal text-text-muted ml-1">(Optional)</span>
+          Phone Number
         </label>
         <input
           type="tel"

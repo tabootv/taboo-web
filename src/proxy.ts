@@ -27,7 +27,7 @@ const PUBLIC_ROUTES = [
 const SKIP_REGEX = /^\/(api|_next)\/.+|\.(png|jpe?g|gif|svg|ico|webp|css|js|woff2?|ttf|eot)$/;
 
 // Auth pages for redirect logic (canonical routes only)
-const AUTH_PAGES = ['/sign-in', '/register'];
+const AUTH_PAGES = ['/sign-in', '/register', '/redeem'];
 
 /**
  * Check if middleware should skip processing this path

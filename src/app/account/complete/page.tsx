@@ -1,16 +1,16 @@
 'use client';
 
-import { useState, useRef, useEffect, useMemo } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import Image from 'next/image';
-import { Camera, User, Loader2, Check, X, ArrowRight, ShieldCheck } from 'lucide-react';
-import posthog from 'posthog-js';
-import { Button } from '@/components/ui/button';
 import { profileClient as profileApi } from '@/api/client/profile.client';
+import { Button } from '@/components/ui/button';
+import { useCountries } from '@/hooks/use-countries';
+import { useHandlerCheck } from '@/hooks/use-handler-check';
 import { AnalyticsEvent } from '@/shared/lib/analytics/events';
 import { useAuthStore } from '@/shared/stores/auth-store';
-import { useHandlerCheck } from '@/hooks/use-handler-check';
-import { useCountries } from '@/hooks/use-countries';
+import { ArrowRight, Camera, Check, Loader2, ShieldCheck, User, X } from 'lucide-react';
+import Image from 'next/image';
+import { useRouter, useSearchParams } from 'next/navigation';
+import posthog from 'posthog-js';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { PasswordStep } from './components/password-step';
 
@@ -569,12 +569,7 @@ export default function CompleteProfilePage() {
 
                     {/* Phone Number (Optional) */}
                     <div>
-                      <label className={LABEL_CLASS}>
-                        Phone Number{' '}
-                        <span className="font-normal normal-case text-text-muted ml-1">
-                          (Optional)
-                        </span>
-                      </label>
+                      <label className={LABEL_CLASS}>Phone Number </label>
                       <input
                         type="tel"
                         value={formData.phone_number}

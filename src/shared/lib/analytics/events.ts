@@ -66,6 +66,10 @@ export const AnalyticsEvent = {
 
   // ── P1: Creator Studio ──
   STUDIO_CONTENT_PUBLISHED: 'studio_content_published',
+  STUDIO_CODE_CREATED: 'studio_code_created',
+  STUDIO_CODE_SHARED: 'studio_code_shared',
+  STUDIO_CODE_DELETED: 'studio_code_deleted',
+  STUDIO_CODE_UPDATED: 'studio_code_updated',
 
   // ── P2: Toggle / Undo Events ──
   VIDEO_LIKE_REMOVED: 'video_like_removed',
@@ -83,6 +87,10 @@ export const AnalyticsEvent = {
   // ── P2: Series ──
   SERIES_UP_NEXT_TRIGGERED: 'series_up_next_triggered',
   SERIES_UP_NEXT_CANCELLED: 'series_up_next_cancelled',
+
+  // ── P2: Invite System ──
+  INVITE_CODE_GENERATED: 'invite_code_generated',
+  INVITE_CODE_SHARED: 'invite_code_shared',
 
   // ── P2: Studio ──
   STUDIO_UPLOAD_STARTED: 'studio_upload_started',

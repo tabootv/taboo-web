@@ -608,11 +608,21 @@ export function ChoosePlanContent() {
             style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 12 }}
           >
             By subscribing, you agree to our{' '}
-            <Link href="/terms" style={{ color: MUTED_TEXT_LIGHT, textDecoration: 'none' }}>
+            <Link
+              href="https://taboo.tv/terms-conditions"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: MUTED_TEXT_LIGHT, textDecoration: 'none' }}
+            >
               Terms
             </Link>{' '}
             &{' '}
-            <Link href="/privacy" style={{ color: MUTED_TEXT_LIGHT, textDecoration: 'none' }}>
+            <Link
+              href="https://taboo.tv/privacy-policy"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: MUTED_TEXT_LIGHT, textDecoration: 'none' }}
+            >
               Privacy
             </Link>
           </p>
