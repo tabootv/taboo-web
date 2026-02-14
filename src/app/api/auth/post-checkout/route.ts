@@ -52,7 +52,8 @@ export async function POST(request: NextRequest) {
     let intent;
     try {
       intent = await verifyCheckoutIntent(intentToken);
-    } catch {
+    } catch (error) {
+      log.warn({ err: error }, 'Checkout intent verification failed');
       return NextResponse.json(
         { message: 'Invalid or expired checkout session. Please try again.' },
         { status: 401 }

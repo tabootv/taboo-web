@@ -103,11 +103,6 @@ function redirectToHome(request: NextRequest): NextResponse {
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Debug logging in development
-  if (process.env.NODE_ENV === 'development') {
-    console.log('[Middleware] Processing:', pathname);
-  }
-
   // 1. Skip middleware for static files and specific patterns
   if (shouldSkipMiddleware(pathname)) {
     return NextResponse.next();
@@ -132,9 +127,7 @@ export function proxy(request: NextRequest) {
 
   // 4. Protected route - require authentication
   if (!token) {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[Middleware] No token found, redirecting to sign-in');
-    }
+    console.log(`[Proxy] No token, redirecting to sign-in`, { path: pathname });
     return redirectToSignIn(request, pathname);
   }
 
@@ -146,6 +139,9 @@ export function proxy(request: NextRequest) {
   // 5a. Profile gate: incomplete profile → force /account/complete
   if (profileCompleted === '0') {
     if (pathname !== '/account/complete') {
+      console.log(`[Proxy] Profile incomplete, redirecting to /account/complete`, {
+        path: pathname,
+      });
       return NextResponse.redirect(new URL('/account/complete', request.url));
     }
     return NextResponse.next();
@@ -161,11 +157,13 @@ export function proxy(request: NextRequest) {
     ) {
       return NextResponse.next();
     }
+    console.log(`[Proxy] Not subscribed, redirecting to /choose-plan`, { path: pathname });
     return NextResponse.redirect(new URL('/choose-plan', request.url));
   }
 
   // 5c. Creator gate: non-creators cannot access /studio
   if (isCreator === '0' && pathname.startsWith('/studio')) {
+    console.log(`[Proxy] Non-creator accessing /studio, redirecting to home`, { path: pathname });
     return redirectToHome(request);
   }
 

@@ -15,6 +15,7 @@ import { cache } from 'react';
 import { homeClient } from '@/api/client/home.client';
 import { playlistsClient } from '@/api/client/playlists.client';
 import { TOKEN_KEY, decodeCookieToken } from '@/shared/lib/auth/cookie-config';
+import logger from '@/shared/lib/logger';
 import type { Banner, Creator, Playlist, Series, Video } from '@/types';
 import { cookies } from 'next/headers';
 
@@ -108,7 +109,7 @@ export const fetchHomeData = cache(
         result.isLastPage = true;
       }
     } catch (error) {
-      console.error('Error fetching playlists:', error);
+      logger.error({ err: error }, 'Error fetching playlists');
       result.playlists = [];
       result.isLastPage = true;
     }
@@ -145,7 +146,7 @@ export const fetchPlaylistVideos = cache(
         hasMore: currentPage < lastPage,
       };
     } catch (error) {
-      console.error(`Error fetching playlist ${playlistId} videos:`, error);
+      logger.error({ err: error, playlistId }, 'Error fetching playlist videos');
       return {
         videos: [],
         currentPage: page,
