@@ -14,6 +14,8 @@ import {
   SidebarSeparator,
   SidebarTrigger,
 } from '@/components/ui/sidebar';
+import type { FeatureName } from '@/shared/lib/config/feature-flags';
+import { isFeatureEnabled } from '@/shared/lib/config/feature-flags';
 import {
   ArrowLeft,
   BarChart3,
@@ -21,6 +23,7 @@ import {
   Film,
   LayoutDashboard,
   Settings,
+  Ticket,
   Wallet,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -33,7 +36,16 @@ const studioNavigation = [
   { name: 'Earnings', href: '/studio/earnings', icon: DollarSign },
   { name: 'Payouts', href: '/studio/payouts', icon: Wallet },
   { name: 'Settings', href: '/studio/settings', icon: Settings },
+  { name: 'Codes', href: '/studio/codes', icon: Ticket },
 ];
+
+const featureFlagMap: Partial<Record<string, FeatureName>> = {
+  '/studio/analytics': 'STUDIO_ANALYTICS',
+  '/studio/earnings': 'STUDIO_EARNINGS',
+  '/studio/payouts': 'STUDIO_PAYOUTS',
+  '/studio/settings': 'STUDIO_SETTINGS',
+  '/studio/codes': 'STUDIO_CODES',
+};
 
 export function StudioSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
@@ -54,22 +66,8 @@ export function StudioSidebar({ ...props }: React.ComponentProps<typeof Sidebar>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 py-2">
               <SidebarTrigger className="size-8" />
-              <SidebarMenuButton
-                asChild
-                size="lg"
-                className="data-[slot=sidebar-menu-button]:p-1.5!"
-              >
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-base font-semibold text-red-primary">TabooTV</span>
-                    <span className="text-[10px] font-medium text-red-primary px-1.5 py-0.5 bg-red-primary/10 rounded">
-                      Studio
-                    </span>
-                  </div>
-                </div>
-              </SidebarMenuButton>
             </div>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -79,19 +77,24 @@ export function StudioSidebar({ ...props }: React.ComponentProps<typeof Sidebar>
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {studioNavigation.map((item) => {
-                const active = isActive(item.href);
-                return (
-                  <SidebarMenuItem key={item.name}>
-                    <SidebarMenuButton asChild isActive={active} tooltip={item.name}>
-                      <Link href={item.href}>
-                        <item.icon className={active ? 'text-red-primary' : ''} />
-                        <span>{item.name}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
+              {studioNavigation
+                .filter((item) => {
+                  const flag = featureFlagMap[item.href];
+                  return !flag || isFeatureEnabled(flag);
+                })
+                .map((item) => {
+                  const active = isActive(item.href);
+                  return (
+                    <SidebarMenuItem key={item.name}>
+                      <SidebarMenuButton asChild isActive={active} tooltip={item.name}>
+                        <Link href={item.href}>
+                          <item.icon className={active ? 'text-red-primary' : ''} />
+                          <span>{item.name}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

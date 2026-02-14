@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { FunnelAreaChart } from '@/features/creator-studio/components/funnel-area-chart';
+import { useFeature } from '@/hooks/use-feature';
 import type { DateRange, GroupBy } from '@/types';
 import {
   AlertCircle,
@@ -21,15 +22,25 @@ import {
   Loader2,
   RefreshCw,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { EarningsCard } from '../_components/EarningsCard';
 
 export default function EarningsPage() {
+  const studioEarningsEnabled = useFeature('STUDIO_EARNINGS');
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!studioEarningsEnabled) router.replace('/studio');
+  }, [studioEarningsEnabled, router]);
+
   const [dateRange, setDateRange] = useState<DateRange>('30d');
   const [groupBy, setGroupBy] = useState<GroupBy>('day');
   const [showFunnel, setShowFunnel] = useState(false);
 
   const { data, isLoading, error, refetch, isFetching } = useEarnings(dateRange, groupBy);
+
+  if (!studioEarningsEnabled) return null;
 
   const dateRangeOptions: { value: DateRange; label: string }[] = [
     { value: '7d', label: 'Last 7 days' },

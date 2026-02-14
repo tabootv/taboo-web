@@ -3,13 +3,25 @@
 import { useEarnings } from '@/api/queries/earnings.queries';
 import { useFirstPromoterIframeToken } from '@/api/queries/firstpromoter.queries';
 import { Button } from '@/components/ui/button';
+import { useFeature } from '@/hooks/use-feature';
 import { AlertCircle, Loader2, RefreshCw } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import { EarningsCard } from '../_components/EarningsCard';
 
 export default function PayoutsPage() {
+  const studioPayoutsEnabled = useFeature('STUDIO_PAYOUTS');
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!studioPayoutsEnabled) router.replace('/studio');
+  }, [studioPayoutsEnabled, router]);
+
   const { data: iframeUrl, isLoading, error, refetch } = useFirstPromoterIframeToken();
 
   const { data: earningsData } = useEarnings('30d', 'day');
+
+  if (!studioPayoutsEnabled) return null;
 
   return (
     <div className="min-h-screen bg-black text-white">

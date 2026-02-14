@@ -2,13 +2,22 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { useFeature } from '@/hooks/use-feature';
 import { useAuthStore } from '@/shared/stores/auth-store';
 import { Bell, Camera, Settings, Shield, User } from 'lucide-react';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 export default function StudioSettingsPage() {
+  const studioSettingsEnabled = useFeature('STUDIO_SETTINGS');
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!studioSettingsEnabled) router.replace('/studio');
+  }, [studioSettingsEnabled, router]);
+
   const { user } = useAuthStore();
   const channel = user?.channel;
 
@@ -18,6 +27,8 @@ export default function StudioSettingsPage() {
   const handleSave = () => {
     toast.success('Settings saved (demo)');
   };
+
+  if (!studioSettingsEnabled) return null;
 
   return (
     <div className="pt-6 lg:pt-8 max-w-4xl mx-auto">

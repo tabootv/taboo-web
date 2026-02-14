@@ -4,9 +4,11 @@ import { useEarnings } from '@/api/queries/earnings.queries';
 import { useStudioShorts, useStudioVideos } from '@/api/queries/studio.queries';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { useFeature } from '@/hooks/use-feature';
 import { AlertCircle, Loader2, RefreshCw } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import { useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
 import { AnalyticsHeader, DATE_RANGE_OPTIONS } from './_components/AnalyticsHeader';
 import { ChartSkeleton } from './_components/chart-skeleton';
 import { ConversionFunnelCard } from './_components/ConversionFunnelCard';
@@ -36,6 +38,13 @@ function formatLabel(period: string, groupBy?: string) {
 }
 
 export default function AnalyticsPage() {
+  const studioAnalyticsEnabled = useFeature('STUDIO_ANALYTICS');
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!studioAnalyticsEnabled) router.replace('/studio');
+  }, [studioAnalyticsEnabled, router]);
+
   const [dateRange, setDateRange] = useState<DateRange>('30d');
   const [groupBy, setGroupBy] = useState<GroupBy>('day');
 
@@ -48,7 +57,7 @@ export default function AnalyticsPage() {
   } = useEarnings(dateRange, groupBy);
 
   const { data: videosData } = useStudioVideos({ page: 1, per_page: 100 });
-  const { data: shortsData } = useStudioShorts(1);
+  const { data: shortsData } = useStudioShorts({ page: 1, per_page: 100, types: ['shorts'] });
 
   const contentStats = useMemo(() => {
     const allContent = [...(videosData?.videos || []), ...(shortsData?.videos || [])];
@@ -86,6 +95,8 @@ export default function AnalyticsPage() {
   const error = earningsError instanceof Error ? earningsError.message : null;
   const periodLabel =
     DATE_RANGE_OPTIONS.find((o) => o.value === dateRange)?.label || 'Selected period';
+
+  if (!studioAnalyticsEnabled) return null;
 
   if (isLoading) {
     return (

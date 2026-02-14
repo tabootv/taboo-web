@@ -1,6 +1,6 @@
-import Link from 'next/link';
-import { Video, MessageSquarePlus } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { MessageSquarePlus, Video } from 'lucide-react';
+import Link from 'next/link';
 
 const QUICK_ACTIONS = [
   {
@@ -10,7 +10,7 @@ const QUICK_ACTIONS = [
     subtitle: 'Videos & shorts',
   },
   {
-    href: '/studio/posts',
+    href: '/compose/post',
     icon: MessageSquarePlus,
     title: 'Create post',
     subtitle: 'Community updates',
