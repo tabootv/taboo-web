@@ -12,7 +12,7 @@ import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import posthog from 'posthog-js';
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useState } from 'react';
 import { toast } from 'sonner';
 
 function SignInContent() {
@@ -37,11 +37,6 @@ function SignInContent() {
 
   const isAnyLoading = isLoading || socialLoading;
 
-  // Prefetch target route so RSC payload + JS chunks load in parallel with login
-  useEffect(() => {
-    router.prefetch(redirectTo || '/');
-  }, [router, redirectTo]);
-
   /**
    * Navigate immediately after login, then fire analytics/redeem in background.
    * This removes ~500ms of blocking work from the critical path.
@@ -49,7 +44,7 @@ function SignInContent() {
   const navigateAndDeferPostLogin = (method: 'email' | 'google' | 'apple') => {
     const { user, isSubscribed } = useAuthStore.getState();
     const onboardingPath = getOnboardingRedirectPath(user, isSubscribed);
-    router.push(onboardingPath || redirectTo || '/');
+    window.location.replace(onboardingPath || redirectTo || '/');
 
     // Fire-and-forget: toast, analytics, redeem code
     toast.success('Welcome back!');
