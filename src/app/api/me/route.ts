@@ -12,12 +12,13 @@ import {
   setStateCookies,
 } from '@/shared/lib/auth/cookie-config';
 import { cookies } from 'next/headers';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createApiLogger } from '@/shared/lib/logger';
+import { getProxyHeaders } from '@/shared/lib/proxy-headers';
 
 const log = createApiLogger('/api/me', 'GET');
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const cookieStore = await cookies();
 
   try {
@@ -35,6 +36,7 @@ export async function GET() {
       headers: {
         Accept: 'application/json',
         Authorization: `Bearer ${token}`,
+        ...getProxyHeaders(request),
       },
     });
 

@@ -17,6 +17,7 @@ import {
   setStateCookies,
 } from '@/shared/lib/auth/cookie-config';
 import { createApiLogger } from '@/shared/lib/logger';
+import { getProxyHeaders } from '@/shared/lib/proxy-headers';
 
 const log = createApiLogger('/api/auth/whop-exchange', 'POST');
 
@@ -32,6 +33,7 @@ export async function POST(request: NextRequest) {
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
       Accept: 'application/json',
+      ...getProxyHeaders(request),
     };
 
     if (existingToken) {

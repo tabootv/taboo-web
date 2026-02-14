@@ -9,6 +9,7 @@ import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import { TOKEN_KEY, decodeCookieToken, getApiUrl } from '@/shared/lib/auth/cookie-config';
 import { createApiLogger } from '@/shared/lib/logger';
+import { getProxyHeaders } from '@/shared/lib/proxy-headers';
 
 const log = createApiLogger('/api/device-token', 'POST');
 
@@ -30,6 +31,7 @@ export async function POST(request: NextRequest) {
         'Content-Type': 'application/json',
         Accept: 'application/json',
         Authorization: `Bearer ${token}`,
+        ...getProxyHeaders(request),
       },
       body: JSON.stringify(body),
     });

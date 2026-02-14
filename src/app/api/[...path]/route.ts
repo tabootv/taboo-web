@@ -14,6 +14,7 @@ import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import { TOKEN_KEY, decodeCookieToken, getApiUrl } from '@/shared/lib/auth/cookie-config';
 import { createApiLogger } from '@/shared/lib/logger';
+import { getProxyHeaders } from '@/shared/lib/proxy-headers';
 
 async function proxyRequest(request: NextRequest, method: string) {
   const log = createApiLogger(request.nextUrl.pathname, method);
@@ -30,6 +31,7 @@ async function proxyRequest(request: NextRequest, method: string) {
     // Build headers
     const headers: HeadersInit = {
       Accept: 'application/json',
+      ...getProxyHeaders(request),
     };
 
     // Add Authorization header if token exists
