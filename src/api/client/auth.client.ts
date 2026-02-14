@@ -32,6 +32,7 @@ export interface AuthenticatedMeResponse extends MeResponse {
 export interface WhopExchangeRequest {
   code: string;
   membership_id?: string | undefined;
+  redirect_uri?: string | undefined;
 }
 
 export interface WhopExchangeResponse {

@@ -1,7 +1,7 @@
 'use client';
 
-import { VideoComments } from '@/features/video/components/video-comments';
 import { useSeriesDetail } from '@/api/queries/series.queries';
+import { VideoComments } from '@/features/video/components/video-comments';
 import type { Video } from '@/types';
 import { useSeriesPlayerHandlers } from '../hooks/use-series-player-handlers';
 import { SeriesChannelAndActions } from './series-channel-and-actions';
@@ -56,7 +56,6 @@ export function SeriesPlayerMainContent({
       <SeriesEpisodeIndicator
         currentEpisodeIndex={currentEpisodeIndex}
         episodesLength={episodes.length}
-        {...(currentVideo.duration !== undefined && { duration: currentVideo.duration })}
         isCourse={isCourse}
       />
 

@@ -110,7 +110,7 @@ function RegisterContent() {
 
       const { user, isSubscribed } = useAuthStore.getState();
       const onboardingPath = getOnboardingRedirectPath(user, isSubscribed);
-      router.push(onboardingPath || '/');
+      window.location.replace(onboardingPath || '/');
     } catch (err) {
       posthog.capture(AnalyticsEvent.AUTH_REGISTER_FAILED, {
         method: 'email',
@@ -146,7 +146,7 @@ function RegisterContent() {
 
       const { user, isSubscribed } = useAuthStore.getState();
       const onboardingPath = getOnboardingRedirectPath(user, isSubscribed);
-      router.push(onboardingPath || '/');
+      window.location.replace(onboardingPath || '/');
     } else if (result.error && result.error !== 'Sign-in cancelled') {
       posthog.capture(AnalyticsEvent.AUTH_REGISTER_FAILED, {
         method: 'google',
@@ -173,7 +173,7 @@ function RegisterContent() {
 
       const { user, isSubscribed } = useAuthStore.getState();
       const onboardingPath = getOnboardingRedirectPath(user, isSubscribed);
-      router.push(onboardingPath || '/');
+      window.location.replace(onboardingPath || '/');
     } else if (result.error && result.error !== 'Sign-in cancelled') {
       posthog.capture(AnalyticsEvent.AUTH_REGISTER_FAILED, {
         method: 'apple',

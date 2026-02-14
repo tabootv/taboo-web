@@ -1,8 +1,13 @@
-import { decodeCookieToken } from '@/shared/lib/auth/cookie-config';
+import {
+  decodeCookieToken,
+  PROFILE_COMPLETED_KEY,
+  SUBSCRIBED_KEY,
+  IS_CREATOR_KEY,
+} from '@/shared/lib/auth/cookie-config';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
-// Token key in cookies
+// Cookie keys
 const TOKEN_KEY = 'tabootv_token';
 
 // Public routes that don't require authentication
@@ -16,14 +21,13 @@ const PUBLIC_ROUTES = [
   '/choose-plan',
   '/auth/whop-callback',
   '/redeem',
-  '/creators',
 ];
 
 // O(1) regex for skipping static files and internal routes
 const SKIP_REGEX = /^\/(api|_next)\/.+|\.(png|jpe?g|gif|svg|ico|webp|css|js|woff2?|ttf|eot)$/;
 
 // Auth pages for redirect logic (canonical routes only)
-const AUTH_PAGES = ['/sign-in', '/register'];
+const AUTH_PAGES = ['/sign-in', '/register', '/redeem'];
 
 /**
  * Check if middleware should skip processing this path
@@ -99,11 +103,6 @@ function redirectToHome(request: NextRequest): NextResponse {
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Debug logging in development
-  if (process.env.NODE_ENV === 'development') {
-    console.log('[Middleware] Processing:', pathname);
-  }
-
   // 1. Skip middleware for static files and specific patterns
   if (shouldSkipMiddleware(pathname)) {
     return NextResponse.next();
@@ -128,13 +127,47 @@ export function proxy(request: NextRequest) {
 
   // 4. Protected route - require authentication
   if (!token) {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[Middleware] No token found, redirecting to sign-in');
-    }
+    console.log(`[Proxy] No token, redirecting to sign-in`, { path: pathname });
     return redirectToSignIn(request, pathname);
   }
 
-  // 5. Allow request to proceed (studio creator check handled client-side)
+  // 5. State cookie gates (only trigger on explicit '0', missing cookies fall through)
+  const profileCompleted = request.cookies.get(PROFILE_COMPLETED_KEY)?.value;
+  const subscribed = request.cookies.get(SUBSCRIBED_KEY)?.value;
+  const isCreator = request.cookies.get(IS_CREATOR_KEY)?.value;
+
+  // 5a. Profile gate: incomplete profile → force /account/complete
+  if (profileCompleted === '0') {
+    if (pathname !== '/account/complete') {
+      console.log(`[Proxy] Profile incomplete, redirecting to /account/complete`, {
+        path: pathname,
+      });
+      return NextResponse.redirect(new URL('/account/complete', request.url));
+    }
+    return NextResponse.next();
+  }
+
+  // 5b. Subscription gate: not subscribed → limited access
+  if (subscribed === '0') {
+    if (
+      isPublicRoute(pathname) ||
+      pathname.startsWith('/account') ||
+      pathname === '/profile' ||
+      pathname.startsWith('/profile/')
+    ) {
+      return NextResponse.next();
+    }
+    console.log(`[Proxy] Not subscribed, redirecting to /choose-plan`, { path: pathname });
+    return NextResponse.redirect(new URL('/choose-plan', request.url));
+  }
+
+  // 5c. Creator gate: non-creators cannot access /studio
+  if (isCreator === '0' && pathname.startsWith('/studio')) {
+    console.log(`[Proxy] Non-creator accessing /studio, redirecting to home`, { path: pathname });
+    return redirectToHome(request);
+  }
+
+  // 6. Allow request to proceed
   return NextResponse.next();
 }
 

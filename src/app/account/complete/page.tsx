@@ -1,21 +1,20 @@
 'use client';
 
-import { useState, useRef, useEffect, useMemo } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import Image from 'next/image';
-import { Camera, User, Loader2, Check, X, ArrowRight, ShieldCheck } from 'lucide-react';
-import posthog from 'posthog-js';
-import { Button } from '@/components/ui/button';
 import { profileClient as profileApi } from '@/api/client/profile.client';
+import { Button } from '@/components/ui/button';
+import { useCountries } from '@/hooks/use-countries';
+import { useHandlerCheck } from '@/hooks/use-handler-check';
 import { AnalyticsEvent } from '@/shared/lib/analytics/events';
 import { useAuthStore } from '@/shared/stores/auth-store';
-import { useHandlerCheck } from '@/hooks/use-handler-check';
-import { useCountries } from '@/hooks/use-countries';
-import { getOnboardingRedirectPath } from '@/shared/lib/auth/profile-completion';
+import { ArrowRight, Camera, Check, Loader2, ShieldCheck, User, X } from 'lucide-react';
+import Image from 'next/image';
+import { useRouter, useSearchParams } from 'next/navigation';
+import posthog from 'posthog-js';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { PasswordStep } from './components/password-step';
 
-type Step = 'password' | 'photo' | 'details' | 'complete';
+type Step = 'password' | 'photo' | 'details';
 
 const GLASS_CARD = 'rounded-2xl backdrop-blur-xl' as const;
 
@@ -57,7 +56,7 @@ function getStepCircleStyle(index: number, currentStepIndex: number): React.CSSP
 export default function CompleteProfilePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, updateUser, fetchUser, isSubscribed } = useAuthStore();
+  const { user, updateUser, fetchUser } = useAuthStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { countries, isLoading: countriesLoading } = useCountries();
 
@@ -177,7 +176,12 @@ export default function CompleteProfilePage() {
       });
       await fetchUser();
       posthog.capture(AnalyticsEvent.ONBOARDING_PROFILE_STEP_COMPLETED, { step: 'details' });
-      setCurrentStep('complete');
+      posthog.capture(AnalyticsEvent.ONBOARDING_PROFILE_COMPLETED, {
+        has_avatar: !!(profileImage || user?.dp),
+      });
+      toast.success('Profile completed!');
+      const freshIsSubscribed = useAuthStore.getState().isSubscribed;
+      router.push(freshIsSubscribed ? '/' : '/choose-plan');
     } catch {
       toast.error('Failed to update profile');
     } finally {
@@ -185,20 +189,11 @@ export default function CompleteProfilePage() {
     }
   };
 
-  const handleComplete = () => {
-    posthog.capture(AnalyticsEvent.ONBOARDING_PROFILE_COMPLETED, {
-      has_avatar: !!(profileImage || user?.dp),
-    });
-    const redirectPath = getOnboardingRedirectPath(useAuthStore.getState().user, isSubscribed);
-    router.push(redirectPath || '/');
-  };
-
   const steps = useMemo(() => {
     const s: { id: Step; label: string }[] = [];
     if (needsPassword) s.push({ id: 'password', label: 'Password' });
     s.push({ id: 'photo', label: 'Photo' });
     s.push({ id: 'details', label: 'Details' });
-    s.push({ id: 'complete', label: 'Done' });
     return s;
   }, [needsPassword]);
 
@@ -574,12 +569,7 @@ export default function CompleteProfilePage() {
 
                     {/* Phone Number (Optional) */}
                     <div>
-                      <label className={LABEL_CLASS}>
-                        Phone Number{' '}
-                        <span className="font-normal normal-case text-text-muted ml-1">
-                          (Optional)
-                        </span>
-                      </label>
+                      <label className={LABEL_CLASS}>Phone Number </label>
                       <input
                         type="tel"
                         value={formData.phone_number}
@@ -605,83 +595,6 @@ export default function CompleteProfilePage() {
                       )}
                     </Button>
                   </form>
-                </div>
-              )}
-
-              {/* Step 3: Complete */}
-              {currentStep === 'complete' && (
-                <div className="text-center">
-                  <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-green-500/10 flex items-center justify-center">
-                    <svg
-                      className="w-10 h-10 text-green-500"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                  </div>
-
-                  <h1 className="text-2xl md:text-3xl font-extrabold text-white mb-3 tracking-tight">
-                    You&apos;re all set!
-                  </h1>
-                  <p className="text-text-secondary mb-10">
-                    Your profile is complete.{' '}
-                    {isSubscribed ? 'Start exploring TabooTV!' : 'Choose a plan to start watching.'}
-                  </p>
-
-                  {/* Profile Preview */}
-                  <div
-                    className="rounded-xl p-6 mb-8"
-                    style={{
-                      background: 'rgba(255,255,255,0.04)',
-                      border: '1px solid rgba(255,255,255,0.06)',
-                    }}
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="w-16 h-16 rounded-full overflow-hidden bg-gradient-to-br from-red-primary to-red-dark flex items-center justify-center flex-shrink-0">
-                        {profileImage || user?.dp ? (
-                          <Image
-                            src={profileImage || user?.dp || ''}
-                            alt="Profile"
-                            width={64}
-                            height={64}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <span className="text-2xl font-bold text-white">
-                            {(formData.display_name || formData.first_name || 'U')
-                              .charAt(0)
-                              .toUpperCase()}
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-left">
-                        <p className="font-semibold text-text-primary">
-                          {formData.display_name ||
-                            `${formData.first_name} ${formData.last_name}`.trim() ||
-                            'User'}
-                        </p>
-                        {formData.handler && (
-                          <p className="text-sm text-text-secondary">@{formData.handler}</p>
-                        )}
-                        <p className="text-sm text-text-secondary">{user?.email}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <Button
-                    onClick={handleComplete}
-                    className="w-full btn-premium h-12 rounded-xl text-base font-bold group active:scale-[0.98] transition-all"
-                  >
-                    <span>{isSubscribed ? 'Start Watching' : 'Choose a Plan'}</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform duration-300" />
-                  </Button>
                 </div>
               )}
             </div>

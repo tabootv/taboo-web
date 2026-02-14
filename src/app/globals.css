@@ -717,6 +717,10 @@ small {
    Button Styles
    ============================================ */
 
+button {
+  cursor: pointer;
+}
+
 .btn-glow:hover {
   box-shadow: var(--glow-medium);
 }
@@ -1140,6 +1144,10 @@ small {
 
 .textarea::placeholder {
   color: rgba(255, 255, 255, 0.5);
+}
+
+textarea:focus-visible {
+  outline: none;
 }
 
 /* Submit button */
@@ -2306,6 +2314,29 @@ section:has(.vertical-series-card:hover) {
 .community-post-card:hover {
   background: linear-gradient(to bottom, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03));
   border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Detail Comments Custom Scrollbar */
+.detail-comments {
+  scrollbar-width: thin;
+  scrollbar-color: #1f1f1f transparent;
+}
+
+.detail-comments::-webkit-scrollbar {
+  width: 4px;
+}
+
+.detail-comments::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.detail-comments::-webkit-scrollbar-thumb {
+  background: #1f1f1f;
+  border-radius: 2px;
+}
+
+.detail-comments::-webkit-scrollbar-thumb:hover {
+  background: #2a2a2a;
 }
 
 /* Community Sidebar Card - Studio Dashboard Style */

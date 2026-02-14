@@ -33,6 +33,22 @@ export interface RedeemCodeApplyResponse {
   subscribed: boolean;
 }
 
+export interface InviteInfo {
+  code: string;
+  uses_count: number;
+  max_uses: number;
+  can_create_invite: boolean;
+}
+
+export interface MyInviteResponse {
+  invite: InviteInfo | null;
+  can_create_invite: boolean;
+}
+
+export interface CreateInviteResponse {
+  invite: InviteInfo;
+}
+
 export const subscriptionsClient = {
   /**
    * Get all available plans with Whop checkout URLs
@@ -156,6 +172,20 @@ export const subscriptionsClient = {
    */
   applyRedeemCode: async (code: string): Promise<RedeemCodeApplyResponse> => {
     return apiClient.post<RedeemCodeApplyResponse>('/redeem-codes/apply', { code });
+  },
+
+  /**
+   * Get the current user's invite code (if any)
+   */
+  getMyInvite: async (): Promise<MyInviteResponse> => {
+    return apiClient.get<MyInviteResponse>('/redeem-codes/my-invite');
+  },
+
+  /**
+   * Generate a new invite code
+   */
+  createInvite: async (): Promise<CreateInviteResponse> => {
+    return apiClient.post<CreateInviteResponse>('/redeem-codes/create-invite', {});
   },
 
   /**

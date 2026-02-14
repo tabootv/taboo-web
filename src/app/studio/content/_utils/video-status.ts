@@ -11,6 +11,11 @@ import type { VideoStatusFilter } from '../_types/filters';
  * 4. Otherwise -> 'draft'
  */
 export function deriveVideoDisplayState(video: StudioVideoListItem): VideoDisplayState {
+  // Non-Bunny legacy videos: if published with published_at and uuid, treat as live
+  if (!video.is_bunny_video && video.published === true && video.published_at && video.uuid) {
+    return 'live';
+  }
+
   // Check if video is still processing
   if (video.processing === true) {
     return 'processing';
@@ -39,6 +44,11 @@ export function deriveVideoDisplayState(video: StudioVideoListItem): VideoDispla
  * Derive the processing status for progress display
  */
 export function deriveProcessingStatus(video: StudioVideoListItem): ProcessingStatus {
+  // Non-Bunny legacy videos: if published with published_at and uuid, treat as ready
+  if (!video.is_bunny_video && video.published === true && video.published_at && video.uuid) {
+    return 'ready';
+  }
+
   if (video.processing === true) {
     return 'processing';
   }

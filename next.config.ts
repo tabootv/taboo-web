@@ -1,5 +1,14 @@
+import { execSync } from 'child_process';
 import type { NextConfig } from 'next';
 import type { Redirect } from 'next/dist/lib/load-custom-routes';
+
+function getGitSha(): string {
+  try {
+    return execSync('git rev-parse --short HEAD').toString().trim();
+  } catch {
+    return 'unknown';
+  }
+}
 
 /**
  * Route Redirect Configuration
@@ -22,6 +31,14 @@ const routeRedirects: Redirect[] = [
     permanent: true,
   },
   { source: '/home', destination: '/', permanent: true },
+
+  // ============================================
+  // Legacy Platform URL Redirects
+  // Maps old /c/, /u/, /v/ short URLs to canonical routes
+  // ============================================
+  { source: '/c/:handler', destination: '/creators/:handler', permanent: true },
+  { source: '/u/:handler', destination: '/profile/:handler', permanent: true },
+  { source: '/v/:uuid', destination: '/videos/:uuid', permanent: true },
 
   // ============================================
   // Auth Route Consolidation (PR 2.2)
@@ -55,9 +72,18 @@ const routeRedirects: Redirect[] = [
   { source: '/profile/subscription', destination: '/account/subscription', permanent: true },
   { source: '/profile/complete', destination: '/account/complete', permanent: true },
   { source: '/profile/settings', destination: '/account', permanent: true },
+
+  // ============================================
+  // Community Post Route Migration
+  // Canonical: /posts/:id
+  // ============================================
+  { source: '/community/:id(\\d+)', destination: '/posts/:id', permanent: true },
 ];
 
 const nextConfig: NextConfig = {
+  // Generate build ID from git SHA for observability
+  generateBuildId: async () => getGitSha(),
+
   // Required: PostHog API uses trailing slashes (e.g. /e/), prevent Next.js from redirecting them
   skipTrailingSlashRedirect: true,
   // Image optimization configuration
@@ -93,6 +119,12 @@ const nextConfig: NextConfig = {
   // Enable React strict mode for better development experience
   reactStrictMode: true,
 
+  // Disable dev indicators (N button) in production
+  devIndicators: false,
+
+  // Exclude shaka-player from server-side bundling (client-only library)
+  serverExternalPackages: ['shaka-player', 'pino', 'pino-pretty', '@axiomhq/pino'],
+
   // Experimental features
   experimental: {
     // Enable server actions
@@ -121,6 +153,7 @@ const nextConfig: NextConfig = {
   // Environment variables available at build time
   env: {
     NEXT_PUBLIC_APP_NAME: 'TabooTV',
+    NEXT_PUBLIC_BUILD_ID: getGitSha(),
   },
 
   // Redirects - see routeRedirects configuration at top of file

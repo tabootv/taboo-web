@@ -1,12 +1,14 @@
 'use client';
 
-import { ArrowLeft, CreditCard, Lock, User as UserIcon } from 'lucide-react';
+import { useFeature } from '@/hooks/use-feature';
+import { ArrowLeft, CreditCard, Lock, User as UserIcon, UserPlus } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { useMemo } from 'react';
 
-export type AccountTab = 'profile' | 'password' | 'subscription';
+export type AccountTab = 'profile' | 'password' | 'subscription' | 'invite';
 
-const tabs: { id: AccountTab; label: string; icon: typeof UserIcon }[] = [
+const BASE_TABS: { id: AccountTab; label: string; icon: typeof UserIcon }[] = [
   { id: 'profile', label: 'Profile', icon: UserIcon },
   { id: 'password', label: 'Password', icon: Lock },
   { id: 'subscription', label: 'Manage Subscription', icon: CreditCard },
@@ -16,11 +18,13 @@ const TAB_ROUTES: Record<AccountTab, string> = {
   profile: '/account',
   password: '/account/security',
   subscription: '/account/subscription',
+  invite: '/account/invite',
 };
 
 function getActiveTabFromPath(pathname: string): AccountTab {
   if (pathname.endsWith('/security')) return 'password';
   if (pathname.includes('/subscription')) return 'subscription';
+  if (pathname.includes('/invite')) return 'invite';
   return 'profile';
 }
 
@@ -32,6 +36,12 @@ export function AccountSidebar({ activeTab: activeTabProp }: AccountSidebarProps
   const router = useRouter();
   const pathname = usePathname();
   const activeTab = activeTabProp ?? getActiveTabFromPath(pathname);
+  const inviteEnabled = useFeature('INVITE_SYSTEM');
+
+  const tabs = useMemo(() => {
+    if (!inviteEnabled) return BASE_TABS;
+    return [...BASE_TABS, { id: 'invite' as AccountTab, label: 'Invite a Friend', icon: UserPlus }];
+  }, [inviteEnabled]);
 
   return (
     <>

@@ -77,7 +77,7 @@ export function CreatorTabs({ handler, tabs }: CreatorTabsProps) {
 
   return (
     <section className="sticky top-0 z-50 bg-black/90 backdrop-blur-sm border-t border-white/6 border-b border-white/6">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-3 flex justify-center gap-4 sm:gap-6 overflow-x-auto">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-3 flex sm:justify-center gap-4 sm:gap-6 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         {tabs.map((tab) => {
           const route = TAB_ROUTES[tab.key];
           const href = route ? `/creators/${handler}/${route}` : `/creators/${handler}`;

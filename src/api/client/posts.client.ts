@@ -15,6 +15,15 @@
 import type { Post, PostComment, PostCommentListResponse, PostListResponse } from '../types';
 import { apiClient } from './base-client';
 
+export interface CreatePostParams {
+  caption: string;
+  images?: File[];
+  audioFiles?: File[];
+  location?: string;
+  latitude?: number;
+  longitude?: number;
+}
+
 export const postsClient = {
   list: async (params?: { page?: number }): Promise<PostListResponse> => {
     const data = await apiClient.get<{ posts?: PostListResponse }>(
@@ -24,17 +33,31 @@ export const postsClient = {
     return data.posts || (data as PostListResponse);
   },
 
-  get: async (id: number): Promise<Post> => {
-    const data = await apiClient.get<{ post?: Post; data?: Post }>(`/posts/${id}`);
+  get: async (id: number, serverToken?: string): Promise<Post> => {
+    const data = await apiClient.get<{ post?: Post; data?: Post }>(
+      `/posts/${id}`,
+      serverToken ? { serverToken } : undefined
+    );
     return data.post || data.data || (data as Post);
   },
 
-  create: async (caption: string, image?: File): Promise<Post> => {
+  create: async (params: CreatePostParams): Promise<Post> => {
     const formData = new FormData();
-    formData.append('caption', caption);
-    if (image) {
-      formData.append('post_image', image);
+    formData.append('caption', params.caption);
+    if (params.images) {
+      for (const img of params.images) {
+        formData.append('post_image[]', img);
+      }
     }
+    if (params.audioFiles) {
+      for (const audio of params.audioFiles) {
+        formData.append('post_audio[]', audio);
+      }
+    }
+    if (params.location) formData.append('location', params.location);
+    if (params.latitude != null) formData.append('latitude', String(params.latitude));
+    if (params.longitude != null) formData.append('longitude', String(params.longitude));
+
     const data = await apiClient.post<{ post?: Post; data?: Post }>('/posts', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
@@ -53,11 +76,18 @@ export const postsClient = {
     await apiClient.delete(`/posts/${id}`);
   },
 
-  getComments: async (id: number, params?: { page?: number }): Promise<PostCommentListResponse> => {
+  getComments: async (
+    id: number,
+    params?: { page?: number },
+    serverToken?: string
+  ): Promise<PostCommentListResponse> => {
+    const config: Record<string, unknown> = {};
+    if (params) config.params = params;
+    if (serverToken) config.serverToken = serverToken;
     const data = await apiClient.get<{
       postComment?: PostCommentListResponse;
       comments?: PostCommentListResponse;
-    }>(`/post-comments/posts/${id}`, params ? { params } : undefined);
+    }>(`/post-comments/posts/${id}`, Object.keys(config).length ? config : undefined);
     return data.postComment || data.comments || (data as PostCommentListResponse);
   },
 
@@ -93,5 +123,9 @@ export const postsClient = {
 
   postComment: async (postId: number, content: string, parentId?: number): Promise<PostComment> => {
     return postsClient.addComment(postId, content, parentId);
+  },
+
+  deleteComment: async (commentUuid: string): Promise<void> => {
+    await apiClient.delete(`/post-comments/${commentUuid}/delete`);
   },
 };

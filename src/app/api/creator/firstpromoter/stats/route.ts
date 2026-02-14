@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { getRequiredEnv } from '@/shared/lib/config/env';
+import { createApiLogger } from '@/shared/lib/logger';
+
+const log = createApiLogger('/api/creator/firstpromoter/stats', 'GET');
 
 // Temporary mapping of user emails to FirstPromoter promoter IDs
 // TODO: Replace with database lookup once Laravel backend is ready
@@ -92,7 +95,7 @@ export async function GET(_request: NextRequest) {
 
     if (!fpResponse.ok) {
       const errorText = await fpResponse.text();
-      console.error('FirstPromoter API error:', errorText);
+      log.error({ status: fpResponse.status, body: errorText }, 'FirstPromoter API error');
 
       // Return mock data for development
       return NextResponse.json(getMockStats(promoterId, userEmail));
@@ -131,7 +134,7 @@ export async function GET(_request: NextRequest) {
 
     return NextResponse.json(stats);
   } catch (error) {
-    console.error('FirstPromoter stats error:', error);
+    log.error({ err: error }, 'FirstPromoter stats error');
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

@@ -23,6 +23,8 @@ export const queryKeys = {
       [...queryKeys.videos.all, 'map', filters] as const,
     detail: (id: string | number) => [...queryKeys.videos.all, 'detail', String(id)] as const,
     related: (id: string | number) => [...queryKeys.videos.detail(id), 'related'] as const,
+    byTags: (tagIds: number[]) =>
+      [...queryKeys.videos.all, 'byTags', tagIds.sort().join(',')] as const,
     comments: (id: string | number) => [...queryKeys.videos.detail(id), 'comments'] as const,
     bookmarked: () => [...queryKeys.videos.all, 'bookmarked'] as const,
     history: () => [...queryKeys.videos.all, 'history'] as const,
@@ -133,13 +135,31 @@ export const queryKeys = {
         : {};
       return [...queryKeys.studio.all, 'videos', key] as const;
     },
-    shorts: (creatorId?: number, page?: number, filters?: Record<string, unknown>) =>
-      [...queryKeys.studio.all, 'shorts', creatorId, page, filters] as const,
+    shorts: (params?: { page?: number; per_page?: number; types?: string[]; sort_by?: string }) => {
+      const key = params
+        ? {
+            page: params.page ?? 1,
+            per_page: params.per_page ?? 20,
+            types: params.types?.slice().sort().join(','),
+            sort_by: params.sort_by ?? 'latest',
+          }
+        : {};
+      return [...queryKeys.studio.all, 'shorts', key] as const;
+    },
     posts: (channelId?: number, page?: number) =>
       [...queryKeys.studio.all, 'posts', channelId, page] as const,
     mapStats: (creatorId: string | number) =>
       [...queryKeys.studio.all, 'mapStats', String(creatorId)] as const,
     iframeToken: () => [...queryKeys.studio.all, 'iframeToken'] as const,
+  },
+  redeemCodes: {
+    all: ['redeemCodes'] as const,
+    lists: () => [...queryKeys.redeemCodes.all, 'list'] as const,
+    list: (params?: Record<string, unknown>) => [...queryKeys.redeemCodes.lists(), params] as const,
+  },
+  invite: {
+    all: ['invite'] as const,
+    myInvite: () => [...queryKeys.invite.all, 'my-invite'] as const,
   },
   users: {
     all: ['users'] as const,

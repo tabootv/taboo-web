@@ -27,14 +27,24 @@ export function useVideo(id: string | number | null | undefined) {
 
 /**
  * Hook to play video (returns video + related videos)
+ *
+ * Accepts `initialData` from server components to seed the cache,
+ * enabling instant rendering via stale-while-revalidate.
  */
-export function useVideoPlay(id: string | number | null | undefined) {
+export function useVideoPlay(
+  id: string | number | null | undefined,
+  options: { initialData?: { video: Video; videos: Video[] } } = {}
+) {
   return useQuery({
     queryKey: [...queryKeys.videos.detail(id!), 'play'],
     queryFn: () => videoClient.play(id!),
     enabled: !!id,
     staleTime: 1000 * 60 * 30, // 30 minutes
     gcTime: 1000 * 60 * 60, // 1 hour
+    ...(options.initialData && {
+      initialData: options.initialData,
+      initialDataUpdatedAt: Date.now(),
+    }),
   });
 }
 
@@ -79,6 +89,37 @@ export function useRelatedVideos(
     queryFn: () => videoClient.getRelated(videoId!, page, perPage),
     enabled: !!videoId,
     staleTime: 1000 * 60 * 10, // 10 minutes
+  });
+}
+
+/**
+ * Hook to fetch videos by tag IDs (for tag-based related videos)
+ */
+export function useVideosByTags(
+  tagIds: number[],
+  excludeVideoId?: string | number,
+  options?: { initialData?: Video[] }
+) {
+  return useQuery({
+    queryKey: queryKeys.videos.byTags(tagIds),
+    queryFn: async () => {
+      const result = await videoClient.list({
+        tag_ids: tagIds,
+        limit: 10,
+        published: true,
+        short: false,
+        type: 'video',
+      });
+      return excludeVideoId
+        ? result.data.filter((v) => String(v.uuid || v.id) !== String(excludeVideoId))
+        : result.data;
+    },
+    enabled: tagIds.length > 0,
+    staleTime: 1000 * 60 * 10,
+    ...(options?.initialData && {
+      initialData: options.initialData,
+      initialDataUpdatedAt: Date.now(),
+    }),
   });
 }
 

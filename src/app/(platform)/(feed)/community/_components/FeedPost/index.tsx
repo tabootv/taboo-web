@@ -8,9 +8,5 @@ interface FeedPostProps {
 }
 
 export function FeedPost({ post, currentUserId, onDelete }: FeedPostProps) {
-  return (
-    <div className="community-post-card">
-      <CommunityPost post={post} currentUserId={currentUserId ?? 0} onDelete={onDelete} />
-    </div>
-  );
+  return <CommunityPost post={post} currentUserId={currentUserId ?? 0} onDelete={onDelete} />;
 }

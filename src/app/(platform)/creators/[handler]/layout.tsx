@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import { creatorsClient } from '@/api/client/creators.client';
 import { queryKeys } from '@/api/query-keys';
 import { HydrationBoundary, QueryClient, dehydrate } from '@tanstack/react-query';
@@ -60,6 +61,12 @@ export default async function CreatorLayout({ children, params }: LayoutProps) {
     },
     staleTime: 1000 * 60 * 5,
   });
+
+  const creators = queryClient.getQueryData<{ creators: unknown[] }>([
+    ...queryKeys.creators.list({ handler }),
+    'by-handler',
+  ]);
+  if (!creators?.creators?.length) notFound();
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>

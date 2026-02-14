@@ -1,5 +1,6 @@
 'use client';
 
+import { ComposeFAB } from '@/components/fab/compose-fab';
 import { NavigationProgress } from '@/components/layout/navigation/NavigationProgress';
 import { ScrollRestoration } from '@/components/layout/navigation/ScrollRestoration';
 import { AppSidebar } from '@/components/sidebar';
@@ -70,14 +71,16 @@ export function MainLayout({ children, showFooter = true }: MainLayoutProps) {
           {showFooter && <Footer />}
         </div>
 
+        <ComposeFAB />
         <Toaster
           position="bottom-center"
           richColors
+          className="z-99999999"
           toastOptions={{
             style: {
-              background: 'var(--surface)',
-              border: '1px solid var(--border)',
-              color: 'var(--text-primary)',
+              background: '#ab0013',
+              border: '1px solid rgba(255,255,255,0.2)',
+              color: '#ffffff',
               zIndex: 99999,
             },
           }}

@@ -1,6 +1,9 @@
 import { getRequiredEnv } from '@/shared/lib/config/env';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
+import { createApiLogger } from '@/shared/lib/logger';
+
+const log = createApiLogger('/api/creator/firstpromoter/reports', 'GET');
 
 // Temporary mapping of user emails to FirstPromoter promoter IDs
 const PROMOTER_ID_MAP: Record<string, number> = {
@@ -113,7 +116,7 @@ export async function GET(request: NextRequest) {
 
     if (!fpResponse.ok) {
       const errorText = await fpResponse.text();
-      console.error('FirstPromoter Reports API error:', errorText);
+      log.error({ status: fpResponse.status, body: errorText }, 'FirstPromoter Reports API error');
 
       // Return mock data for development
       return NextResponse.json(getMockReportData(promoterId, startDate, endDate, groupBy));
@@ -169,7 +172,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error('FirstPromoter reports error:', error);
+    log.error({ err: error }, 'FirstPromoter reports error');
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

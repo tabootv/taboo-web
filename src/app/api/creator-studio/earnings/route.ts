@@ -7,6 +7,9 @@ import {
 import { getRequiredEnv } from '@/shared/lib/config/env';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
+import { createApiLogger } from '@/shared/lib/logger';
+
+const log = createApiLogger('/api/creator-studio/earnings', 'GET');
 
 // Hardcoded promoter ID mapping for now
 // TODO: Replace with database lookup once Laravel backend is ready
@@ -327,7 +330,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Earnings API error:', error);
+    log.error({ err: error }, 'Earnings API error');
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

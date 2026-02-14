@@ -3,10 +3,9 @@
 import { postsClient as postsApi } from '@/api/client/posts.client';
 import { useAuthStore } from '@/shared/stores/auth-store';
 import type { Post, PostComment as PostCommentType } from '@/types';
-import { Send } from 'lucide-react';
-import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { PostComment } from './post-comment';
+import { PostCommentInput } from './post-comment-input';
 
 interface PostCommentAreaProps {
   post: Post;
@@ -36,6 +35,11 @@ export function PostCommentArea({ post, showReplySection }: PostCommentAreaProps
     }
   };
 
+  const handleCommentDeleted = (commentId: number) => {
+    setComments((prev) => prev.filter((c) => c.id !== commentId));
+    setCommentsCount((prev) => prev - 1);
+  };
+
   const storeComment = async () => {
     if (!newComment.trim()) {
       alert('Comment cannot be empty or just spaces.');
@@ -44,7 +48,6 @@ export function PostCommentArea({ post, showReplySection }: PostCommentAreaProps
 
     try {
       const myComment = await postsApi.postComment(post.id, newComment);
-      // Set created_at to 'just now' for display
       const commentWithTime = { ...myComment, created_at: 'just now' };
       setComments([commentWithTime, ...comments]);
       setNewComment('');
@@ -54,53 +57,32 @@ export function PostCommentArea({ post, showReplySection }: PostCommentAreaProps
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      storeComment();
-    }
-  };
-
   return (
     <div>
-      <p className="text-[20px] font-medium font-bold">{commentsCount} comments</p>
+      <p className="text-sm font-semibold text-text-secondary capitalize">
+        {commentsCount} Comments
+      </p>
 
       {/* Comment Input */}
-      <div className="flex items-start gap-[21px] mt-[4px] md:mt-[25px]">
-        <div className="relative size-[30px] md:size-[48px] rounded-full overflow-hidden bg-surface flex-shrink-0">
-          {user?.small_dp || user?.dp ? (
-            <Image
-              src={user.small_dp || user.dp || ''}
-              alt={user.display_name || 'You'}
-              fill
-              className="object-cover"
-            />
-          ) : (
-            <div className="size-full flex items-center justify-center bg-red-primary text-white text-xs md:text-sm font-medium">
-              {user?.display_name?.charAt(0) || 'U'}
-            </div>
-          )}
-        </div>
-
-        <div className="flex items-end w-full">
-          <textarea
-            placeholder="Add Comment"
-            rows={1}
-            className="flex-1 bg-transparent border-b border-white/30 focus:border-white/60 outline-none resize-none p-2 rounded text-white placeholder:text-white/50"
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            onKeyDown={handleKeyDown}
-          />
-          <button onClick={storeComment} className="p-2 hover:bg-white/10 rounded-full">
-            <Send className="w-5 h-5 text-white" />
-          </button>
-        </div>
+      <div className="mt-3">
+        <PostCommentInput
+          value={newComment}
+          onChange={setNewComment}
+          onSubmit={storeComment}
+          avatarSrc={user?.small_dp || user?.dp}
+          avatarFallback={user?.display_name?.charAt(0) || 'U'}
+        />
       </div>
 
       {/* Comments List */}
-      <div className="mt-4">
+      <div className="mt-4 space-y-1">
         {comments.map((comment, index) => (
-          <PostComment key={comment.id} comment={comment} index={index} />
+          <PostComment
+            key={comment.id}
+            comment={comment}
+            index={index}
+            onCommentDeleted={handleCommentDeleted}
+          />
         ))}
       </div>
     </div>

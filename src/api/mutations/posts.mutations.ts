@@ -6,7 +6,7 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { postsClient } from '../client/posts.client';
+import { postsClient, type CreatePostParams } from '../client/posts.client';
 import { queryKeys } from '../query-keys';
 import type { Post } from '../types';
 
@@ -17,8 +17,7 @@ export function useCreatePost() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ caption, image }: { caption: string; image?: File }) =>
-      postsClient.create(caption, image),
+    mutationFn: (params: CreatePostParams) => postsClient.create(params),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.community.postList() });
     },
@@ -108,6 +107,37 @@ export function useDeletePost() {
     onSuccess: (_data, postId) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.community.postList() });
       queryClient.removeQueries({ queryKey: queryKeys.community.postDetail(postId) });
+    },
+  });
+}
+
+/**
+ * Hook to delete a comment on a post
+ */
+export function useDeletePostComment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ commentUuid }: { commentUuid: string; postId: number }) =>
+      postsClient.deleteComment(commentUuid),
+    onSuccess: (_data, { postId }) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.community.comments(postId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.community.postDetail(postId) });
+    },
+  });
+}
+
+/**
+ * Hook to like/unlike a comment on a post
+ */
+export function useLikePostComment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ commentId }: { commentId: number; postId: number }) =>
+      postsClient.likeComment(commentId),
+    onSuccess: (_data, { postId }) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.community.comments(postId) });
     },
   });
 }

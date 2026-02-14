@@ -16,7 +16,7 @@ export function MentionText({ content }: MentionTextProps) {
           <Link
             key={`${index}-${part}`}
             href={`/profile/${part}`}
-            className="text-red-primary hover:underline"
+            className="bg-red-primary/10 text-red-primary px-0.5 rounded hover:underline"
           >
             @{part}
           </Link>

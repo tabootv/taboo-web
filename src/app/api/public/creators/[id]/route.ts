@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { getRequiredEnv } from '@/shared/lib/config/env';
+import { createApiLogger } from '@/shared/lib/logger';
+
+const log = createApiLogger('/api/public/creators/[id]', 'GET');
 
 // Force dynamic to avoid build-time env var requirement
 export const dynamic = 'force-dynamic';
@@ -39,7 +42,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
       },
     });
   } catch (error) {
-    console.error('Failed to fetch creator:', error);
+    log.error({ err: error }, 'Failed to fetch creator');
     return NextResponse.json({ error: 'Failed to fetch creator' }, { status: 500 });
   }
 }

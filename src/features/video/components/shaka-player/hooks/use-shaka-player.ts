@@ -40,6 +40,7 @@ interface UseShakaPlayerReturn {
   previewShakaRef: React.RefObject<ShakaPlayerInstance | null>;
   capturePreviewFrame: (time: number) => void;
   previewImage: string | null;
+  ensurePreviewPlayer: () => Promise<void>;
 }
 
 export function useShakaPlayer({
@@ -74,8 +75,14 @@ export function useShakaPlayer({
   const previewThrottleRef = useRef<number>(0);
   const hasResumedRef = useRef(false);
 
-  // Load Shaka module dynamically
+  // Detect whether the source is an HLS/DASH manifest (requires Shaka) or a plain MP4
+  const isManifestSrc =
+    !!src && (src.includes('.m3u8') || src.includes('.mpd') || src.includes('manifest'));
+
+  // Load Shaka module dynamically — only for HLS/DASH sources
   useEffect(() => {
+    if (!isManifestSrc) return;
+
     let mounted = true;
 
     const initShaka = async () => {
@@ -100,11 +107,33 @@ export function useShakaPlayer({
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [isManifestSrc]);
 
   // Initialize main player
   useEffect(() => {
-    if (!shakaModule || !videoRef.current || !src) return;
+    if (!videoRef.current || !src) return;
+
+    // MP4-only fast path: skip Shaka entirely, use native <video>
+    if (!isManifestSrc) {
+      videoRef.current.src = src;
+      videoRef.current.load();
+      setIsLoading(false);
+
+      const savedVolume = localStorage.getItem(VOLUME_STORAGE_KEY);
+      if (savedVolume) {
+        videoRef.current.volume = Number.parseFloat(savedVolume);
+      }
+
+      if (initialPosition && initialPosition > 0 && !hasResumedRef.current) {
+        videoRef.current.currentTime = initialPosition;
+        hasResumedRef.current = true;
+      }
+
+      return;
+    }
+
+    // HLS/DASH: full Shaka Player init
+    if (!shakaModule) return;
 
     const initPlayer = async () => {
       try {
@@ -116,10 +145,11 @@ export function useShakaPlayer({
         await player.attach(videoRef.current!);
         shakaRef.current = player;
 
+        // Use aggressive fast-start config for quick first frame, then relax
         player.configure({
           streaming: {
-            bufferingGoal: PLAYER_CONFIG.STREAMING.BUFFERING_GOAL,
-            rebufferingGoal: PLAYER_CONFIG.STREAMING.REBUFFERING_GOAL,
+            bufferingGoal: PLAYER_CONFIG.FAST_START.BUFFERING_GOAL,
+            rebufferingGoal: PLAYER_CONFIG.FAST_START.REBUFFERING_GOAL,
             bufferBehind: PLAYER_CONFIG.STREAMING.BUFFER_BEHIND,
             lowLatencyMode: false,
             alwaysStreamText: false,
@@ -145,6 +175,20 @@ export function useShakaPlayer({
         player.addEventListener('adaptation', () => {
           onQualityTracksUpdate(player);
         });
+
+        // Expand buffer to steady-state values after first canplay
+        videoRef.current!.addEventListener(
+          'canplay',
+          () => {
+            player.configure({
+              streaming: {
+                bufferingGoal: PLAYER_CONFIG.STREAMING.BUFFERING_GOAL,
+                rebufferingGoal: PLAYER_CONFIG.STREAMING.REBUFFERING_GOAL,
+              },
+            });
+          },
+          { once: true }
+        );
 
         await player.load(src);
         onQualityTracksUpdate(player);
@@ -181,77 +225,84 @@ export function useShakaPlayer({
     // - initialPosition is only used on first load (guarded by hasResumedRef)
     // - onLoaded is a callback that should only fire once per load
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shakaModule, src, videoRef, isPiPRef, onQualityTracksUpdate]);
+  }, [shakaModule, src, videoRef, isPiPRef, isManifestSrc, onQualityTracksUpdate]);
 
-  // Initialize preview player
+  // Lazy preview player init — only runs when seek bar is hovered
+  const previewInitRef = useRef(false);
+
+  // Reset preview init state when src changes
   useEffect(() => {
-    // Check if source is HLS/DASH manifest (Shaka Player only works with manifests, not direct MP4 files)
-    const isManifest =
-      src && (src.includes('.m3u8') || src.includes('.mpd') || src.includes('manifest'));
+    previewInitRef.current = false;
+    setIsPreviewReady(false);
+  }, [src]);
 
-    if (!shakaModule || !previewVideoRef.current || !src || !isManifest) {
-      // For non-manifest sources (MP4), use native video element
-      if (src && !isManifest && previewVideoRef.current) {
-        try {
-          previewVideoRef.current.src = src;
-          previewVideoRef.current.load();
-          setIsPreviewReady(true);
-        } catch (error) {
-          console.error('Error setting up native video for MP4:', error);
-        }
+  const ensurePreviewPlayer = useCallback(async () => {
+    if (previewInitRef.current || !previewVideoRef.current || !src) return;
+    previewInitRef.current = true;
+
+    // MP4: use native video element directly
+    if (!isManifestSrc) {
+      try {
+        previewVideoRef.current.src = src;
+        previewVideoRef.current.load();
+        setIsPreviewReady(true);
+      } catch (error) {
+        console.error('Error setting up native preview for MP4:', error);
       }
       return;
     }
 
-    const initPreviewPlayer = async () => {
-      try {
-        if (previewShakaRef.current) {
-          await previewShakaRef.current.destroy();
-        }
+    // HLS/DASH: full Shaka preview player
+    if (!shakaModule) return;
 
-        const player = new shakaModule.Player();
-        await player.attach(previewVideoRef.current!);
-        previewShakaRef.current = player;
-
-        player.configure({
-          streaming: {
-            bufferingGoal: PLAYER_CONFIG.PREVIEW.BUFFERING_GOAL,
-            rebufferingGoal: PLAYER_CONFIG.PREVIEW.REBUFFERING_GOAL,
-            bufferBehind: PLAYER_CONFIG.PREVIEW.BUFFER_BEHIND,
-            retryParameters: {
-              maxAttempts: 2,
-              baseDelay: 500,
-              backoffFactor: 2,
-            },
-          },
-          abr: {
-            enabled: true,
-            defaultBandwidthEstimate: 500000,
-            switchInterval: 4,
-            bandwidthUpgradeTarget: 0.8,
-            bandwidthDowngradeTarget: 0.9,
-            restrictions: {
-              maxHeight: PLAYER_CONFIG.PREVIEW.MAX_HEIGHT,
-            },
-          },
-        });
-
-        await player.load(src);
-        setIsPreviewReady(true);
-      } catch (error) {
-        console.error('Error initializing preview player:', error);
+    try {
+      if (previewShakaRef.current) {
+        await previewShakaRef.current.destroy();
       }
-    };
 
-    initPreviewPlayer();
+      const player = new shakaModule.Player();
+      await player.attach(previewVideoRef.current!);
+      previewShakaRef.current = player;
 
+      player.configure({
+        streaming: {
+          bufferingGoal: PLAYER_CONFIG.PREVIEW.BUFFERING_GOAL,
+          rebufferingGoal: PLAYER_CONFIG.PREVIEW.REBUFFERING_GOAL,
+          bufferBehind: PLAYER_CONFIG.PREVIEW.BUFFER_BEHIND,
+          retryParameters: {
+            maxAttempts: 2,
+            baseDelay: 500,
+            backoffFactor: 2,
+          },
+        },
+        abr: {
+          enabled: true,
+          defaultBandwidthEstimate: 500000,
+          switchInterval: 4,
+          bandwidthUpgradeTarget: 0.8,
+          bandwidthDowngradeTarget: 0.9,
+          restrictions: {
+            maxHeight: PLAYER_CONFIG.PREVIEW.MAX_HEIGHT,
+          },
+        },
+      });
+
+      await player.load(src);
+      setIsPreviewReady(true);
+    } catch (error) {
+      console.error('Error initializing preview player:', error);
+    }
+  }, [shakaModule, src, previewVideoRef, isManifestSrc]);
+
+  // Cleanup preview player on unmount
+  useEffect(() => {
     return () => {
       if (previewShakaRef.current && !isPiPRef.current) {
         previewShakaRef.current.destroy();
         previewShakaRef.current = null;
       }
     };
-  }, [shakaModule, src, previewVideoRef, isPiPRef]);
+  }, [isPiPRef]);
 
   // Create canvas for preview frame capture
   useEffect(() => {
@@ -438,5 +489,6 @@ export function useShakaPlayer({
     previewShakaRef,
     capturePreviewFrame,
     previewImage,
+    ensurePreviewPlayer,
   };
 }

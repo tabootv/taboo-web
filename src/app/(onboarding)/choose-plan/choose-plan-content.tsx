@@ -1,19 +1,18 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
-import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { Check, Crown, Star, Sparkles } from 'lucide-react';
-import posthog from 'posthog-js';
 import { subscriptionsClient as subscriptionsApi } from '@/api/client/subscriptions.client';
-import type { Plan } from '@/types';
-import { useAuthStore } from '@/shared/stores/auth-store';
-import { setRegisterFlowToken } from '@/shared/lib/auth/register-flow-guard';
 import { useCountryCode } from '@/hooks/use-country-code';
-import { RedeemCodeCard } from '@/components/redeem/redeem-code-card';
 import { AnalyticsEvent } from '@/shared/lib/analytics/events';
 import { isProfileComplete as checkProfileComplete } from '@/shared/lib/auth/profile-completion';
+import { setRegisterFlowToken } from '@/shared/lib/auth/register-flow-guard';
 import { saveRedeemCode } from '@/shared/lib/redeem/apply-pending-code';
+import { useAuthStore } from '@/shared/stores/auth-store';
+import type { Plan } from '@/types';
+import { Check, Crown, Sparkles, Star } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import posthog from 'posthog-js';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import { CheckoutModal } from './components/checkout-modal';
@@ -21,17 +20,17 @@ import { LeadModal } from './components/lead-modal';
 import { LoadingPlans, VerifyingSubscription } from './components/loading-states';
 import { PlanToggle } from './components/plan-toggle';
 import {
+  BRAND_COLOR,
+  calcYearlySavings,
   DEFAULT_BENEFITS,
+  findMonthlyPlan,
+  findYearlyPlan,
+  formatPrice,
   MAX_POLL_ATTEMPTS,
-  POLL_INTERVAL_MS,
   MUTED_TEXT_COLOR,
   MUTED_TEXT_LIGHT,
   MUTED_TEXT_LIGHTER,
-  BRAND_COLOR,
-  findMonthlyPlan,
-  findYearlyPlan,
-  calcYearlySavings,
-  formatPrice,
+  POLL_INTERVAL_MS,
 } from './utils';
 
 export function ChoosePlanContent() {
@@ -47,6 +46,7 @@ export function ChoosePlanContent() {
   const [leadEmail, setLeadEmail] = useState('');
   const [isLeadLoading, setIsLeadLoading] = useState(false);
   const [isCreatingAccount, setIsCreatingAccount] = useState(false);
+  const autoClaimedRef = useRef(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [verifyMessage, setVerifyMessage] = useState('Activating your subscription...');
   const [showRetry, setShowRetry] = useState(false);
@@ -94,8 +94,9 @@ export function ChoosePlanContent() {
           toast.success('Subscription activated! Welcome to TabooTV.');
           const currentUser = useAuthStore.getState().user;
           if (!checkProfileComplete(currentUser)) {
-            // Only add set_password flag for post-checkout (guest) users
-            const pwParam = leadEmail ? '?set_password=1' : '';
+            // Add set_password flag for embedded checkout users, but not auto-claimed
+            // (webhook-created) users who skip the password step
+            const pwParam = leadEmail && !autoClaimedRef.current ? '?set_password=1' : '';
             router.push(`/account/complete${pwParam}`);
           } else {
             router.push('/');
@@ -219,7 +220,7 @@ export function ChoosePlanContent() {
     toast.error('Checkout not available for this plan');
   }, [activePlan, isAuthenticated, redeemCode, router, selectedPlan]);
 
-  // Handle lead email submission (guest checkout flow)
+  // Handle lead email submission (embedded checkout flow)
   const handleLeadSubmit = useCallback(
     async (email: string) => {
       if (!activePlan?.whop_plan_id) return;
@@ -312,10 +313,12 @@ export function ChoosePlanContent() {
             return;
           }
 
-          // Account created successfully
+          // Account created or claimed successfully
+          autoClaimedRef.current = data.auto_claimed === true;
           posthog.capture(AnalyticsEvent.AUTH_POST_CHECKOUT_ACCOUNT_CREATED, {
             plan: selectedPlan,
             plan_id: planId,
+            auto_claimed: autoClaimedRef.current,
           });
 
           setUserFromPostCheckout(data.user, data.subscribed ?? false);
@@ -338,16 +341,16 @@ export function ChoosePlanContent() {
     [isAuthenticated, leadEmail, router, selectedPlan, setUserFromPostCheckout, verifySubscription]
   );
 
-  const handleRedeemSubscribed = useCallback(() => {
-    setSubscribed(true);
-    toast.success('Redeem code applied! Your subscription is now active.');
-    router.push('/');
-  }, [setSubscribed, router]);
+  // const handleRedeemSubscribed = useCallback(() => {
+  //   setSubscribed(true);
+  //   toast.success('Redeem code applied! Your subscription is now active.');
+  //   router.push('/');
+  // }, [setSubscribed, router]);
 
-  const handleRedeemStartVerifying = useCallback(() => {
-    setIsVerifying(true);
-    verifySubscription();
-  }, [verifySubscription]);
+  // const handleRedeemStartVerifying = useCallback(() => {
+  //   setIsVerifying(true);
+  //   verifySubscription();
+  // }, [verifySubscription]);
 
   if (isLoading) {
     return <LoadingPlans />;
@@ -564,13 +567,13 @@ export function ChoosePlanContent() {
               </p>
 
               {/* Redeem Code Section - only for authenticated users to prevent 401 errors */}
-              {isAuthenticated && (
+              {/* {isAuthenticated && (
                 <RedeemCodeCard
                   variant="inline"
                   onSubscribed={handleRedeemSubscribed}
                   onStartVerifying={handleRedeemStartVerifying}
                 />
-              )}
+              )} */}
 
               {!isAuthenticated && (
                 <p
@@ -605,18 +608,28 @@ export function ChoosePlanContent() {
             style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 12 }}
           >
             By subscribing, you agree to our{' '}
-            <Link href="/terms" style={{ color: MUTED_TEXT_LIGHT, textDecoration: 'none' }}>
+            <Link
+              href="https://taboo.tv/terms-conditions"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: MUTED_TEXT_LIGHT, textDecoration: 'none' }}
+            >
               Terms
             </Link>{' '}
             &{' '}
-            <Link href="/privacy" style={{ color: MUTED_TEXT_LIGHT, textDecoration: 'none' }}>
+            <Link
+              href="https://taboo.tv/privacy-policy"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: MUTED_TEXT_LIGHT, textDecoration: 'none' }}
+            >
               Privacy
             </Link>
           </p>
         </div>
       </div>
 
-      {/* Lead Modal (guest checkout) */}
+      {/* Lead Modal (embedded checkout) */}
       {showLeadModal && (
         <LeadModal
           onSubmit={handleLeadSubmit}

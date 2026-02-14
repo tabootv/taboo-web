@@ -8,47 +8,23 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Logo } from '@/components/ui/logo';
-import { useSidebar } from '@/components/ui/sidebar';
 import { useAuthStore } from '@/shared/stores/auth-store';
 import { getCreatorRoute } from '@/shared/utils/formatting';
-import {
-  Bell,
-  ChevronDown,
-  ExternalLink,
-  FileText,
-  HelpCircle,
-  LogOut,
-  Menu,
-  Settings,
-  Upload,
-  User,
-  Video,
-} from 'lucide-react';
+import { ExternalLink, LogOut, Settings, User } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
 export function StudioHeader() {
   const { user, logout } = useAuthStore();
-  const { toggleSidebar } = useSidebar();
 
   const handleLogout = async () => {
     await logout();
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 h-14 bg-black border-b border-black z-[999]">
-      <div className="flex items-center justify-between h-full pr-4">
+    <header className="sticky top-0 left-0 right-0 h-[4rem] bg-black backdrop-blur-xs z-9999">
+      <div className="flex items-center justify-between h-full page-px mx-auto max-w-[1920px]">
         <div className="flex items-center">
-          <div className="w-12 h-14 flex items-center justify-center shrink-0">
-            <button
-              onClick={toggleSidebar}
-              className="p-2 rounded-full hover:bg-hover text-text-secondary hover:text-text-primary transition-colors"
-              aria-label="Toggle menu"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
-          </div>
-
           <Logo size="md" linkTo="/" />
 
           <span className="text-xs font-medium text-red-primary px-2 py-0.5 bg-red-primary/10 rounded ml-1">
@@ -57,30 +33,6 @@ export function StudioHeader() {
         </div>
 
         <div className="flex items-center gap-3">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-2 px-4 py-2 bg-red-primary hover:bg-red-hover text-white rounded-lg font-medium text-sm transition-colors">
-                <Upload className="w-4 h-4" />
-                <span className="hidden sm:inline">Create</span>
-                <ChevronDown className="w-4 h-4" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem asChild>
-                <Link href="/studio/content" className="flex items-center gap-3">
-                  <Video className="w-4 h-4" />
-                  Upload Video
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/studio/posts" className="flex items-center gap-3">
-                  <FileText className="w-4 h-4" />
-                  Create Post
-                </Link>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
           {user?.channel && (
             <Link
               href={getCreatorRoute(user.channel.handler)}
@@ -92,9 +44,9 @@ export function StudioHeader() {
             </Link>
           )}
 
-          <button className="p-2 text-text-secondary hover:text-text-primary transition-colors">
+          {/* <button className="p-2 text-text-secondary hover:text-text-primary transition-colors">
             <Bell className="w-5 h-5" />
-          </button>
+          </button> */}
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -118,7 +70,8 @@ export function StudioHeader() {
                 </div>
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
+
+            <DropdownMenuContent align="end" className="w-56 z-9999999">
               <div className="px-3 py-3 border-b border-white/10">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
@@ -152,28 +105,11 @@ export function StudioHeader() {
                     My Profile
                   </Link>
                 </DropdownMenuItem>
-                {user?.channel && (
-                  <DropdownMenuItem asChild>
-                    <Link
-                      href={getCreatorRoute(user.channel.handler)}
-                      target="_blank"
-                      className="flex items-center gap-3"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                      View Channel
-                    </Link>
-                  </DropdownMenuItem>
-                )}
+
                 <DropdownMenuItem asChild>
-                  <Link href="/settings" className="flex items-center gap-3">
+                  <Link href="/account" className="flex items-center gap-3">
                     <Settings className="w-4 h-4" />
                     Settings
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/help" className="flex items-center gap-3">
-                    <HelpCircle className="w-4 h-4" />
-                    Help & Support
                   </Link>
                 </DropdownMenuItem>
               </div>

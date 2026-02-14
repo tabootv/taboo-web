@@ -1,6 +1,7 @@
 'use client';
 
 import { Logo } from '@/components/ui/logo';
+import Link from 'next/link';
 import { Toaster } from 'sonner';
 
 interface AuthLayoutProps {
@@ -24,17 +25,17 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
       </div>
 
       {/* Header */}
-      <header className="relative z-10 py-5 px-4">
+      <header className="relative z-10 py-6 px-6 md:px-12 w-full border-white/5 border-b">
         <div className="max-w-7xl mx-auto">
           <Logo size="md" linkTo="/" />
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="relative z-10 flex-1 flex items-center justify-center px-4 py-6">
-        <div className="w-full max-w-[400px]">
+      <main className="relative z-10 flex-1 flex items-start justify-center px-4 py-6">
+        <div className="w-full max-w-[480px]">
           {/* Solid Dark Card - Compact Supabase Style */}
-          <div className="rounded-xl p-6 bg-surface border border-border">
+          <div className="rounded-xl py-8 px-5">
             {/* Title */}
             {title && (
               <div className="text-center mb-5">
@@ -50,11 +51,27 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
       </main>
 
       {/* Footer */}
-      <footer className="relative z-10 py-4 px-4">
-        <div className="max-w-7xl mx-auto text-center">
-          <p className="text-xs text-text-secondary">
-            &copy; {new Date().getFullYear()} TabooTV. All rights reserved.
-          </p>
+      <footer className="relative z-10 py-6 px-4 text-center border-t border-white/5">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] font-medium text-white/20 uppercase tracking-widest">
+          <p>&copy; {new Date().getFullYear()} TabooTV. All rights reserved.</p>
+          <div className="flex gap-6">
+            <Link
+              target="_blank"
+              rel="noopener noreferrer"
+              href="https://taboo.tv/terms-conditions"
+            >
+              Terms
+            </Link>
+            <Link target="_blank" rel="noopener noreferrer" href="https://taboo.tv/privacy-policy">
+              Privacy
+            </Link>
+            <Link target="_blank" rel="noopener noreferrer" href="https://taboo.tv/refund-policy">
+              Refund
+            </Link>
+            <Link target="_blank" rel="noopener noreferrer" href="https://taboo.tv/become-creator">
+              Become a Creator
+            </Link>
+          </div>
         </div>
       </footer>
 
@@ -63,9 +80,9 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
         richColors
         toastOptions={{
           style: {
-            background: '#0d0d0d',
-            border: '1px solid rgba(255,255,255,0.08)',
-            color: '#e6e7ea',
+            background: '#ab0013',
+            border: '1px solid rgba(255,255,255,0.2)',
+            color: '#ffffff',
             zIndex: 99999,
           },
         }}

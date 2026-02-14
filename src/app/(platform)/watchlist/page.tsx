@@ -1,11 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { Bookmark, Play, Trash2 } from 'lucide-react';
-import { useBookmarkedVideos } from '@/api/queries/video.queries';
 import { useToggleBookmark } from '@/api/mutations';
+import { useBookmarkedVideos } from '@/api/queries/video.queries';
 import {
   useWatchlistStore,
   type WatchlistItem,
@@ -13,6 +9,10 @@ import {
 } from '@/shared/stores/watchlist-store';
 import { formatDuration, getSeriesRoute } from '@/shared/utils/formatting';
 import type { Video } from '@/types';
+import { Bookmark, Play, Trash2 } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useState } from 'react';
 
 type FilterType = 'all' | 'video' | 'series' | 'course';
 
@@ -49,7 +49,7 @@ export default function WatchlistPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <div className="max-w-6xl mx-auto px-4 md:px-8 py-8">
+        <div className="mx-auto page-px py-8">
           <div className="flex items-center gap-3 mb-2">
             <Bookmark className="w-7 h-7 text-red-primary" />
             <h1 className="text-2xl md:text-3xl font-bold text-white">My Watchlist</h1>
@@ -77,7 +77,7 @@ export default function WatchlistPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-6xl mx-auto px-4 md:px-8 py-8">
+      <div className="mx-auto page-px py-8">
         {/* Header */}
         <div className="flex items-center gap-3 mb-2">
           <Bookmark className="w-7 h-7 text-red-primary" />

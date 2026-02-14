@@ -1,14 +1,15 @@
 'use client';
 
-import { useCreatePost } from '@/api/mutations';
 import { usePostsList } from '@/api/queries/posts.queries';
+import { Spinner } from '@/components/ui/spinner';
+import { PostCompose } from '@/features/community';
+import { useInfiniteScroll } from '@/hooks/use-infinite-scroll';
 import { useAuthStore } from '@/shared/stores/auth-store';
 import { MessageCircle, Rss, Star } from 'lucide-react';
 import Link from 'next/link';
 import { useMemo, useTransition } from 'react';
 import { toast } from 'sonner';
 import { deletePostAction } from './_actions';
-import { CreatePostCard } from './_components/CreatePostCard';
 import { FeedPost } from './_components/FeedPost';
 import { PostSkeleton } from './_components/PostSkeleton';
 
@@ -19,15 +20,18 @@ export default function CommunityPage() {
   const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage, refetch } =
     usePostsList();
 
-  const createPost = useCreatePost();
-
   const postsList = useMemo(() => {
     return data?.pages.flatMap((page) => page.data) || [];
   }, [data]);
 
-  const handlePostCreated = async (caption: string, image?: File) => {
-    await createPost.mutateAsync({ caption, ...(image && { image }) });
-  };
+  const { loadMoreRef } = useInfiniteScroll({
+    onLoadMore: () => {
+      fetchNextPage();
+    },
+    hasMore: !!hasNextPage,
+    isLoading: isFetchingNextPage,
+    rootMargin: '400px',
+  });
 
   const handleDeletePost = (id: number) => {
     startTransition(async () => {
@@ -69,11 +73,11 @@ export default function CommunityPage() {
 
       {/* Navigation + Feed column centered */}
       <div className="max-w-[820px] mx-auto page-px space-y-4 pb-12 mt-4">
-        {/* Create Post Card */}
-        {user?.channel && <CreatePostCard user={user} onPostCreated={handlePostCreated} />}
+        {/* Create Post */}
+        {user?.channel && <PostCompose variant="inline" />}
 
         {/* Feed Posts */}
-        <div className="space-y-4">
+        <div>
           {isLoading ? (
             // Skeleton Loading
             Array.from({ length: 3 }).map((_, i) => <PostSkeleton key={`skeleton-${i}`} />)
@@ -89,14 +93,8 @@ export default function CommunityPage() {
               ))}
 
               {hasNextPage && (
-                <div className="flex justify-center py-8">
-                  <button
-                    onClick={() => fetchNextPage()}
-                    disabled={isFetchingNextPage}
-                    className="px-6 py-2 bg-surface hover:bg-surface/80 text-white rounded-lg transition-colors disabled:opacity-50"
-                  >
-                    {isFetchingNextPage ? 'Loading...' : 'Load More'}
-                  </button>
+                <div ref={loadMoreRef} className="flex justify-center py-4">
+                  {isFetchingNextPage && <Spinner size="md" />}
                 </div>
               )}
 

@@ -7,7 +7,7 @@ import { useDebounce } from '@/hooks/use-debounce';
 import { useAuthStore } from '@/shared/stores/auth-store';
 import { cn } from '@/shared/utils/formatting';
 import type { MentionUser } from '@/types/mention';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 
 interface MentionInputProps {
   value: string;
@@ -17,6 +17,11 @@ interface MentionInputProps {
   disabled?: boolean;
   className?: string;
   rows?: number;
+}
+
+export interface MentionInputHandle {
+  focus: () => void;
+  insertAtCursor: (text: string) => void;
 }
 
 interface MentionContext {
@@ -34,15 +39,10 @@ function extractMentionQuery(text: string, cursorPos: number): MentionContext | 
   return { query, startIndex: atIndex };
 }
 
-export function MentionInput({
-  value,
-  onChange,
-  onKeyDown,
-  placeholder,
-  disabled,
-  className,
-  rows = 1,
-}: MentionInputProps) {
+export const MentionInput = forwardRef<MentionInputHandle, MentionInputProps>(function MentionInput(
+  { value, onChange, onKeyDown, placeholder, disabled, className, rows = 1 },
+  ref
+) {
   const [cursorPosition, setCursorPosition] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -62,6 +62,31 @@ export function MentionInput({
   );
 
   const filteredUsers = users.filter((u) => u.uuid !== currentUserUuid);
+
+  useImperativeHandle(ref, () => ({
+    focus: () => {
+      textareaRef.current?.focus();
+    },
+    insertAtCursor: (text: string) => {
+      const textarea = textareaRef.current;
+      if (!textarea) return;
+
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const before = value.slice(0, start);
+      const after = value.slice(end);
+      const newValue = before + text + after;
+      onChange(newValue);
+
+      const newPos = start + text.length;
+      requestAnimationFrame(() => {
+        textarea.selectionStart = newPos;
+        textarea.selectionEnd = newPos;
+        textarea.focus();
+        setCursorPosition(newPos);
+      });
+    },
+  }));
 
   // Reset selected index when results change
   useEffect(() => {
@@ -228,4 +253,4 @@ export function MentionInput({
       ) : null}
     </div>
   );
-}
+});

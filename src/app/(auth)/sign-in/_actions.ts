@@ -1,19 +1,33 @@
 'use server';
 
 import { authClient } from '@/api/client/auth.client';
+import { createActionLogger } from '@/shared/lib/logger';
 import { revalidatePath } from 'next/cache';
 
+const log = createActionLogger('loginAction');
+const logoutLog = createActionLogger('logoutAction');
+
 export async function loginAction(credentials: { email: string; password: string }) {
-  const result = await authClient.login(credentials);
+  try {
+    const result = await authClient.login(credentials);
 
-  revalidatePath('/profile');
-  revalidatePath('/');
+    revalidatePath('/profile');
+    revalidatePath('/');
 
-  return result;
+    return result;
+  } catch (error) {
+    log.error({ err: error }, 'Login failed');
+    throw error;
+  }
 }
 
 export async function logoutAction() {
-  await authClient.logout();
+  try {
+    await authClient.logout();
 
-  revalidatePath('/', 'layout');
+    revalidatePath('/', 'layout');
+  } catch (error) {
+    logoutLog.error({ err: error }, 'Logout failed');
+    throw error;
+  }
 }

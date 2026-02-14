@@ -64,8 +64,12 @@ export function ContentTableActions({
             <Button
               variant="ghost"
               size="icon-sm"
-              onClick={onEdit}
-              className="text-text-tertiary hover:text-text-primary"
+              onClick={isShort ? undefined : onEdit}
+              disabled={isShort}
+              className={cn(
+                'text-text-tertiary hover:text-text-primary',
+                isShort && 'opacity-50 cursor-not-allowed pointer-events-none'
+              )}
             >
               <Pencil className="w-4 h-4" />
             </Button>
@@ -125,14 +129,22 @@ export function ContentTableActions({
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => {
-                posthog.capture(AnalyticsEvent.STUDIO_CONTENT_DELETED, {
-                  content_type: isShort ? 'short' : 'video',
-                  video_uuid: videoUuid,
-                });
-                onDelete();
-              }}
-              className="text-red-500 focus:text-red-500"
+              onClick={
+                isShort
+                  ? undefined
+                  : () => {
+                      posthog.capture(AnalyticsEvent.STUDIO_CONTENT_DELETED, {
+                        content_type: isShort ? 'short' : 'video',
+                        video_uuid: videoUuid,
+                      });
+                      onDelete();
+                    }
+              }
+              disabled={isShort}
+              className={cn(
+                'text-red-500 focus:text-red-500',
+                isShort && 'opacity-50 cursor-not-allowed'
+              )}
             >
               <Trash2 className="w-4 h-4 mr-2" />
               Delete

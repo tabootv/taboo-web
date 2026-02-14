@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/sidebar';
 import { useFeature } from '@/hooks/use-feature';
 import { useAuthStore } from '@/shared/stores/auth-store';
-import { ChevronRight, Clapperboard } from 'lucide-react';
+import { ChevronRight, Clapperboard, UserPlus } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -24,6 +24,7 @@ export function NavUser({ items }: NavUserProps) {
   const { user, isAuthenticated } = useAuthStore();
   const bookmarksEnabled = useFeature('BOOKMARK_SYSTEM');
   const historyEnabled = useFeature('WATCH_HISTORY');
+  const inviteEnabled = useFeature('INVITE_SYSTEM');
   const isCreator = user?.channel;
 
   if (!isAuthenticated) return null;
@@ -52,6 +53,21 @@ export function NavUser({ items }: NavUserProps) {
               </SidebarMenuItem>
             );
           })}
+
+          {inviteEnabled && (
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                isActive={pathname === '/account/invite'}
+                tooltip="Invite a Friend"
+              >
+                <Link href="/account/invite">
+                  <UserPlus />
+                  <span>Invite a Friend</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
 
           {isCreator && (
             <SidebarMenuItem>

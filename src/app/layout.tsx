@@ -14,13 +14,17 @@ const figtree = Figtree({
   weight: ['400', '500', '600', '700', '800'],
 });
 
+const SITE_TITLE = 'TabooTV - Premium Video Streaming Platform';
+const SITE_DESCRIPTION =
+  'Discover premium video content, educational courses, and connect with creators on TabooTV. Stream exclusive videos, learn from expert creators, and join a vibrant community of content enthusiasts.';
+
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://app.taboo.tv'),
   title: {
-    default: 'TabooTV - Premium Video Streaming Platform',
+    default: SITE_TITLE,
     template: '%s | TabooTV',
   },
-  description:
-    'Discover premium video content, educational courses, and connect with creators on TabooTV. Stream exclusive videos, learn from expert creators, and join a vibrant community of content enthusiasts.',
+  description: SITE_DESCRIPTION,
   keywords: ['video', 'streaming', 'courses', 'community', 'creators'],
   authors: [{ name: 'TabooTV' }],
   icons: {
@@ -34,29 +38,14 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     siteName: 'TabooTV',
-    title: 'TabooTV - Premium Video Streaming Platform',
-    description:
-      'Discover premium video content, educational courses, and connect with creators on TabooTV. Stream exclusive videos, learn from expert creators, and join a vibrant community of content enthusiasts.',
-    images: [
-      {
-        url: '/apple-icon.png',
-        width: 180,
-        height: 180,
-        alt: 'TabooTV Logo',
-      },
-    ],
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
     url: '/',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'TabooTV - Premium Video Streaming Platform',
-    description:
-      'Discover premium video content, educational courses, and connect with creators on TabooTV. Stream exclusive videos, learn from expert creators, and join a vibrant community of content enthusiasts.',
-    images: ['/apple-icon.png'],
-  },
-  robots: {
-    index: true,
-    follow: true,
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
   },
 };
 
@@ -74,14 +63,15 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.taboo.tv';
   const organizationSchema = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'TabooTV',
     description:
       'Premium video streaming platform offering exclusive content, educational courses, and a vibrant creator community.',
-    url: 'https://dev.taboo.tv',
-    logo: 'https://dev.taboo.tv/apple-icon.png',
+    url: appUrl,
+    logo: `${appUrl}/apple-icon.png`,
     sameAs: [],
   };
 

@@ -6,7 +6,15 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getCookieOptions, TOKEN_KEY, getApiUrl } from '@/shared/lib/auth/cookie-config';
+import {
+  getCookieOptions,
+  TOKEN_KEY,
+  getApiUrl,
+  setStateCookies,
+} from '@/shared/lib/auth/cookie-config';
+import { createApiLogger } from '@/shared/lib/logger';
+
+const log = createApiLogger('/api/login', 'POST');
 
 export async function POST(request: NextRequest) {
   try {
@@ -59,12 +67,22 @@ export async function POST(request: NextRequest) {
     });
 
     if (token) {
-      res.cookies.set(TOKEN_KEY, token, getCookieOptions(remember_me));
+      const cookieOpts = getCookieOptions(remember_me);
+      res.cookies.set(TOKEN_KEY, token, cookieOpts);
+      setStateCookies(
+        res,
+        {
+          profile_completed: !!(user as any)?.profile_completed,
+          subscribed: !!subscribed,
+          is_creator: !!(user as any)?.is_creator,
+        },
+        'maxAge' in cookieOpts ? cookieOpts.maxAge : null
+      );
     }
 
     return res;
   } catch (error) {
-    console.error('Login proxy error:', error);
+    log.error({ err: error }, 'Login proxy error');
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
 }

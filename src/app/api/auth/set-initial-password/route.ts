@@ -11,6 +11,9 @@ import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import { decryptPasswordHint } from '@/shared/lib/auth/checkout-intent';
 import { TOKEN_KEY, decodeCookieToken, getApiUrl } from '@/shared/lib/auth/cookie-config';
+import { createApiLogger } from '@/shared/lib/logger';
+
+const log = createApiLogger('/api/auth/set-initial-password', 'POST');
 
 const PW_HINT_COOKIE = '_pw_hint';
 
@@ -94,7 +97,7 @@ export async function POST(request: NextRequest) {
 
     return res;
   } catch (error) {
-    console.error('Set initial password error:', error);
+    log.error({ err: error }, 'Set initial password error');
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
 }

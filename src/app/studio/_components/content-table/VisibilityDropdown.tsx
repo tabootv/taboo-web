@@ -31,6 +31,7 @@ interface VisibilityDropdownProps {
   onScheduleCancel?: (() => Promise<void>) | undefined;
   onToggleHidden?: (() => Promise<void>) | undefined;
   disabled?: boolean | undefined;
+  readOnly?: boolean | undefined;
 }
 
 const visibilityConfig: Record<
@@ -71,6 +72,7 @@ export function VisibilityDropdown({
   onScheduleCancel,
   onToggleHidden,
   disabled,
+  readOnly,
 }: VisibilityDropdownProps) {
   const [isUpdating, setIsUpdating] = useState(false);
   const [open, setOpen] = useState(false);
@@ -155,6 +157,30 @@ export function VisibilityDropdown({
     const minutes = String(now.getMinutes()).padStart(2, '0');
     return `${year}-${month}-${day}T${hours}:${minutes}`;
   };
+
+  if (readOnly) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className="flex items-center gap-1.5 px-2 py-1 rounded-md text-sm">
+            <Icon
+              className={cn('w-4 h-4', config.color, visibility === 'processing' && 'animate-spin')}
+            />
+            <span className={cn('text-sm', config.color)}>{config.label}</span>
+            {hidden && (
+              <span className="px-1.5 py-0.5 bg-amber-500/20 text-amber-500 text-xs rounded">
+                Hidden
+              </span>
+            )}
+          </div>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">
+          <p className="font-medium">{config.label}</p>
+          <p className="text-xs text-white/70">{config.description}</p>
+        </TooltipContent>
+      </Tooltip>
+    );
+  }
 
   if (visibility === 'processing') {
     return (

@@ -23,7 +23,7 @@ export function SeriesCard({ item, index, isSelected, onClick }: SeriesCardProps
     <button
       onClick={onClick}
       className={cn(
-        'group flex-shrink-0 w-[140px] lg:w-full flex flex-col lg:flex-row items-start lg:items-center gap-2 lg:gap-3 p-1.5 lg:p-2 rounded-lg transition-all duration-200 text-left border border-transparent',
+        'group flex-shrink-0 w-[140px] lg:w-full snap-start lg:snap-align-none flex flex-col lg:flex-row items-start lg:items-center gap-2 lg:gap-3 p-1.5 lg:p-2 rounded-lg transition-all duration-200 text-left border border-transparent',
         isSelected
           ? 'bg-white/10 border-white/15 shadow-[0_10px_40px_rgba(0,0,0,0.25)]'
           : 'bg-transparent hover:bg-white/5'

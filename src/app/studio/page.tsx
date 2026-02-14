@@ -75,7 +75,7 @@ export default function StudioDashboard() {
   };
 
   return (
-    <div className="p-6 lg:p-8 space-y-8">
+    <div className="space-y-8">
       <WelcomeHeader channel={channel} />
       <ContentMetricsGrid totals={totals} />
       <ContentPulseCard />

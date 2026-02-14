@@ -14,7 +14,11 @@ export function CleanLayout({ children, showBack: _showBack = true }: CleanLayou
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <NavigationProgress />
-      <TopHeader hiddenSearch={true} classNameDivContainer="account-container" />
+      <TopHeader
+        hiddenSearch={true}
+        hiddenGetStarted={true}
+        classNameDivContainer="account-container"
+      />
 
       <main className="flex-1 flex flex-col">
         <div className="flex-1">{children}</div>
@@ -26,10 +30,10 @@ export function CleanLayout({ children, showBack: _showBack = true }: CleanLayou
         richColors
         toastOptions={{
           style: {
-            background: 'var(--surface)',
-            border: '1px solid var(--border)',
-            color: 'var(--text-primary)',
-            zIndex: 99999,
+            background: '#ab0013',
+            border: '1px solid rgba(255,255,255,0.2)',
+            color: '#ffffff',
+            zIndex: 99999999,
           },
         }}
       />

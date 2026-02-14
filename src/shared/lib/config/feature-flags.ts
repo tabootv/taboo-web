@@ -36,6 +36,53 @@ export const FEATURES = {
     ],
     reason: 'Backend not ready - history tracking under development',
   },
+  STUDIO_ANALYTICS: {
+    enabled: process.env.NEXT_PUBLIC_FEATURE_STUDIO_ANALYTICS === 'true',
+    name: 'Studio Analytics',
+    description: 'Analytics page in Creator Studio',
+    impacts: ['Studio sidebar Analytics link', '/studio/analytics page'],
+    reason: 'Page hidden during development',
+  },
+  STUDIO_EARNINGS: {
+    enabled: process.env.NEXT_PUBLIC_FEATURE_STUDIO_EARNINGS === 'true',
+    name: 'Studio Earnings',
+    description: 'Earnings page in Creator Studio',
+    impacts: ['Studio sidebar Earnings link', '/studio/earnings page'],
+    reason: 'Page hidden during development',
+  },
+  STUDIO_PAYOUTS: {
+    enabled: process.env.NEXT_PUBLIC_FEATURE_STUDIO_PAYOUTS === 'true',
+    name: 'Studio Payouts',
+    description: 'Payouts page in Creator Studio',
+    impacts: ['Studio sidebar Payouts link', '/studio/payouts page'],
+    reason: 'Page hidden during development',
+  },
+  STUDIO_SETTINGS: {
+    enabled: process.env.NEXT_PUBLIC_FEATURE_STUDIO_SETTINGS === 'true',
+    name: 'Studio Settings',
+    description: 'Settings page in Creator Studio',
+    impacts: ['Studio sidebar Settings link', '/studio/settings page'],
+    reason: 'Page hidden during development',
+  },
+  STUDIO_CODES: {
+    enabled: process.env.NEXT_PUBLIC_FEATURE_STUDIO_CODES === 'true',
+    name: 'Studio Codes',
+    description: 'Redeem codes management page in Creator Studio',
+    impacts: ['Studio sidebar Codes link', '/studio/codes page'],
+    reason: 'Page hidden during development',
+  },
+  INVITE_SYSTEM: {
+    enabled: process.env.NEXT_PUBLIC_FEATURE_INVITE_SYSTEM === 'true',
+    name: 'Invite System',
+    description: 'Allows paid subscribers to generate and share invite codes',
+    impacts: [
+      'Account sidebar "Invite a Friend" tab',
+      '/account/invite page',
+      'GET /redeem-codes/my-invite API calls',
+      'POST /redeem-codes/create-invite API calls',
+    ],
+    reason: '',
+  },
 } as const;
 
 export type FeatureName = keyof typeof FEATURES;
