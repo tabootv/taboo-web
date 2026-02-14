@@ -97,9 +97,9 @@ export function ChoosePlanContent() {
             // Add set_password flag for embedded checkout users, but not auto-claimed
             // (webhook-created) users who skip the password step
             const pwParam = leadEmail && !autoClaimedRef.current ? '?set_password=1' : '';
-            router.push(`/account/complete${pwParam}`);
+            window.location.replace(`/account/complete${pwParam}`);
           } else {
-            router.push('/');
+            window.location.replace('/');
           }
           return;
         }
@@ -303,7 +303,7 @@ export function ChoosePlanContent() {
           // Email already registered
           if (response.status === 409 && data.existing_user) {
             const emailParam = encodeURIComponent(data.email || leadEmail);
-            router.push(`/sign-in?email=${emailParam}&subscription_activated=true`);
+            window.location.replace(`/sign-in?email=${emailParam}&subscription_activated=true`);
             return;
           }
 

@@ -80,7 +80,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ plan: strin
         if (status.is_subscribed) {
           setSubscribed(true);
           toast.success('Subscription activated! Welcome to TabooTV.');
-          router.push('/');
+          window.location.replace('/');
           return;
         }
         // Wait 2 seconds between polls
@@ -90,7 +90,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ plan: strin
       toast.info(
         'Payment received! Your subscription is being activated. This usually takes less than a minute.'
       );
-      router.push('/');
+      window.location.replace('/');
     } catch (error) {
       console.error('Failed to verify subscription:', error);
       toast.error('Failed to verify subscription status');

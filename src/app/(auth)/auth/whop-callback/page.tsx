@@ -76,7 +76,7 @@ function WhopCallbackContent() {
               email: response.email!,
               subscription_activated: 'true',
             });
-            router.push(`/sign-in?${params.toString()}`);
+            window.location.replace(`/sign-in?${params.toString()}`);
           }, 3000);
           return;
         }
@@ -95,10 +95,10 @@ function WhopCallbackContent() {
 
           if (response.requires_profile_completion || response.scenario === 'new_user') {
             await fetchUser();
-            setTimeout(() => router.push('/account/complete'), 1500);
+            setTimeout(() => window.location.replace('/account/complete'), 1500);
           } else {
             await fetchUser();
-            setTimeout(() => router.push('/'), 1500);
+            setTimeout(() => window.location.replace('/'), 1500);
           }
           return;
         }
