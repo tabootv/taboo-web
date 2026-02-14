@@ -73,7 +73,6 @@ function ContentPageInner() {
 
   const { filters, setFilters } = useContentFilters();
 
-  const creatorId = user?.id;
   const channelId = user?.channel?.id;
 
   const {
@@ -90,9 +89,11 @@ function ContentPageInner() {
     data: shortsData,
     isLoading: isLoadingShorts,
     refetch: refetchShorts,
-  } = useStudioShorts(creatorId, shortsPage, {
-    status: filters.status,
-    sortBy: filters.sortBy,
+  } = useStudioShorts({
+    page: shortsPage,
+    per_page: 20,
+    types: ['shorts'],
+    sort_by: filters.sortBy === 'newest' ? 'latest' : 'oldest',
   });
   const {
     data: postsData,
@@ -417,7 +418,7 @@ function ContentPageInner() {
   }, []);
 
   return (
-    <div className="p-6 lg:p-8">
+    <div>
       {/* Upload Modal */}
       <UploadModal
         isOpen={isUploadModalOpen || !!resumeUploadId}
@@ -508,7 +509,7 @@ function ContentPageInner() {
 
 export default function ContentPage() {
   return (
-    <Suspense fallback={<div className="p-6 lg:p-8">Loading...</div>}>
+    <Suspense fallback={<div>Loading...</div>}>
       <ContentPageInner />
     </Suspense>
   );

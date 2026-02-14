@@ -244,6 +244,7 @@ export function ContentTableRow({
             onScheduleCancel={onScheduleCancel ? handleScheduleCancel : undefined}
             onToggleHidden={onToggleHidden ? handleToggleHidden : undefined}
             disabled={item.processing_status !== 'ready'}
+            readOnly={isShort}
           />
         </td>
 
