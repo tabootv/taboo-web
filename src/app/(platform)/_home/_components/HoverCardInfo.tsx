@@ -35,6 +35,7 @@ export function HoverCardInfo({
         <button
           onClick={onPlay}
           className="netflix-action-btn-primary p-2 rounded-full bg-white hover:bg-white/90 transition-all hover:scale-110"
+          aria-label="Play"
           title="Play"
         >
           <Play className="w-4 h-4 text-black" fill="black" />
@@ -46,6 +47,7 @@ export function HoverCardInfo({
               ? 'bg-white/20 border-white text-white'
               : 'bg-surface/80 border-white/40 hover:border-white text-white'
           }`}
+          aria-label={saved ? 'Remove from My List' : 'Add to My List'}
           title={saved ? 'Remove from My List' : 'Add to My List'}
         >
           {saved ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
@@ -57,6 +59,7 @@ export function HoverCardInfo({
               ? 'bg-white/20 border-white'
               : 'bg-surface/80 border-white/40 hover:border-white'
           }`}
+          aria-label="More Info"
           title="More Info"
         >
           <ChevronDown
@@ -93,7 +96,13 @@ export function HoverCardInfo({
       <div className="flex items-center gap-1.5 pt-1 border-t border-white/10">
         {video.channel?.dp ? (
           <div className="relative w-4 h-4 rounded-full overflow-hidden ring-1 ring-white/20">
-            <Image src={video.channel.dp} alt="" fill className="object-cover" />
+            <Image
+              src={video.channel.dp}
+              alt={`${video.channel.name} profile`}
+              fill
+              sizes="16px"
+              className="object-cover"
+            />
           </div>
         ) : (
           <div className="w-4 h-4 rounded-full bg-gradient-to-br from-red-primary to-red-dark flex items-center justify-center">

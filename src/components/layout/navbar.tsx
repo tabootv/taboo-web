@@ -101,8 +101,10 @@ export function Navbar() {
             {/* Mobile Menu Button */}
             <button
               onClick={toggleMobileMenu}
+              aria-label="Toggle mobile menu"
+              aria-expanded={isMobileMenuOpen}
               className={cn(
-                'lg:hidden p-2 rounded-sm text-text-secondary hover:bg-hover transition-colors',
+                'lg:hidden min-w-12 min-h-12 flex items-center justify-center rounded-sm text-text-secondary hover:bg-hover transition-colors',
                 isSearchExpanded && 'hidden'
               )}
             >

@@ -203,6 +203,7 @@ export const RailCard = memo(function RailCard({
             className={`p-1.5 rounded-full border transition-all hover:scale-110 ${
               saved ? 'bg-white/20 border-white' : 'bg-black/60 border-white/40 hover:border-white'
             }`}
+            aria-label={saved ? 'Remove from My List' : 'Add to My List'}
             title={saved ? 'Remove from My List' : 'Add to My List'}
           >
             {saved ? (
@@ -246,7 +247,13 @@ export const RailCard = memo(function RailCard({
             if (profilePic) {
               return (
                 <div className="relative w-4 h-4 rounded-full overflow-hidden flex-shrink-0">
-                  <Image src={profilePic} alt="" fill className="object-cover" />
+                  <Image
+                    src={profilePic}
+                    alt={`${video.channel?.name} profile`}
+                    fill
+                    sizes="16px"
+                    className="object-cover"
+                  />
                 </div>
               );
             }
@@ -261,10 +268,10 @@ export const RailCard = memo(function RailCard({
             }
             return null;
           })()}
-          <p className="text-xs text-white/50 truncate">{video.channel?.name}</p>
+          <p className="text-xs text-white/60 truncate">{video.channel?.name}</p>
         </div>
         {showDate && video.published_at && (
-          <p className="text-xs text-white/40 mt-0.5">{formatRelativeTime(video.published_at)}</p>
+          <p className="text-xs text-white/60 mt-0.5">{formatRelativeTime(video.published_at)}</p>
         )}
       </div>
     </div>

@@ -5,8 +5,8 @@ import {
   cn,
   formatCompactNumber,
   getCreatorRoute,
-  getSeriesRoute,
   getSeriesPlayRoute,
+  getSeriesRoute,
 } from '@/shared/utils/formatting';
 import type { Series } from '@/types';
 import { Check, ChevronRight, Clock, Film, Play, Plus } from 'lucide-react';
@@ -155,9 +155,10 @@ export function SeriesSidePanel({ series }: SeriesSidePanelProps) {
 
           <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/40 to-transparent" />
 
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+          <div className="absolute inset-0 flex items-center justify-center opacity-60 hover:opacity-100 transition-opacity">
             <button
               onClick={() => handlePlay('play')}
+              aria-label="Play"
               disabled={isLoadingPlay}
               className="w-14 h-14 rounded-full bg-white/90 hover:bg-white flex items-center justify-center transition-all hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
             >

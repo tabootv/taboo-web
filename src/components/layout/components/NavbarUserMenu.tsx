@@ -56,7 +56,8 @@ export function NavbarUserMenu({ isSearchExpanded }: NavbarUserMenuProps) {
       {/* Notifications */}
       <Link
         href="/notifications"
-        className="relative p-2 rounded-sm text-text-secondary hover:bg-hover hover:text-text-primary transition-colors"
+        aria-label="Notifications"
+        className="relative min-w-12 min-h-12 flex items-center justify-center rounded-sm text-text-secondary hover:bg-hover hover:text-text-primary transition-colors"
       >
         <Bell className="w-5 h-5" />
         {unreadCount > 0 && (
@@ -70,7 +71,9 @@ export function NavbarUserMenu({ isSearchExpanded }: NavbarUserMenuProps) {
       <div className="relative">
         <button
           onClick={toggleUserMenu}
-          className="flex items-center gap-2 p-1 rounded-sm hover:bg-hover transition-colors"
+          aria-label="User menu"
+          aria-expanded={isUserMenuOpen}
+          className="flex items-center gap-2 min-w-12 min-h-12 justify-center rounded-sm hover:bg-hover transition-colors"
         >
           <Avatar
             src={user?.dp ?? null}

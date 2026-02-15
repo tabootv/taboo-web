@@ -49,9 +49,9 @@ export function MediaCardThumbnail({
   onImageError,
 }: MediaCardThumbnailProps) {
   const imageSizes = {
-    sm: '(max-width: 640px) 50vw, 25vw',
-    md: '(max-width: 640px) 100vw, 33vw',
-    lg: '(max-width: 640px) 100vw, 50vw',
+    sm: '(max-width: 640px) 45vw, 200px',
+    md: '(max-width: 640px) 90vw, (max-width: 1024px) 33vw, 300px',
+    lg: '(max-width: 640px) 90vw, (max-width: 1024px) 50vw, 450px',
   };
 
   return (

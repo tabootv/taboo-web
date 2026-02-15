@@ -26,7 +26,13 @@ export function CreatorCard({ creator }: CreatorCardProps) {
       >
         <div className="relative h-[110px] w-full rounded-t-lg overflow-hidden">
           {creator.banner ? (
-            <Image src={creator.banner} alt="" fill className="object-cover" />
+            <Image
+              src={creator.banner}
+              alt={`${creator.name} banner`}
+              fill
+              sizes="(max-width: 640px) 90vw, 300px"
+              className="object-cover"
+            />
           ) : (
             <div className="w-full h-full bg-linear-to-r from-red-dark to-red-primary" />
           )}
@@ -40,6 +46,7 @@ export function CreatorCard({ creator }: CreatorCardProps) {
                 src={creator.dp}
                 alt={creator.name || 'Creator'}
                 fill
+                sizes="88px"
                 className="object-cover"
               />
             ) : (

@@ -48,6 +48,7 @@ export const PreviewMediaInfo = memo(function PreviewMediaInfo({
                 ? 'bg-white/20 border-white text-white'
                 : 'bg-surface-hover border-white/30 hover:border-white text-white'
             }`}
+            aria-label={saved ? 'Remove from My List' : 'Add to My List'}
             title={saved ? 'Remove from My List' : 'Add to My List'}
           >
             {saved ? <Check className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
