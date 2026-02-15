@@ -1,3 +1,4 @@
+import { CreatorsProvider } from '@/components/providers/creators-provider';
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import {
@@ -50,7 +51,9 @@ export default function HomePage() {
 
       <div className="w-full page-px flex flex-col gap-5 sm:gap-6 md:gap-8 lg:gap-10 mt-4 sm:mt-8 md:mt-12 relative z-10">
         <Suspense fallback={<CreatorsSkeleton />}>
-          <CreatorsSectionServer />
+          <CreatorsProvider>
+            <CreatorsSectionServer />
+          </CreatorsProvider>
         </Suspense>
         <Suspense fallback={<FeaturedSkeleton />}>
           <FeaturedSectionServer />
