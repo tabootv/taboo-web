@@ -5,13 +5,21 @@ import { Suspense, useEffect, useRef } from 'react';
 import posthog from 'posthog-js';
 import { PostHogProvider as PHProvider } from 'posthog-js/react';
 
-if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_POSTHOG_KEY) {
+let posthogInitialized = false;
+function ensurePostHogInit() {
+  if (posthogInitialized || typeof window === 'undefined' || !process.env.NEXT_PUBLIC_POSTHOG_KEY)
+    return;
+  posthogInitialized = true;
   posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
     api_host: '/phtv',
     ui_host: 'https://us.i.posthog.com',
     defaults: '2026-01-30',
     person_profiles: 'identified_only',
-    capture_pageview: false, // We handle this manually for reliable UTM capture
+    capture_pageview: false,
+    disable_session_recording: true,
+    disable_surveys: true,
+    capture_dead_clicks: false,
+    capture_performance: false,
   });
 }
 
@@ -25,6 +33,7 @@ function PostHogPageViewInner() {
 
   useEffect(() => {
     if (!pathname) return;
+    ensurePostHogInit();
 
     let url = window.origin + pathname;
     const search = searchParams.toString();
