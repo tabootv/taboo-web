@@ -1,9 +1,9 @@
 'use client';
 
 import { usePathname, useSearchParams } from 'next/navigation';
-import { Suspense, useEffect, useRef } from 'react';
 import posthog from 'posthog-js';
 import { PostHogProvider as PHProvider } from 'posthog-js/react';
+import { Suspense, useEffect, useRef } from 'react';
 
 let posthogInitialized = false;
 function ensurePostHogInit() {
@@ -16,7 +16,7 @@ function ensurePostHogInit() {
     defaults: '2026-01-30',
     person_profiles: 'identified_only',
     capture_pageview: false,
-    disable_session_recording: true,
+    disable_session_recording: false,
     disable_surveys: true,
     capture_dead_clicks: false,
     capture_performance: false,
