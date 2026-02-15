@@ -88,6 +88,8 @@ const nextConfig: NextConfig = {
   skipTrailingSlashRedirect: true,
   // Image optimization configuration
   images: {
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 2592000, // 30 days
     remotePatterns: [
       {
         protocol: 'https',
@@ -147,6 +149,11 @@ const nextConfig: NextConfig = {
       '@radix-ui/react-slot',
       '@radix-ui/react-tooltip',
       '@radix-ui/react-visually-hidden',
+      'posthog-js',
+      'firebase/app',
+      'firebase/auth',
+      'swiper',
+      'emoji-picker-react',
     ],
   },
 
@@ -175,7 +182,7 @@ const nextConfig: NextConfig = {
     ];
   },
 
-  // Headers for security
+  // Headers for security, caching, and performance
   async headers() {
     return [
       {
@@ -198,6 +205,22 @@ const nextConfig: NextConfig = {
             value: 'camera=(), microphone=(), geolocation=()',
           },
         ],
+      },
+      // Long-lived cache for static images (app store badges, logos, etc.)
+      {
+        source: '/images/:path*',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
+      },
+      // Long-lived cache for proxied PostHog static assets
+      {
+        source: '/phtv/static/:path*',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
+      },
+      // Enable bfcache: use no-cache (revalidate) instead of no-store
+      // This allows back/forward navigation to restore pages from memory instantly
+      {
+        source: '/((?!api|_next).*)',
+        headers: [{ key: 'Cache-Control', value: 'private, no-cache' }],
       },
     ];
   },
