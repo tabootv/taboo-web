@@ -89,6 +89,7 @@ export function BannerSlider({ initialBanners }: BannerSliderProps) {
           alt={currentBanner.title}
           fill
           priority
+          fetchPriority="high"
           className="object-cover object-top"
           sizes="100vw"
         />
@@ -103,6 +104,7 @@ export function BannerSlider({ initialBanners }: BannerSliderProps) {
                     src={creatorImage}
                     alt={currentBanner.channel?.name || 'Creator'}
                     fill
+                    sizes="24px"
                     className="rounded-full object-cover"
                   />
                 </div>
@@ -130,7 +132,7 @@ export function BannerSlider({ initialBanners }: BannerSliderProps) {
                     href={href}
                     className="inline-flex items-center gap-1 text-white font-semibold mt-2 hover:text-red-primary transition-colors"
                   >
-                    Read more
+                    Explore series
                     <ChevronRight className="w-4 h-4" />
                   </Link>
                 )}
@@ -157,12 +159,14 @@ export function BannerSlider({ initialBanners }: BannerSliderProps) {
           <>
             <button
               onClick={goToPrev}
+              aria-label="Previous slide"
               className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-10 p-2 bg-black/50 hover:bg-black/70 rounded-full opacity-0 group-hover:opacity-100 transition-all hidden sm:flex items-center justify-center"
             >
               <ChevronLeft className="w-4 h-4 text-white" />
             </button>
             <button
               onClick={goToNext}
+              aria-label="Next slide"
               className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-10 p-2 bg-black/50 hover:bg-black/70 rounded-full opacity-0 group-hover:opacity-100 transition-all hidden sm:flex items-center justify-center"
             >
               <ChevronRight className="w-4 h-4 text-white" />
@@ -171,18 +175,22 @@ export function BannerSlider({ initialBanners }: BannerSliderProps) {
         )}
 
         {banners.length > 1 && (
-          <div className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5 sm:gap-2">
+          <div className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1 sm:gap-1.5">
             {banners.map((_, idx) => (
               <button
                 key={idx}
                 onClick={() => goToSlide(idx)}
-                className={`h-1 sm:h-1.5 rounded-full transition-all duration-300 ${
-                  idx === currentIndex
-                    ? 'w-6 sm:w-8 bg-red-primary'
-                    : 'w-1.5 sm:w-2 bg-white/40 hover:bg-white/60'
-                }`}
+                className="min-w-[44px] min-h-[44px] flex items-center justify-center"
                 aria-label={`Go to slide ${idx + 1}`}
-              />
+              >
+                <span
+                  className={`block h-1 sm:h-1.5 rounded-full transition-all duration-300 ${
+                    idx === currentIndex
+                      ? 'w-6 sm:w-8 bg-red-primary'
+                      : 'w-1.5 sm:w-2 bg-white/40 hover:bg-white/60'
+                  }`}
+                />
+              </button>
             ))}
           </div>
         )}
