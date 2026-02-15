@@ -68,7 +68,7 @@ export function SeriesCard({ item, index, isSelected, onClick }: SeriesCardProps
           <span
             className={cn(
               'text-sm font-bold transition-colors',
-              isSelected ? 'text-white' : 'text-white/30'
+              isSelected ? 'text-white' : 'text-white/60'
             )}
           >
             #{index + 1}
@@ -87,7 +87,7 @@ export function SeriesCard({ item, index, isSelected, onClick }: SeriesCardProps
         <div className="flex flex-wrap items-center gap-2 mt-1">
           <p className="text-[10px] lg:text-xs text-white/60">{item.videos_count || 0} episodes</p>
           {item.channel?.name && (
-            <span className="text-[10px] lg:text-xs text-white/40 truncate">
+            <span className="text-[10px] lg:text-xs text-white/60 truncate">
               {item.channel.name}
             </span>
           )}

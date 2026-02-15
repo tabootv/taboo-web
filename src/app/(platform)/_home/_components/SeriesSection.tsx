@@ -22,7 +22,7 @@ export function SeriesSection({
         <h2 className="text-lg md:text-xl font-semibold text-white">{title}</h2>
         <Link
           href={viewAllHref}
-          className="group flex items-center gap-1 text-sm text-white/50 hover:text-white transition-colors"
+          className="group flex items-center gap-1 text-sm text-white/60 hover:text-white transition-colors"
         >
           View All
           <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />

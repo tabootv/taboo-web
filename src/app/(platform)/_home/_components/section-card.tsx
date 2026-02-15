@@ -18,7 +18,7 @@ export function SectionCard({ title, href, children, className = '' }: SectionCa
         {href && (
           <Link
             href={href}
-            className="text-sm text-red-primary hover:text-red-hover flex items-center gap-1 transition-colors group"
+            className="text-sm text-white/70 hover:text-red-primary flex items-center gap-1 transition-colors group"
           >
             View All
             <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

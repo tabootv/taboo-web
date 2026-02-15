@@ -60,7 +60,7 @@ export function VerticalSeriesList({ series, selectedIndex, onSelect }: Vertical
 
   return (
     <div className="min-w-0 lg:w-[320px] xl:w-[340px] flex-shrink-0 relative lg:h-full">
-      <div className="hidden lg:flex items-center justify-between text-xs text-white/40 mb-2 px-1">
+      <div className="hidden lg:flex items-center justify-between text-xs text-white/60 mb-2 px-1">
         <span>{series.length} series</span>
         <div className="flex items-center gap-1">
           <ChevronUp className="w-3 h-3" />
