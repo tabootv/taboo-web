@@ -29,7 +29,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
       <SidebarContent>
         <NavMain items={mainNavigation} />
-        <SidebarSeparator />
+        <SidebarSeparator className="bg-surface" />
         <NavUser items={userNavigation} />
       </SidebarContent>
 
