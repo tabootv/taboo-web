@@ -3105,29 +3105,6 @@ section:has(.vertical-series-card:hover) {
   scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
 }
 
-/* Sidebar scrollbar */
-.sidebar-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-
-.sidebar-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.sidebar-scrollbar::-webkit-scrollbar-thumb {
-  background: #333;
-  border-radius: 3px;
-}
-
-.sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #444;
-}
-
-.sidebar-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: #333 transparent;
-}
-
 /* ============================================
    Fade In Animation
    ============================================ */
