@@ -16,4 +16,4 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           target-branch: ${{ github.ref_name }}
-          prerelease: ${{ github.ref_name == 'develop' }}
+          config-file: ${{ github.ref_name == 'develop' && 'release-please-config-develop.json' || 'release-please-config.json' }}
