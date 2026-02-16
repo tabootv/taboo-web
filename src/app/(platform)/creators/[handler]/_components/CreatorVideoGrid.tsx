@@ -1,7 +1,7 @@
 'use client';
 
-import { cn, formatDuration } from '@/shared/utils/formatting';
 import { getCountryName } from '@/shared/utils/country';
+import { cn, formatDuration } from '@/shared/utils/formatting';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { CreatorVideoGridProps } from './types';
@@ -69,8 +69,6 @@ export function CreatorVideoGrid({
         <a
           key={video.uuid}
           href={`/videos/${video.uuid}`}
-          target="_blank"
-          rel="noopener noreferrer"
           className={cn(
             'text-inherit no-underline',
             'transition-all duration-250',
