@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.2](https://github.com/tabootv/taboo-web/compare/tabootv-new-v0.6.1...tabootv-new-v0.6.2) (2026-02-16)
+
+
+### Bug Fixes
+
+* **api:** use POST instead of PATCH for video update endpoint ([85c1f20](https://github.com/tabootv/taboo-web/commit/85c1f20d7bf5ce5ba32026e9e5c7ffaac41a3148))
+* **ci:** upload bundle metrics JSON instead of .next directory ([1635654](https://github.com/tabootv/taboo-web/commit/163565438327e6abfc75de0e81789230eb158655))
+
 ## [0.6.1](https://github.com/tabootv/taboo-web/compare/tabootv-new-v0.6.0...tabootv-new-v0.6.1) (2026-02-16)
 
 
