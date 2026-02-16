@@ -154,6 +154,7 @@ const nextConfig: NextConfig = {
       'firebase/auth',
       'swiper',
       'emoji-picker-react',
+      '@vis.gl/react-google-maps',
     ],
   },
 
