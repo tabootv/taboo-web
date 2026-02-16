@@ -5,6 +5,7 @@ import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { after } from 'next/server';
+import { ErrorBoundary } from '@/shared/components/error-boundary';
 import { cache, Suspense } from 'react';
 import { RelatedVideosSidebar } from './_components/related-videos-sidebar';
 import { ShakaPreloader } from './_components/shaka-preloader';
@@ -134,18 +135,22 @@ export default async function VideoPage({ params }: PageProps) {
           <div className="flex-1 min-w-0 flex flex-col gap-6">
             <VideoPlayerSection initialPlayData={playData} videoId={id} />
 
-            <Suspense fallback={<CommentsSkeleton />}>
-              <VideoCommentsSection video={commentsVideo} />
-            </Suspense>
+            <ErrorBoundary fallback={<CommentsSkeleton />}>
+              <Suspense fallback={<CommentsSkeleton />}>
+                <VideoCommentsSection video={commentsVideo} />
+              </Suspense>
+            </ErrorBoundary>
           </div>
 
-          <Suspense fallback={<RelatedVideosSkeleton />}>
-            <RelatedVideosSidebar
-              initialVideos={leanRelatedVideos}
-              currentVideo={playData.video}
-              videoTags={playData.video.tags}
-            />
-          </Suspense>
+          <ErrorBoundary fallback={<RelatedVideosSkeleton />}>
+            <Suspense fallback={<RelatedVideosSkeleton />}>
+              <RelatedVideosSidebar
+                initialVideos={leanRelatedVideos}
+                currentVideo={playData.video}
+                videoTags={playData.video.tags}
+              />
+            </Suspense>
+          </ErrorBoundary>
         </div>
       </div>
     </div>
