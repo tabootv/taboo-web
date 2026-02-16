@@ -1,5 +1,43 @@
 # Changelog
 
+## [0.6.0](https://github.com/tabootv/taboo-web/compare/tabootv-new-v0.5.0...tabootv-new-v0.6.0) (2026-02-16)
+
+
+### Features
+
+* **analytics:** re-enable PostHog session recording ([093b49e](https://github.com/tabootv/taboo-web/commit/093b49ede5bea9e9461389024dbc759acdf20ec1))
+* **manifest:** add PWA icon sizes and stable id ([827b34b](https://github.com/tabootv/taboo-web/commit/827b34b73eb92bad8edc587bc15ee9ae639dd732))
+* **player:** add series navigation controls and autoplay toggle ([7ef40b8](https://github.com/tabootv/taboo-web/commit/7ef40b830d714a7b8e4cb9793fb1183babcf30b1))
+* **studio:** add Google Maps preview to LocationPicker ([549f5ab](https://github.com/tabootv/taboo-web/commit/549f5abe699656ae3c60914125cd1dcf783b9168))
+
+
+### Bug Fixes
+
+* **a11y:** add aria-labels, image sizes, and descriptive alt text ([0515695](https://github.com/tabootv/taboo-web/commit/0515695ba22ace7c4b94d22fc7c3d4896b60216f))
+* **banner:** improve slider tap targets and accessibility ([c02401e](https://github.com/tabootv/taboo-web/commit/c02401e7325c4772cb8f2a29a099fd86e1063523))
+* **ci:** use config-file for prerelease instead of invalid prerelease input ([b92954e](https://github.com/tabootv/taboo-web/commit/b92954ee10f7d3c817b0201d51e96b44202e3552))
+* **player:** handle MP4 stco corruption with quality fallback ([0139b36](https://github.com/tabootv/taboo-web/commit/0139b36e6d31c0fc1d008f3e2011d285ef3f0cf5))
+* **ui:** improve text contrast for WCAG compliance ([4616ae4](https://github.com/tabootv/taboo-web/commit/4616ae470ec184496990e7fd45f0f9087f62f90d))
+* **upload:** fix edit-mode step navigation and enable thumbnail upload ([ce4d610](https://github.com/tabootv/taboo-web/commit/ce4d610e8885da2fd5c66e0ec7d936d9043f2d37))
+* **videos:** add ErrorBoundary around Suspense sections and healthcheck route ([bcf4503](https://github.com/tabootv/taboo-web/commit/bcf45032d8897c9963105ff0785ce38c38525b20))
+
+
+### Performance
+
+* **bundle:** lazy-load SmartSearchDropdown in top-header ([91f7b59](https://github.com/tabootv/taboo-web/commit/91f7b59b0abb83eb466468901bd3c50fe6b0ee1f))
+* **bundle:** lazy-load upload provider and reduce font payload ([77b4b75](https://github.com/tabootv/taboo-web/commit/77b4b75460d7805fa91d96b1b81b65c7e5834822))
+* **config:** optimize images, caching, and bundling ([8e53960](https://github.com/tabootv/taboo-web/commit/8e5396069075e8e3b67be03eb9d3e57f3b395c96))
+* **posthog:** defer initialization and disable unused features ([5b4e9a1](https://github.com/tabootv/taboo-web/commit/5b4e9a1eaf6c48893c59832f36d5fd0ac6385b9e))
+
+
+### Refactoring
+
+* **home:** scope CreatorsProvider to home page ([e994ab6](https://github.com/tabootv/taboo-web/commit/e994ab6f2a9ecef2b716e6e0f0910c88f8425406))
+* **layout:** switch to fixed header with drawer-mode sidebar ([1f7a27d](https://github.com/tabootv/taboo-web/commit/1f7a27d34b364bc7f93a8c7c50157435209dcc3d))
+* **sidebar:** replace SidebarMenuButton with SidebarNavLink ([e1329d3](https://github.com/tabootv/taboo-web/commit/e1329d3e561cea35d4afe69ba0c7e730575b1786))
+* **studio:** restructure layout and update table styling ([eaced9b](https://github.com/tabootv/taboo-web/commit/eaced9b84db1d7dfe379cf5394f145e1002f8c11))
+* **ui:** simplify action buttons and improve video page UX ([2dc50b7](https://github.com/tabootv/taboo-web/commit/2dc50b74c779402f9e828b82216a141c67d33f0a))
+
 ## [0.5.0](https://github.com/tabootv/taboo-web/compare/tabootv-new-v0.4.0...tabootv-new-v0.5.0) (2026-02-14)
 
 
