@@ -18,6 +18,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+// import { VideoAmbientGlow } from './video-ambient-glow';
 
 const VideoPlayer = dynamic(
   () =>
@@ -113,34 +114,37 @@ export function VideoPlayerSection({ initialPlayData, videoId }: VideoPlayerSect
 
   return (
     <div className="flex-1 min-w-0">
-      <div className="relative w-full rounded-lg overflow-hidden bg-black">
-        <VideoPlayer
-          {...(!isAutoplayNavigation && video.thumbnail && { thumbnail: video.thumbnail })}
-          hls_url={video.hls_url || video.url_hls || null}
-          url_1440={video.url_1440 || null}
-          url_1080={video.url_1080 || null}
-          url_720={video.url_720 || null}
-          url_480={video.url_480 || null}
-          autoplay={autoplayEnabled || isAutoplayNavigation}
-          onEnded={handleVideoEnded}
-          isBunnyVideo={video.is_bunny_video}
-          captions={video.captions}
-          userProgress={video.user_progress}
-          videoId={video.uuid}
-          videoTitle={video.title}
-          channelName={video.channel?.name}
-          contentType="video"
-          videoDuration={video.duration}
-          navigationControls={navigationControls}
-        />
-        {showUpNext && nextVideo && (
-          <UpNextOverlay
-            nextVideo={nextVideo}
-            countdown={countdown.countdown}
-            onCancel={handleCancelUpNext}
-            onPlayNow={countdown.playNow}
+      <div className="relative isolate overflow-x-clip">
+        {/* {video.thumbnail && <VideoAmbientGlow key={video.thumbnail} thumbnailUrl={video.thumbnail} />} */}
+        <div className="relative z-10 w-full rounded-lg overflow-hidden bg-black">
+          <VideoPlayer
+            {...(!isAutoplayNavigation && video.thumbnail && { thumbnail: video.thumbnail })}
+            hls_url={video.hls_url || video.url_hls || null}
+            url_1440={video.url_1440 || null}
+            url_1080={video.url_1080 || null}
+            url_720={video.url_720 || null}
+            url_480={video.url_480 || null}
+            autoplay={autoplayEnabled || isAutoplayNavigation}
+            onEnded={handleVideoEnded}
+            isBunnyVideo={video.is_bunny_video}
+            captions={video.captions}
+            userProgress={video.user_progress}
+            videoId={video.uuid}
+            videoTitle={video.title}
+            channelName={video.channel?.name}
+            contentType="video"
+            videoDuration={video.duration}
+            navigationControls={navigationControls}
           />
-        )}
+          {showUpNext && nextVideo && (
+            <UpNextOverlay
+              nextVideo={nextVideo}
+              countdown={countdown.countdown}
+              onCancel={handleCancelUpNext}
+              onPlayNow={countdown.playNow}
+            />
+          )}
+        </div>
       </div>
 
       <h1 className="font-medium text-white mt-3 leading-snug text-[1.5rem]!">{video.title}</h1>

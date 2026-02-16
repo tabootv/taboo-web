@@ -1,11 +1,11 @@
 import { videoClient } from '@/api/client/video.client';
+import { ErrorBoundary } from '@/shared/components/error-boundary';
 import { decodeCookieToken, TOKEN_KEY } from '@/shared/lib/auth/cookie-config';
 import type { Video } from '@/types';
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { after } from 'next/server';
-import { ErrorBoundary } from '@/shared/components/error-boundary';
 import { cache, Suspense } from 'react';
 import { RelatedVideosSidebar } from './_components/related-videos-sidebar';
 import { ShakaPreloader } from './_components/shaka-preloader';
@@ -126,7 +126,7 @@ export default async function VideoPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-[1800px] mx-auto page-px py-4 lg:py-6 relative z-10">
+      <div className="max-w-[1800px] mx-auto px-6 py-4 lg:py-6 relative z-10">
         <ShakaPreloader />
         {cdnOrigin ? <link rel="preconnect" href={cdnOrigin} /> : null}
         {hlsUrl ? <link rel="preload" href={hlsUrl} as="fetch" crossOrigin="anonymous" /> : null}
