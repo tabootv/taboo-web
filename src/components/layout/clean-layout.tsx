@@ -20,7 +20,7 @@ export function CleanLayout({ children, showBack: _showBack = true }: CleanLayou
         classNameDivContainer="account-container"
       />
 
-      <main className="flex-1 flex flex-col pt-[var(--header-height)]">
+      <main className="flex-1 flex flex-col">
         <div className="flex-1">{children}</div>
         <Footer />
       </main>

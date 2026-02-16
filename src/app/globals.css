@@ -10,9 +10,6 @@
    ============================================ */
 
 :root {
-  /* Layout */
-  --header-height: 4rem;
-
   /* Background Colors - Pure Black Theme */
   --bg: #000000;
   --bg-primary: #000000;
