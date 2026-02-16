@@ -1,7 +1,7 @@
 'use client';
 
-import { ChevronLeft, ChevronRight, Loader2, MessageSquareText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ChevronLeft, ChevronRight, Loader2, MessageSquareText } from 'lucide-react';
 import { PostsTableRow, type PostItem } from './PostsTableRow';
 
 interface PostsTableProps {
@@ -47,11 +47,11 @@ function TableHeader() {
   return (
     <thead>
       <tr className="border-b border-white/10 text-left text-xs uppercase tracking-wider text-text-tertiary">
-        <th className="py-3 px-4 font-medium">Post</th>
-        <th className="py-3 px-4 font-medium w-[120px]">Date</th>
-        <th className="py-3 px-4 font-medium w-[100px]">Likes</th>
-        <th className="py-3 px-4 font-medium w-[100px]">Comments</th>
-        <th className="py-3 px-4 font-medium w-[60px]"></th>
+        <th className="py-3 px-8 font-medium">Post</th>
+        <th className="py-3 px-8 font-medium w-[120px]">Date</th>
+        <th className="py-3 px-8 font-medium w-[100px]">Likes</th>
+        <th className="py-3 px-8 font-medium w-[100px]">Comments</th>
+        <th className="py-3 px-8 font-medium w-[60px]"></th>
       </tr>
     </thead>
   );
@@ -115,7 +115,7 @@ export function PostsTable({
 }: PostsTableProps) {
   if (isLoading) {
     return (
-      <div className="bg-surface border border-white/10 rounded-xl overflow-hidden">
+      <div className="border border-x-0 border-white/10 overflow-hidden">
         <LoadingState />
       </div>
     );
@@ -123,14 +123,14 @@ export function PostsTable({
 
   if (items.length === 0) {
     return (
-      <div className="bg-surface border border-white/10 rounded-xl overflow-hidden">
+      <div className="border border-x-0 border-t-0 border-white/10 overflow-hidden">
         <EmptyState />
       </div>
     );
   }
 
   return (
-    <div className="bg-surface border border-white/10 rounded-xl overflow-hidden">
+    <div className="border border-x-0 border-white/10 overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full min-w-[700px]">
           <TableHeader />

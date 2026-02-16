@@ -1,8 +1,8 @@
 'use client';
 
-import { ChevronLeft, ChevronRight, Film, Clapperboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/shared/utils/formatting';
+import { ChevronLeft, ChevronRight, Clapperboard, Film } from 'lucide-react';
 import { ContentTableRow, type ContentItem } from './ContentTableRow';
 import type { Visibility } from './VisibilityDropdown';
 
@@ -52,12 +52,12 @@ function TableHeader({ isShort }: { isShort: boolean }) {
   return (
     <thead>
       <tr className="border-b border-white/10 text-left text-xs uppercase tracking-wider text-text-tertiary">
-        <th className="py-3 px-4 font-medium">{isShort ? 'Short' : 'Video'}</th>
-        <th className="py-3 px-4 font-medium w-[140px]">Visibility</th>
-        <th className="py-3 px-4 font-medium w-[120px]">Restrictions</th>
-        <th className="py-3 px-4 font-medium w-[120px]">Date</th>
-        <th className="py-3 px-4 font-medium w-[80px] text-right">Comments</th>
-        <th className="py-3 px-4 font-medium w-[80px] text-right">Likes</th>
+        <th className="py-3 px-8 font-medium">{isShort ? 'Short' : 'Video'}</th>
+        <th className="py-3 px-8 font-medium w-[140px]">Visibility</th>
+        <th className="py-3 px-8 font-medium w-[120px]">Restrictions</th>
+        <th className="py-3 px-8 font-medium w-[120px]">Date</th>
+        <th className="py-3 px-8 font-medium w-[80px] text-right">Comments</th>
+        <th className="py-3 px-8 font-medium w-[80px] text-right">Likes</th>
       </tr>
     </thead>
   );
@@ -66,7 +66,7 @@ function TableHeader({ isShort }: { isShort: boolean }) {
 function SkeletonRow({ isShort }: { isShort: boolean }) {
   return (
     <tr className="border-b border-white/5">
-      <td className="py-3 px-4">
+      <td className="py-3 px-8">
         <div className="flex items-start gap-3">
           <div
             className={cn(
@@ -80,19 +80,19 @@ function SkeletonRow({ isShort }: { isShort: boolean }) {
           </div>
         </div>
       </td>
-      <td className="py-3 px-4 w-[140px]">
+      <td className="py-3 px-8 w-[140px]">
         <div className="h-8 bg-white/5 rounded animate-pulse w-24" />
       </td>
-      <td className="py-3 px-4 w-[120px]">
+      <td className="py-3 px-8 w-[120px]">
         <div className="h-4 bg-white/5 rounded animate-pulse w-16" />
       </td>
-      <td className="py-3 px-4 w-[120px]">
+      <td className="py-3 px-8 w-[120px]">
         <div className="h-4 bg-white/5 rounded animate-pulse w-20" />
       </td>
-      <td className="py-3 px-4 w-[80px] text-right">
+      <td className="py-3 px-8 w-[80px] text-right">
         <div className="h-4 bg-white/5 rounded animate-pulse w-10 ml-auto" />
       </td>
-      <td className="py-3 px-4 w-[80px] text-right">
+      <td className="py-3 px-8 w-[80px] text-right">
         <div className="h-4 bg-white/5 rounded animate-pulse w-10 ml-auto" />
       </td>
     </tr>
@@ -161,7 +161,7 @@ export function ContentTable({
 }: ContentTableProps) {
   if (isLoading) {
     return (
-      <div className="bg-surface border border-white/10 rounded-xl overflow-hidden">
+      <div className="bg-surface border border-x-0 border-white/10 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[900px]">
             <TableHeader isShort={isShort} />
@@ -178,17 +178,18 @@ export function ContentTable({
 
   if (items.length === 0) {
     return (
-      <div className="bg-surface border border-white/10 rounded-xl overflow-hidden">
+      <div className="border border-x-0 border-white/10 overflow-hidden">
         <EmptyState isShort={isShort} />
       </div>
     );
   }
 
   return (
-    <div className="bg-surface border border-white/10 rounded-xl overflow-hidden">
+    <div className="border border-x-0 border-white/10 overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full min-w-[900px]">
           <TableHeader isShort={isShort} />
+
           <tbody>
             {items.map((item) => (
               <ContentTableRow
@@ -205,6 +206,7 @@ export function ContentTable({
           </tbody>
         </table>
       </div>
+
       {pagination && pagination.lastPage > 1 && onPageChange && (
         <Pagination
           currentPage={pagination.currentPage}

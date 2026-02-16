@@ -32,7 +32,7 @@ export function ContentTabs({
           key={tab.id}
           onClick={() => onTabChange(tab.id)}
           className={cn(
-            'px-4 py-3 text-sm font-medium transition-colors relative',
+            'px-8 py-3 text-sm font-medium transition-colors relative',
             activeTab === tab.id
               ? 'text-text-primary'
               : 'text-text-tertiary hover:text-text-secondary'

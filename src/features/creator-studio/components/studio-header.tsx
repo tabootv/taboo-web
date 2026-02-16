@@ -8,23 +8,37 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Logo } from '@/components/ui/logo';
+import { useSidebarSafe } from '@/components/ui/sidebar';
 import { useAuthStore } from '@/shared/stores/auth-store';
 import { getCreatorRoute } from '@/shared/utils/formatting';
-import { ExternalLink, LogOut, Settings, User } from 'lucide-react';
+import { ExternalLink, LogOut, Menu, Settings, User } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
 export function StudioHeader() {
   const { user, logout } = useAuthStore();
+  const sidebar = useSidebarSafe();
 
   const handleLogout = async () => {
     await logout();
   };
 
   return (
-    <header className="sticky top-0 left-0 right-0 h-[4rem] bg-black backdrop-blur-xs z-9999">
-      <div className="flex items-center justify-between h-full page-px mx-auto max-w-[1920px]">
-        <div className="flex items-center">
+    <header className="fixed top-0 left-0 right-0 h-(--header-height) bg-black backdrop-blur-xs z-9999">
+      <div className="flex items-center justify-between h-full px-2 mx-auto max-w-[1920px]">
+        <div className="flex items-center gap-4">
+          {sidebar && (
+            <div className="w-12 h-14 flex items-center justify-center shrink-0">
+              <button
+                onClick={sidebar.toggleSidebar}
+                className="p-2 rounded-full hover:bg-hover text-text-secondary hover:text-text-primary transition-colors"
+                aria-label="Toggle menu"
+              >
+                <Menu className="w-6 h-6" />
+              </button>
+            </div>
+          )}
+
           <Logo size="md" linkTo="/" />
 
           <span className="text-xs font-medium text-red-primary px-2 py-0.5 bg-red-primary/10 rounded ml-1">
@@ -32,7 +46,7 @@ export function StudioHeader() {
           </span>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 px-2">
           {user?.channel && (
             <Link
               href={getCreatorRoute(user.channel.handler)}

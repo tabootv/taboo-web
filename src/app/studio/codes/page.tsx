@@ -1,8 +1,8 @@
 'use client';
 
+import type { RedeemCodeLimits } from '@/api/client/redeem-codes.client';
 import { useCreateRedeemCode } from '@/api/mutations/redeem-codes.mutations';
 import { useRedeemCodes } from '@/api/queries/redeem-codes.queries';
-import type { RedeemCodeLimits } from '@/api/client/redeem-codes.client';
 import { Button } from '@/components/ui/button';
 import { useFeature } from '@/hooks/use-feature';
 import { AnalyticsEvent } from '@/shared/lib/analytics/events';
@@ -80,13 +80,13 @@ function FilterTabs({
   ];
 
   return (
-    <div className="flex gap-1 border-b border-white/10 mb-4">
+    <div className="flex gap-1 border-b border-white/10 px-8">
       {tabs.map((tab) => (
         <button
           key={tab.id}
           onClick={() => onTabChange(tab.id)}
           className={cn(
-            'px-4 py-3 text-sm font-medium transition-colors relative',
+            'px-8 py-3 text-sm font-medium transition-colors relative',
             activeTab === tab.id
               ? 'text-text-primary'
               : 'text-text-tertiary hover:text-text-secondary'
@@ -182,7 +182,7 @@ function CodesPageInner() {
   if (!studioCodesEnabled) return null;
 
   return (
-    <div>
+    <>
       {/* Create Modal */}
       <CreateCodeModal
         isOpen={showCreateModal}
@@ -192,9 +192,8 @@ function CodesPageInner() {
       />
 
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 px-8">
         <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-text-tertiary">Creator studio</p>
           <h1 className="text-3xl font-bold text-text-primary">Redeem Codes</h1>
         </div>
         <Button
@@ -234,7 +233,7 @@ function CodesPageInner() {
         }
         onPageChange={setPage}
       />
-    </div>
+    </>
   );
 }
 

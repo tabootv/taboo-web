@@ -57,12 +57,12 @@ function TableHeader() {
   return (
     <thead>
       <tr className="border-b border-white/10 text-left text-xs uppercase tracking-wider text-text-tertiary">
-        <th className="py-3 px-4 font-medium">Code</th>
-        <th className="py-3 px-4 font-medium w-[140px]">Actions</th>
-        <th className="py-3 px-4 font-medium w-[100px]">Value</th>
-        <th className="py-3 px-4 font-medium w-[120px]">Uses</th>
-        <th className="py-3 px-4 font-medium w-[100px]">Status</th>
-        <th className="py-3 px-4 font-medium w-[120px]">Created</th>
+        <th className="py-3 px-8 font-medium">Code</th>
+        <th className="py-3 px-8 font-medium w-[140px]">Actions</th>
+        <th className="py-3 px-8 font-medium w-[100px]">Value</th>
+        <th className="py-3 px-8 font-medium w-[120px]">Uses</th>
+        <th className="py-3 px-8 font-medium w-[100px]">Status</th>
+        <th className="py-3 px-8 font-medium w-[120px]">Created</th>
       </tr>
     </thead>
   );
@@ -71,25 +71,25 @@ function TableHeader() {
 function SkeletonRow() {
   return (
     <tr className="border-b border-white/5">
-      <td className="py-3 px-4">
+      <td className="py-3 px-8">
         <div className="flex items-center gap-2">
           <div className="h-5 bg-white/5 rounded animate-pulse w-32" />
           <div className="h-5 bg-white/5 rounded-full animate-pulse w-14" />
         </div>
       </td>
-      <td className="py-3 px-4 w-[140px]">
+      <td className="py-3 px-8 w-[140px]">
         <div className="h-8 bg-white/5 rounded animate-pulse w-24" />
       </td>
-      <td className="py-3 px-4 w-[100px]">
+      <td className="py-3 px-8 w-[100px]">
         <div className="h-4 bg-white/5 rounded animate-pulse w-10" />
       </td>
-      <td className="py-3 px-4 w-[120px]">
+      <td className="py-3 px-8 w-[120px]">
         <div className="h-4 bg-white/5 rounded animate-pulse w-16" />
       </td>
-      <td className="py-3 px-4 w-[100px]">
+      <td className="py-3 px-8 w-[100px]">
         <div className="h-5 bg-white/5 rounded-full animate-pulse w-16" />
       </td>
-      <td className="py-3 px-4 w-[120px]">
+      <td className="py-3 px-8 w-[120px]">
         <div className="h-4 bg-white/5 rounded animate-pulse w-20" />
       </td>
     </tr>
@@ -113,7 +113,7 @@ function Pagination({
   const endItem = Math.min(currentPage * perPage, total);
 
   return (
-    <div className="flex items-center justify-between px-4 py-3 border-t border-white/10">
+    <div className="flex items-center justify-between px-8 py-3 border-t border-white/10">
       <p className="text-sm text-text-secondary">
         Showing {startItem}-{endItem} of {total}
       </p>
@@ -177,7 +177,7 @@ function CodeRow({ code }: { code: RedeemCode }) {
 
   return (
     <tr className="border-b border-white/5 group hover:bg-white/[0.02] transition-colors">
-      <td className="py-3 px-4">
+      <td className="py-3 px-8">
         <div className="flex items-center gap-2">
           <code className="text-sm font-mono text-text-primary">{code.code}</code>
           <span
@@ -197,7 +197,7 @@ function CodeRow({ code }: { code: RedeemCode }) {
           </p>
         )}
       </td>
-      <td className="py-3 px-4 w-[140px]">
+      <td className="py-3 px-8 w-[140px]">
         <div className="flex items-center gap-0.5">
           <Tooltip>
             <TooltipTrigger asChild>
@@ -230,10 +230,10 @@ function CodeRow({ code }: { code: RedeemCode }) {
           {/* TODO: re-enable Edit, Deactivate, Delete actions */}
         </div>
       </td>
-      <td className="py-3 px-4 w-[100px]">
+      <td className="py-3 px-8 w-[100px]">
         <span className="text-sm text-text-secondary">{code.value}d</span>
       </td>
-      <td className="py-3 px-4 w-[120px]">
+      <td className="py-3 px-8 w-[120px]">
         <div className="space-y-1">
           <span className="text-sm text-text-secondary">{usesDisplay}</span>
           {code.max_uses !== null && (
@@ -246,12 +246,12 @@ function CodeRow({ code }: { code: RedeemCode }) {
           )}
         </div>
       </td>
-      <td className="py-3 px-4 w-[100px]">
+      <td className="py-3 px-8 w-[100px]">
         <span className={cn('text-xs px-2 py-1 rounded-full font-medium', config.className)}>
           {config.label}
         </span>
       </td>
-      <td className="py-3 px-4 w-[120px]">
+      <td className="py-3 px-8 w-[120px]">
         <span className="text-sm text-text-secondary">
           {new Date(code.created_at).toLocaleDateString('en-US', {
             month: 'short',
@@ -267,7 +267,7 @@ function CodeRow({ code }: { code: RedeemCode }) {
 export function CodesTable({ items, isLoading, pagination, onPageChange }: CodesTableProps) {
   if (isLoading) {
     return (
-      <div className="bg-surface border border-white/10 rounded-xl overflow-hidden">
+      <div className="border border-x-0 border-t-0 border-white/10 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[700px]">
             <TableHeader />
@@ -284,14 +284,14 @@ export function CodesTable({ items, isLoading, pagination, onPageChange }: Codes
 
   if (items.length === 0) {
     return (
-      <div className="bg-surface border border-white/10 rounded-xl overflow-hidden">
+      <div className="border border-x-0 border-t-0 border-white/10 overflow-hidden">
         <EmptyState />
       </div>
     );
   }
 
   return (
-    <div className="bg-surface border border-white/10 rounded-xl overflow-hidden">
+    <div className="border border-x-0 border-t-0 border-white/10 overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full min-w-[700px]">
           <TableHeader />
