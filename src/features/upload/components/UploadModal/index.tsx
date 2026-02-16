@@ -474,8 +474,8 @@ export function UploadModal({
       has_tags: tags.length > 0,
       is_adult_content: isAdultContent,
     });
-    await publish(derivedVisibility);
-  }, [publish, publishMode, isShort, tags.length, isAdultContent]);
+    await publish(derivedVisibility, thumbnailFile);
+  }, [publish, publishMode, isShort, tags.length, isAdultContent, thumbnailFile]);
 
   // Save handler for edit mode - uses UUID-based endpoints with schedule API
   const handleSaveChanges = useCallback(async () => {

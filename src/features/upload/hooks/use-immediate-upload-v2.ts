@@ -58,7 +58,7 @@ export interface UseImmediateUploadReturn {
   storeUpload: ActiveUpload | undefined; // Current upload from store
   startUpload: (file: File) => Promise<void>;
   updateMetadata: (data: Partial<ImmediateUploadFormData>) => void;
-  publish: (visibility: 'live' | 'draft') => Promise<void>;
+  publish: (visibility: 'live' | 'draft', thumbnailFile?: File | null) => Promise<void>;
   pauseUpload: () => void;
   resumeUpload: () => void;
   retryUpload: () => void; // Manual retry after circuit breaker trips
@@ -510,7 +510,7 @@ export function useImmediateUploadV2({
    * 2. POST /schedule for publish action (if publishing)
    */
   const publish = useCallback(
-    async (visibility: 'live' | 'draft') => {
+    async (visibility: 'live' | 'draft', thumbnailFile?: File | null) => {
       const uploadId = currentUploadIdRef.current;
       if (!uploadId) {
         onError?.('No upload to publish');
@@ -552,6 +552,8 @@ export function useImmediateUploadV2({
         if (upload.metadata.tagSlugs?.length) {
           metadataPayload.tags = upload.metadata.tagSlugs;
         }
+
+        if (thumbnailFile) metadataPayload.thumbnail = thumbnailFile;
 
         // Update metadata first
         await studioClient.updateVideo(upload.videoUuid, metadataPayload);
