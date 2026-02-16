@@ -66,24 +66,24 @@ export function TopHeader({
   }, [isUserMenuOpen]);
 
   return (
-    <header className="sticky top-0 left-0 right-0 h-[4rem] bg-black backdrop-blur-xs z-9999">
+    <header className="fixed top-0 left-0 right-0 h-(--header-height) bg-black backdrop-blur-xs z-9999">
       <div
         className={cn(
-          'flex items-center justify-between h-full page-px mx-auto max-w-[1920px]',
+          'flex items-center justify-between h-full px-2 mx-auto max-w-[1920px]',
           classNameDivContainer
         )}
       >
         {/* Left: Hamburger + Logo */}
-        <div className="flex items-center">
+        <div className="flex items-center gap-4">
           {/* Hamburger - Aligned with sidebar icons (3rem = 48px width) */}
           {sidebar && (
-            <div className="w-12 h-14 flex items-center justify-center shrink-0 md:hidden">
+            <div className="w-12 h-14 flex items-center justify-center shrink-0">
               <button
                 onClick={sidebar.toggleSidebar}
                 className="p-2 rounded-full hover:bg-hover text-text-secondary hover:text-text-primary transition-colors"
                 aria-label="Toggle menu"
               >
-                <Menu className="w-5 h-5" />
+                <Menu className="w-6 h-6" />
               </button>
             </div>
           )}
@@ -99,7 +99,7 @@ export function TopHeader({
         )}
 
         {/* Right: Notifications, User */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 px-2">
           {isAuthenticated ? (
             <>
               {/* Notifications */}

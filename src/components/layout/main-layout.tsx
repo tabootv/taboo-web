@@ -4,7 +4,7 @@ import { ComposeFAB } from '@/components/fab/compose-fab';
 import { NavigationProgress } from '@/components/layout/navigation/NavigationProgress';
 import { ScrollRestoration } from '@/components/layout/navigation/ScrollRestoration';
 import { AppSidebar } from '@/components/sidebar';
-import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { SidebarBackdrop, SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { cn } from '@/shared/utils/formatting';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
@@ -21,6 +21,12 @@ export function MainLayout({ children, showFooter = true }: MainLayoutProps) {
   const pathname = usePathname();
   const router = useRouter();
   const PIP_RETURN_URL_KEY = 'tabootv_pip_return_url';
+
+  // Route-based drawer mode: overlay sidebar on video/shorts pages
+  const isDrawerRoute =
+    pathname.startsWith('/videos/') ||
+    (pathname.startsWith('/series/') && pathname.includes('/play/')) ||
+    pathname.startsWith('/shorts');
 
   // Global PiP return handler: poll to detect when PiP closes
   // Note: leavepictureinpicture event doesn't bubble to document, so we poll instead
@@ -59,33 +65,36 @@ export function MainLayout({ children, showFooter = true }: MainLayoutProps) {
   }, [pathname, router, PIP_RETURN_URL_KEY]);
 
   return (
-    <SidebarProvider defaultOpen={false}>
-      <AppSidebar />
-      <SidebarInset className="bg-background min-h-screen">
-        <ScrollRestoration />
-        <NavigationProgress />
-        <TopHeader />
+    <SidebarProvider defaultOpen={false} drawerMode={isDrawerRoute}>
+      <TopHeader />
+      <div className="flex pt-[var(--header-height)]">
+        <AppSidebar />
+        <SidebarBackdrop />
+        <SidebarInset className="bg-background min-h-[calc(100svh-var(--header-height))]">
+          <ScrollRestoration />
+          <NavigationProgress />
 
-        <div className={cn('overflow-x-hidden flex-1')}>
-          {children}
-          {showFooter && <Footer />}
-        </div>
+          <div className={cn('overflow-x-hidden flex-1')}>
+            {children}
+            {showFooter && <Footer />}
+          </div>
 
-        <ComposeFAB />
-        <Toaster
-          position="bottom-center"
-          richColors
-          className="z-99999999"
-          toastOptions={{
-            style: {
-              background: '#ab0013',
-              border: '1px solid rgba(255,255,255,0.2)',
-              color: '#ffffff',
-              zIndex: 99999,
-            },
-          }}
-        />
-      </SidebarInset>
+          <ComposeFAB />
+          <Toaster
+            position="bottom-center"
+            richColors
+            className="z-99999999"
+            toastOptions={{
+              style: {
+                background: '#ab0013',
+                border: '1px solid rgba(255,255,255,0.2)',
+                color: '#ffffff',
+                zIndex: 99999,
+              },
+            }}
+          />
+        </SidebarInset>
+      </div>
     </SidebarProvider>
   );
 }

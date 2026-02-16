@@ -24,7 +24,7 @@ const SIDEBAR_COOKIE_NAME = 'sidebar_state';
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 const SIDEBAR_WIDTH = '15rem';
 const SIDEBAR_WIDTH_MOBILE = '15rem';
-const SIDEBAR_WIDTH_ICON = '3rem';
+const SIDEBAR_WIDTH_ICON = '4rem';
 const SIDEBAR_KEYBOARD_SHORTCUT = 'b';
 
 type SidebarContextProps = {
@@ -35,6 +35,8 @@ type SidebarContextProps = {
   setOpenMobile: (open: boolean) => void;
   isMobile: boolean;
   toggleSidebar: () => void;
+  drawerMode: boolean;
+  setDrawerMode: (drawer: boolean) => void;
 };
 
 const SidebarContext = React.createContext<SidebarContextProps | null>(null);
@@ -56,6 +58,7 @@ function SidebarProvider({
   defaultOpen = true,
   open: openProp,
   onOpenChange: setOpenProp,
+  drawerMode: drawerModeProp = false,
   className,
   style,
   children,
@@ -64,9 +67,16 @@ function SidebarProvider({
   defaultOpen?: boolean;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  drawerMode?: boolean;
 }) {
   const isMobile = useIsMobile();
   const [openMobile, setOpenMobile] = React.useState(false);
+  const [drawerMode, setDrawerMode] = React.useState(drawerModeProp);
+
+  // Sync drawerMode prop changes
+  React.useEffect(() => {
+    setDrawerMode(drawerModeProp);
+  }, [drawerModeProp]);
 
   // This is the internal state of the sidebar.
   // We use openProp and setOpenProp for control from outside the component.
@@ -118,8 +128,10 @@ function SidebarProvider({
       openMobile,
       setOpenMobile,
       toggleSidebar,
+      drawerMode,
+      setDrawerMode,
     }),
-    [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar]
+    [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar, drawerMode]
   );
 
   return (
@@ -127,15 +139,17 @@ function SidebarProvider({
       <TooltipProvider delayDuration={0}>
         <div
           data-slot="sidebar-wrapper"
+          data-drawer-mode={drawerMode ? 'true' : undefined}
           style={
             {
               '--sidebar-width': SIDEBAR_WIDTH,
               '--sidebar-width-icon': SIDEBAR_WIDTH_ICON,
+              '--header-height': '4rem',
               ...style,
             } as React.CSSProperties
           }
           className={cn(
-            'group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-h-svh w-full',
+            'group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex flex-col min-h-svh w-full',
             className
           )}
           {...props}
@@ -159,7 +173,7 @@ function Sidebar({
   variant?: 'sidebar' | 'floating' | 'inset';
   collapsible?: 'offcanvas' | 'icon' | 'none';
 }) {
-  const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
+  const { isMobile, state, openMobile, setOpenMobile, drawerMode } = useSidebar();
 
   if (collapsible === 'none') {
     return (
@@ -209,6 +223,7 @@ function Sidebar({
       data-variant={variant}
       data-side={side}
       data-slot="sidebar"
+      data-drawer-mode={drawerMode ? 'true' : undefined}
     >
       {/* This is what handles the sidebar gap on desktop */}
       <div
@@ -217,22 +232,31 @@ function Sidebar({
           'relative w-(--sidebar-width) bg-transparent transition-[width] duration-200 ease-linear',
           'group-data-[collapsible=offcanvas]:w-0',
           'group-data-[side=right]:rotate-180',
-          variant === 'floating' || variant === 'inset'
-            ? 'group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4)))]'
-            : 'group-data-[collapsible=icon]:w-(--sidebar-width-icon)'
+          // In drawer mode, gap is always 0 (sidebar is fully hidden or overlays content)
+          drawerMode
+            ? 'w-0!'
+            : variant === 'floating' || variant === 'inset'
+              ? 'group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4)))]'
+              : 'group-data-[collapsible=icon]:w-(--sidebar-width-icon)'
         )}
       />
       <div
         data-slot="sidebar-container"
         className={cn(
-          'fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex',
+          'fixed top-[var(--header-height)] z-10 hidden h-[calc(100svh-var(--header-height))] w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex',
           side === 'left'
             ? 'left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]'
             : 'right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]',
           // Adjust the padding for floating and inset variants.
           variant === 'floating' || variant === 'inset'
             ? 'p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4))+2px)]'
-            : 'group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[side=left]:border-r group-data-[side=right]:border-l',
+            : cn(
+                !drawerMode && 'group-data-[collapsible=icon]:w-(--sidebar-width-icon)',
+                'group-data-[side=left]:border-r group-data-[side=right]:border-l'
+              ),
+          // In drawer mode: slide off-screen when collapsed, overlay at z-40 when expanded
+          drawerMode && state === 'collapsed' && 'left-[calc(var(--sidebar-width)*-1)]!',
+          drawerMode && state === 'expanded' && 'z-40',
           className
         )}
         {...props}
@@ -670,8 +694,26 @@ function SidebarMenuSubButton({
   );
 }
 
+function SidebarBackdrop() {
+  const { drawerMode, open, setOpen, isMobile } = useSidebar();
+
+  if (isMobile || !drawerMode) return null;
+
+  return (
+    <div
+      data-slot="sidebar-backdrop"
+      className={cn(
+        'fixed inset-0 top-[var(--header-height)] z-30 bg-black/50 transition-opacity duration-200',
+        open ? 'opacity-100' : 'opacity-0 pointer-events-none'
+      )}
+      onClick={() => setOpen(false)}
+    />
+  );
+}
+
 export {
   Sidebar,
+  SidebarBackdrop,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
