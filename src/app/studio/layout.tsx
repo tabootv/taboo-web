@@ -58,15 +58,20 @@ export default function StudioLayout({ children }: { children: React.ReactNode }
   return (
     <TooltipProvider delayDuration={300}>
       <SidebarProvider defaultOpen={false}>
-        <StudioHeader />
-        <div className="flex pt-(--header-height)">
-          <StudioSidebar />
-
-          <SidebarInset className="min-h-[calc(100svh-var(--header-height))] bg-background">
-            <div className={cn('w-full pt-6')}>{children}</div>
-          </SidebarInset>
-        </div>
+        <StudioSidebar />
+        <SidebarInset className="min-h-screen bg-background">
+          <StudioContent>{children}</StudioContent>
+        </SidebarInset>
       </SidebarProvider>
     </TooltipProvider>
+  );
+}
+
+function StudioContent({ children }: { children: React.ReactNode }) {
+  return (
+    <div className={cn('min-h-screen bg-background')}>
+      <StudioHeader />
+      <main className={cn('page-px mx-auto max-w-[1920px] py-14')}>{children}</main>
+    </div>
   );
 }
