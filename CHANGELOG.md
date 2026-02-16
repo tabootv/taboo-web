@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.1](https://github.com/tabootv/taboo-web/compare/tabootv-new-v0.6.0...tabootv-new-v0.6.1) (2026-02-16)
+
+
+### Bug Fixes
+
+* **upload:** send thumbnailFile in upload mode publish flow ([1aca8e4](https://github.com/tabootv/taboo-web/commit/1aca8e4f098d03b4678c34770827c00f976ea6da))
+
 ## [0.6.0](https://github.com/tabootv/taboo-web/compare/tabootv-new-v0.5.0...tabootv-new-v0.6.0) (2026-02-16)
 
 
