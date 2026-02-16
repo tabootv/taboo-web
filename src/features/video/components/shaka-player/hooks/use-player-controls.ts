@@ -17,6 +17,7 @@ interface UsePlayerControlsParams {
   isPlaying: boolean;
   showSettings: boolean;
   onSeek?: ((time: number) => void) | undefined;
+  seekLimited?: boolean | undefined;
 }
 
 interface UsePlayerControlsReturn {
@@ -43,6 +44,7 @@ export function usePlayerControls({
   isPlaying,
   showSettings,
   onSeek,
+  seekLimited,
 }: UsePlayerControlsParams): UsePlayerControlsReturn {
   const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
@@ -92,7 +94,7 @@ export function usePlayerControls({
   const togglePlay = useCallback(() => {
     if (!videoRef.current) return;
     if (videoRef.current.paused) {
-      videoRef.current.play();
+      videoRef.current.play().catch(() => {}); // Suppress AbortError from rapid play/pause
     } else {
       videoRef.current.pause();
     }
@@ -128,6 +130,7 @@ export function usePlayerControls({
 
   const seek = useCallback(
     (seconds: number) => {
+      if (seekLimited) return; // Seeking disabled (corrupted lower qualities)
       if (!videoRef.current) return;
       const newTime = Math.max(0, Math.min(duration, videoRef.current.currentTime + seconds));
       videoRef.current.currentTime = newTime;
@@ -138,17 +141,19 @@ export function usePlayerControls({
       });
       setTimeout(() => setSeekFeedback(null), FEEDBACK_DISPLAY_MS);
     },
-    [videoRef, duration, onSeek]
+    [seekLimited, videoRef, duration, onSeek]
   );
 
   const seekToPercent = useCallback(
     (percent: number) => {
+      if (seekLimited) return; // Seeking disabled (corrupted lower qualities)
       if (!videoRef.current || !duration) return;
+      const video = videoRef.current;
       const newTime = (percent / 100) * duration;
-      videoRef.current.currentTime = newTime;
+      video.currentTime = newTime;
       onSeek?.(newTime);
     },
-    [videoRef, duration, onSeek]
+    [seekLimited, videoRef, duration, onSeek]
   );
 
   const toggleFullscreen = useCallback(async () => {
