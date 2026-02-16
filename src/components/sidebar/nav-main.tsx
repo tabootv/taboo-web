@@ -1,14 +1,15 @@
 'use client';
 
-import type { NavigationItem } from '@/components/layout/constants/navigation-constants';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarMenu,
+  SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { usePathname } from 'next/navigation';
-import { SidebarNavLink } from './sidebar-nav-link';
+import type { NavigationItem } from '@/components/layout/constants/navigation-constants';
 
 interface NavMainProps {
   items: NavigationItem[];
@@ -20,18 +21,17 @@ export function NavMain({ items }: NavMainProps) {
   return (
     <SidebarGroup>
       <SidebarGroupContent>
-        <SidebarMenu className="space-y-0.5 py-3">
+        <SidebarMenu>
           {items.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
             return (
-              <SidebarMenuItem key={item.name} className="flex">
-                <SidebarNavLink
-                  href={item.href}
-                  icon={item.icon}
-                  label={item.name}
-                  isActive={isActive}
-                  tooltip={item.name}
-                />
+              <SidebarMenuItem key={item.name}>
+                <SidebarMenuButton asChild isActive={isActive} tooltip={item.name}>
+                  <Link href={item.href}>
+                    <item.icon className={isActive ? 'text-red-primary' : ''} />
+                    <span>{item.name}</span>
+                  </Link>
+                </SidebarMenuButton>
               </SidebarMenuItem>
             );
           })}

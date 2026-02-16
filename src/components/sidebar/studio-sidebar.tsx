@@ -8,6 +8,7 @@ import {
   SidebarGroupContent,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
   SidebarSeparator,
@@ -25,8 +26,8 @@ import {
   Ticket,
   Wallet,
 } from 'lucide-react';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { SidebarNavLink } from './sidebar-nav-link';
 
 const studioNavigation = [
   { name: 'Dashboard', href: '/studio', icon: LayoutDashboard },
@@ -53,6 +54,7 @@ export function StudioSidebar({ ...props }: React.ComponentProps<typeof Sidebar>
     if (href === '/studio') {
       return pathname === '/studio';
     }
+    // For Content, match content path
     if (href === '/studio/content') {
       return pathname.startsWith('/studio/content');
     }
@@ -84,13 +86,12 @@ export function StudioSidebar({ ...props }: React.ComponentProps<typeof Sidebar>
                   const active = isActive(item.href);
                   return (
                     <SidebarMenuItem key={item.name}>
-                      <SidebarNavLink
-                        href={item.href}
-                        icon={item.icon}
-                        label={item.name}
-                        isActive={active}
-                        tooltip={item.name}
-                      />
+                      <SidebarMenuButton asChild isActive={active} tooltip={item.name}>
+                        <Link href={item.href}>
+                          <item.icon className={active ? 'text-red-primary' : ''} />
+                          <span>{item.name}</span>
+                        </Link>
+                      </SidebarMenuButton>
                     </SidebarMenuItem>
                   );
                 })}
@@ -98,18 +99,18 @@ export function StudioSidebar({ ...props }: React.ComponentProps<typeof Sidebar>
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarSeparator className="bg-surface" />
+        <SidebarSeparator className="mt-auto" />
 
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarNavLink
-                  href="/"
-                  icon={ArrowLeft}
-                  label="Back to Taboo"
-                  tooltip="Back to Taboo"
-                />
+                <SidebarMenuButton asChild tooltip="Back to Taboo">
+                  <Link href="/">
+                    <ArrowLeft />
+                    <span>Back to Taboo</span>
+                  </Link>
+                </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
@@ -117,7 +118,7 @@ export function StudioSidebar({ ...props }: React.ComponentProps<typeof Sidebar>
       </SidebarContent>
 
       <SidebarFooter>
-        <div className="px-2 py-1 text-[9px] text-sidebar-foreground/50">
+        <div className="px-2 py-1 text-[10px] text-sidebar-foreground/50">
           &copy; {new Date().getFullYear()} TabooTV
         </div>
       </SidebarFooter>
