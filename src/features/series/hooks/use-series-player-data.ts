@@ -19,6 +19,8 @@ export function useSeriesPlayerData(seriesId: string, videoUuid: string) {
       ? episodes[currentEpisodeIndex + 1]
       : null;
 
+  const previousEpisode = currentEpisodeIndex > 0 ? episodes[currentEpisodeIndex - 1] : null;
+
   return {
     isLoading,
     currentVideo,
@@ -27,6 +29,7 @@ export function useSeriesPlayerData(seriesId: string, videoUuid: string) {
     isCourse,
     currentEpisodeIndex,
     nextEpisode,
+    previousEpisode,
     seriesData,
   };
 }

@@ -15,7 +15,7 @@ import {
 
 const noop = () => {};
 import { PlayerControls } from './player-controls';
-import type { CaptionTrack, SeekPreview } from './types';
+import type { CaptionTrack, PlayerNavigationControls, SeekPreview } from './types';
 
 interface ShakaPlayerProps {
   src: string;
@@ -28,10 +28,14 @@ interface ShakaPlayerProps {
   onPause?: (() => void) | undefined;
   onSeek?: ((time: number) => void) | undefined;
   onEnded?: (() => void) | undefined;
+  onSeekFailed?: ((targetTime: number) => void) | undefined;
+  seekLimited?: boolean | undefined;
   className?: string | undefined;
   isBunnyVideo?: boolean | undefined;
   captions?: CaptionTrack[] | undefined;
   initialPosition?: number | undefined;
+  isRecoveryLoad?: boolean | undefined;
+  navigationControls?: PlayerNavigationControls | undefined;
 }
 
 export function ShakaPlayer({
@@ -45,10 +49,14 @@ export function ShakaPlayer({
   onPause,
   onSeek,
   onEnded,
+  onSeekFailed,
+  seekLimited,
   className = '',
   isBunnyVideo = false,
   captions,
   initialPosition,
+  isRecoveryLoad,
+  navigationControls,
 }: ShakaPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const previewVideoRef = useRef<HTMLVideoElement>(null);
@@ -114,10 +122,12 @@ export function ShakaPlayer({
     onPlay,
     onPause,
     onEnded,
+    onSeekFailed,
     onEnterPiP: handleEnterPiP,
     onLeavePiP: handleLeavePiP,
     initialPosition,
     onLoaded: handlePlayerLoaded,
+    isRecoveryLoad,
   });
 
   const {
@@ -142,6 +152,7 @@ export function ShakaPlayer({
     isPlaying,
     showSettings: false,
     onSeek,
+    seekLimited,
   });
 
   const handleSelectCaption = useCallback(
@@ -171,11 +182,15 @@ export function ShakaPlayer({
     handleVolumeChange,
     showSettings: false,
     setShowSettings: noop,
+    onNext: navigationControls?.hasNext ? navigationControls.onNext : undefined,
+    onPrevious: navigationControls?.hasPrevious ? navigationControls.onPrevious : undefined,
   });
 
   const handleProgressHover = useCallback(
     (e: React.MouseEvent<HTMLInputElement>) => {
+      if (seekLimited) return; // No preview on disabled bar
       if (!progressRef.current || !duration) return;
+
       // Lazily init preview player on first seek bar hover
       ensurePreviewPlayer();
       const rect = progressRef.current.getBoundingClientRect();
@@ -187,7 +202,7 @@ export function ShakaPlayer({
         capturePreviewFrame(previewTime);
       }
     },
-    [duration, capturePreviewFrame, isPreviewReady, ensurePreviewPlayer]
+    [seekLimited, duration, capturePreviewFrame, isPreviewReady, ensurePreviewPlayer]
   );
 
   const handleProgressLeave = useCallback(() => {
@@ -339,6 +354,7 @@ export function ShakaPlayer({
 
       {!showThumbnail && (
         <PlayerControls
+          seekLimited={seekLimited}
           isPlaying={isPlaying}
           isFullscreen={isFullscreen}
           isPiP={isPiP}
@@ -375,6 +391,7 @@ export function ShakaPlayer({
           onToggleCaptions={handleToggleCaptions}
           onSelectQuality={handleSelectQuality}
           onChangePlaybackSpeed={handleChangePlaybackSpeed}
+          navigationControls={navigationControls}
         />
       )}
 

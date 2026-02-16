@@ -14,6 +14,8 @@ interface UseKeyboardShortcutsParams {
   handleVolumeChange: (volume: number) => void;
   showSettings: boolean;
   setShowSettings: (show: boolean) => void;
+  onNext?: (() => void) | undefined;
+  onPrevious?: (() => void) | undefined;
 }
 
 export function useKeyboardShortcuts({
@@ -28,6 +30,8 @@ export function useKeyboardShortcuts({
   handleVolumeChange,
   showSettings,
   setShowSettings,
+  onNext,
+  onPrevious,
 }: UseKeyboardShortcutsParams) {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -72,10 +76,20 @@ export function useKeyboardShortcuts({
           e.preventDefault();
           handleVolumeChange(volume - 0.1);
           break;
+        case 'n':
+          if (e.shiftKey && onNext) {
+            e.preventDefault();
+            onNext();
+          }
+          break;
         case 'p':
           if (e.shiftKey) {
             e.preventDefault();
-            togglePiP();
+            if (onPrevious) {
+              onPrevious();
+            } else {
+              togglePiP();
+            }
           }
           break;
         case '0':
@@ -121,5 +135,7 @@ export function useKeyboardShortcuts({
     handleVolumeChange,
     showSettings,
     setShowSettings,
+    onNext,
+    onPrevious,
   ]);
 }

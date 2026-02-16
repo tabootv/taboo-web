@@ -15,7 +15,8 @@ export function useSeriesPlayerHandlers(
   nextEpisode: Video | null,
   autoplayEnabled: boolean,
   seriesTitle?: string,
-  hasLiked?: boolean
+  hasLiked?: boolean,
+  previousEpisode?: Video | null
 ) {
   const router = useRouter();
   const toggleLike = useToggleLike();
@@ -73,6 +74,12 @@ export function useSeriesPlayerHandlers(
     }
   }, [nextEpisode, seriesId, seriesTitle, router]);
 
+  const playPreviousVideo = useCallback(() => {
+    if (previousEpisode) {
+      router.push(getSeriesPlayRoute(seriesId, seriesTitle, previousEpisode.uuid));
+    }
+  }, [previousEpisode, seriesId, seriesTitle, router]);
+
   const handleToggleAutoplay = useCallback(() => {
     toggleAutoplay.mutate();
   }, [toggleAutoplay]);
@@ -97,6 +104,7 @@ export function useSeriesPlayerHandlers(
   return {
     handleVideoEnded,
     playNextVideo,
+    playPreviousVideo,
     handleToggleAutoplay,
     handleLike,
     handleDislike,
