@@ -7,9 +7,7 @@ import {
   SidebarMenu,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { cn } from '@/shared/utils/formatting';
 import { usePathname } from 'next/navigation';
-import { useSidebar } from '../ui/sidebar';
 import { SidebarNavLink } from './sidebar-nav-link';
 
 interface NavMainProps {
@@ -18,21 +16,21 @@ interface NavMainProps {
 
 export function NavMain({ items }: NavMainProps) {
   const pathname = usePathname();
-  const { open } = useSidebar();
 
   return (
     <SidebarGroup>
       <SidebarGroupContent>
-        <SidebarMenu className={cn(!open ? 'space-y-6' : 'space-y-0.5')}>
+        <SidebarMenu className="space-y-0.5 py-3">
           {items.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
             return (
-              <SidebarMenuItem key={item.name} className="flex items-center justify-center">
+              <SidebarMenuItem key={item.name} className="flex">
                 <SidebarNavLink
                   href={item.href}
                   icon={item.icon}
                   label={item.name}
                   isActive={isActive}
+                  tooltip={item.name}
                 />
               </SidebarMenuItem>
             );

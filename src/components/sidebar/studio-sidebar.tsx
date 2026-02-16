@@ -6,15 +6,15 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuItem,
   SidebarRail,
   SidebarSeparator,
-  useSidebar,
+  SidebarTrigger,
 } from '@/components/ui/sidebar';
 import type { FeatureName } from '@/shared/lib/config/feature-flags';
 import { isFeatureEnabled } from '@/shared/lib/config/feature-flags';
-import { cn } from '@/shared/utils/formatting';
 import {
   ArrowLeft,
   BarChart3,
@@ -48,7 +48,6 @@ const featureFlagMap: Partial<Record<string, FeatureName>> = {
 
 export function StudioSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
-  const { open } = useSidebar();
 
   const isActive = (href: string) => {
     if (href === '/studio') {
@@ -62,10 +61,20 @@ export function StudioSidebar({ ...props }: React.ComponentProps<typeof Sidebar>
 
   return (
     <Sidebar collapsible="icon" {...props}>
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <div className="flex items-center gap-2 py-2">
+              <SidebarTrigger className="size-8" />
+            </div>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu className={cn(!open ? 'space-y-6' : 'space-y-0.5')}>
+            <SidebarMenu>
               {studioNavigation
                 .filter((item) => {
                   const flag = featureFlagMap[item.href];
@@ -74,12 +83,13 @@ export function StudioSidebar({ ...props }: React.ComponentProps<typeof Sidebar>
                 .map((item) => {
                   const active = isActive(item.href);
                   return (
-                    <SidebarMenuItem key={item.name} className="flex items-center justify-center">
+                    <SidebarMenuItem key={item.name}>
                       <SidebarNavLink
                         href={item.href}
                         icon={item.icon}
                         label={item.name}
                         isActive={active}
+                        tooltip={item.name}
                       />
                     </SidebarMenuItem>
                   );
@@ -92,9 +102,14 @@ export function StudioSidebar({ ...props }: React.ComponentProps<typeof Sidebar>
 
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu className={cn(!open ? 'space-y-6' : 'space-y-0.5')}>
-              <SidebarMenuItem className="flex items-center justify-center">
-                <SidebarNavLink href="/" icon={ArrowLeft} label="Back to Taboo" />
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarNavLink
+                  href="/"
+                  icon={ArrowLeft}
+                  label="Back to Taboo"
+                  tooltip="Back to Taboo"
+                />
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
@@ -102,7 +117,7 @@ export function StudioSidebar({ ...props }: React.ComponentProps<typeof Sidebar>
       </SidebarContent>
 
       <SidebarFooter>
-        <div className={cn('px-2 py-1 text-[12px] text-sidebar-foreground/50', !open && 'hidden')}>
+        <div className="px-2 py-1 text-[9px] text-sidebar-foreground/50">
           &copy; {new Date().getFullYear()} TabooTV
         </div>
       </SidebarFooter>

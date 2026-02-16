@@ -29,14 +29,14 @@ export function SidebarNavLink({
       href={href}
       data-active={isActive}
       className={cn(
-        'w-full flex items-center gap-6 px-3 py-2.5 rounded-lg transition-all text-text-secondary hover:bg-[#1a1a1a]',
-        '[&>svg]:size-6 [&>svg]:shrink-0 [&>span]:truncate',
+        'w-full flex items-center gap-6 px-3 py-2.5 rounded-lg transition-all text-white hover:bg-[#1a1a1a]',
+        '[&>svg]:size-4 [&>svg]:shrink-0 [&>span]:truncate',
         'group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:[&>span]:hidden',
         isActive && 'bg-[#0d0d0d] font-medium',
         className
       )}
     >
-      <Icon className={cn(isActive ? 'text-red-primary' : '')} />
+      <Icon className={isActive ? 'text-red-primary' : ''} />
       <span>{label}</span>
     </Link>
   );
