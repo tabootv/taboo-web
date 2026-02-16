@@ -119,7 +119,9 @@
       "WebFetch(domain:whop.com)",
       "Bash(node:*)",
       "Bash(/Users/igaosoza/workspace/www/tabootv/taboo-web/src/app/\\\\\\(platform\\\\\\)/videos/[id]/not-found.tsx << 'ENDOFFILE'\nimport { Button } from '@/components/ui/button';\nimport { Home, PlayCircle } from 'lucide-react';\nimport Link from 'next/link';\n\nexport default function VideoNotFound\\(\\) {\n  return \\(\n    <div className=\"min-h-[60vh] flex flex-col items-center justify-center px-4 py-12\">\n      <div className=\"w-full max-w-md bg-surface border border-border rounded-xl shadow-medium p-6 sm:p-8\">\n        <div className=\"flex justify-center mb-5\">\n          <div className=\"w-12 h-12 rounded-full bg-red-muted flex items-center justify-center\">\n            <PlayCircle className=\"w-6 h-6 text-red-primary\" />\n          </div>\n        </div>\n\n        <h1 className=\"text-xl font-semibold text-text-primary text-center mb-2\">\n          Video not found\n        </h1>\n        <p className=\"text-sm text-text-secondary text-center mb-6\">\n          This video doesn&apos;t exist or may have been removed.\n        </p>\n\n        <div className=\"flex gap-3\">\n          <Button variant=\"destructive\" className=\"flex-1 gap-2\" asChild>\n            <Link href=\"/\">\n              <Home className=\"w-4 h-4\" />\n              Back to Home\n            </Link>\n          </Button>\n          <Button variant=\"outline\" className=\"flex-1 gap-2\" asChild>\n            <Link href=\"/explore\">\n              <PlayCircle className=\"w-4 h-4\" />\n              Explore Videos\n            </Link>\n          </Button>\n        </div>\n      </div>\n    </div>\n  \\);\n}\nENDOFFILE)",
-      "Bash(git status:*)"
+      "Bash(git status:*)",
+      "mcp__next-devtools__nextjs_docs",
+      "WebFetch(domain:shaka-player-demo.appspot.com)"
     ],
     "deny": [],
     "ask": []
@@ -133,6 +135,14 @@
           {
             "type": "command",
             "command": "echo 'Remember: For any code-related work, apply these skills in order: (1) /vercel-react-best-practices (2) /web-performance-optimization (3) /sonar-scan after completing code changes.'"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'DEBUGGING PROTOCOL: When the user reports a bug, unexpected behavior, or test failure: (1) ALWAYS apply /systematic-debugging FIRST - no fixes without root cause investigation. (2) Add console.log/debug statements to trace the issue - keep ALL debug logs active during the session. (3) Do NOT remove any debug logs until the user explicitly confirms the bug is solved and says it is OK to clean up.'"
           }
         ]
       }

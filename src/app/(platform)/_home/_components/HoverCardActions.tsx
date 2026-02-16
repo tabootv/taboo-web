@@ -23,7 +23,13 @@ export function HoverCardActions({ video, showDate }: HoverCardActionsProps) {
       <div className="flex items-center gap-2 mt-1">
         {video.channel?.dp ? (
           <div className="relative w-4 h-4 rounded-full overflow-hidden">
-            <Image src={video.channel.dp} alt="" fill className="object-cover" />
+            <Image
+              src={video.channel.dp}
+              alt={`${video.channel.name} profile`}
+              fill
+              sizes="16px"
+              className="object-cover"
+            />
           </div>
         ) : (
           <div className="w-4 h-4 rounded-full bg-gradient-to-br from-red-primary/80 to-red-dark flex items-center justify-center">

@@ -1,9 +1,8 @@
 import { ErrorBoundary } from '@/shared/components/error-boundary';
+import { LazyUploadScope } from '@/shared/components/providers/lazy-upload-scope';
 import { PostHogProvider } from '@/shared/components/providers/posthog-provider';
 import { QueryProvider } from '@/shared/components/providers/query-provider';
-import { UploadProvider } from '@/shared/components/providers/upload-provider';
 import { WebVitalsReporter } from '@/shared/components/providers/web-vitals-reporter';
-import { GlobalUploadIndicator } from '@/shared/components/upload/GlobalUploadIndicator';
 import type { Metadata, Viewport } from 'next';
 import { Figtree } from 'next/font/google';
 import './globals.css';
@@ -11,7 +10,8 @@ import './globals.css';
 const figtree = Figtree({
   variable: '--font-figtree',
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
 });
 
 const SITE_TITLE = 'TabooTV - Premium Video Streaming Platform';
@@ -86,10 +86,7 @@ export default function RootLayout({
           <WebVitalsReporter />
           <ErrorBoundary>
             <QueryProvider>
-              <UploadProvider>
-                {children}
-                <GlobalUploadIndicator />
-              </UploadProvider>
+              <LazyUploadScope>{children}</LazyUploadScope>
             </QueryProvider>
           </ErrorBoundary>
         </PostHogProvider>

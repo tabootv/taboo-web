@@ -9,7 +9,7 @@ import {
   useSeriesPlayerHandlers,
 } from '@/features/series';
 import { extractIdFromSlug, isValidId } from '@/shared/utils/formatting';
-import { use, useEffect, useRef } from 'react';
+import { use, useEffect, useRef, useState } from 'react';
 
 export default function SeriesPlayerPage({
   params,
@@ -26,13 +26,20 @@ export default function SeriesPlayerPage({
   }, [videoUuid]);
 
   const playerData = useSeriesPlayerData(isValid ? seriesId : '', videoUuid);
+  const [autoplayEnabled, setAutoplayEnabled] = useState(playerData.autoplayEnabled);
+
+  useEffect(() => {
+    setAutoplayEnabled(playerData.autoplayEnabled);
+  }, [playerData.autoplayEnabled]);
+
   const handlers = useSeriesPlayerHandlers(
     seriesId,
     videoUuid,
     playerData.nextEpisode ?? null,
-    playerData.autoplayEnabled,
+    autoplayEnabled,
     playerData.seriesData?.title,
-    playerData.currentVideo?.has_liked ?? false
+    playerData.currentVideo?.has_liked ?? false,
+    playerData.previousEpisode ?? null
   );
 
   useEpisodeScroll(episodesRef, playerData.currentEpisodeIndex);
@@ -58,9 +65,11 @@ export default function SeriesPlayerPage({
       episodes={playerData.episodes}
       currentEpisodeIndex={playerData.currentEpisodeIndex}
       nextEpisode={playerData.nextEpisode || null}
+      previousEpisode={playerData.previousEpisode || null}
       isCourse={playerData.isCourse}
-      autoplayEnabled={playerData.autoplayEnabled}
+      autoplayEnabled={autoplayEnabled}
       handlers={handlers}
+      onAutoplayChange={setAutoplayEnabled}
       episodesRef={episodesRef}
     />
   );

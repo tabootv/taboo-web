@@ -15,9 +15,11 @@ interface SeriesPlayerContentProps {
   episodes: Video[];
   currentEpisodeIndex: number;
   nextEpisode: Video | null;
+  previousEpisode: Video | null;
   isCourse: boolean;
   autoplayEnabled: boolean;
   handlers: ReturnType<typeof useSeriesPlayerHandlers>;
+  onAutoplayChange?: (enabled: boolean) => void;
   episodesRef: React.RefObject<HTMLDivElement | null>;
 }
 
@@ -28,9 +30,11 @@ export function SeriesPlayerContent({
   episodes,
   currentEpisodeIndex,
   nextEpisode,
+  previousEpisode,
   isCourse,
   autoplayEnabled,
   handlers,
+  onAutoplayChange,
   episodesRef,
 }: SeriesPlayerContentProps) {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
@@ -54,9 +58,11 @@ export function SeriesPlayerContent({
             episodes={episodes}
             currentEpisodeIndex={currentEpisodeIndex}
             nextEpisode={nextEpisode}
+            previousEpisode={previousEpisode}
             isCourse={isCourse}
             autoplayEnabled={autoplayEnabled}
             handlers={handlers}
+            {...(onAutoplayChange && { onAutoplayChange })}
             isDescriptionExpanded={isDescriptionExpanded}
             setIsDescriptionExpanded={setIsDescriptionExpanded}
             shouldTruncateDescription={!!shouldTruncateDescription}

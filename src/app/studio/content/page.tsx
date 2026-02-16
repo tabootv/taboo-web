@@ -418,7 +418,7 @@ function ContentPageInner() {
   }, []);
 
   return (
-    <div>
+    <>
       {/* Upload Modal */}
       <UploadModal
         isOpen={isUploadModalOpen || !!resumeUploadId}
@@ -438,11 +438,9 @@ function ContentPageInner() {
         />
       )}
 
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-text-tertiary">Creator studio</p>
-          <h1 className="text-3xl font-bold text-text-primary">Channel content</h1>
-        </div>
+      <div className="flex items-center justify-between mb-6 px-9">
+        <h1 className="text-2xl! font-bold text-text-primary">Channel content</h1>
+
         <Button onClick={handleUpload} className="bg-red-primary hover:bg-red-primary/90">
           <Upload className="w-4 h-4 mr-2" />
           Upload
@@ -503,7 +501,7 @@ function ContentPageInner() {
           />
         )}
       </div>
-    </div>
+    </>
   );
 }
 

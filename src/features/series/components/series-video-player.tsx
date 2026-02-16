@@ -1,6 +1,7 @@
 'use client';
 
 import { VideoPlayer } from '@/features/video/components/video-player';
+import type { PlayerNavigationControls } from '@/features/video/components/shaka-player/types';
 import type { Video } from '@/types';
 import { useSearchParams } from 'next/navigation';
 import { UpNextOverlay } from './up-next-overlay';
@@ -14,6 +15,7 @@ interface SeriesVideoPlayerProps {
   countdown: number;
   onCancelUpNext: () => void;
   onPlayNow: () => void;
+  navigationControls?: PlayerNavigationControls | undefined;
 }
 
 export function SeriesVideoPlayer({
@@ -25,6 +27,7 @@ export function SeriesVideoPlayer({
   countdown,
   onCancelUpNext,
   onPlayNow,
+  navigationControls,
 }: SeriesVideoPlayerProps) {
   const searchParams = useSearchParams();
   const forceAutoplay = searchParams.get('autoplay') === 'true';
@@ -51,6 +54,7 @@ export function SeriesVideoPlayer({
         channelName={currentVideo.channel?.name}
         contentType="series_episode"
         videoDuration={currentVideo.duration}
+        navigationControls={navigationControls}
       />
       {showUpNext && nextVideo && (
         <UpNextOverlay

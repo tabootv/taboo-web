@@ -59,3 +59,5 @@ sonar-summary*.md
 deploy.sh
 
 .superdesign
+
+loggers

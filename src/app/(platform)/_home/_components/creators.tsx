@@ -90,6 +90,7 @@ export function CreatorsSection({ initialCreators }: CreatorsSectionProps) {
 
         <button
           onClick={() => scroll('left')}
+          aria-label="Scroll left"
           className={`absolute left-2 top-1/2 -translate-y-1/2 z-20 p-2 md:p-2.5 bg-black/80 rounded-full border border-white/20 opacity-0 group-hover/section:opacity-100 transition-all hover:bg-black hover:border-white/40 ${
             showLeftGradient ? '' : 'pointer-events-none opacity-0!'
           }`}
@@ -98,6 +99,7 @@ export function CreatorsSection({ initialCreators }: CreatorsSectionProps) {
         </button>
         <button
           onClick={() => scroll('right')}
+          aria-label="Scroll right"
           className={`absolute right-2 top-1/2 -translate-y-1/2 z-20 p-2 md:p-2.5 bg-black/80 rounded-full border border-white/20 opacity-0 group-hover/section:opacity-100 transition-all hover:bg-black hover:border-white/40 ${
             showRightGradient ? '' : 'pointer-events-none opacity-0!'
           }`}
@@ -134,6 +136,7 @@ export function CreatorsSection({ initialCreators }: CreatorsSectionProps) {
                         src={displayImage}
                         alt={displayName}
                         fill
+                        sizes="90px"
                         className="object-cover group-hover:scale-110 transition-transform duration-300"
                       />
                     ) : (

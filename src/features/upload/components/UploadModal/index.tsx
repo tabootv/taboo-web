@@ -84,9 +84,8 @@ export function UploadModal({
   const [tagsError, setTagsError] = useState<string | null>(null);
   const [pendingTagNames, setPendingTagNames] = useState<string[]>([]);
 
-  // Thumbnail state - file stored for future upload integration (when backend endpoint is available)
-
-  const [, setThumbnailFile] = useState<File | null>(null);
+  // Thumbnail state
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [thumbnailPreviewUrl, setThumbnailPreviewUrl] = useState<string | null>(null);
   const [thumbnailSource, setThumbnailSource] = useState<'custom' | 'auto'>('auto');
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
@@ -139,8 +138,11 @@ export function UploadModal({
     trackRender(`modal-render-phase:${state.uploadPhase}`);
   }, [trackRender, state.uploadPhase]);
 
-  // Derive currentStep from store-backed state (persisted across modal close/reopen)
-  const currentStep = state.modalStep ?? 'details';
+  // Edit mode: local step state (edit mode doesn't have an upload entry, so store-backed modalStep won't work)
+  const [editStep, setEditStep] = useState<ModalStep>('details');
+
+  // Derive currentStep: edit mode uses local state; upload mode uses store-backed state
+  const currentStep = mode === 'edit' ? editStep : (state.modalStep ?? 'details');
 
   // Compute dynamic steps based on content type
   // In edit mode, use editVideo.isShort; otherwise use detected type
@@ -150,6 +152,18 @@ export function UploadModal({
   // Edit mode: whether we're actively saving
   const [isSaving, setIsSaving] = useState(false);
 
+  // Mode-aware step setter: edit mode uses local state, upload mode uses store
+  const changeStep = useCallback(
+    (step: ModalStep) => {
+      if (mode === 'edit') {
+        setEditStep(step);
+      } else {
+        setModalStep(step);
+      }
+    },
+    [mode, setModalStep]
+  );
+
   useEffect(() => {
     setMounted(true);
     return () => setMounted(false);
@@ -158,6 +172,9 @@ export function UploadModal({
   // Initialize form fields when in edit mode
   useEffect(() => {
     if (!isOpen || mode !== 'edit' || !editVideo) return;
+
+    // Reset step to first when entering edit mode
+    setEditStep('details');
 
     // Basic fields
     setTitle(editVideo.title);
@@ -371,7 +388,7 @@ export function UploadModal({
 
     // Reset form state
     hasHydratedRef.current = null;
-    setModalStep('details');
+    changeStep('details');
     setTitle('');
     setDescription('');
     setVisibility('draft');
@@ -399,7 +416,7 @@ export function UploadModal({
     onClose,
     thumbnailPreviewUrl,
     videoPreviewUrl,
-    setModalStep,
+    changeStep,
     updateMetadata,
     title,
     description,
@@ -457,8 +474,8 @@ export function UploadModal({
       has_tags: tags.length > 0,
       is_adult_content: isAdultContent,
     });
-    await publish(derivedVisibility);
-  }, [publish, publishMode, isShort, tags.length, isAdultContent]);
+    await publish(derivedVisibility, thumbnailFile);
+  }, [publish, publishMode, isShort, tags.length, isAdultContent, thumbnailFile]);
 
   // Save handler for edit mode - uses UUID-based endpoints with schedule API
   const handleSaveChanges = useCallback(async () => {
@@ -477,6 +494,8 @@ export function UploadModal({
 
       const slugs = convertTagsToSlugs(tags, availableTags);
       if (slugs.length > 0) metadataPayload.tags = slugs;
+
+      if (thumbnailFile) metadataPayload.thumbnail = thumbnailFile;
 
       await studioClient.updateVideo(editVideo.uuid, metadataPayload);
 
@@ -501,6 +520,7 @@ export function UploadModal({
     isAdultContent,
     location,
     countryId,
+    thumbnailFile,
     publishMode,
     scheduledAt,
     onSuccess,
@@ -509,13 +529,13 @@ export function UploadModal({
 
   const handleNext = useCallback(() => {
     const nextStepId = getNextStepId(steps, currentStep);
-    if (nextStepId) setModalStep(nextStepId);
-  }, [currentStep, steps, setModalStep]);
+    if (nextStepId) changeStep(nextStepId);
+  }, [currentStep, steps, changeStep]);
 
   const handleBack = useCallback(() => {
     const prevStepId = getPrevStepId(steps, currentStep);
-    if (prevStepId) setModalStep(prevStepId);
-  }, [currentStep, steps, setModalStep]);
+    if (prevStepId) changeStep(prevStepId);
+  }, [currentStep, steps, changeStep]);
 
   const toggleTag = useCallback((tagId: number) => {
     setTags((prev) =>
@@ -525,7 +545,7 @@ export function UploadModal({
 
   // Shared reset function for circuit breaker and close handlers
   const resetFormState = useCallback(() => {
-    setModalStep('details');
+    changeStep('details');
     setTitle('');
     setDescription('');
     setVisibility('draft');
@@ -542,7 +562,7 @@ export function UploadModal({
     if (videoPreviewUrl?.startsWith('blob:')) URL.revokeObjectURL(videoPreviewUrl);
     setVideoPreviewUrl(null);
     uploadStartedRef.current = false;
-  }, [thumbnailPreviewUrl, videoPreviewUrl, setModalStep]);
+  }, [thumbnailPreviewUrl, videoPreviewUrl, changeStep]);
 
   const isLastStep = currentStep === 'publishing';
   const canProceed = canProceedToNext(mode, currentStep, title, tags, isShort);
@@ -600,7 +620,7 @@ export function UploadModal({
 
         {/* Step Indicator - Show when: edit mode OR file has been selected */}
         {(mode === 'edit' || state.uploadPhase !== 'idle') && (
-          <StepIndicator steps={steps} currentStep={currentStep} onStepClick={setModalStep} />
+          <StepIndicator steps={steps} currentStep={currentStep} onStepClick={changeStep} />
         )}
 
         {/* Content */}
@@ -653,6 +673,8 @@ export function UploadModal({
                   <LocationPicker
                     value={location}
                     countryId={countryId}
+                    initialLatitude={editVideo?.latitude}
+                    initialLongitude={editVideo?.longitude}
                     onLocationChange={(newLocation, details) => {
                       setLocation(newLocation);
                       if (details.countryId !== undefined) {

@@ -164,7 +164,7 @@ export function ContentTableRow({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <td className="py-3 px-4">
+        <td className="py-3 px-8">
           <div className="flex items-start gap-3">
             <div className="relative shrink-0">
               <div
@@ -235,7 +235,7 @@ export function ContentTableRow({
           </div>
         </td>
 
-        <td className="py-3 px-4 w-[140px]">
+        <td className="py-3 px-8 w-[140px]">
           <VisibilityDropdown
             visibility={item.visibility}
             scheduledAt={item.scheduled_at}
@@ -248,21 +248,21 @@ export function ContentTableRow({
           />
         </td>
 
-        <td className="py-3 px-4 w-[120px]">
+        <td className="py-3 px-8 w-[120px]">
           <RestrictionsBadge restrictions={item.restrictions} />
         </td>
 
-        <td className="py-3 px-4 w-[120px]">
+        <td className="py-3 px-8 w-[120px]">
           <span className="text-sm text-text-secondary">
             {formatDate(item.published_at || item.created_at)}
           </span>
         </td>
 
-        <td className="py-3 px-4 w-[80px] text-right">
+        <td className="py-3 px-8 w-[80px] text-right">
           <span className="text-sm text-text-secondary">{formatNumber(item.comments_count)}</span>
         </td>
 
-        <td className="py-3 px-4 w-[80px] text-right">
+        <td className="py-3 px-8 w-[80px] text-right">
           <span className="text-sm text-text-secondary">{formatNumber(item.likes_count)}</span>
         </td>
       </tr>

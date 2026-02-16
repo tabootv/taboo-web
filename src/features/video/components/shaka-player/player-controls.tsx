@@ -9,6 +9,8 @@ import {
   PictureInPicture2,
   Play,
   Settings,
+  SkipBack,
+  SkipForward,
   Volume1,
   Volume2,
   VolumeX,
@@ -18,12 +20,14 @@ import { PlayerSettings } from './player-settings';
 import { SeekPreview } from './seek-preview';
 import type {
   CaptionTrack,
+  PlayerNavigationControls,
   QualityTrack,
   SeekPreview as SeekPreviewType,
   SettingsPanel,
 } from './types';
 
 interface PlayerControlsProps {
+  seekLimited?: boolean | undefined;
   isPlaying: boolean;
   isFullscreen: boolean;
   isPiP: boolean;
@@ -65,9 +69,11 @@ interface PlayerControlsProps {
   onToggleCaptions: () => void;
   onSelectQuality: (quality: QualityTrack | null) => void;
   onChangePlaybackSpeed: (speed: number) => void;
+  navigationControls?: PlayerNavigationControls | undefined;
 }
 
 export function PlayerControls({
+  seekLimited,
   isPlaying,
   isFullscreen,
   isPiP,
@@ -104,6 +110,7 @@ export function PlayerControls({
   onToggleCaptions,
   onSelectQuality,
   onChangePlaybackSpeed,
+  navigationControls,
 }: PlayerControlsProps) {
   const [showSettings, setShowSettings] = useState(false);
   const [settingsPanel, setSettingsPanel] = useState<SettingsPanel>('main');
@@ -135,15 +142,22 @@ export function PlayerControls({
       )}
 
       <div className="relative z-10 px-4 pb-2 space-y-2">
-        <div ref={progressRef} className="group/progress relative h-1">
+        <div
+          ref={progressRef}
+          className={cn('group/progress relative h-1', seekLimited && 'opacity-40')}
+        >
           <input
             type="range"
             min="0"
             max="100"
             step="0.1"
             value={progress}
+            disabled={!!seekLimited}
             aria-label="Video progress"
-            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+            className={cn(
+              'absolute inset-0 w-full h-full opacity-0 z-10',
+              seekLimited ? '' : 'cursor-pointer'
+            )}
             onChange={(e) => {
               const percent = Number.parseFloat(e.target.value);
               seekToPercent(percent);
@@ -175,15 +189,17 @@ export function PlayerControls({
             />
           </div>
 
-          <div
-            className={cn(
-              'absolute top-1/2 -translate-y-1/2 -translate-x-1/2 pointer-events-none',
-              'w-2.5 h-2.5 bg-red-primary rounded-full shadow-sm',
-              'opacity-0 group-hover/progress:opacity-100 transition-all duration-150',
-              isSeeking && 'opacity-100'
-            )}
-            style={{ left: `${progress}%` }}
-          />
+          {!seekLimited && (
+            <div
+              className={cn(
+                'absolute top-1/2 -translate-y-1/2 -translate-x-1/2 pointer-events-none',
+                'w-2.5 h-2.5 bg-red-primary rounded-full shadow-sm',
+                'opacity-0 group-hover/progress:opacity-100 transition-all duration-150',
+                isSeeking && 'opacity-100'
+              )}
+              style={{ left: `${progress}%` }}
+            />
+          )}
 
           {seekPreview && (
             <div
@@ -205,6 +221,38 @@ export function PlayerControls({
                 <Play className="w-6 h-6" fill="white" />
               )}
             </button>
+
+            {navigationControls?.onPrevious !== undefined && (
+              <button
+                onClick={navigationControls.onPrevious}
+                disabled={!navigationControls.hasPrevious}
+                className={cn(
+                  'p-2 rounded-lg transition-colors',
+                  navigationControls.hasPrevious
+                    ? 'text-white hover:bg-white/10'
+                    : 'text-white/30 cursor-default'
+                )}
+                title="Previous (Shift+P)"
+              >
+                <SkipBack className="w-5 h-5" fill="currentColor" />
+              </button>
+            )}
+
+            {navigationControls?.onNext !== undefined && (
+              <button
+                onClick={navigationControls.onNext}
+                disabled={!navigationControls.hasNext}
+                className={cn(
+                  'p-2 rounded-lg transition-colors',
+                  navigationControls.hasNext
+                    ? 'text-white hover:bg-white/10'
+                    : 'text-white/30 cursor-default'
+                )}
+                title="Next (Shift+N)"
+              >
+                <SkipForward className="w-5 h-5" fill="currentColor" />
+              </button>
+            )}
 
             <div className="flex items-center group/vol">
               <button
@@ -243,6 +291,31 @@ export function PlayerControls({
           </div>
 
           <div className="flex items-center gap-1">
+            {navigationControls?.onAutoplayChange !== undefined && (
+              <button
+                onClick={() =>
+                  navigationControls.onAutoplayChange!(!navigationControls.autoplayEnabled)
+                }
+                className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg hover:bg-white/10 transition-colors"
+                title="Autoplay"
+              >
+                <span className="text-white/70 text-xs hidden sm:inline">Autoplay</span>
+                <div
+                  className={cn(
+                    'relative w-8 h-4 rounded-full transition-colors duration-200',
+                    navigationControls.autoplayEnabled ? 'bg-red-primary' : 'bg-white/25'
+                  )}
+                >
+                  <div
+                    className={cn(
+                      'absolute top-0.5 w-3 h-3 rounded-full bg-white transition-transform duration-200',
+                      navigationControls.autoplayEnabled ? 'translate-x-4' : 'translate-x-0.5'
+                    )}
+                  />
+                </div>
+              </button>
+            )}
+
             {availableCaptions.length > 0 && (
               <button
                 onClick={onToggleCaptions}

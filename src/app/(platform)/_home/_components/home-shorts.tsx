@@ -81,6 +81,7 @@ export function HomeShortsSection({ initialShorts }: HomeShortsSectionProps) {
         {/* Navigation Arrows */}
         <button
           onClick={() => scroll('left')}
+          aria-label="Scroll left"
           className={`absolute left-2 top-1/2 -translate-y-1/2 z-20 p-2 md:p-2.5 bg-black/80 rounded-full border border-white/20 opacity-0 group-hover/section:opacity-100 transition-all hover:bg-black hover:border-white/40 ${
             showLeftGradient ? '' : 'pointer-events-none !opacity-0'
           }`}
@@ -89,6 +90,7 @@ export function HomeShortsSection({ initialShorts }: HomeShortsSectionProps) {
         </button>
         <button
           onClick={() => scroll('right')}
+          aria-label="Scroll right"
           className={`absolute right-2 top-1/2 -translate-y-1/2 z-20 p-2 md:p-2.5 bg-black/80 rounded-full border border-white/20 opacity-0 group-hover/section:opacity-100 transition-all hover:bg-black hover:border-white/40 ${
             showRightGradient ? '' : 'pointer-events-none !opacity-0'
           }`}

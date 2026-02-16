@@ -183,6 +183,7 @@ function main() {
   const args = process.argv.slice(2);
   const outputJson = args.includes('--json');
   const saveBaseline = args.includes('--save-baseline');
+  const saveCurrent = args.includes('--save-current');
 
   console.log('📦 Analyzing bundle sizes...\n');
 
@@ -234,22 +235,30 @@ function main() {
     });
   }
 
-  if (saveBaseline) {
+  if (saveBaseline || saveCurrent) {
     if (!fs.existsSync(METRICS_DIR)) {
       fs.mkdirSync(METRICS_DIR, { recursive: true });
     }
 
-    const baselinePath = path.join(METRICS_DIR, 'baseline.json');
-    let baseline = {};
+    if (saveBaseline) {
+      const baselinePath = path.join(METRICS_DIR, 'baseline.json');
+      let baseline = {};
 
-    if (fs.existsSync(baselinePath)) {
-      baseline = JSON.parse(fs.readFileSync(baselinePath, 'utf-8'));
+      if (fs.existsSync(baselinePath)) {
+        baseline = JSON.parse(fs.readFileSync(baselinePath, 'utf-8'));
+      }
+
+      baseline.bundle = results;
+
+      fs.writeFileSync(baselinePath, JSON.stringify(baseline, null, 2));
+      console.log(`\n✅ Bundle baseline saved to ${baselinePath}`);
     }
 
-    baseline.bundle = results;
-
-    fs.writeFileSync(baselinePath, JSON.stringify(baseline, null, 2));
-    console.log(`\n✅ Bundle baseline saved to ${baselinePath}`);
+    if (saveCurrent) {
+      const currentPath = path.join(METRICS_DIR, 'current.json');
+      fs.writeFileSync(currentPath, JSON.stringify({ bundle: results }, null, 2));
+      console.log(`\n✅ Current bundle metrics saved to ${currentPath}`);
+    }
   }
 
   return results;

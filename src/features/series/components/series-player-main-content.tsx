@@ -1,8 +1,10 @@
 'use client';
 
 import { useSeriesDetail } from '@/api/queries/series.queries';
+import type { PlayerNavigationControls } from '@/features/video/components/shaka-player/types';
 import { VideoComments } from '@/features/video/components/video-comments';
 import type { Video } from '@/types';
+import { useMemo } from 'react';
 import { useSeriesPlayerHandlers } from '../hooks/use-series-player-handlers';
 import { SeriesChannelAndActions } from './series-channel-and-actions';
 import { SeriesDescription } from './series-description';
@@ -15,9 +17,11 @@ interface SeriesPlayerMainContentProps {
   episodes: Video[];
   currentEpisodeIndex: number;
   nextEpisode: Video | null;
+  previousEpisode: Video | null;
   isCourse: boolean;
   autoplayEnabled: boolean;
   handlers: ReturnType<typeof useSeriesPlayerHandlers>;
+  onAutoplayChange?: (enabled: boolean) => void;
   isDescriptionExpanded: boolean;
   setIsDescriptionExpanded: (expanded: boolean) => void;
   shouldTruncateDescription: boolean;
@@ -29,13 +33,34 @@ export function SeriesPlayerMainContent({
   episodes,
   currentEpisodeIndex,
   nextEpisode,
+  previousEpisode,
   isCourse,
   autoplayEnabled,
   handlers,
+  onAutoplayChange,
   isDescriptionExpanded,
   setIsDescriptionExpanded,
   shouldTruncateDescription,
 }: SeriesPlayerMainContentProps) {
+  const navigationControls: PlayerNavigationControls = useMemo(
+    () => ({
+      onPrevious: handlers.playPreviousVideo,
+      onNext: handlers.playNextVideo,
+      hasPrevious: !!previousEpisode,
+      hasNext: !!nextEpisode,
+      autoplayEnabled,
+      onAutoplayChange,
+    }),
+    [
+      handlers.playPreviousVideo,
+      handlers.playNextVideo,
+      previousEpisode,
+      nextEpisode,
+      autoplayEnabled,
+      onAutoplayChange,
+    ]
+  );
+
   return (
     <div className="flex-1 min-w-0">
       <SeriesVideoPlayer
@@ -47,9 +72,10 @@ export function SeriesPlayerMainContent({
         countdown={handlers.upNextCountdown}
         onCancelUpNext={handlers.handleCancelUpNext}
         onPlayNow={handlers.handlePlayNow}
+        navigationControls={navigationControls}
       />
 
-      <h1 className="text-lg md:text-xl font-semibold text-white mt-4 leading-snug">
+      <h1 className="text-[1.5rem]! font-semibold text-white mt-4 leading-snug">
         {isCourse ? seriesData.title : currentVideo.title}
       </h1>
 
@@ -59,12 +85,7 @@ export function SeriesPlayerMainContent({
         isCourse={isCourse}
       />
 
-      <SeriesChannelAndActions
-        currentVideo={currentVideo}
-        autoplayEnabled={autoplayEnabled}
-        nextEpisode={nextEpisode}
-        handlers={handlers}
-      />
+      <SeriesChannelAndActions currentVideo={currentVideo} />
 
       {currentVideo.description && (
         <SeriesDescription

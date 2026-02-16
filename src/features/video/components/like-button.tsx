@@ -15,7 +15,6 @@ interface LikeButtonProps {
 
 export function LikeButton({ video, onUpdate }: LikeButtonProps) {
   const [isLiked, setIsLiked] = useState(video.has_liked || false);
-  const [likesCount, setLikesCount] = useState(video.likes_count || 0);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleToggleLike = useCallback(async () => {
@@ -26,7 +25,6 @@ export function LikeButton({ video, onUpdate }: LikeButtonProps) {
       await videoClient.toggleLike(video.uuid);
 
       const newIsLiked = !isLiked;
-      const newLikesCount = newIsLiked ? likesCount + 1 : likesCount - 1;
 
       posthog.capture(newIsLiked ? AnalyticsEvent.VIDEO_LIKED : AnalyticsEvent.VIDEO_LIKE_REMOVED, {
         video_id: video.uuid,
@@ -35,13 +33,11 @@ export function LikeButton({ video, onUpdate }: LikeButtonProps) {
       });
 
       setIsLiked(newIsLiked);
-      setLikesCount(newLikesCount);
 
       if (onUpdate) {
         onUpdate({
           ...video,
           has_liked: newIsLiked,
-          likes_count: newLikesCount,
         });
       }
     } catch {
@@ -49,7 +45,7 @@ export function LikeButton({ video, onUpdate }: LikeButtonProps) {
     } finally {
       setIsLoading(false);
     }
-  }, [video, isLiked, likesCount, isLoading, onUpdate]);
+  }, [video, isLiked, isLoading, onUpdate]);
 
   return (
     <button
@@ -62,7 +58,7 @@ export function LikeButton({ video, onUpdate }: LikeButtonProps) {
       <Heart
         className={`w-5 h-5 transition-transform ${isLiked ? 'fill-current scale-110' : ''}`}
       />
-      <span className="text-sm font-medium">{likesCount}</span>
+      <span className="text-sm font-medium">Like</span>
     </button>
   );
 }

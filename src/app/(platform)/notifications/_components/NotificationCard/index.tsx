@@ -43,7 +43,13 @@ export function NotificationCard({ notification, onMarkRead, onDelete }: Notific
       <div className="shrink-0">
         {image ? (
           <div className="relative w-12 h-12 rounded-lg overflow-hidden">
-            <Image src={image} alt="" fill className="object-cover" />
+            <Image
+              src={image}
+              alt="Notification thumbnail"
+              fill
+              sizes="48px"
+              className="object-cover"
+            />
           </div>
         ) : (
           <div className="w-12 h-12 rounded-lg bg-surface-hover flex items-center justify-center">

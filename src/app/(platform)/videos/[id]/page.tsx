@@ -1,4 +1,5 @@
 import { videoClient } from '@/api/client/video.client';
+import { ErrorBoundary } from '@/shared/components/error-boundary';
 import { decodeCookieToken, TOKEN_KEY } from '@/shared/lib/auth/cookie-config';
 import type { Video } from '@/types';
 import type { Metadata } from 'next';
@@ -125,7 +126,7 @@ export default async function VideoPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-[1800px] mx-auto page-px py-4 lg:py-6 relative z-10">
+      <div className="max-w-[1800px] mx-auto px-6 py-4 lg:py-6 relative z-10">
         <ShakaPreloader />
         {cdnOrigin ? <link rel="preconnect" href={cdnOrigin} /> : null}
         {hlsUrl ? <link rel="preload" href={hlsUrl} as="fetch" crossOrigin="anonymous" /> : null}
@@ -134,18 +135,22 @@ export default async function VideoPage({ params }: PageProps) {
           <div className="flex-1 min-w-0 flex flex-col gap-6">
             <VideoPlayerSection initialPlayData={playData} videoId={id} />
 
-            <Suspense fallback={<CommentsSkeleton />}>
-              <VideoCommentsSection video={commentsVideo} />
-            </Suspense>
+            <ErrorBoundary fallback={<CommentsSkeleton />}>
+              <Suspense fallback={<CommentsSkeleton />}>
+                <VideoCommentsSection video={commentsVideo} />
+              </Suspense>
+            </ErrorBoundary>
           </div>
 
-          <Suspense fallback={<RelatedVideosSkeleton />}>
-            <RelatedVideosSidebar
-              initialVideos={leanRelatedVideos}
-              currentVideo={playData.video}
-              videoTags={playData.video.tags}
-            />
-          </Suspense>
+          <ErrorBoundary fallback={<RelatedVideosSkeleton />}>
+            <Suspense fallback={<RelatedVideosSkeleton />}>
+              <RelatedVideosSidebar
+                initialVideos={leanRelatedVideos}
+                currentVideo={playData.video}
+                videoTags={playData.video.tags}
+              />
+            </Suspense>
+          </ErrorBoundary>
         </div>
       </div>
     </div>

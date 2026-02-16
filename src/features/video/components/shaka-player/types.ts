@@ -23,6 +23,15 @@ export type ShakaPlayerInstance = any;
 // NOSONAR - Type alias improves code readability
 export type ShakaModule = any;
 
+export interface PlayerNavigationControls {
+  onPrevious?: (() => void) | undefined;
+  onNext?: (() => void) | undefined;
+  hasPrevious?: boolean | undefined;
+  hasNext?: boolean | undefined;
+  autoplayEnabled?: boolean | undefined;
+  onAutoplayChange?: ((enabled: boolean) => void) | undefined;
+}
+
 export interface SeekFeedback {
   direction: 'forward' | 'backward';
   seconds: number;

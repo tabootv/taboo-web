@@ -286,7 +286,7 @@ export const studioClient = {
           }
         }
       });
-      const data = await apiClient.patch<UpdateVideoResponse>(
+      const data = await apiClient.post<UpdateVideoResponse>(
         `/studio/videos/${videoUuid}`,
         formData,
         { headers: { 'Content-Type': 'multipart/form-data' } }
@@ -294,7 +294,7 @@ export const studioClient = {
       return data;
     }
 
-    const data = await apiClient.patch<UpdateVideoResponse>(`/studio/videos/${videoUuid}`, payload);
+    const data = await apiClient.post<UpdateVideoResponse>(`/studio/videos/${videoUuid}`, payload);
     return data;
   },
 

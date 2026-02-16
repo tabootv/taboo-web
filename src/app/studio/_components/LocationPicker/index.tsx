@@ -1,11 +1,49 @@
 'use client';
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { MapPin, X, ChevronDown, Loader2, Check } from 'lucide-react';
 import { cn } from '@/shared/utils/formatting';
 import { usePlaceAutocomplete, usePlaceDetails } from '@/api/queries/places.queries';
 import { useQuery } from '@tanstack/react-query';
 import { publicClient } from '@/api/client/public.client';
+
+const MapPreview = dynamic(() => import('./MapPreview'), { ssr: false });
+
+/** Probe common Google Places API response wrappers to find geometry + address_components */
+function extractPlaceData(raw: unknown): {
+  lat: number | undefined;
+  lng: number | undefined;
+  addressComponents: Array<{ long_name: string; short_name: string; types: string[] }> | undefined;
+} {
+  // Backend may return: { result: { geometry, address_components } }
+  // or: { geometry, address_components } (unwrapped)
+  // or: { data: { result: { ... } } }
+  const candidates = [
+    raw,
+    (raw as Record<string, unknown>)?.place,
+    (raw as Record<string, unknown>)?.result,
+    (raw as Record<string, unknown>)?.data,
+    ((raw as Record<string, unknown>)?.data as Record<string, unknown>)?.result,
+  ];
+
+  for (const obj of candidates) {
+    if (obj && typeof obj === 'object' && 'geometry' in obj) {
+      const geo = (obj as Record<string, unknown>).geometry as
+        | { location?: { lat?: number; lng?: number } }
+        | undefined;
+      return {
+        lat: geo?.location?.lat,
+        lng: geo?.location?.lng,
+        addressComponents: (obj as Record<string, unknown>).address_components as
+          | Array<{ long_name: string; short_name: string; types: string[] }>
+          | undefined,
+      };
+    }
+  }
+
+  return { lat: undefined, lng: undefined, addressComponents: undefined };
+}
 
 interface LocationDetails {
   countryId?: number | undefined;
@@ -17,6 +55,8 @@ interface LocationPickerProps {
   value: string;
   countryId: number | null;
   onLocationChange: (location: string, details: LocationDetails) => void;
+  initialLatitude?: number | undefined;
+  initialLongitude?: number | undefined;
 }
 
 // Rate limit guard: max 30 API calls per minute
@@ -31,17 +71,27 @@ export const LocationPicker = memo(function LocationPicker({
   value,
   countryId,
   onLocationChange,
+  initialLatitude,
+  initialLongitude,
 }: LocationPickerProps) {
   const [searchInput, setSearchInput] = useState(value);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
   const [isRateLimited, setIsRateLimited] = useState(false);
+  const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number } | null>(null);
 
   // Rate limiting - track calls count in state to avoid ref access during render
   const apiCallsRef = useRef<number[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Initialize map center from edit mode coordinates
+  useEffect(() => {
+    if (initialLatitude != null && initialLongitude != null && !mapCenter) {
+      setMapCenter({ lat: initialLatitude, lng: initialLongitude });
+    }
+  }, [initialLatitude, initialLongitude]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Fetch countries for dropdown
   const { data: countriesData, isLoading: isLoadingCountries } = useQuery({
@@ -85,35 +135,35 @@ export const LocationPicker = memo(function LocationPicker({
     if (placeDetails && selectedPlaceId) {
       trackApiCall();
 
-      // Extract coordinates and country from place details
-      // The structure depends on the backend's Google Places API response
-      const details = placeDetails as {
-        geometry?: { location?: { lat?: number; lng?: number } };
-        address_components?: Array<{
-          long_name: string;
-          short_name: string;
-          types: string[];
-        }>;
-        formatted_address?: string;
-      };
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[LocationPicker] Raw placeDetails:', JSON.stringify(placeDetails, null, 2));
+      }
 
-      const lat = details.geometry?.location?.lat;
-      const lng = details.geometry?.location?.lng;
+      const { lat, lng, addressComponents } = extractPlaceData(placeDetails);
 
       // Try to find country from address components
       let detectedCountryId: number | undefined;
-      const countryComponent = details.address_components?.find((comp) =>
-        comp.types.includes('country')
-      );
+      const countryComponent = addressComponents?.find((comp) => comp.types.includes('country'));
 
       if (countryComponent && countries.length > 0) {
-        // Match country by ISO code
-        const matchedCountry = countries.find(
-          (c) => c.iso === countryComponent.short_name || c.name === countryComponent.long_name
-        );
+        // Match country by ISO code or name (case-insensitive, partial match)
+        const matchedCountry = countries.find((c) => {
+          const cName = c.name.toLowerCase();
+          const longName = countryComponent.long_name.toLowerCase();
+          return (
+            c.iso === countryComponent.short_name || // 3-letter ISO exact match
+            cName === longName || // exact name (case-insensitive)
+            cName.includes(longName) || // DB name contains Google name
+            longName.includes(cName) // Google name contains DB name
+          );
+        });
         if (matchedCountry) {
           detectedCountryId = matchedCountry.id;
         }
+      }
+
+      if (lat != null && lng != null) {
+        setMapCenter({ lat, lng });
       }
 
       onLocationChange(searchInput, {
@@ -162,6 +212,7 @@ export const LocationPicker = memo(function LocationPicker({
 
   const handleClearLocation = useCallback(() => {
     setSearchInput('');
+    setMapCenter(null);
     onLocationChange('', {});
   }, [onLocationChange]);
 
@@ -175,7 +226,7 @@ export const LocationPicker = memo(function LocationPicker({
           <MapPin className="w-4 h-4" />
           Location
         </label>
-        <div className="relative">
+        <div className="relative z-30">
           <input
             ref={inputRef}
             type="text"
@@ -197,7 +248,7 @@ export const LocationPicker = memo(function LocationPicker({
 
           {/* Autocomplete Dropdown */}
           {isDropdownOpen && (
-            <div className="absolute z-20 top-full mt-1 w-full bg-surface border border-white/10 rounded-lg shadow-lg overflow-hidden">
+            <div className="absolute z-50 top-full mt-1 w-full bg-surface border border-white/10 rounded-lg shadow-lg overflow-hidden">
               {isLoadingAutocomplete || isLoadingDetails ? (
                 <div className="flex items-center justify-center py-4">
                   <Loader2 className="w-5 h-5 text-red-primary animate-spin" />
@@ -227,20 +278,21 @@ export const LocationPicker = memo(function LocationPicker({
         </p>
       </div>
 
-      {/* Map Preview (Static placeholder - actual map would require Google Maps embed) */}
-      {value && (
-        <div className="aspect-video bg-white/5 border border-white/10 rounded-lg overflow-hidden relative">
+      {/* Map Preview */}
+      <div className="aspect-video bg-white/5 border border-white/10 rounded-lg overflow-hidden relative">
+        {mapCenter ? (
+          <MapPreview lat={mapCenter.lat} lng={mapCenter.lng} locationLabel={value} />
+        ) : (
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-center">
               <MapPin className="w-8 h-8 text-red-primary mx-auto mb-2" />
-              <p className="text-sm text-text-secondary">{value}</p>
-              <p className="text-xs text-text-tertiary mt-1">
-                Map preview available after location is set
+              <p className="text-sm text-text-secondary">
+                Search for a location to see map preview
               </p>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Country Dropdown */}
       <div>
@@ -273,7 +325,7 @@ export const LocationPicker = memo(function LocationPicker({
 
           {/* Country Dropdown List */}
           {isCountryDropdownOpen && (
-            <div className="absolute z-20 top-full mt-1 w-full bg-surface border border-white/10 rounded-lg shadow-lg overflow-hidden">
+            <div className="absolute z-50 bottom-full mb-1 w-full bg-surface border border-white/10 rounded-lg shadow-lg overflow-hidden">
               {isLoadingCountries ? (
                 <div className="flex items-center justify-center py-4">
                   <Loader2 className="w-5 h-5 text-red-primary animate-spin" />

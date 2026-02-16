@@ -24,7 +24,8 @@ const PUBLIC_ROUTES = [
 ];
 
 // O(1) regex for skipping static files and internal routes
-const SKIP_REGEX = /^\/(api|_next)\/.+|\.(png|jpe?g|gif|svg|ico|webp|css|js|woff2?|ttf|eot)$/;
+const SKIP_REGEX =
+  /^\/(api|_next)\/.+|\.(png|jpe?g|gif|svg|ico|webp|webmanifest|css|js|woff2?|ttf|eot)$/;
 
 // Auth pages for redirect logic (canonical routes only)
 const AUTH_PAGES = ['/sign-in', '/register', '/redeem'];

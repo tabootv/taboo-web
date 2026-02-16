@@ -3,9 +3,12 @@
 import { useVideoPlay } from '@/api/queries/video.queries';
 import { Button } from '@/components/ui/button';
 import { VerifiedBadge } from '@/components/ui/VerifiedBadge';
-import { VideoPlayerSkeleton } from '@/features/video/components/VideoPlayerSkeleton';
+import { UpNextOverlay } from '@/features/series/components/up-next-overlay';
+import { useUpNextCountdown } from '@/features/series/hooks/use-up-next-countdown';
 import { LikeButton } from '@/features/video/components/like-button';
 import { SaveButton } from '@/features/video/components/save-button';
+import type { PlayerNavigationControls } from '@/features/video/components/shaka-player/types';
+import { VideoPlayerSkeleton } from '@/features/video/components/VideoPlayerSkeleton';
 import { useAuthStore } from '@/shared/stores/auth-store';
 import { formatRelativeTime, getCreatorRoute } from '@/shared/utils/formatting';
 import { normalizeTags } from '@/shared/utils/tags';
@@ -13,8 +16,9 @@ import type { Video } from '@/types';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+// import { VideoAmbientGlow } from './video-ambient-glow';
 
 const VideoPlayer = dynamic(
   () =>
@@ -34,8 +38,13 @@ interface VideoPlayerSectionProps {
 
 export function VideoPlayerSection({ initialPlayData, videoId }: VideoPlayerSectionProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user } = useAuthStore();
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  const [autoplayEnabled, setAutoplayEnabled] = useState(user?.video_autoplay ?? true);
+  const [showUpNext, setShowUpNext] = useState(false);
+
+  const isAutoplayNavigation = searchParams.get('autoplay') === 'true';
 
   const { data: playData } = useVideoPlay(videoId, { initialData: initialPlayData });
 
@@ -52,42 +61,52 @@ export function VideoPlayerSection({ initialPlayData, videoId }: VideoPlayerSect
     tags: normalizeTags(v.tags),
   }));
 
-  const autoplayEnabled = user?.video_autoplay ?? true;
-
-  const videoRef = useRef(video);
-  const relatedVideosRef = useRef(relatedVideos);
-
-  useEffect(() => {
-    videoRef.current = video;
-    relatedVideosRef.current = relatedVideos;
+  const nextVideo = useMemo(() => {
+    if (!video || relatedVideos.length === 0) return null;
+    const currentKey = video.uuid || video.id;
+    const currentIndex = relatedVideos.findIndex((v) => (v.uuid || v.id) === currentKey);
+    if (currentIndex >= 0 && currentIndex < relatedVideos.length - 1) {
+      return relatedVideos[currentIndex + 1] ?? null;
+    }
+    return relatedVideos[0] ?? null;
   }, [video, relatedVideos]);
 
-  const playNextVideo = useCallback(() => {
-    const currentVideo = videoRef.current;
-    const videos = relatedVideosRef.current;
-    if (!currentVideo || videos.length === 0) return;
-    const currentKey = currentVideo.uuid || currentVideo.id;
-    const currentIndex = videos.findIndex((v) => (v.uuid || v.id) === currentKey);
-    if (currentIndex >= 0 && currentIndex < videos.length - 1) {
-      const nextVideo = videos[currentIndex + 1];
-      if (nextVideo) {
-        const nextId = nextVideo.uuid || nextVideo.id;
-        if (nextId) router.push(`/videos/${nextId}`);
-      }
-    } else if (videos.length > 0) {
-      const firstVideo = videos[0];
-      if (firstVideo) {
-        const firstId = firstVideo.uuid || firstVideo.id;
-        if (firstId) router.push(`/videos/${firstId}`);
-      }
+  const navigateToNext = useCallback(() => {
+    if (!nextVideo) return;
+    const nextId = nextVideo.uuid || nextVideo.id;
+    if (nextId) {
+      setShowUpNext(false);
+      router.push(`/videos/${nextId}?autoplay=true`);
     }
-  }, [router]);
+  }, [nextVideo, router]);
+
+  const countdown = useUpNextCountdown({ onComplete: navigateToNext });
+
+  const handleCancelUpNext = useCallback(() => {
+    countdown.cancel();
+    setShowUpNext(false);
+  }, [countdown]);
+
+  // Reset overlay when video changes
+  useEffect(() => {
+    setShowUpNext(false);
+    countdown.cancel();
+  }, [videoId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleVideoEnded = useCallback(() => {
-    if (autoplayEnabled) {
-      playNextVideo();
+    if (autoplayEnabled && nextVideo) {
+      setShowUpNext(true);
+      countdown.start();
     }
-  }, [autoplayEnabled, playNextVideo]);
+  }, [autoplayEnabled, nextVideo, countdown]);
+
+  const navigationControls: PlayerNavigationControls = useMemo(
+    () => ({
+      autoplayEnabled,
+      onAutoplayChange: setAutoplayEnabled,
+    }),
+    [autoplayEnabled]
+  );
 
   if (!video) return null;
 
@@ -95,30 +114,40 @@ export function VideoPlayerSection({ initialPlayData, videoId }: VideoPlayerSect
 
   return (
     <div className="flex-1 min-w-0">
-      <div className="w-full rounded-lg overflow-hidden bg-black">
-        <VideoPlayer
-          {...(video.thumbnail && { thumbnail: video.thumbnail })}
-          hls_url={video.hls_url || video.url_hls || null}
-          url_1440={video.url_1440 || null}
-          url_1080={video.url_1080 || null}
-          url_720={video.url_720 || null}
-          url_480={video.url_480 || null}
-          autoplay={autoplayEnabled}
-          onEnded={handleVideoEnded}
-          isBunnyVideo={video.is_bunny_video}
-          captions={video.captions}
-          userProgress={video.user_progress}
-          videoId={video.uuid}
-          videoTitle={video.title}
-          channelName={video.channel?.name}
-          contentType="video"
-          videoDuration={video.duration}
-        />
+      <div className="relative isolate overflow-x-clip">
+        {/* {video.thumbnail && <VideoAmbientGlow key={video.thumbnail} thumbnailUrl={video.thumbnail} />} */}
+        <div className="relative z-10 w-full rounded-lg overflow-hidden bg-black">
+          <VideoPlayer
+            {...(!isAutoplayNavigation && video.thumbnail && { thumbnail: video.thumbnail })}
+            hls_url={video.hls_url || video.url_hls || null}
+            url_1440={video.url_1440 || null}
+            url_1080={video.url_1080 || null}
+            url_720={video.url_720 || null}
+            url_480={video.url_480 || null}
+            autoplay={autoplayEnabled || isAutoplayNavigation}
+            onEnded={handleVideoEnded}
+            isBunnyVideo={video.is_bunny_video}
+            captions={video.captions}
+            userProgress={video.user_progress}
+            videoId={video.uuid}
+            videoTitle={video.title}
+            channelName={video.channel?.name}
+            contentType="video"
+            videoDuration={video.duration}
+            navigationControls={navigationControls}
+          />
+          {showUpNext && nextVideo && (
+            <UpNextOverlay
+              nextVideo={nextVideo}
+              countdown={countdown.countdown}
+              onCancel={handleCancelUpNext}
+              onPlayNow={countdown.playNow}
+            />
+          )}
+        </div>
       </div>
 
-      <h1 className="font-medium text-white mt-3 leading-snug" style={{ fontSize: '24px' }}>
-        {video.title}
-      </h1>
+      <h1 className="font-medium text-white mt-3 leading-snug text-[1.5rem]!">{video.title}</h1>
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-3 pb-4">
         <div className="flex items-center gap-3">
@@ -180,7 +209,7 @@ export function VideoPlayerSection({ initialPlayData, videoId }: VideoPlayerSect
       </div>
 
       {video.description && (
-        <div className="bg-surface/60 border border-border rounded-xl p-4">
+        <div className="bg-surface/60 rounded-xl p-4">
           <button
             type="button"
             className="w-full text-left"

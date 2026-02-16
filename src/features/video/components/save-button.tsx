@@ -37,21 +37,17 @@ export function SaveButton({ video }: SaveButtonProps) {
 
   if (!bookmarksEnabled) return null;
 
-  const baseClasses =
-    'inline-flex items-center justify-center w-9 h-9 md:w-10 md:h-10 rounded-full border border-white/10 bg-white/5 text-white transition-colors';
-
-  const activeClasses = saved
-    ? 'bg-white text-black border-white/30'
-    : 'hover:bg-white/10 hover:border-white/20';
-
   return (
     <button
       onClick={handleToggle}
       aria-label={saved ? 'Saved' : 'Save'}
       disabled={toggleBookmark.isPending}
-      className={`${baseClasses} ${activeClasses} disabled:opacity-60`}
+      className={`h-9 px-4 flex items-center gap-2 rounded-full transition-all ${
+        saved ? 'bg-primary text-white' : 'bg-surface text-white hover:bg-hover'
+      } disabled:opacity-60`}
     >
-      <Bookmark className={`w-4 h-4 md:w-5 md:h-5 ${saved ? 'fill-current' : ''}`} />
+      <Bookmark className={`w-5 h-5 ${saved ? 'fill-current' : ''}`} />
+      <span className="text-sm font-medium">Save</span>
     </button>
   );
 }

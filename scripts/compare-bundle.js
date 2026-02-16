@@ -2,7 +2,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const { main: measureBundle } = require('./measure-bundle');
 
 /**
  * Bundle Size Comparison Script
@@ -10,6 +9,7 @@ const { main: measureBundle } = require('./measure-bundle');
  */
 
 const METRICS_DIR = path.join(__dirname, '..', 'metrics');
+const CURRENT_PATH = path.join(METRICS_DIR, 'current.json');
 const BASELINE_PATH = path.join(METRICS_DIR, 'baseline.json');
 const REPORT_PATH = path.join(METRICS_DIR, 'bundle-report.md');
 
@@ -32,6 +32,15 @@ function formatDelta(current, baseline) {
   const sign = diff > 0 ? '+' : '';
   const emoji = diff > 0 ? '\u{1F534}' : diff < 0 ? '\u{1F7E2}' : '\u{26AA}';
   return `${emoji} ${sign}${formatBytes(diff)} (${sign}${pct}%)`;
+}
+
+function loadCurrent() {
+  if (!fs.existsSync(CURRENT_PATH)) {
+    console.error(`Current metrics not found at ${CURRENT_PATH}. Run "node scripts/measure-bundle.js --save-current" first.`);
+    process.exit(1);
+  }
+  const data = JSON.parse(fs.readFileSync(CURRENT_PATH, 'utf-8'));
+  return data.bundle;
 }
 
 function loadBaseline() {
@@ -133,7 +142,7 @@ function buildReport(current, baseline) {
 function main() {
   console.log('Comparing bundle sizes...\n');
 
-  const current = measureBundle();
+  const current = loadCurrent();
   const baseline = loadBaseline();
 
   if (!baseline) {

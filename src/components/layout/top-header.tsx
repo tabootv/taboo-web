@@ -1,6 +1,5 @@
 'use client';
 import { useNotifications } from '@/api/queries/notifications.queries';
-import { SmartSearchDropdown } from '@/components/search';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/ui/logo';
@@ -8,8 +7,17 @@ import { useSidebarSafe } from '@/components/ui/sidebar';
 import { useAuthStore } from '@/shared/stores/auth-store';
 import { cn } from '@/shared/utils/formatting';
 import { Bell, LogOut, Menu, Settings } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
+
+const SmartSearchDropdown = dynamic(
+  () =>
+    import('@/components/search/SmartSearchDropdown').then((m) => ({
+      default: m.SmartSearchDropdown,
+    })),
+  { ssr: false }
+);
 
 export function TopHeader({
   classNameDivContainer,
@@ -98,7 +106,9 @@ export function TopHeader({
               <Link
                 href="/notifications"
                 className="relative p-2 rounded-full hover:bg-hover text-text-secondary hover:text-text-primary transition-colors"
+                aria-label="Notifications"
               >
+                <span className="sr-only">Notifications</span>
                 <Bell className="w-5 h-5" />
                 {unreadCount > 0 && (
                   <span className="absolute top-1 right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-semibold text-white bg-red-primary rounded-full">

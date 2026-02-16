@@ -10,6 +10,8 @@ import type { ShakaModule, ShakaPlayerInstance } from '../types';
 
 const VOLUME_STORAGE_KEY = STORAGE_KEYS.VOLUME;
 const PREVIEW_THROTTLE_MS = PLAYER_CONFIG.PREVIEW.THROTTLE_MS;
+const DURATION_CORRUPTION_THRESHOLD = 0.9; // new < 90% of known-good = corruption
+const SEEK_CORRUPTION_WINDOW_MS = 5000; // detect corruption within 5s of a seek
 
 interface UseShakaPlayerParams {
   src: string;
@@ -22,10 +24,12 @@ interface UseShakaPlayerParams {
   onPlay?: (() => void) | undefined;
   onPause?: (() => void) | undefined;
   onEnded?: (() => void) | undefined;
+  onSeekFailed?: ((targetTime: number) => void) | undefined;
   onEnterPiP: () => void;
   onLeavePiP: () => void;
   initialPosition?: number | undefined;
   onLoaded?: ((player: ShakaPlayerInstance) => void) | undefined;
+  isRecoveryLoad?: boolean | undefined;
 }
 
 interface UseShakaPlayerReturn {
@@ -54,10 +58,12 @@ export function useShakaPlayer({
   onPlay,
   onPause,
   onEnded,
+  onSeekFailed,
   onEnterPiP,
   onLeavePiP,
   initialPosition,
   onLoaded,
+  isRecoveryLoad,
 }: UseShakaPlayerParams): UseShakaPlayerReturn {
   const [shakaModule, setShakaModule] = useState<ShakaModule | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -74,6 +80,14 @@ export function useShakaPlayer({
   const previewCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const previewThrottleRef = useRef<number>(0);
   const hasResumedRef = useRef(false);
+  const recoveryTargetRef = useRef<number>(0);
+  const sourceLoadingRef = useRef(false);
+
+  // MP4 stco corruption tracking — refs survive effect re-runs
+  const knownGoodDurationRef = useRef(0);
+  const durationCorruptedRef = useRef(false);
+  const isRecoveryLoadRef = useRef(false);
+  isRecoveryLoadRef.current = isRecoveryLoad ?? false;
 
   // Detect whether the source is an HLS/DASH manifest (requires Shaka) or a plain MP4
   const isManifestSrc =
@@ -115,6 +129,13 @@ export function useShakaPlayer({
 
     // MP4-only fast path: skip Shaka entirely, use native <video>
     if (!isManifestSrc) {
+      // Reset corruption tracking for genuine new-video loads, preserve for recovery fallbacks
+      if (!isRecoveryLoadRef.current) {
+        knownGoodDurationRef.current = 0;
+        durationCorruptedRef.current = false;
+        recoveryTargetRef.current = 0;
+      }
+      sourceLoadingRef.current = true;
       videoRef.current.src = src;
       videoRef.current.load();
       setIsLoading(false);
@@ -125,6 +146,7 @@ export function useShakaPlayer({
       }
 
       if (initialPosition && initialPosition > 0 && !hasResumedRef.current) {
+        recoveryTargetRef.current = initialPosition;
         videoRef.current.currentTime = initialPosition;
         hasResumedRef.current = true;
       }
@@ -243,7 +265,10 @@ export function useShakaPlayer({
     // MP4: use native video element directly
     if (!isManifestSrc) {
       try {
-        previewVideoRef.current.src = src;
+        // Cache-bust the preview URL to prevent the browser from sharing internal
+        // buffer/cache state between the main and preview <video> elements.
+        const previewSrc = src + (src.includes('?') ? '&' : '?') + '_preview=1';
+        previewVideoRef.current.src = previewSrc;
         previewVideoRef.current.load();
         setIsPreviewReady(true);
       } catch (error) {
@@ -359,6 +384,15 @@ export function useShakaPlayer({
     let stallStartTime: number | null = null;
     let recoveryAttempts = 0;
 
+    // Track user-initiated seeks to prevent autoplay navigation when seeking near the end.
+    // When the user drags the progress bar close to the end, the native "ended" event fires
+    // almost immediately. Without this guard, the onEnded callback triggers router.push()
+    // to the next video — making it look like clicking the progress bar redirects away.
+    let userSeekedAt = 0;
+    let lastSeekTarget = 0;
+    let spuriousEndRecovering = false;
+    const SEEK_ENDED_GRACE_MS = 1500;
+
     const clearStallInterval = () => {
       if (stallCheckInterval) {
         clearInterval(stallCheckInterval);
@@ -376,15 +410,62 @@ export function useShakaPlayer({
     };
     const handleTimeUpdate = () => {
       setCurrentTime(video.currentTime);
-      if (video.duration) {
-        onProgress?.(video.currentTime / video.duration);
-        onTimeUpdate?.(video.currentTime, video.duration);
+      // Use knownGoodDuration when the browser's duration is corrupted
+      const safeDuration = durationCorruptedRef.current
+        ? knownGoodDurationRef.current
+        : video.duration;
+      if (safeDuration > 0) {
+        onProgress?.(video.currentTime / safeDuration);
+        onTimeUpdate?.(video.currentTime, safeDuration);
       }
     };
-    const handleDurationChange = () => setDuration(video.duration);
+
+    const handleDurationChange = () => {
+      const newDuration = video.duration;
+
+      // Ignore NaN/Infinity (common during load)
+      if (!Number.isFinite(newDuration) || newDuration <= 0) return;
+
+      const timeSinceSeek = Date.now() - userSeekedAt;
+      const seekedRecently = timeSinceSeek < SEEK_CORRUPTION_WINDOW_MS;
+      const durationDropped =
+        knownGoodDurationRef.current > 0 &&
+        newDuration < knownGoodDurationRef.current * DURATION_CORRUPTION_THRESHOLD;
+
+      if (
+        durationDropped &&
+        seekedRecently &&
+        !durationCorruptedRef.current &&
+        !sourceLoadingRef.current
+      ) {
+        // MP4 stco 32-bit overflow: browser's MP4 parser hit the 4GB boundary
+        // and reported a truncated duration. Block the corrupted value.
+        durationCorruptedRef.current = true;
+
+        if (onSeekFailed) {
+          onSeekFailed(lastSeekTarget);
+        } else {
+          // Emergency fallback: no parent handler, reset player
+          video.currentTime = 0;
+          video.pause();
+          setIsPlaying(false);
+        }
+        return; // Do NOT call setDuration with the corrupted value
+      }
+
+      // Normal case: duration stable or increased (e.g. progressive download)
+      if (newDuration > knownGoodDurationRef.current) {
+        knownGoodDurationRef.current = newDuration;
+      }
+      durationCorruptedRef.current = false;
+      setDuration(newDuration);
+    };
     const handleProgress = () => {
-      if (video.buffered.length > 0) {
-        setBuffered((video.buffered.end(video.buffered.length - 1) / video.duration) * 100);
+      const safeDuration = durationCorruptedRef.current
+        ? knownGoodDurationRef.current
+        : video.duration;
+      if (video.buffered.length > 0 && Number.isFinite(safeDuration) && safeDuration > 0) {
+        setBuffered((video.buffered.end(video.buffered.length - 1) / safeDuration) * 100);
       }
     };
 
@@ -408,9 +489,6 @@ export function useShakaPlayer({
               recoveryAttempts < STALL_RECOVERY_CONFIG.MAX_RECOVERY_ATTEMPTS
             ) {
               // Recovery: small seek to force buffer refresh
-              console.warn(
-                `[ShakaPlayer] Extended stall detected (${stallDuration}ms), attempting recovery ${recoveryAttempts + 1}/${STALL_RECOVERY_CONFIG.MAX_RECOVERY_ATTEMPTS}`
-              );
               video.currentTime = currentPosition + STALL_RECOVERY_CONFIG.RECOVERY_SEEK_OFFSET;
               recoveryAttempts++;
               stallStartTime = Date.now(); // Reset stall timer after recovery attempt
@@ -428,10 +506,42 @@ export function useShakaPlayer({
       clearStallInterval();
     };
 
+    const handleSeeking = () => {
+      // Don't update seek tracking for our own recovery seek
+      if (spuriousEndRecovering) return;
+      userSeekedAt = Date.now();
+      lastSeekTarget = video.currentTime;
+    };
+
     const handleEnded = () => {
+      const timeSinceSeek = Date.now() - userSeekedAt;
+      const isSpuriousEnd = timeSinceSeek < SEEK_ENDED_GRACE_MS;
+
+      if (isSpuriousEnd) {
+        // Browser couldn't seek (broken MP4 index, likely stco 32-bit overflow
+        // on >4GB files) and jumped to end.
+        if (onSeekFailed) {
+          onSeekFailed(lastSeekTarget);
+        }
+        // Always reset to safe state — if parent loads new quality, init effect overrides
+        spuriousEndRecovering = true;
+        video.currentTime = 0;
+        video.pause();
+        setIsPlaying(false);
+        clearStallInterval();
+        return;
+      }
+
+      // Genuine end of video
       setIsPlaying(false);
       clearStallInterval();
       onEnded?.();
+    };
+
+    const handleSeeked = () => {
+      if (spuriousEndRecovering) {
+        spuriousEndRecovering = false;
+      }
     };
 
     const handleStalled = () => {
@@ -447,6 +557,35 @@ export function useShakaPlayer({
       recoveryAttempts = 0;
     };
 
+    const handleError = () => {};
+
+    const handleLoadedMetadata = () => {
+      const dur = video.duration;
+      if (!Number.isFinite(dur) || dur <= 0) return;
+
+      sourceLoadingRef.current = false;
+
+      // Detect stco corruption in fallback: new duration << known-good
+      if (
+        knownGoodDurationRef.current > 0 &&
+        dur < knownGoodDurationRef.current * DURATION_CORRUPTION_THRESHOLD
+      ) {
+        durationCorruptedRef.current = true;
+        video.pause();
+        video.currentTime = 0;
+        hasResumedRef.current = false; // Allow next fallback to seek
+        const target = recoveryTargetRef.current || lastSeekTarget;
+        if (target > 0) onSeekFailed?.(target);
+        return; // Don't update knownGoodDuration with corrupted value
+      }
+
+      // Normal: only increase knownGoodDuration
+      if (dur > knownGoodDurationRef.current) {
+        knownGoodDurationRef.current = dur;
+      }
+      durationCorruptedRef.current = false;
+    };
+
     video.addEventListener('play', handlePlay);
     video.addEventListener('pause', handlePause);
     video.addEventListener('timeupdate', handleTimeUpdate);
@@ -454,9 +593,13 @@ export function useShakaPlayer({
     video.addEventListener('progress', handleProgress);
     video.addEventListener('waiting', handleWaiting);
     video.addEventListener('canplay', handleCanPlay);
+    video.addEventListener('seeking', handleSeeking);
+    video.addEventListener('seeked', handleSeeked);
     video.addEventListener('ended', handleEnded);
     video.addEventListener('stalled', handleStalled);
     video.addEventListener('ratechange', handleRateChange);
+    video.addEventListener('error', handleError);
+    video.addEventListener('loadedmetadata', handleLoadedMetadata);
     video.addEventListener('enterpictureinpicture', onEnterPiP);
     video.addEventListener('leavepictureinpicture', onLeavePiP);
 
@@ -468,14 +611,28 @@ export function useShakaPlayer({
       video.removeEventListener('progress', handleProgress);
       video.removeEventListener('waiting', handleWaiting);
       video.removeEventListener('canplay', handleCanPlay);
+      video.removeEventListener('seeking', handleSeeking);
+      video.removeEventListener('seeked', handleSeeked);
       video.removeEventListener('ended', handleEnded);
       video.removeEventListener('stalled', handleStalled);
       video.removeEventListener('ratechange', handleRateChange);
+      video.removeEventListener('error', handleError);
+      video.removeEventListener('loadedmetadata', handleLoadedMetadata);
       video.removeEventListener('enterpictureinpicture', onEnterPiP);
       video.removeEventListener('leavepictureinpicture', onLeavePiP);
       clearStallInterval();
     };
-  }, [videoRef, onProgress, onTimeUpdate, onPlay, onPause, onEnded, onEnterPiP, onLeavePiP]);
+  }, [
+    videoRef,
+    onProgress,
+    onTimeUpdate,
+    onPlay,
+    onPause,
+    onEnded,
+    onSeekFailed,
+    onEnterPiP,
+    onLeavePiP,
+  ]);
 
   return {
     isLoading,
