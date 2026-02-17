@@ -306,7 +306,7 @@ export function useImmediateUploadV2({
         // Mock mode: simulate upload progress without API calls
         if (MOCK_MODE) {
           const mockVideoId = Math.floor(Math.random() * 10000);
-          const mockVideoUuid = `mock-${Date.now()}-${mockVideoId}`;
+          const mockVideoUuid = crypto.randomUUID();
 
           store.updateUpload(uploadId, {
             videoId: mockVideoId,
@@ -325,13 +325,11 @@ export function useImmediateUploadV2({
 
             if (progress >= 100) {
               clearInterval(interval);
+              store.clearError(uploadId);
               store.setPhase(uploadId, 'processing');
-
-              // Simulate processing delay
-              setTimeout(() => {
-                store.setPhase(uploadId, 'complete');
-                onUploadComplete?.(mockVideoId, mockVideoUuid);
-              }, 1000);
+              store.updateProgress(uploadId, 100, file.size);
+              onUploadComplete?.(mockVideoId, mockVideoUuid);
+              // Phase stays 'processing' — polling will transition to 'complete'
             }
           }, 500);
 
@@ -418,18 +416,12 @@ export function useImmediateUploadV2({
           },
           onSuccess: () => {
             console.log('[TUS] onSuccess:', uploadId);
-            // Clear any stale error before transitioning to processing
             store.clearError(uploadId);
             store.setPhase(uploadId, 'processing');
             store.updateProgress(uploadId, 100, file.size);
-
-            // After short delay, mark as ready
-            setTimeout(() => {
-              // Clear error again before complete (defensive)
-              store.clearError(uploadId);
-              store.setPhase(uploadId, 'complete');
-              onUploadComplete?.(videoId, videoUuid);
-            }, 500);
+            onUploadComplete?.(videoId, videoUuid);
+            // Phase stays 'processing' — polling will transition to 'complete'
+            // when bunny_status === 3
           },
         });
 

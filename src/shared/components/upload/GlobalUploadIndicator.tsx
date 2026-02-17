@@ -17,6 +17,7 @@ import {
 import { toast } from 'sonner';
 import { cn } from '@/shared/utils/formatting';
 import { useUploadStore, type ActiveUpload } from '@/shared/stores/upload-store';
+import { useProcessingPoller } from '@/features/upload/hooks/use-processing-poller';
 import { UploadProgressBar } from './UploadProgressBar';
 
 /**
@@ -178,7 +179,7 @@ function UploadItem({ upload }: { upload: ActiveUpload }) {
 
           {/* Completed status */}
           {upload.phase === 'complete' && (
-            <p className="text-xs text-green-500 mt-1">Upload complete!</p>
+            <p className="text-xs text-green-500 mt-1">Video ready!</p>
           )}
 
           {/* Processing status */}
@@ -225,6 +226,7 @@ function UploadItem({ upload }: { upload: ActiveUpload }) {
  * - Auto-hides when no uploads
  */
 export function GlobalUploadIndicator() {
+  useProcessingPoller();
   const [isExpanded, setIsExpanded] = useState(false);
   const hasHydrated = useUploadStore((state) => state._hasHydrated);
   // Use useShallow to prevent re-renders when uploads Map reference changes but contents are same
