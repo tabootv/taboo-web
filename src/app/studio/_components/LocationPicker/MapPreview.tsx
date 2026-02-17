@@ -6,10 +6,22 @@ import { useEffect } from 'react';
 interface MapPreviewProps {
   lat: number;
   lng: number;
+  zoom?: number;
+  showMarker?: boolean;
   locationLabel?: string;
 }
 
-function MapContent({ lat, lng }: { lat: number; lng: number }) {
+function MapContent({
+  lat,
+  lng,
+  zoom = 13,
+  showMarker = true,
+}: {
+  lat: number;
+  lng: number;
+  zoom?: number;
+  showMarker?: boolean;
+}) {
   const map = useMap();
 
   useEffect(() => {
@@ -18,10 +30,16 @@ function MapContent({ lat, lng }: { lat: number; lng: number }) {
     }
   }, [map, lat, lng]);
 
-  return <Marker position={{ lat, lng }} />;
+  useEffect(() => {
+    if (map) {
+      map.setZoom(zoom);
+    }
+  }, [map, zoom]);
+
+  return showMarker ? <Marker position={{ lat, lng }} /> : null;
 }
 
-export default function MapPreview({ lat, lng }: MapPreviewProps) {
+export default function MapPreview({ lat, lng, zoom = 13, showMarker = true }: MapPreviewProps) {
   return (
     <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
       <Map
@@ -112,7 +130,7 @@ export default function MapPreview({ lat, lng }: MapPreviewProps) {
         ]}
         className="w-full h-full z-10"
       >
-        <MapContent lat={lat} lng={lng} />
+        <MapContent lat={lat} lng={lng} zoom={zoom} showMarker={showMarker} />
       </Map>
     </APIProvider>
   );

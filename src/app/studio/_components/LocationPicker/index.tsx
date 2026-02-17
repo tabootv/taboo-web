@@ -1,14 +1,29 @@
 'use client';
 
+import { placesClient } from '@/api/client/places.client';
 import { publicClient } from '@/api/client/public.client';
 import { usePlaceAutocomplete, usePlaceDetails } from '@/api/queries/places.queries';
 import { cn } from '@/shared/utils/formatting';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, ChevronDown, Loader2, MapPin, X } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-const MapPreview = dynamic(() => import('./MapPreview'), { ssr: false });
+const WORLD_VIEW_CENTER = { lat: 20, lng: 0 };
+const WORLD_VIEW_ZOOM = 2;
+const LOCATION_ZOOM = 13;
+
+const MapPreview = dynamic(() => import('./MapPreview'), {
+  ssr: false,
+  loading: () => (
+    <div
+      className="w-full h-full flex items-center justify-center"
+      style={{ backgroundColor: '#242f3e' }}
+    >
+      <Loader2 className="w-6 h-6 text-white/40 animate-spin" />
+    </div>
+  ),
+});
 
 /** Probe common Google Places API response wrappers to find geometry + address_components */
 function extractPlaceData(raw: unknown): {
@@ -79,17 +94,23 @@ export const LocationPicker = memo(function LocationPicker({
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
   const [isRateLimited, setIsRateLimited] = useState(false);
-  const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number } | null>(null);
+  const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number }>(WORLD_VIEW_CENTER);
+  const [mapZoom, setMapZoom] = useState(WORLD_VIEW_ZOOM);
+  const [hasLocation, setHasLocation] = useState(false);
 
   // Rate limiting - track calls count in state to avoid ref access during render
   const apiCallsRef = useRef<number[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const prefetchedIds = useRef(new Set<string>());
+  const queryClient = useQueryClient();
 
   // Initialize map center from edit mode coordinates
   useEffect(() => {
-    if (initialLatitude != null && initialLongitude != null && !mapCenter) {
+    if (initialLatitude != null && initialLongitude != null && !hasLocation) {
       setMapCenter({ lat: initialLatitude, lng: initialLongitude });
+      setMapZoom(LOCATION_ZOOM);
+      setHasLocation(true);
     }
   }, [initialLatitude, initialLongitude]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -135,10 +156,6 @@ export const LocationPicker = memo(function LocationPicker({
     if (placeDetails && selectedPlaceId) {
       trackApiCall();
 
-      if (process.env.NODE_ENV === 'development') {
-        console.log('[LocationPicker] Raw placeDetails:', JSON.stringify(placeDetails, null, 2));
-      }
-
       const { lat, lng, addressComponents } = extractPlaceData(placeDetails);
 
       // Try to find country from address components
@@ -164,6 +181,8 @@ export const LocationPicker = memo(function LocationPicker({
 
       if (lat != null && lng != null) {
         setMapCenter({ lat, lng });
+        setMapZoom(LOCATION_ZOOM);
+        setHasLocation(true);
       }
 
       onLocationChange(searchInput, {
@@ -212,9 +231,24 @@ export const LocationPicker = memo(function LocationPicker({
 
   const handleClearLocation = useCallback(() => {
     setSearchInput('');
-    setMapCenter(null);
+    setMapCenter(WORLD_VIEW_CENTER);
+    setMapZoom(WORLD_VIEW_ZOOM);
+    setHasLocation(false);
     onLocationChange('', {});
   }, [onLocationChange]);
+
+  const handlePrefetchPlace = useCallback(
+    (placeId: string) => {
+      if (prefetchedIds.current.has(placeId)) return;
+      prefetchedIds.current.add(placeId);
+      queryClient.prefetchQuery({
+        queryKey: ['places', 'details', placeId],
+        queryFn: () => placesClient.getDetails(placeId),
+        staleTime: 1000 * 60 * 30,
+      });
+    },
+    [queryClient]
+  );
 
   const selectedCountry = countries.find((c) => c.id === countryId);
 
@@ -260,6 +294,7 @@ export const LocationPicker = memo(function LocationPicker({
                       key={prediction.place_id}
                       type="button"
                       onClick={() => handlePlaceSelect(prediction.place_id, prediction.description)}
+                      onMouseEnter={() => handlePrefetchPlace(prediction.place_id)}
                       className="w-full px-4 py-3 text-left hover:bg-white/5 transition-colors flex items-start gap-3"
                     >
                       <MapPin className="w-4 h-4 text-text-tertiary mt-0.5 shrink-0" />
@@ -280,16 +315,16 @@ export const LocationPicker = memo(function LocationPicker({
 
       {/* Map Preview */}
       <div className="aspect-video border border-white/10 rounded-lg overflow-hidden relative">
-        {mapCenter ? (
-          <MapPreview lat={mapCenter.lat} lng={mapCenter.lng} locationLabel={value} />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center">
-              <MapPin className="w-8 h-8 text-red-primary mx-auto mb-2" />
-              <p className="text-sm text-text-secondary">
-                Search for a location to see map preview
-              </p>
-            </div>
+        <MapPreview
+          lat={mapCenter.lat}
+          lng={mapCenter.lng}
+          zoom={mapZoom}
+          showMarker={hasLocation}
+          locationLabel={value}
+        />
+        {isLoadingDetails && (
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/40">
+            <Loader2 className="w-6 h-6 text-white animate-spin" />
           </div>
         )}
       </div>
