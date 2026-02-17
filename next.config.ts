@@ -34,11 +34,11 @@ const routeRedirects: Redirect[] = [
 
   // ============================================
   // Legacy Platform URL Redirects
-  // Maps old /c/, /u/, /v/ short URLs to canonical routes
+  // Maps old /c/, /u/ short URLs to canonical routes
+  // /v/ is handled by the smart route handler at src/app/v/[code]/route.ts
   // ============================================
   { source: '/c/:handler', destination: '/creators/:handler', permanent: true },
   { source: '/u/:handler', destination: '/profile/:handler', permanent: true },
-  { source: '/v/:uuid', destination: '/videos/:uuid', permanent: true },
 
   // ============================================
   // Auth Route Consolidation (PR 2.2)

@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { UploadProgressBar } from '@/shared/components/upload/UploadProgressBar';
 import type { ActiveUpload, UploadPhase } from '@/shared/stores/upload-store';
 import { cn } from '@/shared/utils/formatting';
+import { getShortUrl } from '@/shared/utils/video-link';
 import { AlertTriangle, Check, Copy, Loader2, RotateCcw } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
@@ -94,8 +95,8 @@ export function UnifiedPreviewCard({
   const hasLink = Boolean(uuid);
   const origin =
     typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_APP_URL || '';
-  const videoPath = hasLink ? (isShort ? `/shorts/${uuid}` : `/videos/${uuid}`) : '';
-  const fullUrl = hasLink ? `${origin}${videoPath}` : '';
+  const shortPath = hasLink ? getShortUrl(uuid) : '';
+  const fullUrl = hasLink ? `${origin}${shortPath}` : '';
 
   // ETA calculation
   let etaText: string | null = null;

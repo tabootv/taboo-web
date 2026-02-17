@@ -227,6 +227,7 @@ export function ContentTableRow({
                   videoUuid={item.uuid}
                   isShort={isShort}
                   visibility={item.visibility}
+                  hidden={item.hidden}
                   onEdit={() => onEdit(item)}
                   onDelete={() => setShowDeleteDialog(true)}
                 />
