@@ -14,7 +14,7 @@ interface ContentRatingStepProps {
 export function ContentRatingStep({ isAdultContent, onToggle }: ContentRatingStepProps) {
   return (
     <div>
-      <label className="flex items-start gap-4 p-4 rounded-xl bg-white/5 border border-white/10 hover:border-red-primary/40 cursor-pointer transition-all">
+      <label className="flex items-start gap-4 p-4 rounded-xl bg-white/5 hover:border-red-primary/40 cursor-pointer transition-all">
         <button
           type="button"
           onClick={onToggle}
@@ -42,7 +42,8 @@ export function ContentRatingStep({ isAdultContent, onToggle }: ContentRatingSte
           </p>
         </div>
       </label>
-      <div className="mt-6 p-4 rounded-xl bg-white/5 border border-white/10">
+
+      <div className="mt-6 p-4 rounded-xl bg-white/5">
         <h3 className="text-sm font-medium text-text-primary mb-2">
           When to mark as age-restricted:
         </h3>

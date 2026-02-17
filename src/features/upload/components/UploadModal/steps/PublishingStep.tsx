@@ -2,8 +2,8 @@
 
 import { cn } from '@/shared/utils/formatting';
 import { Clock, Globe } from 'lucide-react';
-import type { EditVideoData, PublishMode } from '../types';
 import { PUBLISH_OPTIONS } from '../constants';
+import type { EditVideoData, PublishMode } from '../types';
 import { formatDateForInput, getMinDateTime, getVisibilityInfoText } from '../utils';
 
 interface PublishOptionItemProps {
@@ -37,7 +37,7 @@ function PublishOptionItem({
         isDisabled ? 'opacity-50 cursor-not-allowed bg-white/5 border-white/10' : 'cursor-pointer',
         !isDisabled && isSelected
           ? 'bg-red-primary/10 border-red-primary'
-          : !isDisabled && 'bg-white/5 border-white/10 hover:border-red-primary/40'
+          : !isDisabled && 'border-white/10 hover:border-red-primary/40'
       )}
     >
       <input

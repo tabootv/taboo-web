@@ -6,7 +6,6 @@ import type { UploadPhase } from '@/shared/stores/upload-store';
 interface UploadProgressBarProps {
   phase: UploadPhase;
   progress: number;
-  isPaused: boolean;
   isStale?: boolean;
   className?: string;
   /** Height of the progress bar. Defaults to 'md' */
@@ -20,7 +19,6 @@ interface UploadProgressBarProps {
 export function UploadProgressBar({
   phase,
   progress,
-  isPaused,
   isStale = false,
   className,
   size = 'md',
@@ -29,7 +27,6 @@ export function UploadProgressBar({
     if (phase === 'error') return 'bg-red-500';
     if (phase === 'complete') return 'bg-green-500';
     if (isStale) return 'bg-orange-500';
-    if (isPaused) return 'bg-yellow-500';
     return 'bg-red-primary';
   };
 

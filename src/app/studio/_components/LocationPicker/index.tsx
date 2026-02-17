@@ -1,12 +1,12 @@
 'use client';
 
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import dynamic from 'next/dynamic';
-import { MapPin, X, ChevronDown, Loader2, Check } from 'lucide-react';
-import { cn } from '@/shared/utils/formatting';
-import { usePlaceAutocomplete, usePlaceDetails } from '@/api/queries/places.queries';
-import { useQuery } from '@tanstack/react-query';
 import { publicClient } from '@/api/client/public.client';
+import { usePlaceAutocomplete, usePlaceDetails } from '@/api/queries/places.queries';
+import { cn } from '@/shared/utils/formatting';
+import { useQuery } from '@tanstack/react-query';
+import { Check, ChevronDown, Loader2, MapPin, X } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 const MapPreview = dynamic(() => import('./MapPreview'), { ssr: false });
 
@@ -234,7 +234,7 @@ export const LocationPicker = memo(function LocationPicker({
             onChange={handleInputChange}
             onFocus={() => searchInput.length >= 3 && setIsDropdownOpen(true)}
             placeholder="Search for a location..."
-            className="w-full px-4 py-3 pr-10 bg-white/5 border border-white/10 rounded-lg text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-red-primary/50 focus:border-red-primary"
+            className="w-full px-4 py-3 pr-10 border border-white/10 rounded-lg text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-red-primary/50 focus:border-red-primary"
           />
           {searchInput && (
             <button
@@ -279,7 +279,7 @@ export const LocationPicker = memo(function LocationPicker({
       </div>
 
       {/* Map Preview */}
-      <div className="aspect-video bg-white/5 border border-white/10 rounded-lg overflow-hidden relative">
+      <div className="aspect-video border border-white/10 rounded-lg overflow-hidden relative">
         {mapCenter ? (
           <MapPreview lat={mapCenter.lat} lng={mapCenter.lng} locationLabel={value} />
         ) : (
@@ -302,7 +302,7 @@ export const LocationPicker = memo(function LocationPicker({
             type="button"
             onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
             className={cn(
-              'w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-left flex items-center justify-between',
+              'w-full px-4 py-3 border border-white/10 rounded-lg text-left flex items-center justify-between',
               'hover:border-white/20 focus:outline-none focus:ring-2 focus:ring-red-primary/50 focus:border-red-primary transition-colors'
             )}
           >
@@ -331,7 +331,7 @@ export const LocationPicker = memo(function LocationPicker({
                   <Loader2 className="w-5 h-5 text-red-primary animate-spin" />
                 </div>
               ) : (
-                <div className="max-h-60 overflow-y-auto">
+                <div className="max-h-60 overflow-y-auto bg-white/5">
                   {countries.map((country) => (
                     <button
                       key={country.id}

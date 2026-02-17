@@ -95,8 +95,6 @@
   "StudioDashboardResponse": "@/types/studio",
   "StudioUploadVideoPayload": "@/types/studio",
   "StudioUploadVideoResponse": "@/types/studio",
-  "StudioUploadShortPayload": "@/types/studio",
-  "StudioUploadShortResponse": "@/types/studio",
   "StudioCreatePostPayload": "@/types/studio",
   "StudioCreatePostResponse": "@/types/studio",
   "StudioVideoListItem": "@/types/studio",

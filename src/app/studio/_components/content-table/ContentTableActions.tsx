@@ -34,10 +34,15 @@ export function ContentTableActions({
   onDelete,
   className,
 }: ContentTableActionsProps) {
-  const videoUrl = isShort ? `/shorts/${videoUuid}` : `/videos/${videoUuid}`;
+  const isProcessing = visibility === 'processing';
+  const videoPath = isShort ? `/shorts/${videoUuid}` : `/videos/${videoUuid}`;
 
   const handleShare = async () => {
-    const url = `${window.location.origin}${videoUrl}`;
+    const origin =
+      typeof window !== 'undefined'
+        ? window.location.origin
+        : process.env.NEXT_PUBLIC_APP_URL || '';
+    const url = `${origin}${videoPath}`;
     try {
       await navigator.clipboard.writeText(url);
       toast.success('Link copied to clipboard');
@@ -60,16 +65,12 @@ export function ContentTableActions({
     <div className={className}>
       <div className="flex items-center gap-0.5">
         <Tooltip>
-          <TooltipTrigger asChild>
+          <TooltipTrigger asChild className="hover:bg-surface rounded-full">
             <Button
               variant="ghost"
               size="icon-sm"
-              onClick={isShort ? undefined : onEdit}
-              disabled={isShort}
-              className={cn(
-                'text-text-tertiary hover:text-text-primary',
-                isShort && 'opacity-50 cursor-not-allowed pointer-events-none'
-              )}
+              onClick={onEdit}
+              className="text-text-tertiary hover:text-text-primary"
             >
               <Pencil className="w-4 h-4" />
             </Button>
@@ -78,18 +79,18 @@ export function ContentTableActions({
         </Tooltip>
 
         <Tooltip>
-          <TooltipTrigger asChild>
+          <TooltipTrigger asChild className="hover:bg-surface rounded-full">
             <Button
               variant="ghost"
               size="icon-sm"
               asChild
               className={cn(
                 'text-text-tertiary hover:text-text-primary',
-                visibility !== 'live' ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''
+                isProcessing ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''
               )}
-              disabled={visibility !== 'live'}
+              disabled={isProcessing}
             >
-              <Link href={videoUrl} target="_blank">
+              <Link href={videoPath} target="_blank">
                 <Play className="w-4 h-4" />
               </Link>
             </Button>
@@ -99,7 +100,7 @@ export function ContentTableActions({
 
         <DropdownMenu>
           <Tooltip>
-            <TooltipTrigger asChild>
+            <TooltipTrigger asChild className="hover:bg-surface rounded-full">
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
@@ -112,14 +113,9 @@ export function ContentTableActions({
             </TooltipTrigger>
             <TooltipContent>More options</TooltipContent>
           </Tooltip>
+
           <DropdownMenuContent align="end" className="w-40">
-            <DropdownMenuItem
-              onClick={handleShare}
-              disabled={visibility !== 'live'}
-              className={cn(
-                visibility !== 'live' ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''
-              )}
-            >
+            <DropdownMenuItem onClick={handleShare}>
               <Share2 className="w-4 h-4 mr-2" />
               Share
             </DropdownMenuItem>
@@ -129,22 +125,14 @@ export function ContentTableActions({
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={
-                isShort
-                  ? undefined
-                  : () => {
-                      posthog.capture(AnalyticsEvent.STUDIO_CONTENT_DELETED, {
-                        content_type: isShort ? 'short' : 'video',
-                        video_uuid: videoUuid,
-                      });
-                      onDelete();
-                    }
-              }
-              disabled={isShort}
-              className={cn(
-                'text-red-500 focus:text-red-500',
-                isShort && 'opacity-50 cursor-not-allowed'
-              )}
+              onClick={() => {
+                posthog.capture(AnalyticsEvent.STUDIO_CONTENT_DELETED, {
+                  content_type: isShort ? 'short' : 'video',
+                  video_uuid: videoUuid,
+                });
+                onDelete();
+              }}
+              className="text-red-500 focus:text-red-500"
             >
               <Trash2 className="w-4 h-4 mr-2" />
               Delete

@@ -4,21 +4,15 @@
  * API Endpoints:
  * - GET /studio/dashboard → StudioDashboardResponse
  * - GET /studio/videos → StudioVideosListResponse
- * - GET /studio/shorts → StudioVideosListResponse
  * - POST /studio/videos → StudioUploadVideoResponse
- * - POST /studio/shorts → StudioUploadShortResponse
  * - POST /studio/posts → StudioCreatePostResponse
  * - POST /videos/prepare-bunny-upload → PrepareBunnyUploadResponse
- * - PATCH /studio/videos/{videoUuid} → UpdateVideoResponse (unified metadata + visibility)
- * - POST /studio/videos/{videoUuid}/toggle-hidden → ToggleHiddenResponse
+ * - POST /studio/videos/{videoUuid} → UpdateVideoResponse (unified metadata + visibility)
+ * - PATCH /studio/videos/{videoUuid}/toggle-hidden → ToggleHiddenResponse
  * - DELETE /studio/videos/{videoUuid} → DeleteVideoResponse
- *
- * @deprecated endpoints (use UUID-based methods instead):
- * - PATCH /studio/videos/{id} → UpdateVideoResponse
- * - PATCH /studio/videos/{id}/visibility → UpdateVideoResponse
- * - PATCH /studio/shorts/{id}/visibility → UpdateVideoResponse
- * - DELETE /studio/videos/{id} → { success: boolean }
- * - DELETE /studio/shorts/{id} → { success: boolean }
+ * - POST /studio/videos/{videoUuid}/schedule → ScheduleResponse
+ * - PATCH /studio/videos/{videoUuid}/schedule → ScheduleResponse
+ * - DELETE /studio/videos/{videoUuid}/schedule → DeleteScheduleResponse
  */
 
 import type {
@@ -29,13 +23,9 @@ import type {
   PrepareBunnyUploadPayload,
   PrepareBunnyUploadResponse,
   ScheduleResponse,
-  StudioContentListResponse,
   StudioCreatePostPayload,
   StudioCreatePostResponse,
   StudioDashboardResponse,
-  StudioPostsListResponse,
-  StudioUploadShortPayload,
-  StudioUploadShortResponse,
   StudioUploadVideoPayload,
   StudioUploadVideoResponse,
   StudioVideoListItem,
@@ -43,10 +33,8 @@ import type {
   StudioVideosQueryParams,
   ToggleHiddenResponse,
   UpdateSchedulePayload,
-  UpdateVideoMetadataPayload,
   UpdateVideoPayload,
   UpdateVideoResponse,
-  UpdateVisibilityPayload,
 } from '../types';
 import { apiClient } from './base-client';
 
@@ -104,28 +92,6 @@ export const studioClient = {
   },
 
   /**
-   * Get list of creator's shorts
-   * @deprecated Use videoClient.list() with creator_id and short=true filters instead
-   */
-  getShorts: async (page = 1): Promise<StudioVideosListResponse> => {
-    const data = await apiClient.get<ApiResponse<StudioVideosListResponse>>('/studio/shorts', {
-      params: { page } as Record<string, unknown>,
-    });
-    return data.data;
-  },
-
-  /**
-   * Get list of creator's posts
-   * @deprecated Use creatorsClient.getPosts() with channel ID instead
-   */
-  getPosts: async (page = 1): Promise<StudioPostsListResponse> => {
-    const data = await apiClient.get<ApiResponse<StudioPostsListResponse>>('/studio/posts', {
-      params: { page } as Record<string, unknown>,
-    });
-    return data.data;
-  },
-
-  /**
    * Upload a new video
    */
   uploadVideo: async (payload: StudioUploadVideoPayload): Promise<StudioUploadVideoResponse> => {
@@ -164,41 +130,6 @@ export const studioClient = {
   },
 
   /**
-   * Upload a new short
-   */
-  uploadShort: async (payload: StudioUploadShortPayload): Promise<StudioUploadShortResponse> => {
-    const formData = new FormData();
-    formData.append('file', payload.file);
-    formData.append('title', payload.title);
-    formData.append('type', 'short');
-
-    if (payload.thumbnail) {
-      formData.append('thumbnail', payload.thumbnail);
-    }
-    if (payload.description) {
-      formData.append('description', payload.description);
-    }
-    if (payload.tags && payload.tags.length > 0) {
-      payload.tags.forEach((tag, index) => {
-        formData.append(`tags[${index}]`, tag);
-      });
-    }
-    if (payload.country_id) {
-      formData.append('country_id', String(payload.country_id));
-    }
-    if (payload.is_nsfw !== undefined) {
-      formData.append('is_nsfw', payload.is_nsfw ? '1' : '0');
-    }
-
-    const data = await apiClient.post<StudioUploadShortResponse>('/studio/shorts', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    return data;
-  },
-
-  /**
    * Create a community post
    */
   createPost: async (payload: StudioCreatePostPayload): Promise<StudioCreatePostResponse> => {
@@ -226,14 +157,6 @@ export const studioClient = {
    */
   deleteVideo: async (videoUuid: string): Promise<DeleteVideoResponse> => {
     const data = await apiClient.delete<DeleteVideoResponse>(`/studio/videos/${videoUuid}`);
-    return data;
-  },
-
-  /**
-   * Delete a short
-   */
-  deleteShort: async (videoId: number): Promise<{ success: boolean }> => {
-    const data = await apiClient.delete<{ success: boolean }>(`/studio/shorts/${videoId}`);
     return data;
   },
 
@@ -304,7 +227,7 @@ export const studioClient = {
    * @param videoUuid - The video's UUID
    */
   toggleVideoHidden: async (videoUuid: string): Promise<ToggleHiddenResponse> => {
-    const data = await apiClient.post<ToggleHiddenResponse>(
+    const data = await apiClient.patch<ToggleHiddenResponse>(
       `/studio/videos/${videoUuid}/toggle-hidden`
     );
     return data;
@@ -352,58 +275,5 @@ export const studioClient = {
       `/studio/videos/${videoUuid}/schedule`
     );
     return data;
-  },
-
-  /**
-   * Update video metadata (title, description, tags, etc.)
-   * @deprecated Use updateVideo(videoUuid, payload) instead
-   */
-  updateVideoMetadata: async (
-    videoId: number,
-    payload: UpdateVideoMetadataPayload
-  ): Promise<UpdateVideoResponse> => {
-    const data = await apiClient.patch<UpdateVideoResponse>(`/studio/videos/${videoId}`, payload);
-    return data;
-  },
-
-  /**
-   * Update video visibility
-   * @deprecated Use updateVideo(videoUuid, { publish_mode, scheduled_at }) instead
-   */
-  updateVideoVisibility: async (
-    videoId: number,
-    payload: UpdateVisibilityPayload
-  ): Promise<UpdateVideoResponse> => {
-    const data = await apiClient.patch<UpdateVideoResponse>(
-      `/studio/videos/${videoId}/visibility`,
-      payload
-    );
-    return data;
-  },
-
-  /**
-   * Update short visibility
-   * @deprecated Use updateVideo(videoUuid, { publish_mode, scheduled_at }) instead
-   */
-  updateShortVisibility: async (
-    videoId: number,
-    payload: UpdateVisibilityPayload
-  ): Promise<UpdateVideoResponse> => {
-    const data = await apiClient.patch<UpdateVideoResponse>(
-      `/studio/shorts/${videoId}/visibility`,
-      payload
-    );
-    return data;
-  },
-
-  /**
-   * Get content list for content management hub
-   */
-  getContent: async (type: 'video' | 'short', page = 1): Promise<StudioContentListResponse> => {
-    const endpoint = type === 'short' ? '/studio/shorts' : '/studio/videos';
-    const data = await apiClient.get<ApiResponse<StudioContentListResponse>>(endpoint, {
-      params: { page } as Record<string, unknown>,
-    });
-    return data.data;
   },
 };

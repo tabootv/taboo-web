@@ -120,45 +120,6 @@ export function UploadProvider({ children }: UploadProviderProps) {
   }, [uploads, hasHydrated, handleUploadComplete, scheduleAutoClear]);
 
   /**
-   * Handle online/offline events for upload pause/resume
-   * Uses getState() for imperative access - prevents unnecessary re-renders
-   */
-  useEffect(() => {
-    if (!hasHydrated) return;
-
-    const handleOffline = () => {
-      console.log('[UploadProvider] Network offline - pausing uploads');
-      // Use getState() for imperative access - doesn't trigger re-renders
-      const uploads = useUploadStore.getState().uploads;
-      const pause = useUploadStore.getState().pauseUpload;
-      uploads.forEach((upload, id) => {
-        if (upload.phase === 'uploading' && !upload.isPaused) {
-          pause(id);
-        }
-      });
-    };
-
-    const handleOnline = () => {
-      console.log('[UploadProvider] Network online - resuming uploads');
-      const uploads = useUploadStore.getState().uploads;
-      const resume = useUploadStore.getState().resumeUpload;
-      uploads.forEach((upload, id) => {
-        if (upload.isPaused && upload.phase === 'uploading') {
-          resume(id);
-        }
-      });
-    };
-
-    window.addEventListener('offline', handleOffline);
-    window.addEventListener('online', handleOnline);
-
-    return () => {
-      window.removeEventListener('offline', handleOffline);
-      window.removeEventListener('online', handleOnline);
-    };
-  }, [hasHydrated]); // Removed uploads, pauseUpload, resumeUpload from deps
-
-  /**
    * Clean up orphaned uploads on mount (after hydration)
    */
   useEffect(() => {

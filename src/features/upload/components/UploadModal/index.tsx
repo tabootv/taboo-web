@@ -5,25 +5,23 @@ import { studioClient } from '@/api/client/studio.client';
 import type { UpdateVideoPayload } from '@/api/types';
 import { LocationPicker } from '@/app/studio/_components/LocationPicker';
 import { useBeforeunloadWarning, useCircuitBreaker } from '@/app/studio/_hooks';
-import { useImmediateUploadV2 } from '../../hooks';
 import { Button } from '@/components/ui/button';
-import { fileReferenceStore } from '@/shared/stores/file-reference-store';
-import { cn } from '@/shared/utils/formatting';
 import { AnalyticsEvent } from '@/shared/lib/analytics/events';
+import { fileReferenceStore } from '@/shared/stores/file-reference-store';
 import { Lock, Upload as UploadIcon, X } from 'lucide-react';
 import posthog from 'posthog-js';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
+import { useImmediateUploadV2 } from '../../hooks';
 
 import {
   CircuitBreakerErrorUI,
   FooterActionButton,
   StepIndicator,
-  UploadProgressSection,
-  VideoPreviewContent,
+  UnifiedPreviewCard,
 } from './components';
-import { ContentRatingStep, DetailsStep, PublishingStep, TagsStep, ThumbnailStep } from './steps';
+import { ContentRatingStep, DetailsStep, PublishingStep, TagsStep } from './steps';
 import type { EditVideoData, ModalStep, PublishMode } from './types';
 import {
   buildMetadataPayload,
@@ -98,6 +96,8 @@ export function UploadModal({
   const metadataTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   // Track if form has been hydrated for current resumeUploadId (prevents race condition)
   const hasHydratedRef = useRef<string | null>(null);
+  // Skip close confirm dialog after successful publish (upload may still be in progress)
+  const skipConfirmRef = useRef(false);
 
   // Circuit breaker for infinite loop protection
   const { isTripped, trackRender, reset: resetCircuitBreaker, trace } = useCircuitBreaker();
@@ -109,8 +109,6 @@ export function UploadModal({
     startUpload,
     updateMetadata,
     publish,
-    pauseUpload,
-    resumeUpload,
     retryUpload,
     // cancel is not used because we allow background upload continuation
     reset,
@@ -122,6 +120,7 @@ export function UploadModal({
     },
     onPublishComplete: () => {
       onSuccess?.();
+      skipConfirmRef.current = true;
       handleClose();
     },
     onError: (error) => {
@@ -322,7 +321,10 @@ export function UploadModal({
   }, [pendingTagNames, availableTags]);
 
   // Update metadata when form changes (debounced)
+  // Guard: skip when modal is closed to prevent empty form state from overwriting store
   useEffect(() => {
+    if (!isOpen) return;
+
     if (metadataTimeoutRef.current) clearTimeout(metadataTimeoutRef.current);
 
     metadataTimeoutRef.current = setTimeout(() => {
@@ -345,6 +347,7 @@ export function UploadModal({
       if (metadataTimeoutRef.current) clearTimeout(metadataTimeoutRef.current);
     };
   }, [
+    isOpen,
     title,
     description,
     tags,
@@ -378,12 +381,16 @@ export function UploadModal({
       updateMetadata(metadata as Parameters<typeof updateMetadata>[0]);
     }
 
-    // Check for active upload and confirm close
-    const confirmMessage = getCloseConfirmMessage(state.uploadPhase);
-    if (confirmMessage) {
-      if (!window.confirm(confirmMessage)) return;
+    // Check for active upload and confirm close (skip after successful publish)
+    if (skipConfirmRef.current) {
+      skipConfirmRef.current = false;
     } else {
-      reset();
+      const confirmMessage = getCloseConfirmMessage(state.uploadPhase);
+      if (confirmMessage) {
+        if (!window.confirm(confirmMessage)) return;
+      } else {
+        reset();
+      }
     }
 
     // Reset form state
@@ -474,7 +481,12 @@ export function UploadModal({
       has_tags: tags.length > 0,
       is_adult_content: isAdultContent,
     });
-    await publish(derivedVisibility, thumbnailFile);
+    setIsSaving(true);
+    try {
+      await publish(derivedVisibility, thumbnailFile);
+    } finally {
+      setIsSaving(false);
+    }
   }, [publish, publishMode, isShort, tags.length, isAdultContent, thumbnailFile]);
 
   // Save handler for edit mode - uses UUID-based endpoints with schedule API
@@ -591,12 +603,12 @@ export function UploadModal({
   }
 
   const modalContent = (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-9999 flex items-center justify-center p-4">
       {/* Backdrop - click disabled, modal closes only via X button */}
-      <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" />
+      <div className="fixed inset-0 bg-black/70" />
 
       {/* Modal */}
-      <div className="relative z-10 w-full max-w-4xl max-h-[90vh] bg-surface border border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+      <div className="relative z-10 w-full max-w-[960px] max-h-[90vh] bg-surface border border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
           <div className="flex items-center gap-3">
@@ -657,15 +669,28 @@ export function UploadModal({
             </div>
           ) : (
             /* Form Content */
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
+            <div className="grid grid-cols-1 lg:grid-cols-[6fr_4fr] gap-6 p-6">
               {/* Left Column - Form */}
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {currentStep === 'details' && (
                   <DetailsStep
                     title={title}
                     description={description}
                     onTitleChange={setTitle}
                     onDescriptionChange={setDescription}
+                    thumbnailSource={thumbnailSource}
+                    thumbnailPreviewUrl={thumbnailPreviewUrl}
+                    thumbnailInputRef={thumbnailInputRef}
+                    onSourceChange={setThumbnailSource}
+                    onThumbnailClear={() => {
+                      setThumbnailFile(null);
+                      setThumbnailPreviewUrl(null);
+                    }}
+                    onThumbnailSelect={(file) => {
+                      setThumbnailFile(file);
+                      setThumbnailPreviewUrl(URL.createObjectURL(file));
+                    }}
+                    mode={mode}
                   />
                 )}
 
@@ -713,23 +738,6 @@ export function UploadModal({
                   />
                 )}
 
-                {currentStep === 'thumbnail' && (
-                  <ThumbnailStep
-                    thumbnailSource={thumbnailSource}
-                    thumbnailPreviewUrl={thumbnailPreviewUrl}
-                    thumbnailInputRef={thumbnailInputRef}
-                    onSourceChange={setThumbnailSource}
-                    onThumbnailClear={() => {
-                      setThumbnailFile(null);
-                      setThumbnailPreviewUrl(null);
-                    }}
-                    onThumbnailSelect={(file) => {
-                      setThumbnailFile(file);
-                      setThumbnailPreviewUrl(URL.createObjectURL(file));
-                    }}
-                  />
-                )}
-
                 {currentStep === 'publishing' && (
                   <PublishingStep
                     mode={mode}
@@ -742,65 +750,27 @@ export function UploadModal({
                 )}
               </div>
 
-              {/* Right Column - Preview */}
-              <div className="space-y-4">
-                {/* Video Preview - Tiered fallback */}
-                <div
-                  className={cn(
-                    'relative overflow-hidden rounded-lg bg-white/5 border border-white/10',
-                    isShort ? 'aspect-[9/16] max-h-[300px] mx-auto' : 'aspect-video'
-                  )}
-                >
-                  <VideoPreviewContent
-                    videoPreviewUrl={videoPreviewUrl}
-                    mode={mode}
-                    editVideo={editVideo}
-                    storeUpload={storeUpload}
-                    isShort={isShort}
-                    onFileReselected={(file) => {
-                      if (storeUpload) {
-                        fileReferenceStore.set(storeUpload.id, file);
-                        setVideoPreviewUrl(URL.createObjectURL(file));
-                      }
-                    }}
-                  />
-                  <div className="absolute top-2 left-2 px-2 py-1 bg-black/60 rounded text-xs text-white">
-                    {isShort ? 'Short' : 'Video'}
-                  </div>
-                </div>
-
-                {/* Upload Progress - show during active upload, when complete, or for stale uploads */}
-                {mode === 'upload' && (state.uploadPhase !== 'idle' || storeUpload?.isStale) && (
-                  <UploadProgressSection
-                    uploadPhase={state.uploadPhase}
-                    uploadProgress={state.uploadProgress}
-                    bytesUploaded={state.bytesUploaded}
-                    bytesTotal={state.bytesTotal}
-                    isPaused={state.isPaused}
-                    error={state.error}
-                    storeUpload={storeUpload}
-                    onPause={pauseUpload}
-                    onResume={resumeUpload}
-                    onRetry={retryUpload}
-                  />
-                )}
-
-                {/* Video Link - show in upload mode after upload or in edit mode */}
-                {(state.videoUuid || (mode === 'edit' && editVideo)) && (
-                  <div className="p-4 bg-white/5 border border-white/10 rounded-lg">
-                    <p className="text-xs text-text-tertiary mb-1">
-                      {isShort ? 'Short' : 'Video'} Link
-                    </p>
-                    <p className="text-sm text-blue-400 break-all">
-                      {typeof window !== 'undefined'
-                        ? window.location.origin
-                        : 'https://app.taboo.tv'}
-                      {isShort ? '/shorts/' : '/video/'}
-                      {state.videoUuid || editVideo?.uuid}
-                    </p>
-                  </div>
-                )}
-              </div>
+              {/* Right Column - Unified Preview Card */}
+              <UnifiedPreviewCard
+                videoPreviewUrl={videoPreviewUrl}
+                mode={mode}
+                editVideo={editVideo}
+                storeUpload={storeUpload}
+                isShort={isShort}
+                onFileReselected={(file) => {
+                  if (storeUpload) {
+                    fileReferenceStore.set(storeUpload.id, file);
+                    setVideoPreviewUrl(URL.createObjectURL(file));
+                  }
+                }}
+                uploadPhase={state.uploadPhase}
+                uploadProgress={state.uploadProgress}
+                bytesUploaded={state.bytesUploaded}
+                bytesTotal={state.bytesTotal}
+                error={state.error}
+                videoUuid={state.videoUuid}
+                onRetry={retryUpload}
+              />
             </div>
           )}
         </div>

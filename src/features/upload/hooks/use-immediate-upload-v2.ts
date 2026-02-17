@@ -23,9 +23,8 @@ export interface ImmediateUploadState {
   aspectRatio: AspectRatioResult | null;
   isDraft: boolean;
   canPublish: boolean;
-  isPaused: boolean;
   error: string | null;
-  modalStep: 'details' | 'location' | 'tags' | 'content-rating' | 'thumbnail' | 'publishing';
+  modalStep: 'details' | 'location' | 'tags' | 'content-rating' | 'publishing';
 }
 
 export interface ImmediateUploadFormData {
@@ -59,8 +58,6 @@ export interface UseImmediateUploadReturn {
   startUpload: (file: File) => Promise<void>;
   updateMetadata: (data: Partial<ImmediateUploadFormData>) => void;
   publish: (visibility: 'live' | 'draft', thumbnailFile?: File | null) => Promise<void>;
-  pauseUpload: () => void;
-  resumeUpload: () => void;
   retryUpload: () => void; // Manual retry after circuit breaker trips
   cancel: () => void;
   reset: () => void;
@@ -81,7 +78,6 @@ const initialState: ImmediateUploadState = {
   aspectRatio: null,
   isDraft: true,
   canPublish: false,
-  isPaused: false,
   error: null,
   modalStep: 'details',
 };
@@ -172,7 +168,6 @@ export function useImmediateUploadV2({
       aspectRatio: aspectRatioRef.current,
       isDraft: upload.phase !== 'complete',
       canPublish: upload.phase === 'complete',
-      isPaused: upload.isPaused,
       error: upload.error,
       modalStep: upload.modalStep ?? 'details',
     };
@@ -283,7 +278,6 @@ export function useImmediateUploadV2({
             thumbnailSource: 'auto',
             publishMode: 'none',
           },
-          isPaused: false,
           error: null,
         });
 
@@ -419,10 +413,6 @@ export function useImmediateUploadV2({
             handleUploadError(error);
           },
           onProgress: (bytesUploaded: number, bytesTotal: number) => {
-            const upload = store.getUpload(uploadId);
-            // Don't update progress if paused (prevents race condition with abort)
-            if (upload?.isPaused) return;
-
             const percentage = bytesTotal > 0 ? (bytesUploaded / bytesTotal) * 100 : 0;
             store.updateProgress(uploadId, Math.round(percentage), bytesUploaded);
           },
@@ -594,34 +584,6 @@ export function useImmediateUploadV2({
   );
 
   /**
-   * Pause the upload
-   */
-  const pauseUpload = useCallback(() => {
-    const uploadId = currentUploadIdRef.current;
-    if (!uploadId) return;
-
-    const upload = store.getUpload(uploadId);
-    if (upload?.phase === 'uploading' && uploadRef.current) {
-      uploadRef.current.abort();
-      store.pauseUpload(uploadId);
-    }
-  }, [store]);
-
-  /**
-   * Resume the upload
-   */
-  const resumeUpload = useCallback(() => {
-    const uploadId = currentUploadIdRef.current;
-    if (!uploadId) return;
-
-    const upload = store.getUpload(uploadId);
-    if (upload?.isPaused && uploadRef.current) {
-      uploadRef.current.start();
-      store.resumeUpload(uploadId);
-    }
-  }, [store]);
-
-  /**
    * Manual retry after circuit breaker trips or stale session
    * Requires explicit user action - prevents infinite loops
    */
@@ -746,8 +708,6 @@ export function useImmediateUploadV2({
     startUpload,
     updateMetadata,
     publish,
-    pauseUpload,
-    resumeUpload,
     retryUpload,
     cancel,
     reset,

@@ -69,12 +69,11 @@ export interface ActiveUpload {
   circuitBreaker: CircuitBreakerState;
 
   // State
-  isPaused: boolean;
   isStale: boolean; // True for hydrated uploads with no live TUS client
   error: string | null;
 
   // Modal UI state
-  modalStep: 'details' | 'location' | 'tags' | 'content-rating' | 'thumbnail' | 'publishing';
+  modalStep: 'details' | 'location' | 'tags' | 'content-rating' | 'publishing';
   hasOpenModal: boolean; // True when modal is open for this upload (prevents auto-clear)
 
   // Timestamps
@@ -165,16 +164,6 @@ interface UploadState {
    * Update upload metadata
    */
   updateMetadata: (id: string, metadata: Partial<ActiveUpload['metadata']>) => void;
-
-  /**
-   * Pause an upload
-   */
-  pauseUpload: (id: string) => void;
-
-  /**
-   * Resume an upload
-   */
-  resumeUpload: (id: string) => void;
 
   /**
    * Update modal step for an upload
@@ -402,8 +391,6 @@ export const useUploadStore = create<UploadState>()(
             ...upload,
             phase,
             error: error ?? null,
-            // Clear isPaused when transitioning away from uploading phase
-            isPaused: phase === 'uploading' ? upload.isPaused : false,
             lastProgressAt: Date.now(),
           });
           return { uploads: newUploads };
@@ -431,21 +418,6 @@ export const useUploadStore = create<UploadState>()(
           });
           return { uploads: newUploads };
         });
-      },
-
-      pauseUpload: (id) => {
-        const upload = get().uploads.get(id);
-        if (upload && upload.phase === 'uploading') {
-          get().updateUpload(id, { isPaused: true });
-        }
-      },
-
-      resumeUpload: (id) => {
-        const upload = get().uploads.get(id);
-        // Reject resume for stale uploads - they need retry instead
-        if (upload && upload.isPaused && !upload.isStale) {
-          get().updateUpload(id, { isPaused: false });
-        }
       },
 
       updateModalStep: (id, step) => {
@@ -541,12 +513,11 @@ export const useUploadStore = create<UploadState>()(
           let hasChanges = false;
 
           for (const [id, upload] of newUploads) {
-            // Mark as stale if in-progress or paused (no live TUS client after hydration)
+            // Mark as stale if in-progress (no live TUS client after hydration)
             if (
               upload.phase === 'uploading' ||
               upload.phase === 'preparing' ||
-              upload.phase === 'processing' ||
-              upload.isPaused
+              upload.phase === 'processing'
             ) {
               newUploads.set(id, { ...upload, isStale: true });
               hasChanges = true;

@@ -9,12 +9,9 @@ import type {
   CreateSchedulePayload,
   PrepareBunnyUploadPayload,
   StudioCreatePostPayload,
-  StudioUploadShortPayload,
   StudioUploadVideoPayload,
   UpdateSchedulePayload,
-  UpdateVideoMetadataPayload,
   UpdateVideoPayload,
-  UpdateVisibilityPayload,
 } from '../types';
 import { studioClient } from '../client/studio.client';
 
@@ -28,21 +25,6 @@ export function useUploadVideo() {
     mutationFn: (payload: StudioUploadVideoPayload) => studioClient.uploadVideo(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['studio', 'videos'] });
-      queryClient.invalidateQueries({ queryKey: ['studio', 'dashboard'] });
-    },
-  });
-}
-
-/**
- * Hook to upload a short
- */
-export function useUploadShort() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (payload: StudioUploadShortPayload) => studioClient.uploadShort(payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['studio', 'shorts'] });
       queryClient.invalidateQueries({ queryKey: ['studio', 'dashboard'] });
     },
   });
@@ -74,21 +56,6 @@ export function useDeleteVideo() {
     mutationFn: (videoUuid: string) => studioClient.deleteVideo(videoUuid),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['studio', 'videos'] });
-      queryClient.invalidateQueries({ queryKey: ['studio', 'shorts'] });
-      queryClient.invalidateQueries({ queryKey: ['studio', 'dashboard'] });
-    },
-  });
-}
-
-/**
- * Hook to delete a short
- */
-export function useDeleteShort() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (videoId: number) => studioClient.deleteShort(videoId),
-    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['studio', 'shorts'] });
       queryClient.invalidateQueries({ queryKey: ['studio', 'dashboard'] });
     },
@@ -141,6 +108,7 @@ export function useToggleVideoHidden() {
     mutationFn: (videoUuid: string) => studioClient.toggleVideoHidden(videoUuid),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['studio', 'videos'] });
+      queryClient.invalidateQueries({ queryKey: ['studio', 'shorts'] });
     },
   });
 }
@@ -189,57 +157,6 @@ export function useDeleteSchedule() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['studio', 'videos'] });
       queryClient.invalidateQueries({ queryKey: ['studio', 'shorts'] });
-    },
-  });
-}
-
-/**
- * Hook to update video metadata
- * @deprecated Use useUpdateVideo() instead
- */
-export function useUpdateVideoMetadata() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ videoId, payload }: { videoId: number; payload: UpdateVideoMetadataPayload }) =>
-      studioClient.updateVideoMetadata(videoId, payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['studio', 'videos'] });
-      queryClient.invalidateQueries({ queryKey: ['studio', 'dashboard'] });
-    },
-  });
-}
-
-/**
- * Hook to update video visibility
- * @deprecated Use useUpdateVideo() with publish_mode field instead
- */
-export function useUpdateVideoVisibility() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ videoId, payload }: { videoId: number; payload: UpdateVisibilityPayload }) =>
-      studioClient.updateVideoVisibility(videoId, payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['studio', 'videos'] });
-      queryClient.invalidateQueries({ queryKey: ['studio', 'dashboard'] });
-    },
-  });
-}
-
-/**
- * Hook to update short visibility
- * @deprecated Use useUpdateVideo() with publish_mode field instead
- */
-export function useUpdateShortVisibility() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ videoId, payload }: { videoId: number; payload: UpdateVisibilityPayload }) =>
-      studioClient.updateShortVisibility(videoId, payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['studio', 'shorts'] });
-      queryClient.invalidateQueries({ queryKey: ['studio', 'dashboard'] });
     },
   });
 }

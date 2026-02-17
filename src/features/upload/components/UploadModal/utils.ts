@@ -13,7 +13,6 @@ export function getSteps(isShort: boolean): { id: ModalStep; label: string }[] {
     { id: 'location', label: 'Location' },
     ...(isShort ? [] : [{ id: 'tags', label: 'Tags' } as const]),
     { id: 'content-rating', label: 'Rating' },
-    { id: 'thumbnail', label: 'Thumbnail' },
     { id: 'publishing', label: 'Publishing' },
   ];
 }
