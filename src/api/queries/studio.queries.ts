@@ -219,4 +219,17 @@ export function useMapStats(creatorId: string | number | null | undefined) {
   });
 }
 
+/**
+ * Hook to fetch a single video with playback URLs (creator-only)
+ * Works for any publish/hidden state.
+ */
+export function useStudioVideoPlay(uuid: string | null | undefined) {
+  return useQuery({
+    queryKey: queryKeys.studio.videoDetail(uuid!),
+    queryFn: () => studioClient.getVideo(uuid!),
+    enabled: !!uuid,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+}
+
 export type { AggregatedStats };

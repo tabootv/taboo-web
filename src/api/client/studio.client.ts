@@ -15,6 +15,7 @@
  * - DELETE /studio/videos/{videoUuid}/schedule → DeleteScheduleResponse
  */
 
+import type { Video } from '@/types/video';
 import type {
   ApiResponse,
   CreateSchedulePayload,
@@ -275,5 +276,14 @@ export const studioClient = {
       `/studio/videos/${videoUuid}/schedule`
     );
     return data;
+  },
+
+  /**
+   * Get a single video with playback URLs (creator-only, works for any publish state)
+   * @param uuid - The video's UUID
+   */
+  getVideo: async (uuid: string): Promise<Video> => {
+    const data = await apiClient.get<{ video?: Video; data?: Video }>(`/studio/videos/${uuid}`);
+    return data.video || data.data || (data as unknown as Video);
   },
 };
