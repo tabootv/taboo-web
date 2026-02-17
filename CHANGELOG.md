@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.3](https://github.com/tabootv/taboo-web/compare/tabootv-new-v0.6.2...tabootv-new-v0.6.3) (2026-02-17)
+
+
+### Refactoring
+
+* **upload:** simplify upload modal and remove deprecated features ([ff263fb](https://github.com/tabootv/taboo-web/commit/ff263fbe1b2e6ccb0d0fef48553088725d12e94c))
+
 ## [0.6.2](https://github.com/tabootv/taboo-web/compare/tabootv-new-v0.6.1...tabootv-new-v0.6.2) (2026-02-16)
 
 
