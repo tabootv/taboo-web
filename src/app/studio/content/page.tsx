@@ -116,6 +116,24 @@ function ContentPageInner() {
   const deleteScheduleMutation = useDeleteSchedule();
   const toggleHiddenMutation = useToggleVideoHidden();
 
+  // Auto-refresh content table while videos are processing
+  const hasProcessingVideos = useMemo(() => {
+    const allVideos = videosData?.videos || [];
+    const allShorts = shortsData?.videos || [];
+    return [...allVideos, ...allShorts].some(
+      (v) => v.bunny_status !== undefined && v.bunny_status < 3
+    );
+  }, [videosData?.videos, shortsData?.videos]);
+
+  useEffect(() => {
+    if (!hasProcessingVideos) return;
+    const interval = setInterval(() => {
+      refetchVideos();
+      refetchShorts();
+    }, 10_000);
+    return () => clearInterval(interval);
+  }, [hasProcessingVideos, refetchVideos, refetchShorts]);
+
   /**
    * Handle uploadId query parameter - opens modal for background upload
    * Supports both in-progress (resume mode) and complete (edit mode) uploads
