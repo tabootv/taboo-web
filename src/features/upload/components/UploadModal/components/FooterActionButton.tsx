@@ -13,22 +13,11 @@ function getPublishButtonContent(
   uploadPhase: string,
   publishMode: PublishMode
 ): React.ReactNode {
-  const isUploading =
-    uploadPhase === 'uploading' || uploadPhase === 'preparing' || uploadPhase === 'processing';
-
   if (!videoUuid && uploadPhase !== 'idle') {
     return (
       <>
         <Loader2 className="w-4 h-4 animate-spin mr-2" />
         Preparing...
-      </>
-    );
-  }
-  if (isUploading) {
-    return (
-      <>
-        <Loader2 className="w-4 h-4 animate-spin mr-2" />
-        Uploading...
       </>
     );
   }
@@ -96,15 +85,20 @@ export function FooterActionButton({
     );
   }
 
-  const isUploading =
-    uploadPhase === 'uploading' || uploadPhase === 'preparing' || uploadPhase === 'processing';
   return (
     <Button
       onClick={onPublish}
-      disabled={isUploading || !videoUuid}
+      disabled={!videoUuid || isSaving}
       className="bg-red-primary hover:bg-red-primary/90 min-w-[100px]"
     >
-      {getPublishButtonContent(videoUuid, uploadPhase, publishMode)}
+      {isSaving ? (
+        <>
+          <Loader2 className="w-4 h-4 animate-spin mr-2" />
+          Saving...
+        </>
+      ) : (
+        getPublishButtonContent(videoUuid, uploadPhase, publishMode)
+      )}
     </Button>
   );
 }

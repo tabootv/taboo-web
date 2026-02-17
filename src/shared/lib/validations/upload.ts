@@ -10,16 +10,6 @@ export const uploadVideoSchema = z.object({
 
 export type UploadVideoInput = z.infer<typeof uploadVideoSchema>;
 
-export const uploadShortSchema = z.object({
-  title: z.string().min(1, 'Title is required').max(100, 'Title must be 100 characters or less'),
-  description: z.string().max(500, 'Description must be 500 characters or less'),
-  tags: z.string(),
-  visibility: z.enum(['public', 'private']),
-  isNsfw: z.boolean(),
-});
-
-export type UploadShortInput = z.infer<typeof uploadShortSchema>;
-
 export const createPostSchema = z.object({
   caption: z
     .string()

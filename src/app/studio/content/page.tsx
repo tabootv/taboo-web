@@ -3,7 +3,6 @@
 import {
   useCreateSchedule,
   useDeleteSchedule,
-  useDeleteShort,
   useDeleteStudioPost,
   useDeleteVideo,
   useToggleVideoHidden,
@@ -17,7 +16,15 @@ import { useUploadStore } from '@/shared/stores/upload-store';
 import type { StudioVideoListItem } from '@/types/studio';
 import { Upload } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  Suspense,
+  startTransition,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { toast } from 'sonner';
 import {
   ContentTable,
@@ -53,6 +60,7 @@ interface EditVideoData {
   publishMode?: 'none' | 'auto' | 'scheduled';
   scheduledAt?: string;
   thumbnailUrl?: string;
+  hidden?: boolean;
 }
 
 function ContentPageInner() {
@@ -102,7 +110,6 @@ function ContentPageInner() {
   } = useStudioPosts(channelId, postsPage);
 
   const deleteVideoMutation = useDeleteVideo();
-  const deleteShortMutation = useDeleteShort();
   const deletePostMutation = useDeleteStudioPost();
   const createScheduleMutation = useCreateSchedule();
   const updateScheduleMutation = useUpdateSchedule();
@@ -130,33 +137,12 @@ function ContentPageInner() {
     // Set modal open in store (prevents auto-clear)
     useUploadStore.getState().setModalOpen(uploadId, true);
 
-    const isInProgress = ['preparing', 'uploading', 'processing'].includes(upload.phase);
-    const isComplete = upload.phase === 'complete';
-
-    if (isInProgress || upload.isStale) {
-      // Resume mode: open modal attached to existing upload
-      setResumeUploadId(uploadId);
-    } else if (isComplete && upload.videoUuid) {
-      // Edit mode: build edit data from store
-      const editData: EditVideoData = {
-        id: upload.videoId ?? 0,
-        uuid: upload.videoUuid,
-        title: upload.metadata.title,
-        visibility: 'draft',
-        isShort: upload.contentType === 'short',
-      };
-
-      // Map optional metadata fields
-      if (upload.metadata.description) editData.description = upload.metadata.description;
-      if (upload.metadata.tags?.length) editData.tags = upload.metadata.tags;
-      if (upload.metadata.location) editData.location = upload.metadata.location;
-      if (upload.metadata.countryId) editData.countryId = upload.metadata.countryId;
-      if (upload.metadata.publishMode) editData.publishMode = upload.metadata.publishMode;
-      if (upload.metadata.scheduledAt) editData.scheduledAt = upload.metadata.scheduledAt;
-
-      // Open the edit modal
-      setEditingVideo(editData);
-    }
+    startTransition(() => {
+      if (upload.isStale) {
+        // Stale upload: needs file re-selection to resume TUS
+        setResumeUploadId(uploadId);
+      }
+    });
 
     // Clean up URL to prevent re-triggering on page refresh
     // Use replaceState instead of router.replace to avoid triggering Next.js navigation
@@ -222,12 +208,12 @@ function ContentPageInner() {
   const currentItems = activeTab === 'videos' ? videos : shorts;
   const currentPagination =
     activeTab === 'videos' ? videosData?.pagination : shortsData?.pagination;
-  const isLoading =
-    activeTab === 'videos'
-      ? isLoadingVideos
-      : activeTab === 'shorts'
-        ? isLoadingShorts
-        : isLoadingPosts;
+  const loadingByTab: Record<ContentType, boolean> = {
+    videos: isLoadingVideos,
+    shorts: isLoadingShorts,
+    posts: isLoadingPosts,
+  };
+  const isLoading = loadingByTab[activeTab];
 
   const handlePageChange = useCallback(
     (page: number) => {
@@ -273,6 +259,8 @@ function ContentPageInner() {
       if (rawVideo?.longitude) editData.longitude = rawVideo.longitude;
       if (rawVideo?.thumbnail) editData.thumbnailUrl = rawVideo.thumbnail;
 
+      if (rawVideo?.hidden !== undefined) editData.hidden = rawVideo.hidden;
+
       // Derive publish mode from schedule or visibility
       if (rawVideo?.publish_schedule?.scheduled_at) {
         editData.scheduledAt = rawVideo.publish_schedule.scheduled_at;
@@ -292,12 +280,11 @@ function ContentPageInner() {
     async (item: ContentItem) => {
       const isShort = activeTab === 'shorts';
       try {
+        // Unified UUID-based delete for both videos and shorts
+        await deleteVideoMutation.mutateAsync(item.uuid);
         if (isShort) {
-          await deleteShortMutation.mutateAsync(item.id);
           refetchShorts();
         } else {
-          // Use UUID-based delete endpoint
-          await deleteVideoMutation.mutateAsync(item.uuid);
           refetchVideos();
         }
         toast.success(`${isShort ? 'Short' : 'Video'} deleted successfully`);
@@ -305,13 +292,15 @@ function ContentPageInner() {
         toast.error(`Failed to delete ${isShort ? 'short' : 'video'}`);
       }
     },
-    [activeTab, deleteVideoMutation, deleteShortMutation, refetchVideos, refetchShorts]
+    [activeTab, deleteVideoMutation, refetchVideos, refetchShorts]
   );
 
   const handleVisibilityChange = useCallback(
     async (item: ContentItem, visibility: Visibility, scheduledAt?: Date) => {
-      // Find the raw video to check current state
-      const rawVideo = videosData?.videos?.find((v) => v.id === item.id);
+      // Find the raw video to check current state (search both videos and shorts)
+      const rawVideo =
+        videosData?.videos?.find((v) => v.id === item.id) ||
+        shortsData?.videos?.find((v) => v.id === item.id);
       const hasSchedule = !!rawVideo?.publish_schedule?.scheduled_at;
       const isPublished = rawVideo?.published === true;
 
@@ -345,7 +334,7 @@ function ContentPageInner() {
         toast.error('Failed to update visibility');
       }
     },
-    [videosData?.videos, createScheduleMutation, updateScheduleMutation]
+    [videosData?.videos, shortsData?.videos, createScheduleMutation, updateScheduleMutation]
   );
 
   const handleScheduleCancel = useCallback(
@@ -405,6 +394,7 @@ function ContentPageInner() {
   const handleCloseUploadModal = useCallback(() => {
     setIsUploadModalOpen(false);
     setResumeUploadId(null);
+    processedUploadIdRef.current = null;
   }, []);
 
   const handleEditSuccess = useCallback(() => {
@@ -415,6 +405,7 @@ function ContentPageInner() {
 
   const handleCloseEditModal = useCallback(() => {
     setEditingVideo(null);
+    processedUploadIdRef.current = null;
   }, []);
 
   return (
@@ -438,7 +429,7 @@ function ContentPageInner() {
         />
       )}
 
-      <div className="flex items-center justify-between mb-6 px-9">
+      <div className="flex items-center justify-between mb-6 px-8">
         <h1 className="text-2xl! font-bold text-text-primary">Channel content</h1>
 
         <Button onClick={handleUpload} className="bg-red-primary hover:bg-red-primary/90">

@@ -132,8 +132,6 @@ export type {
   StudioDashboardResponse,
   StudioUploadVideoPayload,
   StudioUploadVideoResponse,
-  StudioUploadShortPayload,
-  StudioUploadShortResponse,
   StudioCreatePostPayload,
   StudioCreatePostResponse,
   StudioVideoListItem,
@@ -151,12 +149,7 @@ export type {
   PrepareBunnyUploadPayload,
   PrepareBunnyUploadResponse,
   // Content Management Hub types
-  ContentVisibility,
   ProcessingStatus,
-  StudioContentListItem,
-  StudioContentListResponse,
-  UpdateVideoMetadataPayload,
-  UpdateVisibilityPayload,
   UpdateVideoResponse,
   // UUID-based unified endpoint types
   UpdateVideoPayload,

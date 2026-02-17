@@ -57,27 +57,6 @@ export interface StudioUploadVideoResponse {
   errors?: Record<string, string[]>;
 }
 
-export interface StudioUploadShortPayload {
-  file: File;
-  thumbnail?: File | null;
-  title: string;
-  description?: string;
-  tags?: string[];
-  country_id?: number | null;
-  is_nsfw?: boolean;
-}
-
-export interface StudioUploadShortResponse {
-  success: boolean;
-  video?: {
-    id: number;
-    uuid: string;
-    title: string;
-    thumbnail_url: string;
-  };
-  errors?: Record<string, string[]>;
-}
-
 export interface StudioCreatePostPayload {
   body: string;
   image?: File | null;
@@ -235,6 +214,8 @@ export interface PrepareBunnyUploadPayload {
   title: string;
   description?: string | undefined;
   short?: boolean | undefined;
+  duration?: number | undefined;
+  series_id?: number | undefined;
   location?: string | undefined;
   country_id?: number | undefined;
   latitude?: number | undefined;
@@ -268,59 +249,9 @@ export interface PrepareBunnyUploadResponse {
  */
 
 /**
- * Content visibility state for UI display
- * Aligned with VideoDisplayState for consistency
- */
-export type ContentVisibility = 'live' | 'draft' | 'scheduled' | 'processing';
-
-/**
  * Processing status for videos being uploaded/encoded
  */
 export type ProcessingStatus = 'uploading' | 'processing' | 'ready';
-
-export interface StudioContentListItem {
-  id: number;
-  uuid: string;
-  title: string;
-  description?: string;
-  thumbnail_url?: string;
-  visibility: ContentVisibility;
-  scheduled_at?: string;
-  processing_status: ProcessingStatus;
-  restrictions?: string[];
-  views_count: number;
-  comments_count: number;
-  likes_count: number;
-  likes_ratio: number;
-  created_at: string;
-  published_at?: string;
-  duration?: number;
-}
-
-/**
- * @deprecated Use UpdateVideoPayload instead
- */
-export interface UpdateVideoMetadataPayload {
-  title?: string;
-  description?: string;
-  tags?: number[];
-  is_adult_content?: boolean;
-  country_id?: number;
-  location?: string;
-  latitude?: number;
-  longitude?: number;
-  thumbnail_path?: string;
-}
-
-/**
- * Payload for updating video visibility/publication status
- * Uses publish_mode to match API expectations
- * @deprecated Use UpdateVideoPayload with publish_mode field instead
- */
-export interface UpdateVisibilityPayload {
-  publish_mode: PublicationMode;
-  scheduled_at?: string;
-}
 
 /**
  * Unified payload for PATCH /api/studio/videos/{videoUuid}
@@ -410,16 +341,6 @@ export interface DeleteScheduleResponse {
   success: boolean;
   data: [];
   message: string;
-}
-
-export interface StudioContentListResponse {
-  videos: StudioContentListItem[];
-  pagination: {
-    current_page: number;
-    last_page: number;
-    per_page: number;
-    total: number;
-  };
 }
 
 /**

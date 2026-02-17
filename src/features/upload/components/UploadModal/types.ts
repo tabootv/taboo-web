@@ -7,13 +7,7 @@ export type { PublishMode, UploadPhase, ActiveUpload };
 /**
  * Modal step identifiers for the upload wizard
  */
-export type ModalStep =
-  | 'details'
-  | 'location'
-  | 'tags'
-  | 'content-rating'
-  | 'thumbnail'
-  | 'publishing';
+export type ModalStep = 'details' | 'location' | 'tags' | 'content-rating' | 'publishing';
 
 /**
  * Data structure for editing existing video metadata
@@ -38,6 +32,8 @@ export interface EditVideoData {
   scheduledAt?: string;
   // Thumbnail
   thumbnailUrl?: string;
+  // Hidden from public listings
+  hidden?: boolean;
 }
 
 /**

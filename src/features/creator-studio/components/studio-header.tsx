@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Logo } from '@/components/ui/logo';
 import { useAuthStore } from '@/shared/stores/auth-store';
-import { getCreatorRoute } from '@/shared/utils/formatting';
+import { cn, getCreatorRoute } from '@/shared/utils/formatting';
 import { ExternalLink, LogOut, Settings, User } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -23,7 +23,7 @@ export function StudioHeader() {
 
   return (
     <header className="sticky top-0 left-0 right-0 h-[4rem] bg-black backdrop-blur-xs z-9999">
-      <div className="flex items-center justify-between h-full page-px mx-auto max-w-[1920px]">
+      <div className={cn('flex items-center justify-between h-full px-6 mx-auto max-w-[1920px]')}>
         <div className="flex items-center">
           <Logo size="md" linkTo="/" />
 

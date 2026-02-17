@@ -71,7 +71,8 @@ function StudioContent({ children }: { children: React.ReactNode }) {
   return (
     <div className={cn('min-h-screen bg-background')}>
       <StudioHeader />
-      <main className={cn('page-px mx-auto max-w-[1920px] py-14')}>{children}</main>
+
+      <main className={cn('max-w-[1920px] mx-auto px-6 lg:py-6 py-14')}>{children}</main>
     </div>
   );
 }

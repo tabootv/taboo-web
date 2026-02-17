@@ -10,10 +10,8 @@ import {
   Check,
   Loader2,
   AlertTriangle,
-  Pause,
-  Play,
   Upload,
-  Pencil,
+  ExternalLink,
   RotateCcw,
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -57,14 +55,6 @@ function getPhaseInfo(upload: ActiveUpload): {
         color: 'text-blue-400',
       };
     case 'uploading':
-      // Only show "Paused" when phase is strictly 'uploading' (defensive guard)
-      if (upload.isPaused && upload.phase === 'uploading') {
-        return {
-          label: 'Paused',
-          icon: <Pause className="w-4 h-4" />,
-          color: 'text-yellow-500',
-        };
-      }
       return {
         label: `${upload.progress}%`,
         icon: <Upload className="w-4 h-4" />,
@@ -102,16 +92,12 @@ function getPhaseInfo(upload: ActiveUpload): {
  */
 function UploadItem({ upload }: { upload: ActiveUpload }) {
   const router = useRouter();
-  const pauseUpload = useUploadStore((state) => state.pauseUpload);
-  const resumeUpload = useUploadStore((state) => state.resumeUpload);
   const removeUpload = useUploadStore((state) => state.removeUpload);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const phaseInfo = getPhaseInfo(upload);
-  // Disable pause/resume for stale uploads (no live TUS client)
-  const canPauseResume = upload.phase === 'uploading' && !upload.isStale;
   const canRemove = upload.phase === 'complete' || upload.phase === 'error' || upload.isStale;
-  const canEdit = !!upload.videoUuid;
+  const canSeeInStudio = !!upload.videoUuid;
 
   /**
    * Handle stale upload resume - user re-selects original file
@@ -150,7 +136,6 @@ function UploadItem({ upload }: { upload: ActiveUpload }) {
               <UploadProgressBar
                 phase={upload.phase}
                 progress={upload.progress}
-                isPaused={upload.isPaused}
                 isStale={upload.isStale}
                 size="sm"
               />
@@ -204,28 +189,14 @@ function UploadItem({ upload }: { upload: ActiveUpload }) {
 
         {/* Actions */}
         <div className="flex items-center gap-1">
-          {/* Edit button - for uploads with videoUuid */}
-          {canEdit && (
+          {/* See in Studio button - for uploads with videoUuid */}
+          {canSeeInStudio && (
             <button
-              onClick={() => router.push(`/studio/content?uploadId=${upload.id}`)}
+              onClick={() => router.push('/studio/content')}
               className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"
-              title="Edit"
+              title="See in Studio"
             >
-              <Pencil className="w-4 h-4 text-text-secondary" />
-            </button>
-          )}
-
-          {canPauseResume && (
-            <button
-              onClick={() => (upload.isPaused ? resumeUpload(upload.id) : pauseUpload(upload.id))}
-              className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"
-              title={upload.isPaused ? 'Resume' : 'Pause'}
-            >
-              {upload.isPaused ? (
-                <Play className="w-4 h-4 text-text-secondary" />
-              ) : (
-                <Pause className="w-4 h-4 text-text-secondary" />
-              )}
+              <ExternalLink className="w-4 h-4 text-text-secondary" />
             </button>
           )}
 
