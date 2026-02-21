@@ -184,12 +184,9 @@ export function NetflixHoverCard({
     };
   }, []);
 
-  // Preload video on mount or when URL becomes available
-  useEffect(() => {
-    if (videoRef.current && previewUrl) {
-      videoRef.current.load();
-    }
-  }, [previewUrl]);
+  // Video is loaded on demand via handleMouseEnter — no eager preload needed.
+  // Previously this called videoRef.current.load() on mount, which downloaded
+  // video files for every card even without user interaction.
 
   // Play video when fetchedPreviewUrl becomes available and card is expanded AND hovered
   useEffect(() => {

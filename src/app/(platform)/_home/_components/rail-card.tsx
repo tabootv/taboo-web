@@ -279,7 +279,7 @@ export const RailCard = memo(function RailCard({
 
   // Wrap in Link for navigation
   return (
-    <Link href={`/videos/${video.uuid || video.id}`} className="block">
+    <Link href={`/videos/${video.uuid || video.id}`} prefetch={false} className="block">
       {cardContent}
     </Link>
   );
