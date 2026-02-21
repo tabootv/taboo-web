@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.1](https://github.com/tabootv/taboo-web/compare/tabootv-new-v0.7.0...tabootv-new-v0.7.1) (2026-02-21)
+
+
+### Bug Fixes
+
+* **short-url:** resolve redirect to localhost in production ([1c9213c](https://github.com/tabootv/taboo-web/commit/1c9213c47bee2de3a0e2bd1fb8d4be4363e8e3ea))
+
 ## [0.7.0](https://github.com/tabootv/taboo-web/compare/tabootv-new-v0.6.3...tabootv-new-v0.7.0) (2026-02-21)
 
 
