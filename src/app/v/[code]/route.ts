@@ -5,6 +5,20 @@ import { TOKEN_KEY, decodeCookieToken, getApiUrl } from '@/shared/lib/auth/cooki
 import { decode, isUuid, isValidShortCode } from '@/shared/lib/short-url';
 
 /**
+ * Resolve the public-facing origin from proxy headers.
+ *
+ * Behind Cloudflare (or any reverse proxy), `request.url` reflects the
+ * internal server address (e.g. `http://localhost:3002`). The proxy sets
+ * `x-forwarded-host` / `x-forwarded-proto` to communicate the real origin.
+ */
+function getPublicOrigin(request: Request): string {
+  const host = request.headers.get('x-forwarded-host') || request.headers.get('host');
+  const proto = request.headers.get('x-forwarded-proto') || 'https';
+  if (host) return `${proto}://${host}`;
+  return process.env.NEXT_PUBLIC_APP_URL || 'https://app.taboo.tv';
+}
+
+/**
  * Smart Video Redirect — GET /v/:code
  *
  * Accepts either a legacy UUID or a base62-encoded short code.
@@ -15,6 +29,7 @@ import { decode, isUuid, isValidShortCode } from '@/shared/lib/short-url';
  */
 export async function GET(request: Request, { params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;
+  const origin = getPublicOrigin(request);
 
   // Resolve the UUID from either a raw UUID or a base62 short code
   let uuid: string;
@@ -31,7 +46,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ code
     return NextResponse.json({ error: 'Invalid code' }, { status: 404 });
   }
 
-  const studioUrl = new URL(`/studio/watch?v=${uuid}`, request.url);
+  const studioUrl = new URL(`/studio/watch?v=${uuid}`, origin);
 
   // Read auth token from cookie
   const cookieStore = await cookies();
@@ -62,8 +77,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ code
     const isShort = video?.short === true || video?.is_short === true || video?.type === 'short';
 
     const destination = isShort
-      ? new URL(`/shorts/${uuid}`, request.url)
-      : new URL(`/videos/${uuid}`, request.url);
+      ? new URL(`/shorts/${uuid}`, origin)
+      : new URL(`/videos/${uuid}`, origin);
 
     return redirect307(destination);
   } catch {
