@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.7.0](https://github.com/tabootv/taboo-web/compare/tabootv-new-v0.6.3...tabootv-new-v0.7.0) (2026-02-21)
+
+
+### Features
+
+* **api:** add studio video detail endpoint and query ([3b72144](https://github.com/tabootv/taboo-web/commit/3b72144d490c11136f4f1853ca318db915f0ad52))
+* **shared:** add short URL encoding library ([3299790](https://github.com/tabootv/taboo-web/commit/3299790f3a29518ab8dd45572ec24af02a8a41ff))
+* **shared:** add video link helpers and short URL utility ([adca16f](https://github.com/tabootv/taboo-web/commit/adca16fb2d108a9819e7d2b53af6e071c7209e5c))
+* **studio:** add video preview page, short URL route, and content table updates ([a40b760](https://github.com/tabootv/taboo-web/commit/a40b76032b5b0bbf5967e1fc39db97388bbf07ae))
+* **studio:** improve LocationPicker with persistent map and prefetch ([20220c3](https://github.com/tabootv/taboo-web/commit/20220c32002c7923a3c8bf05d642a558d3d12549))
+* **upload:** poll bunny_status to detect processing completion ([84924ca](https://github.com/tabootv/taboo-web/commit/84924ca5fd0824e1dc8c0fdf4e98403ed21cd620))
+
+
+### Bug Fixes
+
+* **home:** prevent phantom /play API calls on homepage scroll ([cf0a33e](https://github.com/tabootv/taboo-web/commit/cf0a33eec424d6e9455ca5815741348d379787af))
+* **studio:** fix video status priority and auto-refresh processing rows ([3663366](https://github.com/tabootv/taboo-web/commit/366336610fdb5a3f6e623c55dc8525fa7a3a1ee1))
+* **upload:** consistent thumbnail card sizing in upload modal ([893d693](https://github.com/tabootv/taboo-web/commit/893d69360129b62776ffebc37680e3aad899e4c4))
+
 ## [0.6.3](https://github.com/tabootv/taboo-web/compare/tabootv-new-v0.6.2...tabootv-new-v0.6.3) (2026-02-17)
 
 

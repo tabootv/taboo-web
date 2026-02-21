@@ -74,7 +74,7 @@ export interface ContentFilters {
  */
 export function useStudioVideos(
   params: StudioVideosQueryParams = {},
-  options?: { enabled?: boolean }
+  options?: { enabled?: boolean; refetchInterval?: number | false }
 ) {
   return useQuery({
     queryKey: queryKeys.studio.videos(params),
@@ -82,6 +82,7 @@ export function useStudioVideos(
     enabled: options?.enabled ?? true,
     staleTime: 1000 * 60 * 5, // 5 minutes
     gcTime: 1000 * 60 * 10, // 10 minutes
+    ...(options?.refetchInterval !== undefined && { refetchInterval: options.refetchInterval }),
   });
 }
 
@@ -93,7 +94,7 @@ export function useStudioVideos(
  */
 export function useStudioShorts(
   params: StudioVideosQueryParams = {},
-  options?: { enabled?: boolean }
+  options?: { enabled?: boolean; refetchInterval?: number | false }
 ) {
   return useQuery({
     queryKey: queryKeys.studio.shorts(params),
@@ -101,6 +102,7 @@ export function useStudioShorts(
     enabled: options?.enabled ?? true,
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 10,
+    ...(options?.refetchInterval !== undefined && { refetchInterval: options.refetchInterval }),
   });
 }
 
@@ -216,6 +218,19 @@ export function useMapStats(creatorId: string | number | null | undefined) {
     enabled: !!creatorId,
     staleTime: 1000 * 60 * 10, // 10 minutes
     gcTime: 1000 * 60 * 15, // 15 minutes
+  });
+}
+
+/**
+ * Hook to fetch a single video with playback URLs (creator-only)
+ * Works for any publish/hidden state.
+ */
+export function useStudioVideoPlay(uuid: string | null | undefined) {
+  return useQuery({
+    queryKey: queryKeys.studio.videoDetail(uuid!),
+    queryFn: () => studioClient.getVideo(uuid!),
+    enabled: !!uuid,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }
 

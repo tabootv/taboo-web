@@ -514,11 +514,9 @@ export const useUploadStore = create<UploadState>()(
 
           for (const [id, upload] of newUploads) {
             // Mark as stale if in-progress (no live TUS client after hydration)
-            if (
-              upload.phase === 'uploading' ||
-              upload.phase === 'preparing' ||
-              upload.phase === 'processing'
-            ) {
+            // 'processing' not included — doesn't need TUS client,
+            // the processing poller will handle it
+            if (upload.phase === 'uploading' || upload.phase === 'preparing') {
               newUploads.set(id, { ...upload, isStale: true });
               hasChanges = true;
             }

@@ -49,18 +49,18 @@ export function deriveProcessingStatus(video: StudioVideoListItem): ProcessingSt
     return 'ready';
   }
 
+  // Bunny status 0 = queued = file still uploading to Bunny
+  // Check BEFORE processing flag so table shows "Uploading" during TUS upload
+  if (video.bunny_status !== undefined && video.bunny_status === 0) {
+    return 'uploading';
+  }
+
   if (video.processing === true) {
     return 'processing';
   }
 
-  // Bunny status: 0=queued, 1=processing, 2=encoding, 3=finished
-  if (video.bunny_status !== undefined) {
-    if (video.bunny_status === 0) {
-      return 'uploading';
-    }
-    if (video.bunny_status < 3) {
-      return 'processing';
-    }
+  if (video.bunny_status !== undefined && video.bunny_status < 3) {
+    return 'processing';
   }
 
   return 'ready';

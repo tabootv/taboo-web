@@ -11,6 +11,7 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { AnalyticsEvent } from '@/shared/lib/analytics/events';
 import { cn } from '@/shared/utils/formatting';
+import { getShortUrl } from '@/shared/utils/video-link';
 import { Download, MoreVertical, Pencil, Play, Share2, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import posthog from 'posthog-js';
@@ -21,6 +22,7 @@ interface ContentTableActionsProps {
   videoUuid: string;
   isShort: boolean;
   visibility: Visibility;
+  hidden?: boolean | undefined;
   onEdit: () => void;
   onDelete: () => void;
   className?: string;
@@ -30,19 +32,21 @@ export function ContentTableActions({
   videoUuid,
   isShort,
   visibility,
+  hidden,
   onEdit,
   onDelete,
   className,
 }: ContentTableActionsProps) {
+  const isPublished = visibility === 'live';
+  const isPublicLink = isPublished && !hidden;
   const isProcessing = visibility === 'processing';
-  const videoPath = isShort ? `/shorts/${videoUuid}` : `/videos/${videoUuid}`;
 
   const handleShare = async () => {
     const origin =
       typeof window !== 'undefined'
         ? window.location.origin
         : process.env.NEXT_PUBLIC_APP_URL || '';
-    const url = `${origin}${videoPath}`;
+    const url = `${origin}${getShortUrl(videoUuid)}`;
     try {
       await navigator.clipboard.writeText(url);
       toast.success('Link copied to clipboard');
@@ -90,12 +94,12 @@ export function ContentTableActions({
               )}
               disabled={isProcessing}
             >
-              <Link href={videoPath} target="_blank">
+              <Link href={getShortUrl(videoUuid)} target="_blank">
                 <Play className="w-4 h-4" />
               </Link>
             </Button>
           </TooltipTrigger>
-          <TooltipContent>View on TabooTV</TooltipContent>
+          <TooltipContent>{isPublicLink ? 'View on TabooTV' : 'Preview in Studio'}</TooltipContent>
         </Tooltip>
 
         <DropdownMenu>

@@ -116,6 +116,24 @@ function ContentPageInner() {
   const deleteScheduleMutation = useDeleteSchedule();
   const toggleHiddenMutation = useToggleVideoHidden();
 
+  // Auto-refresh content table while videos are processing
+  const hasProcessingVideos = useMemo(() => {
+    const allVideos = videosData?.videos || [];
+    const allShorts = shortsData?.videos || [];
+    return [...allVideos, ...allShorts].some(
+      (v) => v.bunny_status !== undefined && v.bunny_status < 3
+    );
+  }, [videosData?.videos, shortsData?.videos]);
+
+  useEffect(() => {
+    if (!hasProcessingVideos) return;
+    const interval = setInterval(() => {
+      refetchVideos();
+      refetchShorts();
+    }, 10_000);
+    return () => clearInterval(interval);
+  }, [hasProcessingVideos, refetchVideos, refetchShorts]);
+
   /**
    * Handle uploadId query parameter - opens modal for background upload
    * Supports both in-progress (resume mode) and complete (edit mode) uploads
@@ -149,6 +167,64 @@ function ContentPageInner() {
     // which can cause auth state race conditions and extra history entries
     window.history.replaceState(null, '', '/studio/content');
   }, [uploadId]);
+
+  /**
+   * Handle edit query parameter - opens edit modal for a video from the watch page
+   */
+  const editUuid = searchParams.get('edit');
+  const processedEditUuidRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!editUuid || processedEditUuidRef.current === editUuid) return;
+
+    const allVideos = videosData?.videos || [];
+    const allShorts = shortsData?.videos || [];
+    if (allVideos.length === 0 && allShorts.length === 0) return;
+
+    processedEditUuidRef.current = editUuid;
+
+    const rawVideo =
+      allVideos.find((v) => v.uuid === editUuid) || allShorts.find((v) => v.uuid === editUuid);
+
+    if (!rawVideo) {
+      window.history.replaceState(null, '', '/studio/content');
+      return;
+    }
+
+    const isShort = !!rawVideo.short;
+    const isPublished = !!rawVideo.published;
+    const editVisibility: 'live' | 'draft' = isPublished ? 'live' : 'draft';
+
+    const editData: EditVideoData = {
+      id: rawVideo.id,
+      uuid: rawVideo.uuid,
+      title: rawVideo.title,
+      visibility: editVisibility,
+      isShort,
+    };
+
+    if (rawVideo.description) editData.description = rawVideo.description;
+    if (rawVideo.tags) editData.tagNames = rawVideo.tags;
+    if (rawVideo.location) editData.location = rawVideo.location;
+    if (rawVideo.country_id) editData.countryId = rawVideo.country_id;
+    if (rawVideo.latitude) editData.latitude = rawVideo.latitude;
+    if (rawVideo.longitude) editData.longitude = rawVideo.longitude;
+    if (rawVideo.thumbnail) editData.thumbnailUrl = rawVideo.thumbnail;
+    if (rawVideo.hidden !== undefined) editData.hidden = rawVideo.hidden;
+
+    if (rawVideo.publish_schedule?.scheduled_at) {
+      editData.scheduledAt = rawVideo.publish_schedule.scheduled_at;
+      editData.publishMode = 'scheduled';
+    } else if (isPublished) {
+      editData.publishMode = 'auto';
+    } else {
+      editData.publishMode = 'none';
+    }
+
+    startTransition(() => setEditingVideo(editData));
+
+    window.history.replaceState(null, '', '/studio/content');
+  }, [editUuid, videosData?.videos, shortsData?.videos]);
 
   /**
    * Transform API video item to ContentItem for UI display

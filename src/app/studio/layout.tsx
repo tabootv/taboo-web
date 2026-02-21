@@ -6,11 +6,12 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { StudioHeader } from '@/features/creator-studio';
 import { useAuthStore } from '@/shared/stores/auth-store';
 import { cn } from '@/shared/utils/formatting';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 export default function StudioLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, _hasHydrated } = useAuthStore();
   const [isChecking, setIsChecking] = useState(true);
 
@@ -60,19 +61,29 @@ export default function StudioLayout({ children }: { children: React.ReactNode }
       <SidebarProvider defaultOpen={false}>
         <StudioSidebar />
         <SidebarInset className="min-h-screen bg-background">
-          <StudioContent>{children}</StudioContent>
+          <StudioContent pathname={pathname}>{children}</StudioContent>
         </SidebarInset>
       </SidebarProvider>
     </TooltipProvider>
   );
 }
 
-function StudioContent({ children }: { children: React.ReactNode }) {
+function StudioContent({
+  children,
+  pathname,
+}: {
+  children: React.ReactNode;
+  pathname: string | null;
+}) {
+  const isWatchPage = pathname?.startsWith('/studio/watch');
+
   return (
     <div className={cn('min-h-screen bg-background')}>
       <StudioHeader />
 
-      <main className={cn('max-w-[1920px] mx-auto px-6 lg:py-6 py-14')}>{children}</main>
+      <main className={cn('max-w-[1920px] mx-auto lg:py-6 py-14', isWatchPage ? 'px-0' : 'px-6')}>
+        {children}
+      </main>
     </div>
   );
 }

@@ -150,6 +150,7 @@ export const queryKeys = {
       [...queryKeys.studio.all, 'posts', channelId, page] as const,
     mapStats: (creatorId: string | number) =>
       [...queryKeys.studio.all, 'mapStats', String(creatorId)] as const,
+    videoDetail: (uuid: string) => [...queryKeys.studio.all, 'videoDetail', uuid] as const,
     iframeToken: () => [...queryKeys.studio.all, 'iframeToken'] as const,
   },
   redeemCodes: {

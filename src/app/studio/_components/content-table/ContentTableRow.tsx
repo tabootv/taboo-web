@@ -88,7 +88,7 @@ function ProcessingBadge({
       return (
         <span className="inline-flex items-center gap-1 text-xs text-blue-400">
           <Loader2 className="w-3 h-3 animate-spin" />
-          {progress !== undefined ? `Uploading ${progress}%` : 'Uploading'}
+          Uploading
         </span>
       );
     case 'processing':
@@ -227,6 +227,7 @@ export function ContentTableRow({
                   videoUuid={item.uuid}
                   isShort={isShort}
                   visibility={item.visibility}
+                  hidden={item.hidden}
                   onEdit={() => onEdit(item)}
                   onDelete={() => setShowDeleteDialog(true)}
                 />

@@ -60,8 +60,7 @@ export function ThumbnailStep({
           }}
           className={cn(
             cardBase,
-            'relative flex flex-col items-center justify-center',
-            mode === 'edit' ? 'max-w-[50%]' : 'flex-1',
+            'relative flex flex-col items-center justify-center max-w-[50%]',
             isCustom ? cardSelected : cardUnselected
           )}
         >
@@ -98,11 +97,11 @@ export function ThumbnailStep({
             onClick={() => onSourceChange('auto')}
             className={cn(
               cardBase,
-              'flex-1 flex flex-col items-center justify-center',
+              'max-w-[50%] flex flex-col items-center justify-center',
               isAuto ? cardSelected : cardUnselected
             )}
           >
-            <Sparkles className="w-12 h-12 text-text-tertiary mb-2" />
+            <Sparkles className="w-6 h-6 text-text-tertiary mb-2" />
             <span className="text-sm text-text-tertiary">Auto-generated</span>
           </button>
         )}

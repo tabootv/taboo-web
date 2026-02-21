@@ -31,6 +31,7 @@ export function formatNumber(num: number): string {
 }
 
 export function formatRelativeTime(date: Date | string): string {
+  if (!date) return 'Not published yet';
   const now = new Date();
   const then = new Date(date);
   const diffInSeconds = Math.floor((now.getTime() - then.getTime()) / 1000);
@@ -67,10 +68,10 @@ export function truncateText(text: string, maxLength: number): string {
 
 // Re-export route utilities
 export {
-  slugify,
-  getSeriesRoute,
-  getSeriesPlayRoute,
-  getCreatorRoute,
   extractIdFromSlug,
+  getCreatorRoute,
+  getSeriesPlayRoute,
+  getSeriesRoute,
   isValidId,
+  slugify,
 } from './routes';
